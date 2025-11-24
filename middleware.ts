@@ -1,6 +1,11 @@
 import { auth } from "@/auth";
 
 export default auth((req) => {
+  // Skip authentication in development if SKIP_AUTH is set
+  if (process.env.SKIP_AUTH === "true") {
+    return;
+  }
+
   const protectedPaths = ["/dashboard", "/board", "/task", "/profile"];
   const isProtectedRoute = protectedPaths.some((path) =>
     req.nextUrl.pathname.startsWith(path)

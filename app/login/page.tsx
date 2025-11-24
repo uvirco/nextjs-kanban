@@ -5,6 +5,7 @@ import SignInGithub from "./SignInGithub";
 import { IconLayoutKanban } from "@tabler/icons-react";
 import SignInGoogle from "./SignInGoogle";
 import SignInDiscord from "./SignInDiscord";
+import SignInCredentials from "./SignInCredentials";
 
 export default async function CustomSignInPage() {
   const session = await auth();
@@ -24,12 +25,28 @@ export default async function CustomSignInPage() {
             </h3>
           </CardHeader>
           <CardBody className="space-y-3 p-10 pt-0">
-            <p className="uppercase text-xs text-center text-primary">
-              - OAuth-{" "}
-            </p>
-            <SignInGithub />
-            <SignInGoogle />
-            <SignInDiscord />
+            <div className="space-y-4">
+              <div>
+                <p className="uppercase text-xs text-center text-primary mb-2">
+                  Development Login
+                </p>
+                <SignInCredentials />
+              </div>
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-gray-600" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-zinc-900 px-2 text-gray-400">Or continue with</span>
+                </div>
+              </div>
+              <p className="uppercase text-xs text-center text-primary">
+                OAuth Providers
+              </p>
+              <SignInGithub />
+              <SignInGoogle />
+              <SignInDiscord />
+            </div>
           </CardBody>
         </Card>
       </div>

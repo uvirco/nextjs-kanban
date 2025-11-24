@@ -76,7 +76,6 @@ export default async function AcceptInvitation({
 
           <InvitationButtons
             token={token}
-            userId={session.user.id}
             boardId={foundInvitation.board.id}
           />
         </div>

@@ -5,6 +5,7 @@ import { IconCheck, IconShare, IconX } from "@tabler/icons-react";
 import {
   handleRejectInvitation,
   handleAcceptInvitation,
+  handleResendInvitation as resendInvitation,
 } from "@/server-actions/InvitationServerActions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -36,10 +37,8 @@ interface SentInvitation {
 
 export function ProfileInviteReceivedActions({
   invite,
-  userId,
 }: {
   invite: Invitation;
-  userId: string;
 }) {
   const router = useRouter();
   const [isAccepting, setIsAccepting] = useState(false);
@@ -48,7 +47,7 @@ export function ProfileInviteReceivedActions({
   const handleAccept = async (token: string) => {
     setIsAccepting(true);
     try {
-      const result = await handleAcceptInvitation({ token, userId });
+      const result = await handleAcceptInvitation({ token });
       if (result.success) {
         toast.success(result.message);
         router.push(`/board/${invite.board.id}`);
@@ -123,6 +122,7 @@ export function ProfileInviteSentActions({
   invite: SentInvitation;
 }) {
   const [isCancelling, setIsCancelling] = useState(false);
+  const [isResending, setIsResending] = useState(false);
 
   const handleCancelInvitation = async (token: string) => {
     if (window.confirm("Are you sure you want to cancel this invitation?")) {
@@ -142,29 +142,75 @@ export function ProfileInviteSentActions({
     }
   };
 
+  const handleResendInvitation = async (boardId: string, email: string) => {
+    setIsResending(true);
+    try {
+      const result = await resendInvitation({ boardId, email });
+      if (result.success) {
+        toast.success("Invitation resent successfully!");
+        // The page will revalidate and show the new invitation
+        window.location.reload();
+      } else {
+        toast.error(result.message);
+      }
+      return result;
+    } catch (error) {
+      toast.error("Failed to resend invitation.");
+    } finally {
+      setIsResending(false);
+    }
+  };
+
   const invitationLink = `${process.env.NEXT_PUBLIC_AUTH_URL}/accept-invitation?token=${invite.token}`;
 
   return (
-    <div className="flex gap-1 items-center">
-      <button
-        className="text-danger"
-        onClick={() => handleCancelInvitation(invite.token)}
-      >
-        {isCancelling ? (
-          <Spinner size="sm" color="danger" />
-        ) : (
-          <IconX size={22} />
-        )}
-      </button>
-      <p>
-        Sent to <strong>{invite.email}</strong> for Board{" "}
-        <strong>{invite.board.title}</strong>
-      </p>
-      <span>
-        <Link href={invitationLink} className="text-blue-500 underline">
-          <IconShare size={16} />
-        </Link>
-      </span>
+    <div className="border-b-1 last:border-b-0 border-zinc-700 py-2">
+      <div className="flex gap-1 items-start flex-wrap">
+        <button
+          className="text-danger hover:bg-red-500 rounded p-1 mt-1"
+          onClick={() => handleCancelInvitation(invite.token)}
+          title="Cancel invitation"
+        >
+          {isCancelling ? (
+            <Spinner size="sm" color="danger" />
+          ) : (
+            <IconX size={18} />
+          )}
+        </button>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm">
+            Sent to <strong>{invite.email}</strong> for Board{" "}
+            <strong>{invite.board.title}</strong>
+          </p>
+          <div className="mt-1 p-2 bg-zinc-800 rounded text-xs font-mono break-all">
+            {invitationLink}
+          </div>
+        </div>
+        <div className="flex items-center gap-2 mt-1">
+          <button
+            onClick={() => handleResendInvitation(invite.board.id, invite.email)}
+            disabled={isResending}
+            className="text-green-500 hover:text-green-300 p-1 rounded disabled:opacity-50"
+            title="Resend invitation with new link"
+          >
+            {isResending ? (
+              <Spinner size="sm" color="success" />
+            ) : (
+              "Resend"
+            )}
+          </button>
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText(invitationLink);
+              toast.success("Invitation link copied to clipboard!");
+            }}
+            className="text-blue-500 hover:text-blue-300 p-1 rounded"
+            title="Copy invitation link"
+          >
+            <IconShare size={16} />
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

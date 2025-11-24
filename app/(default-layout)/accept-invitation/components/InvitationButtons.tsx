@@ -9,18 +9,16 @@ import { toast } from "sonner";
 
 export default function InvitationButtons({
   token,
-  userId,
   boardId,
 }: {
   token: string;
-  userId: string;
   boardId: string;
 }) {
   const router = useRouter();
 
   const handleAccept = async () => {
     try {
-      const response = await handleAcceptInvitation({ token, userId });
+      const response = await handleAcceptInvitation({ token });
       if (response.success) {
         toast.success(response.message);
         router.push(`/board/${boardId}`);

@@ -99,7 +99,6 @@ export default async function ProfileInvites() {
               <ProfileInviteReceivedActions
                 key={invite.id}
                 invite={invite}
-                userId={userId}
               />
             ))}
           </ul>
