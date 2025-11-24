@@ -8,6 +8,7 @@ import {
   IconInbox,
   IconMessage,
   IconCircle,
+  IconShield,
 } from "@tabler/icons-react";
 import SidebarHeader from "./SidebarHeader";
 import SidebarSearch from "./SidebarSearch";
@@ -75,6 +76,13 @@ export default async function SidebarMenu() {
           title="Chat"
           icon={<IconMessage stroke={1.5} size={20} />}
         />
+        {session?.user?.role === "ADMIN" && (
+          <MenuItem
+            path="/admin"
+            title="Admin Dashboard"
+            icon={<IconShield stroke={1.5} size={20} />}
+          />
+        )}
         <hr className="border-zinc-900" />
       </Menu>
     </Sidebar>

@@ -1,0 +1,108 @@
+import { auth } from "@/auth";
+import prisma from "@/prisma/prisma";
+import { Card, CardBody, CardHeader } from "@nextui-org/card";
+import { IconUsers, IconUserCheck, IconUserX } from "@tabler/icons-react";
+
+export default async function AdminDashboard() {
+  const session = await auth();
+
+  if (!session || !session.user || session.user.role !== "ADMIN") {
+    return <div>Access denied</div>;
+  }
+
+  // Get user statistics
+  const totalUsers = await prisma.user.count();
+  const activeUsers = await prisma.user.count({
+    where: { isActive: true }
+  });
+  const inactiveUsers = totalUsers - activeUsers;
+
+  // Get recent users
+  const recentUsers = await prisma.user.findMany({
+    take: 5,
+    orderBy: { createdAt: "desc" },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      isActive: true,
+      createdAt: true,
+    }
+  });
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold text-white">Admin Dashboard</h1>
+        <p className="text-zinc-400 mt-2">Manage users and system settings</p>
+      </div>
+
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="bg-zinc-800 border-zinc-700">
+          <CardHeader className="flex items-center space-x-3">
+            <IconUsers className="text-blue-400" size={24} />
+            <div>
+              <p className="text-sm text-zinc-400">Total Users</p>
+              <p className="text-2xl font-bold text-white">{totalUsers}</p>
+            </div>
+          </CardHeader>
+        </Card>
+
+        <Card className="bg-zinc-800 border-zinc-700">
+          <CardHeader className="flex items-center space-x-3">
+            <IconUserCheck className="text-green-400" size={24} />
+            <div>
+              <p className="text-sm text-zinc-400">Active Users</p>
+              <p className="text-2xl font-bold text-white">{activeUsers}</p>
+            </div>
+          </CardHeader>
+        </Card>
+
+        <Card className="bg-zinc-800 border-zinc-700">
+          <CardHeader className="flex items-center space-x-3">
+            <IconUserX className="text-red-400" size={24} />
+            <div>
+              <p className="text-sm text-zinc-400">Inactive Users</p>
+              <p className="text-2xl font-bold text-white">{inactiveUsers}</p>
+            </div>
+          </CardHeader>
+        </Card>
+      </div>
+
+      {/* Recent Users */}
+      <Card className="bg-zinc-800 border-zinc-700">
+        <CardHeader>
+          <h2 className="text-xl font-semibold text-white">Recent Users</h2>
+        </CardHeader>
+        <CardBody>
+          <div className="space-y-4">
+            {recentUsers.map((user) => (
+              <div key={user.id} className="flex items-center justify-between p-3 bg-zinc-700 rounded-lg">
+                <div>
+                  <p className="text-white font-medium">{user.name}</p>
+                  <p className="text-zinc-400 text-sm">{user.email}</p>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className={`px-2 py-1 rounded text-xs ${
+                    user.role === 'ADMIN' ? 'bg-red-600 text-white' :
+                    user.role === 'MANAGER' ? 'bg-blue-600 text-white' :
+                    'bg-green-600 text-white'
+                  }`}>
+                    {user.role}
+                  </span>
+                  <span className={`px-2 py-1 rounded text-xs ${
+                    user.isActive ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
+                  }`}>
+                    {user.isActive ? 'Active' : 'Inactive'}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardBody>
+      </Card>
+    </div>
+  );
+}

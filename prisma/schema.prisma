@@ -43,6 +43,12 @@ model User {
   email         String?   @unique
   emailVerified DateTime?
   image         String?
+  password      String?
+  role          UserRole  @default(MEMBER)
+  isActive      Boolean   @default(true)
+  createdBy     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
   accounts      Account[]
   sessions      Session[]
   labels        Label[]
@@ -67,6 +73,12 @@ model VerificationToken {
 enum Role {
   member
   owner
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  MEMBER
 }
 
 model BoardMember {

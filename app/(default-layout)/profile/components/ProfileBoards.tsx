@@ -8,8 +8,11 @@ export default async function ProfileBoards() {
   const session = await auth();
   const userId = session?.user?.id;
 
+  console.log('ProfileBoards - Session user ID:', userId);
+  console.log('ProfileBoards - Session user:', session?.user);
+
   if (!userId) {
-    throw new Error("User not authenticated");
+    return <p>Please log in to view your favorite boards.</p>;
   }
 
   const user = await prisma.user.findUnique({
@@ -30,7 +33,23 @@ export default async function ProfileBoards() {
   });
 
   if (!user) {
-    throw new Error("User not found");
+    console.log('ProfileBoards - User not found for ID:', userId);
+    return (
+      <div className="text-center p-4">
+        <p className="text-red-400 mb-2">User data not found in database.</p>
+        <p className="text-sm text-zinc-400 mb-4">
+          This might happen after a database reset. Please log out and log back in.
+        </p>
+        <form action="/api/auth/signout" method="post" className="inline">
+          <button
+            type="submit"
+            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md text-sm"
+          >
+            Sign Out
+          </button>
+        </form>
+      </div>
+    );
   }
 
   const boards = user.favoriteBoards.map((board) => ({
