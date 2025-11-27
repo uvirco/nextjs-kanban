@@ -152,7 +152,7 @@ async function main() {
     create: {
       id: 'sample-board-1',
       title: 'Sample Project Board',
-      backgroundUrl: '/backgrounds/blue-gradient.jpg',
+      backgroundUrl: null, // No background image to avoid 404 errors
     },
   });
   console.log('✅ Sample board created:', board.title);
@@ -172,6 +172,25 @@ async function main() {
       role: 'owner',
     },
   });
+
+  // Add all created users as board members
+  for (const user of createdUsers) {
+    await prisma.boardMember.upsert({
+      where: {
+        userId_boardId: {
+          userId: user.id,
+          boardId: board.id,
+        },
+      },
+      update: {},
+      create: {
+        userId: user.id,
+        boardId: board.id,
+        role: user.role === 'MANAGER' ? 'owner' : 'member',
+      },
+    });
+    console.log(`✅ Added ${user.name} as board member`);
+  }
 
   // Create default columns
   const columns = [

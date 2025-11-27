@@ -138,7 +138,7 @@ export default async function TaskDetailView({ task }: { task: DetailedTask }) {
               {/* Estimated Effort */}
               <div className="space-y-2">
                 <Label htmlFor="estimatedEffort" className="text-xs font-medium">
-                  Estimated Effort (hours)
+                  Estimated Effort (days)
                 </Label>
                 <Input
                   id="estimatedEffort"

@@ -20,11 +20,12 @@ export default async function BoardSettingsPage({
     redirect("/login");
   }
 
-  // Check if user is a member of the board
+  // Check if user is a board member with owner role (only owners can manage members)
   const boardMembership = await prisma.boardMember.findFirst({
     where: {
       userId: userId,
       boardId: id,
+      role: "owner",
     },
   });
 
@@ -79,11 +80,15 @@ export default async function BoardSettingsPage({
   const currentMembers = board.members.map((member) => member.user);
 
   return (
-    <BoardSettingsClient
-      board={board}
-      allUsers={allUsers}
-      currentMembers={currentMembers}
-      labels={board.labels}
-    />
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto py-8 px-4">
+        <BoardSettingsClient
+          board={board}
+          allUsers={allUsers}
+          currentMembers={currentMembers}
+          labels={board.labels}
+        />
+      </div>
+    </div>
   );
 }
