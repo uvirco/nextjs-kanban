@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,21 +7,25 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+generator seed {
+  provider = "ts-node"
+  from      = "@prisma/client"
+}
+
 model Account {
   id                String  @id @default(cuid())
   userId            String
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -50,17 +51,17 @@ model User {
   createdAt           DateTime         @default(now())
   updatedAt           DateTime         @updatedAt
   accounts            Account[]
-  sessions            Session[]
-  labels              Label[]
-  activities          Activity[]
-  favoriteBoards      Board[]          @relation("favorites")
-  memberBoards        BoardMember[]
-  assignedTasks       TaskAssignment[] @relation("UserAssignments")
-  createdTasks        Task[]           @relation("CreatedByRelation")
-  sentInvitations     Invitation[]     @relation("UserToInvitation")
   targetActivities    Activity[]       @relation("TargetUser")
+  activities          Activity[]
   uploadedAttachments Attachment[]
+  memberBoards        BoardMember[]
+  sentInvitations     Invitation[]     @relation("UserToInvitation")
+  labels              Label[]
+  sessions            Session[]
+  createdTasks        Task[]           @relation("CreatedByRelation")
+  assignedTasks       TaskAssignment[] @relation("UserAssignments")
   watchedTasks        TaskWatcher[]
+  favoriteBoards      Board[]          @relation("favorites")
 }
 
 model VerificationToken {
@@ -69,6 +70,213 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model BoardMember {
+  userId    String
+  boardId   String
+  role      Role
+  createdAt DateTime @default(now())
+  board     Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, boardId])
+}
+
+model Board {
+  id            String         @id @default(cuid())
+  title         String
+  backgroundUrl String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  activities    Activity[]
+  members       BoardMember[]
+  settings      BoardSettings?
+  columns       Column[]
+  invitations   Invitation[]
+  labels        Label[]
+  favoritedBy   User[]         @relation("favorites")
+}
+
+model BoardSettings {
+  id                       String     @id @default(cuid())
+  boardId                  String     @unique
+  enablePriority           Boolean    @default(true)
+  enableBusinessValue      Boolean    @default(false)
+  enableEstimatedEffort    Boolean    @default(false)
+  enableDependencies       Boolean    @default(false)
+  enableBudgetEstimate     Boolean    @default(false)
+  enableRiskLevel          Boolean    @default(false)
+  enableStrategicAlignment Boolean    @default(false)
+  enableRoiEstimate        Boolean    @default(false)
+  enableStageGate          Boolean    @default(false)
+  enableTimeSpent          Boolean    @default(false)
+  enableStoryPoints        Boolean    @default(false)
+  enableWatchers           Boolean    @default(false)
+  enableAttachments        Boolean    @default(false)
+  enableSubtasks           Boolean    @default(false)
+  defaultPriority          Priority?  @default(MEDIUM)
+  defaultRiskLevel         RiskLevel? @default(LOW)
+  board                    Board      @relation(fields: [boardId], references: [id], onDelete: Cascade)
+}
+
+model Column {
+  id                         String     @id @default(cuid())
+  title                      String
+  boardId                    String
+  order                      Int
+  createdAt                  DateTime   @default(now())
+  updatedAt                  DateTime   @updatedAt
+  activitiesAsNewColumn      Activity[] @relation("NewColumn")
+  activitiesAsOldColumn      Activity[] @relation("OldColumn")
+  activitiesAsOriginalColumn Activity[] @relation("OriginalColumn")
+  board                      Board      @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  tasks                      Task[]
+}
+
+model Task {
+  id                 String           @id @default(cuid())
+  title              String
+  description        String?
+  dueDate            DateTime?
+  startDate          DateTime?
+  coverImage         String?
+  columnId           String
+  order              Int
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  createdByUserId    String
+  priority           Priority?        @default(MEDIUM)
+  businessValue      String?
+  estimatedEffort    Float?
+  budgetEstimate     Float?
+  riskLevel          RiskLevel?       @default(LOW)
+  strategicAlignment String?
+  roiEstimate        Float?
+  stageGate          String?
+  timeSpent          Float?           @default(0)
+  storyPoints        Int?
+  department         String?
+  parentTaskId       String?
+  activities         Activity[]
+  attachments        Attachment[]
+  checklists         Checklist[]
+  column             Column           @relation(fields: [columnId], references: [id], onDelete: Cascade)
+  createdBy          User             @relation("CreatedByRelation", fields: [createdByUserId], references: [id], onDelete: Cascade)
+  parentTask         Task?            @relation("Subtasks", fields: [parentTaskId], references: [id])
+  subtasks           Task[]           @relation("Subtasks")
+  assignedUsers      TaskAssignment[] @relation("TaskAssignments")
+  dependentTasks     TaskDependency[] @relation("DependsOn")
+  dependencies       TaskDependency[] @relation("TaskDependencies")
+  watchers           TaskWatcher[]
+  labels             Label[]          @relation("LabelToTask")
+}
+
+model TaskAssignment {
+  userId String
+  taskId String
+  task   Task   @relation("TaskAssignments", fields: [taskId], references: [id], onDelete: Cascade)
+  user   User   @relation("UserAssignments", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, taskId])
+}
+
+model Invitation {
+  id        String   @id @default(cuid())
+  boardId   String
+  email     String
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  inviterId String
+  board     Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  inviter   User     @relation("UserToInvitation", fields: [inviterId], references: [id], onDelete: Cascade)
+
+  @@unique([boardId, email])
+}
+
+model Label {
+  id        String  @id @default(cuid())
+  title     String?
+  color     String
+  isDefault Boolean @default(false)
+  userId    String
+  boardId   String
+  board     Board   @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tasks     Task[]  @relation("LabelToTask")
+}
+
+model Checklist {
+  id     String          @id @default(cuid())
+  title  String?
+  taskId String
+  task   Task            @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  items  ChecklistItem[]
+}
+
+model ChecklistItem {
+  id          String    @id @default(cuid())
+  content     String
+  isChecked   Boolean   @default(false)
+  checklistId String
+  createdAt   DateTime  @default(now())
+  checklist   Checklist @relation(fields: [checklistId], references: [id], onDelete: Cascade)
+}
+
+model Attachment {
+  id             String   @id @default(cuid())
+  filename       String
+  url            String
+  size           Int?
+  mimeType       String?
+  taskId         String
+  uploadedBy     String
+  createdAt      DateTime @default(now())
+  task           Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  uploadedByUser User     @relation(fields: [uploadedBy], references: [id])
+}
+
+model TaskWatcher {
+  userId String
+  taskId String
+  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, taskId])
+}
+
+model TaskDependency {
+  id              String @id @default(cuid())
+  taskId          String
+  dependsOnTaskId String
+  dependsOnTask   Task   @relation("DependsOn", fields: [dependsOnTaskId], references: [id], onDelete: Cascade)
+  task            Task   @relation("TaskDependencies", fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, dependsOnTaskId])
+}
+
+model Activity {
+  id               String       @id @default(cuid())
+  type             ActivityType
+  content          String?
+  createdAt        DateTime     @default(now())
+  startDate        DateTime?
+  dueDate          DateTime?
+  userId           String
+  taskId           String?
+  boardId          String?
+  oldColumnId      String?
+  newColumnId      String?
+  originalColumnId String?
+  targetUserId     String?
+  board            Board?       @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  newColumn        Column?      @relation("NewColumn", fields: [newColumnId], references: [id])
+  oldColumn        Column?      @relation("OldColumn", fields: [oldColumnId], references: [id])
+  originalColumn   Column?      @relation("OriginalColumn", fields: [originalColumnId], references: [id])
+  targetUser       User?        @relation("TargetUser", fields: [targetUserId], references: [id])
+  task             Task?        @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user             User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 enum Role {
@@ -93,222 +301,6 @@ enum RiskLevel {
   LOW
   MEDIUM
   HIGH
-}
-
-model BoardMember {
-  userId    String
-  boardId   String
-  role      Role
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  board     Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-
-  @@id([userId, boardId])
-}
-
-model Board {
-  id            String         @id @default(cuid())
-  title         String
-  backgroundUrl String?
-  columns       Column[]
-  labels        Label[]
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  activities    Activity[]
-  favoritedBy   User[]         @relation("favorites")
-  members       BoardMember[]
-  invitations   Invitation[]
-  settings      BoardSettings?
-}
-
-model BoardSettings {
-  id      String @id @default(cuid())
-  boardId String @unique
-  board   Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
-
-  // Field enable/disable flags
-  enablePriority           Boolean @default(true)
-  enableBusinessValue      Boolean @default(false)
-  enableEstimatedEffort    Boolean @default(false)
-  enableDependencies       Boolean @default(false)
-  enableBudgetEstimate     Boolean @default(false)
-  enableRiskLevel          Boolean @default(false)
-  enableStrategicAlignment Boolean @default(false)
-  enableRoiEstimate        Boolean @default(false)
-  enableStageGate          Boolean @default(false)
-  enableTimeSpent          Boolean @default(false)
-  enableStoryPoints        Boolean @default(false)
-  enableWatchers           Boolean @default(false)
-  enableAttachments        Boolean @default(false)
-  enableSubtasks           Boolean @default(false)
-
-  // Default values
-  defaultPriority  Priority?  @default(MEDIUM)
-  defaultRiskLevel RiskLevel? @default(LOW)
-}
-
-model Column {
-  id        String   @id @default(cuid())
-  title     String
-  boardId   String
-  board     Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
-  tasks     Task[]
-  order     Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  activitiesAsOldColumn      Activity[] @relation("OldColumn")
-  activitiesAsNewColumn      Activity[] @relation("NewColumn")
-  activitiesAsOriginalColumn Activity[] @relation("OriginalColumn")
-}
-
-model Task {
-  id              String           @id @default(cuid())
-  title           String
-  description     String?
-  dueDate         DateTime?
-  startDate       DateTime?
-  coverImage      String?
-  columnId        String
-  column          Column           @relation(fields: [columnId], references: [id], onDelete: Cascade)
-  labels          Label[]
-  checklists      Checklist[]
-  order           Int
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  activities      Activity[]
-  assignedUsers   TaskAssignment[] @relation("TaskAssignments")
-  createdByUserId String
-  createdBy       User             @relation("CreatedByRelation", fields: [createdByUserId], references: [id], onDelete: Cascade)
-
-  // Advanced project fields
-  priority           Priority?  @default(MEDIUM)
-  businessValue      String?
-  estimatedEffort    Float?
-  budgetEstimate     Float?
-  riskLevel          RiskLevel? @default(LOW)
-  strategicAlignment String?
-  roiEstimate        Float?
-  stageGate          String?
-  timeSpent          Float?     @default(0)
-  storyPoints        Int?
-
-  // Relations
-  attachments    Attachment[]
-  watchers       TaskWatcher[]
-  dependencies   TaskDependency[] @relation("TaskDependencies")
-  dependentTasks TaskDependency[] @relation("DependsOn")
-  parentTaskId   String?
-  parentTask     Task?            @relation("Subtasks", fields: [parentTaskId], references: [id])
-  subtasks       Task[]           @relation("Subtasks")
-}
-
-model TaskAssignment {
-  userId String
-  taskId String
-  user   User   @relation(name: "UserAssignments", fields: [userId], references: [id], onDelete: Cascade)
-  task   Task   @relation(name: "TaskAssignments", fields: [taskId], references: [id], onDelete: Cascade)
-
-  @@id([userId, taskId])
-}
-
-model Invitation {
-  id        String   @id @default(cuid())
-  boardId   String
-  email     String
-  token     String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-
-  board     Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
-  inviterId String
-  inviter   User   @relation(name: "UserToInvitation", fields: [inviterId], references: [id], onDelete: Cascade)
-
-  @@unique([boardId, email])
-}
-
-model Label {
-  id        String  @id @default(cuid())
-  title     String?
-  color     String
-  isDefault Boolean @default(false)
-  userId    String
-  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  boardId   String
-  board     Board   @relation(fields: [boardId], references: [id], onDelete: Cascade)
-  tasks     Task[]
-}
-
-model Checklist {
-  id     String          @id @default(cuid())
-  title  String?
-  taskId String
-  task   Task            @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  items  ChecklistItem[]
-}
-
-model ChecklistItem {
-  id          String    @id @default(cuid())
-  content     String
-  isChecked   Boolean   @default(false)
-  checklistId String
-  checklist   Checklist @relation(fields: [checklistId], references: [id], onDelete: Cascade)
-  createdAt   DateTime  @default(now())
-}
-
-model Attachment {
-  id             String   @id @default(cuid())
-  filename       String
-  url            String
-  size           Int?
-  mimeType       String?
-  taskId         String
-  task           Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  uploadedBy     String
-  uploadedByUser User     @relation(fields: [uploadedBy], references: [id])
-  createdAt      DateTime @default(now())
-}
-
-model TaskWatcher {
-  userId String
-  taskId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
-
-  @@id([userId, taskId])
-}
-
-model TaskDependency {
-  id              String @id @default(cuid())
-  taskId          String
-  dependsOnTaskId String
-  task            Task   @relation("TaskDependencies", fields: [taskId], references: [id], onDelete: Cascade)
-  dependsOnTask   Task   @relation("DependsOn", fields: [dependsOnTaskId], references: [id], onDelete: Cascade)
-
-  @@unique([taskId, dependsOnTaskId])
-}
-
-model Activity {
-  id               String       @id @default(cuid())
-  type             ActivityType
-  content          String?
-  createdAt        DateTime     @default(now())
-  startDate        DateTime?
-  dueDate          DateTime?
-  userId           String
-  user             User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  taskId           String?
-  task             Task?        @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  boardId          String?
-  board            Board?       @relation(fields: [boardId], references: [id], onDelete: Cascade)
-  oldColumnId      String?
-  oldColumn        Column?      @relation("OldColumn", fields: [oldColumnId], references: [id])
-  newColumnId      String?
-  newColumn        Column?      @relation("NewColumn", fields: [newColumnId], references: [id])
-  originalColumnId String?
-  originalColumn   Column?      @relation("OriginalColumn", fields: [originalColumnId], references: [id])
-  targetUserId     String?
-  targetUser       User?        @relation("TargetUser", fields: [targetUserId], references: [id])
 }
 
 enum ActivityType {

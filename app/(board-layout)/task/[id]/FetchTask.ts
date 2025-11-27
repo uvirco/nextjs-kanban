@@ -12,7 +12,7 @@ export default async function FetchTask({
   const userRole = session?.user?.role;
 
   // Allow admins to access all tasks
-  if (userRole !== 'ADMIN') {
+  if (userRole !== "ADMIN") {
     const boardMembership = await prisma.boardMember.findFirst({
       where: {
         userId: userId,

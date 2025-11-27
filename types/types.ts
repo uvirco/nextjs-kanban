@@ -49,16 +49,20 @@ export interface DetailedTask {
   order: number;
   columnId: string;
   // Advanced project fields
-  priority: Priority | null;
-  businessValue: string | null;
-  estimatedEffort: number | null;
-  budgetEstimate: number | null;
-  riskLevel: RiskLevel | null;
-  strategicAlignment: string | null;
-  roiEstimate: number | null;
-  stageGate: string | null;
-  timeSpent: number | null;
-  storyPoints: number | null;
+  projectName?: string | null;
+  department?: string | null;
+  priority?: Priority | null;
+  status?: string | null;
+  businessValue?: string | null;
+  estimatedEffort?: number | null;
+  budgetEstimate?: number | null;
+  riskLevel?: RiskLevel | null;
+  strategicAlignment?: string | null;
+  roiEstimate?: number | null;
+  stageGate?: string | null;
+  timeSpent?: number | null;
+  storyPoints?: number | null;
+  notes?: string | null;
   column: {
     title: string;
     boardId: string;
@@ -147,7 +151,10 @@ export type TaskEditData = {
   description?: Task["description"];
   boardId: Board["id"];
   // Advanced project fields
+  projectName?: string;
+  department?: string;
   priority?: Priority;
+  status?: string;
   businessValue?: string;
   estimatedEffort?: number;
   budgetEstimate?: number;
@@ -157,6 +164,7 @@ export type TaskEditData = {
   stageGate?: string;
   timeSpent?: number;
   storyPoints?: number;
+  notes?: string;
 };
 
 export type TaskDeletionData = {

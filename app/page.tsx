@@ -2,37 +2,11 @@ import Link from "next/link";
 import {
   IconBrandGithub,
   IconLayoutKanban,
-  IconHeartHandshake,
-  IconWand,
-  IconChartBar,
   IconRocket,
   IconBook,
-  IconBook2,
 } from "@tabler/icons-react";
 import Image from "next/image";
 export default function Home() {
-  const cardData = [
-    {
-      icon: IconLayoutKanban,
-      title: "Organize Projects Effortlessly",
-      body: "Create custom boards, lists, and cards to organize everything from daily tasks to complex projects. Drag and drop to prioritize and adjust plans on the fly.",
-    },
-    {
-      icon: IconHeartHandshake,
-      title: "Collaborate Anywhere, Anytime",
-      body: "Invite team members to collaborate in real-time. Share feedback, assign tasks, and stay updated with seamless notifications and activity logs.",
-    },
-    {
-      icon: IconWand,
-      title: "Customize Your Workflow",
-      body: "Tailor your boards with custom labels, checklists, due dates, and more. Automate repetitive tasks with built-in workflow automation tools to save time and stay focused.",
-    },
-    {
-      icon: IconChartBar,
-      title: "Access Insights & Analytics",
-      body: "Visualize your project's progress with powerful analytics and reporting tools. Make informed decisions with at-a-glance dashboards and detailed reports.",
-    },
-  ];
 
   return (
     <main className="min-h-dvh text-white bg-gradient-to-br from-black to-zinc-900 dark">
@@ -52,9 +26,10 @@ export default function Home() {
               Project Management
             </h4>
             <h1 className="text-4xl md:text-6xl xl:text-8xl tracking-tighter font-bold mb-5">
-              Plan, Track, and{" "}
+              Plan Track and View
+              <br />
               <span className="from-[#FF1CF7] to-[#b249f8] bg-clip-text text-transparent bg-gradient-to-b">
-                Achieve
+                Uvirco Projects
               </span>
             </h1>
             <p className="text-lg text-zinc-500 mb-5">
@@ -84,25 +59,6 @@ export default function Home() {
               className="w-full h-auto rounded-xl shadow-xl"
             />
           </div>
-        </div>
-      </section>
-
-      <section className="mb-10 py-5 px-3 md:px-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-          {cardData.map((card, index) => (
-            <div
-              key={index}
-              className="text-zinc-200 bg-zinc-900/50 backdrop-blur-md shadow-xl rounded-lg p-6"
-            >
-              <div className="font-bold gap-3 mb-4 flex items-center">
-                <span className="flex items-center justify-center bg-purple-500 rounded-full h-8 w-8 shrink-0 text-black">
-                  <card.icon size={20} />
-                </span>
-                {card.title}
-              </div>
-              <div>{card.body}</div>
-            </div>
-          ))}
         </div>
       </section>
     </main>

@@ -6,7 +6,7 @@ export default function TaskDetailWrapper({
   children: React.ReactNode;
 }) {
   return (
-    <Card className="z-10">
+    <Card className="z-10 bg-card text-card-foreground border-border">
       <CardContent className="p-0">{children}</CardContent>
     </Card>
   );
