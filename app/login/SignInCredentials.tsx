@@ -1,9 +1,7 @@
 "use client";
 import { signIn } from "next-auth/react";
-import { Button } from "@nextui-org/button";
-import { Input } from "@nextui-org/input";
 import { useState } from "react";
-import { IconMail, IconLock } from "@tabler/icons-react";
+import { IconMail, IconLock, IconLoader2 } from "@tabler/icons-react";
 
 const SignInCredentials = () => {
   const [email, setEmail] = useState("");
@@ -36,30 +34,42 @@ const SignInCredentials = () => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <Input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        startContent={<IconMail size={18} />}
-        required
-      />
-      <Input
-        type="password"
-        placeholder="Password (any password works in dev)"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        startContent={<IconLock size={18} />}
-        required
-      />
-      <Button
+      <div className="relative">
+        <IconMail size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-500" />
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full pl-10 pr-3 py-2 bg-zinc-800 border border-zinc-700 rounded-md text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          required
+        />
+      </div>
+      <div className="relative">
+        <IconLock size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-500" />
+        <input
+          type="password"
+          placeholder="Password (any password works in dev)"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full pl-10 pr-3 py-2 bg-zinc-800 border border-zinc-700 rounded-md text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          required
+        />
+      </div>
+      <button
         type="submit"
-        color="primary"
-        className="w-full"
-        isLoading={isLoading}
+        disabled={isLoading}
+        className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-md transition-colors"
       >
-        {isLoading ? "Signing In..." : "Sign In"}
-      </Button>
+        {isLoading ? (
+          <>
+            <IconLoader2 size={16} className="animate-spin" />
+            Signing In...
+          </>
+        ) : (
+          "Sign In"
+        )}
+      </button>
     </form>
   );
 };

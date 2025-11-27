@@ -1,13 +1,20 @@
 "use client";
 import { useState } from "react";
-import { RangeCalendar, DateValue, RangeValue } from "@nextui-org/calendar";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   handleAddDate,
   handleRemoveDate,
 } from "@/server-actions/DateServerActions";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { parseDate, today, getLocalTimeZone } from "@internationalized/date";
+
+interface AddToCardDatesCalendarProps {
+  taskId: string;
+  boardId: string;
+  startDate: Date | null;
+  dueDate: Date | null;
+}
 
 interface AddToCardDatesCalendarProps {
   taskId: string;
@@ -22,54 +29,25 @@ export default function AddToCardDatesCalendar({
   startDate,
   dueDate,
 }: AddToCardDatesCalendarProps) {
-  const [selectedRange, setSelectedRange] = useState<RangeValue<DateValue>>({
-    start: startDate
-      ? parseDate(format(startDate, "yyyy-MM-dd"))
-      : today(getLocalTimeZone()),
-    end: dueDate
-      ? parseDate(format(dueDate, "yyyy-MM-dd"))
-      : today(getLocalTimeZone()).add({ weeks: 1 }),
-  });
-
-  const handleRangeSelect = async (range: RangeValue<DateValue>) => {
-    if (!range.start || !range.end) return;
-
-    setSelectedRange(range);
-
-    const newStartDate = new Date(
-      range.start.year,
-      range.start.month - 1,
-      range.start.day,
-    );
-    const newDueDate = new Date(
-      range.end.year,
-      range.end.month - 1,
-      range.end.day,
-    );
-
-    if (
-      startDate &&
-      format(startDate, "yyyy-MM-dd") !== format(newStartDate, "yyyy-MM-dd")
-    ) {
-      await sendDateRequest(newStartDate, "startDate");
-    }
-    if (
-      dueDate &&
-      format(dueDate, "yyyy-MM-dd") !== format(newDueDate, "yyyy-MM-dd")
-    ) {
-      await sendDateRequest(newDueDate, "dueDate");
-    }
-  };
+  const [startDateValue, setStartDateValue] = useState(
+    startDate ? format(startDate, "yyyy-MM-dd") : ""
+  );
+  const [dueDateValue, setDueDateValue] = useState(
+    dueDate ? format(dueDate, "yyyy-MM-dd") : ""
+  );
+  const [isLoading, setIsLoading] = useState(false);
 
   const sendDateRequest = async (
-    newDate: Date,
+    newDate: string,
     dateType: "startDate" | "dueDate",
   ) => {
+    if (!newDate) return;
+
+    setIsLoading(true);
     try {
-      const formattedDate = format(newDate, "yyyy-MM-dd");
       const data = {
         taskId: taskId,
-        date: formattedDate,
+        date: newDate,
         boardId: boardId,
         dateType: dateType,
       };
@@ -85,10 +63,13 @@ export default function AddToCardDatesCalendar({
       toast.error(
         `Failed to Update ${dateType === "dueDate" ? "Due Date" : "Start Date"}`,
       );
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const removeDates = async () => {
+    setIsLoading(true);
     try {
       const dataStartDate = {
         taskId: taskId,
@@ -106,23 +87,57 @@ export default function AddToCardDatesCalendar({
 
       if (responseStartDate.success && responseDueDate.success) {
         toast.success("Dates removed successfully");
-        setSelectedRange({
-          start: today(getLocalTimeZone()),
-          end: today(getLocalTimeZone()).add({ weeks: 1 }),
-        });
+        setStartDateValue("");
+        setDueDateValue("");
       } else {
         throw new Error(responseStartDate.message || responseDueDate.message);
       }
     } catch (error) {
       toast.error(`Failed to Remove Dates`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <RangeCalendar
-      aria-label="Date Range"
-      value={selectedRange}
-      onChange={handleRangeSelect}
-    />
+    <div className="p-4 space-y-4 min-w-64">
+      <div className="space-y-2">
+        <label htmlFor="start-date" className="text-sm font-medium">Start Date</label>
+        <Input
+          id="start-date"
+          type="date"
+          value={startDateValue}
+          onChange={(e) => {
+            setStartDateValue(e.target.value);
+            sendDateRequest(e.target.value, "startDate");
+          }}
+          disabled={isLoading}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <label htmlFor="due-date" className="text-sm font-medium">Due Date</label>
+        <Input
+          id="due-date"
+          type="date"
+          value={dueDateValue}
+          onChange={(e) => {
+            setDueDateValue(e.target.value);
+            sendDateRequest(e.target.value, "dueDate");
+          }}
+          disabled={isLoading}
+        />
+      </div>
+
+      <Button
+        onClick={removeDates}
+        disabled={isLoading}
+        variant="destructive"
+        size="sm"
+        className="w-full"
+      >
+        Remove Dates
+      </Button>
+    </div>
   );
 }

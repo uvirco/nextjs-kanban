@@ -24,13 +24,13 @@ export default function TaskDetailTitle({
       <div className="flex-col w-full pr-5">
         <EditTaskNameForm taskId={taskId} title={taskTitle} boardId={boardId} />
 
-        <div className="text-sm font-normal">
+        <div className="text-sm font-normal text-muted-foreground">
           <p>
             Created on {format(new Date(taskCreatedAt), "MMMM d, yyyy")} |
             Updated on {format(new Date(taskUpdatedAt), "MMMM d, yyyy")}
           </p>
           <p>
-            In column <span className="text-primary">{columnTitle}</span>
+            In column <span className="text-blue-600 dark:text-blue-400">{columnTitle}</span>
           </p>
         </div>
       </div>

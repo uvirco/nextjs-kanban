@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
-import { Input } from "@nextui-org/input";
-import { Button } from "@nextui-org/button";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { IconX } from "@tabler/icons-react";
 import { handleCreateChecklistItem } from "@/server-actions/ChecklistServerActions";
 import { toast } from "sonner";
@@ -47,7 +47,7 @@ export default function ChecklistItemForm({
   return (
     <div>
       {!showInput && (
-        <Button size="sm" onClick={toggleInput}>
+        <Button size="sm" onClick={toggleInput} variant="outline">
           Add an item
         </Button>
       )}
@@ -55,24 +55,19 @@ export default function ChecklistItemForm({
         <form onSubmit={handleSubmit}>
           <Input
             autoComplete="off"
-            variant="bordered"
             placeholder="Add an item..."
             name="content"
             value={inputValue}
             onChange={handleInputChange}
-            label="Checklist Item"
-            size="sm"
             className="w-full mb-2"
             autoFocus
-            isInvalid={!!error}
-            errorMessage={error}
+            required
           />
           <div className="flex gap-2">
             <Button
               type="submit"
               size="sm"
-              color="primary"
-              isLoading={isLoading}
+              disabled={isLoading}
             >
               Add Item
             </Button>
@@ -80,8 +75,8 @@ export default function ChecklistItemForm({
               type="button"
               size="sm"
               onClick={toggleInput}
-              isIconOnly
-              isDisabled={isLoading}
+              variant="outline"
+              disabled={isLoading}
             >
               <IconX size={16} />
             </Button>

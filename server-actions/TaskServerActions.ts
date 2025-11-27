@@ -90,6 +90,17 @@ export async function handleEditTask(data: TaskEditData) {
     boardId: z.string().min(1, MESSAGES.COMMON.BOARD_ID_REQUIRED),
     title: z.string().min(1, MESSAGES.TASK.TITLE_TOO_SHORT),
     description: z.union([z.string(), z.null()]).optional(),
+    // Advanced project fields
+    priority: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]).optional(),
+    businessValue: z.string().optional(),
+    estimatedEffort: z.number().positive().optional(),
+    budgetEstimate: z.number().positive().optional(),
+    riskLevel: z.enum(["LOW", "MEDIUM", "HIGH"]).optional(),
+    strategicAlignment: z.string().optional(),
+    roiEstimate: z.number().positive().optional(),
+    stageGate: z.string().optional(),
+    timeSpent: z.number().min(0).optional(),
+    storyPoints: z.number().int().positive().optional(),
   });
 
   const parse = EditTaskSchema.safeParse(data);
@@ -107,6 +118,17 @@ export async function handleEditTask(data: TaskEditData) {
       data: {
         title: parse.data.title,
         description: parse.data.description,
+        // Advanced project fields
+        priority: parse.data.priority,
+        businessValue: parse.data.businessValue,
+        estimatedEffort: parse.data.estimatedEffort,
+        budgetEstimate: parse.data.budgetEstimate,
+        riskLevel: parse.data.riskLevel,
+        strategicAlignment: parse.data.strategicAlignment,
+        roiEstimate: parse.data.roiEstimate,
+        stageGate: parse.data.stageGate,
+        timeSpent: parse.data.timeSpent,
+        storyPoints: parse.data.storyPoints,
       },
     });
 

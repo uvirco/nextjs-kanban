@@ -10,8 +10,6 @@ import {
   IconBook2,
 } from "@tabler/icons-react";
 import Image from "next/image";
-import { Button } from "@nextui-org/button";
-import { Card, CardBody, CardHeader } from "@nextui-org/card";
 export default function Home() {
   const cardData = [
     {
@@ -65,14 +63,16 @@ export default function Home() {
               <span className="text-purple-500">powered by AI</span>
             </p>
             <div className="flex gap-5">
-              <Button color="secondary" as={Link} href="/board">
-                <IconRocket />
-                Get Started
-              </Button>
-              <Button as={Link} href="/board" isDisabled>
+              <Link href="/board">
+                <button className="bg-secondary text-secondary-foreground hover:bg-secondary/80 h-10 px-4 py-2 rounded-md flex items-center gap-2">
+                  <IconRocket />
+                  Get Started
+                </button>
+              </Link>
+              <button className="bg-muted text-muted-foreground cursor-not-allowed h-10 px-4 py-2 rounded-md flex items-center gap-2" disabled>
                 <IconBook />
                 Docs (Coming Soon)
-              </Button>
+              </button>
             </div>
           </div>
           <div className="hidden lg:block">
@@ -90,19 +90,18 @@ export default function Home() {
       <section className="mb-10 py-5 px-3 md:px-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
           {cardData.map((card, index) => (
-            <Card
+            <div
               key={index}
-              className="text-zinc-200 bg-zinc-900/50 backdrop-blur-md shadow-xl"
-              shadow="none"
+              className="text-zinc-200 bg-zinc-900/50 backdrop-blur-md shadow-xl rounded-lg p-6"
             >
-              <CardHeader className="font-bold gap-3">
+              <div className="font-bold gap-3 mb-4 flex items-center">
                 <span className="flex items-center justify-center bg-purple-500 rounded-full h-8 w-8 shrink-0 text-black">
                   <card.icon size={20} />
                 </span>
                 {card.title}
-              </CardHeader>
-              <CardBody>{card.body}</CardBody>
-            </Card>
+              </div>
+              <div>{card.body}</div>
+            </div>
           ))}
         </div>
       </section>

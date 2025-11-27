@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { CheckboxGroup, Checkbox } from "@nextui-org/checkbox";
+import { Checkbox } from "@/components/ui/checkbox";
 import { IconEdit, IconX } from "@tabler/icons-react";
 import { toast } from "sonner";
 import DeleteChecklistItemButton from "./DeleteChecklistItemButton.client";
@@ -9,8 +9,8 @@ import {
   handleToggleCheckedItem,
 } from "@/server-actions/ChecklistServerActions";
 import { ChecklistSummary, ChecklistItemSummary } from "@/types/types";
-import { Input } from "@nextui-org/input";
-import { Button } from "@nextui-org/button";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface ChecklistCheckboxGroupProps {
   checkedItemIds: string[];
@@ -61,23 +61,31 @@ export default function ChecklistCheckboxGroup({
   };
 
   return (
-    <CheckboxGroup className="mb-3" defaultValue={checkedItemIds}>
+    <div className="mb-3 space-y-2">
       {checklist.items.map((item: ChecklistItemSummary) => (
         <div
-          className="flex justify-between gap-5 hover:bg-zinc-900 py-1 px-2 rounded-md"
+          className="flex justify-between gap-5 hover:bg-muted py-1 px-2 rounded-md transition-colors"
           key={item.id}
         >
           <div className="flex grow items-center">
             <Checkbox
-              value={item.id}
-              onChange={(event) => handleToggle(item.id, event.target.checked)}
-            >
-              {editingItemId !== item.id && <span>{item.content}</span>}
-            </Checkbox>
+              id={item.id}
+              checked={checkedItemIds.includes(item.id)}
+              onCheckedChange={(checked) => handleToggle(item.id, checked as boolean)}
+              className="mr-2"
+            />
+            {editingItemId !== item.id && (
+              <label
+                htmlFor={item.id}
+                className={`cursor-pointer flex-1 ${checkedItemIds.includes(item.id) ? 'line-through text-muted-foreground' : ''}`}
+              >
+                {item.content}
+              </label>
+            )}
 
             {editingItemId === item.id && (
               <form
-                className="flex gap-2 ml-2"
+                className="flex gap-2 ml-2 flex-1"
                 onSubmit={(e) => {
                   e.preventDefault();
                   handleEditSubmit(new FormData(e.currentTarget));
@@ -85,24 +93,21 @@ export default function ChecklistCheckboxGroup({
               >
                 <Input
                   autoComplete="off"
-                  size="sm"
                   placeholder="Enter checklist item name..."
-                  labelPlacement="outside"
                   name="content"
                   defaultValue={item.content}
-                  isInvalid={!!inputErrors[item.id]}
-                  errorMessage={inputErrors[item.id]}
+                  className="flex-1"
                 />
                 <input type="hidden" name="checklistItemId" value={item.id} />
                 <input type="hidden" name="taskId" value={taskId} />
-                <Button type="submit" size="sm" color="primary">
+                <Button type="submit" size="sm">
                   Save
                 </Button>
                 <Button
                   size="sm"
                   type="button"
                   onClick={handleCancelOrSubmit}
-                  isIconOnly
+                  variant="outline"
                 >
                   <IconX size={16} />
                 </Button>
@@ -116,7 +121,7 @@ export default function ChecklistCheckboxGroup({
               onClick={() => handleEditClick(item.id)}
             >
               <IconEdit
-                className="text-zinc-500 hover:text-primary"
+                className="text-muted-foreground hover:text-primary"
                 size={18}
               />
             </button>
@@ -127,6 +132,6 @@ export default function ChecklistCheckboxGroup({
           </div>
         </div>
       ))}
-    </CheckboxGroup>
+    </div>
   );
 }

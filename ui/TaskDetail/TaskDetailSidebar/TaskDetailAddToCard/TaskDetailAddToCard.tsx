@@ -36,7 +36,7 @@ export default async function TaskDetailAddToCard({
 
   return (
     <div className="mb-5">
-      <h4 className="text-sm text-zinc-700 font-semibold mb-1">Add to card</h4>
+      <h4 className="text-sm text-muted-foreground font-semibold mb-1">Add to card</h4>
 
       <ul className="text-sm space-y-2">
         <AddToCardMembers

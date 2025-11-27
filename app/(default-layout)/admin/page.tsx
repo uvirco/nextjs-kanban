@@ -1,6 +1,5 @@
 import { auth } from "@/auth";
 import prisma from "@/prisma/prisma";
-import { Card, CardBody, CardHeader } from "@nextui-org/card";
 import { IconUsers, IconUserCheck, IconUserX } from "@tabler/icons-react";
 
 export default async function AdminDashboard() {
@@ -40,43 +39,43 @@ export default async function AdminDashboard() {
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="bg-zinc-800 border-zinc-700">
-          <CardHeader className="flex items-center space-x-3">
+        <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6">
+          <div className="flex items-center space-x-3">
             <IconUsers className="text-blue-400" size={24} />
             <div>
               <p className="text-sm text-zinc-400">Total Users</p>
               <p className="text-2xl font-bold text-white">{totalUsers}</p>
             </div>
-          </CardHeader>
-        </Card>
+          </div>
+        </div>
 
-        <Card className="bg-zinc-800 border-zinc-700">
-          <CardHeader className="flex items-center space-x-3">
+        <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6">
+          <div className="flex items-center space-x-3">
             <IconUserCheck className="text-green-400" size={24} />
             <div>
               <p className="text-sm text-zinc-400">Active Users</p>
               <p className="text-2xl font-bold text-white">{activeUsers}</p>
             </div>
-          </CardHeader>
-        </Card>
+          </div>
+        </div>
 
-        <Card className="bg-zinc-800 border-zinc-700">
-          <CardHeader className="flex items-center space-x-3">
+        <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6">
+          <div className="flex items-center space-x-3">
             <IconUserX className="text-red-400" size={24} />
             <div>
               <p className="text-sm text-zinc-400">Inactive Users</p>
               <p className="text-2xl font-bold text-white">{inactiveUsers}</p>
             </div>
-          </CardHeader>
-        </Card>
+          </div>
+        </div>
       </div>
 
       {/* Recent Users */}
-      <Card className="bg-zinc-800 border-zinc-700">
-        <CardHeader>
+      <div className="bg-zinc-800 border border-zinc-700 rounded-lg">
+        <div className="p-6 border-b border-zinc-700">
           <h2 className="text-xl font-semibold text-white">Recent Users</h2>
-        </CardHeader>
-        <CardBody>
+        </div>
+        <div className="p-6">
           <div className="space-y-4">
             {recentUsers.map((user) => (
               <div key={user.id} className="flex items-center justify-between p-3 bg-zinc-700 rounded-lg">
@@ -101,8 +100,8 @@ export default async function AdminDashboard() {
               </div>
             ))}
           </div>
-        </CardBody>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

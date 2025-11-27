@@ -2,6 +2,7 @@
 import { useState } from "react";
 import NavbarTitle from "./NavbarTitle";
 import ColourPicker from "./ColourPicker";
+import ThemeToggle from "./ThemeToggle";
 import { IconMenu2, IconLayoutKanban, IconUser } from "@tabler/icons-react";
 import Link from "next/link";
 import React from "react";
@@ -49,6 +50,7 @@ export default function NavbarWrapper({
         </div>
 
         <div className="flex gap-5 items-center justify-between">
+          <ThemeToggle />
           <ColourPicker />
           {children}
         </div>

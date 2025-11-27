@@ -1,11 +1,11 @@
 "use client";
 import { useState } from "react";
-import { Popover, PopoverTrigger, PopoverContent } from "@nextui-org/popover";
+import { IconTag } from "@tabler/icons-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Label } from "@prisma/client";
 import { LabelView } from "./LabelView";
 import { LabelEditMode } from "./LabelEditMode";
 import { saveLabel, removeLabel } from "./LabelActions";
-import { IconTag } from "@tabler/icons-react";
 
 interface AddToCardLabelsProps {
   labels: Label[];
@@ -25,7 +25,6 @@ export default function AddToCardLabels({
   );
   const [editMode, setEditMode] = useState<boolean>(false);
   const [editingLabel, setEditingLabel] = useState<Label | null>(null);
-  const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [tempLabelTitle, setTempLabelTitle] = useState<string>("");
   const [tempLabelColor, setTempLabelColor] = useState<string>("");
 
@@ -48,7 +47,7 @@ export default function AddToCardLabels({
     }
   };
 
-  const closePopover = () => setIsPopoverOpen(false);
+  const closePopover = () => {};
 
   const enterEditMode = (label: Label) => {
     setEditingLabel(label);
@@ -70,19 +69,14 @@ export default function AddToCardLabels({
   };
 
   return (
-    <li className="bg-zinc-900 hover:bg-zinc-800 ring-zinc-800 rounded-md ring-2 hover:ring-primary">
-      <Popover
-        isOpen={isPopoverOpen}
-        onOpenChange={(open) => setIsPopoverOpen(open)}
-        placement="left-start"
-        triggerScaleOnOpen={false}
-      >
-        <PopoverTrigger>
+    <li className="bg-muted hover:bg-muted/80 border border-border rounded-md hover:border-primary transition-colors">
+      <Popover>
+        <PopoverTrigger asChild>
           <button className="flex items-center gap-2 px-2 py-2 w-full">
             <IconTag size={14} /> Labels
           </button>
         </PopoverTrigger>
-        <PopoverContent>
+        <PopoverContent className="w-80" align="start">
           {editMode ? (
             <LabelEditMode
               editingLabel={editingLabel}

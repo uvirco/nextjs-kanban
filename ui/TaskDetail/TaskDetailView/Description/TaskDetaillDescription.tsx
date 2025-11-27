@@ -1,8 +1,8 @@
 "use client";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Textarea } from "@nextui-org/input";
-import { Button } from "@nextui-org/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import { IconTextPlus } from "@tabler/icons-react";
 import {
   handleEditTaskDescription,
@@ -85,11 +85,11 @@ export default function TaskDetailDescription({
       />
       <TaskDetailItemContent indented>
         {!isEditingDescription ? (
-          <p onClick={toggleEditDescription} className="cursor-pointer">
+          <p onClick={toggleEditDescription} className="cursor-pointer text-foreground">
             {taskDescription ? (
               taskDescription
             ) : (
-              <span className="text-primary">Add a description</span>
+              <span className="text-blue-600 dark:text-blue-400">Add a description</span>
             )}
           </p>
         ) : (
@@ -99,35 +99,32 @@ export default function TaskDetailDescription({
             <Textarea
               placeholder="Enter your description"
               autoFocus
-              label="Description"
               value={formData.description}
-              onValueChange={handleValueChange}
-              isInvalid={!!error}
-              errorMessage={error}
-              className="w-full mb-2 mt-1 border-none focus:outline-none"
+              onChange={(e) => handleValueChange(e.target.value)}
+              className="w-full mb-2 mt-1 border-none focus:outline-none resize-none"
             />
+            {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
             <div className="flex gap-2">
               <Button
                 type="submit"
-                isLoading={isSubmitting}
+                disabled={isSubmitting}
                 size="sm"
-                color="primary"
                 className="flex justify-center items-center"
               >
-                Save
+                {isSubmitting ? "Saving..." : "Save"}
               </Button>
-              <Button size="sm" onClick={toggleEditDescription} type="button">
+              <Button size="sm" onClick={toggleEditDescription} type="button" variant="outline">
                 Cancel
               </Button>
               {taskDescription && (
                 <Button
                   size="sm"
-                  isLoading={isDeleting}
+                  disabled={isDeleting}
                   onClick={handleDeleteDescription}
                   type="button"
-                  color="danger"
+                  variant="destructive"
                 >
-                  Delete
+                  {isDeleting ? "Deleting..." : "Delete"}
                 </Button>
               )}
             </div>

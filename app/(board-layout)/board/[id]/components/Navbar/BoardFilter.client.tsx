@@ -1,14 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
-import { Popover, PopoverTrigger, PopoverContent } from "@nextui-org/popover";
-import { Button } from "@nextui-org/button";
-import { CheckboxGroup, Checkbox } from "@nextui-org/checkbox";
 import { LabelSummary } from "@/types/types";
 import {
   IconFilter,
   IconFilterFilled,
-  IconFilterOff,
+  IconX,
 } from "@tabler/icons-react";
 
 const LabelColorIndicator = ({ color }: { color: string }) => (
@@ -30,12 +27,16 @@ export default function BoardFilter({ labels }: { labels: LabelSummary[] }) {
     }
   }, [searchParams]);
 
-  const handleSelectionChange = (values: string[]) => {
-    setSelectedLabels(values);
+  const handleLabelToggle = (labelId: string) => {
+    const newSelection = selectedLabels.includes(labelId)
+      ? selectedLabels.filter(id => id !== labelId)
+      : [...selectedLabels, labelId];
+    
+    setSelectedLabels(newSelection);
 
     const params = new URLSearchParams(searchParams);
-    if (values.length > 0) {
-      params.set("labels", values.join(","));
+    if (newSelection.length > 0) {
+      params.set("labels", newSelection.join(","));
     } else {
       params.delete("labels");
     }
@@ -45,49 +46,55 @@ export default function BoardFilter({ labels }: { labels: LabelSummary[] }) {
   const isFilterActive = selectedLabels.length > 0;
 
   return (
-    <Popover
-      placement="bottom"
-      showArrow
-      isOpen={popoverOpen}
-      onOpenChange={setPopoverOpen}
-    >
-      <PopoverTrigger>
-        <Button color="primary" size="sm" isIconOnly variant="ghost">
-          {isFilterActive ? (
-            <IconFilterFilled size={16} />
-          ) : (
-            <IconFilter size={16} />
-          )}
-        </Button>
-      </PopoverTrigger>
+    <div className="relative">
+      <button
+        onClick={() => setPopoverOpen(!popoverOpen)}
+        className="px-2 py-1 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors"
+      >
+        {isFilterActive ? (
+          <IconFilterFilled size={16} />
+        ) : (
+          <IconFilter size={16} />
+        )}
+      </button>
 
-      <PopoverContent>
-        <div className="px-1 py-3 w-64 space-y-2">
-          <CheckboxGroup
-            label="Filter by label"
-            color="primary"
-            size="sm"
-            value={selectedLabels}
-            onValueChange={handleSelectionChange}
-          >
-            {labels.map((label) => (
-              <Checkbox
-                key={label.id}
-                value={label.id}
-                classNames={{
-                  base: `max-w-full w-full`,
-                  label: "w-full flex items-center",
-                }}
-              >
-                <div className="flex w-full items-center justify-between">
-                  {label.title}
-                  <LabelColorIndicator color={label.color} />
-                </div>
-              </Checkbox>
-            ))}
-          </CheckboxGroup>
-        </div>
-      </PopoverContent>
-    </Popover>
+      {popoverOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-10"
+            onClick={() => setPopoverOpen(false)}
+          />
+          <div className="absolute right-0 z-20 mt-2 w-64 bg-zinc-900 border border-zinc-700 rounded-md shadow-lg">
+            <div className="px-4 py-3 space-y-2">
+              <div className="flex justify-between items-center mb-3">
+                <h4 className="text-sm font-semibold">Filter by label</h4>
+                <button onClick={() => setPopoverOpen(false)}>
+                  <IconX size={16} />
+                </button>
+              </div>
+              <div className="space-y-2">
+                {labels.map((label) => (
+                  <label
+                    key={label.id}
+                    className="flex items-center justify-between cursor-pointer hover:bg-zinc-800 p-2 rounded"
+                  >
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={selectedLabels.includes(label.id)}
+                        onChange={() => handleLabelToggle(label.id)}
+                        className="w-4 h-4 text-blue-600 bg-zinc-700 border-zinc-600 rounded focus:ring-blue-500"
+                      />
+                      <span className="text-sm">{label.title}</span>
+                    </div>
+                    <LabelColorIndicator color={label.color} />
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
   );
 }

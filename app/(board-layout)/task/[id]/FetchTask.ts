@@ -9,24 +9,28 @@ export default async function FetchTask({
 }): Promise<DetailedTask | null> {
   const session = await auth();
   const userId = session?.user?.id;
+  const userRole = session?.user?.role;
 
-  const boardMembership = await prisma.boardMember.findFirst({
-    where: {
-      userId: userId,
-      board: {
-        columns: {
-          some: {
-            tasks: {
-              some: { id: taskId },
+  // Allow admins to access all tasks
+  if (userRole !== 'ADMIN') {
+    const boardMembership = await prisma.boardMember.findFirst({
+      where: {
+        userId: userId,
+        board: {
+          columns: {
+            some: {
+              tasks: {
+                some: { id: taskId },
+              },
             },
           },
         },
       },
-    },
-  });
+    });
 
-  if (!boardMembership) {
-    return null;
+    if (!boardMembership) {
+      return null;
+    }
   }
 
   const task = await prisma.task.findUnique({
@@ -73,6 +77,18 @@ export default async function FetchTask({
           user: true,
         },
       },
+      attachments: true,
+      watchers: {
+        include: {
+          user: true,
+        },
+      },
+      dependencies: {
+        include: {
+          dependsOnTask: true,
+        },
+      },
+      subtasks: true,
     },
   });
 

@@ -3,7 +3,6 @@ import { useState } from "react";
 import { handleDeleteChecklistItem } from "@/server-actions/ChecklistServerActions";
 import { IconTrash } from "@tabler/icons-react";
 import { toast } from "sonner";
-import { Spinner } from "@nextui-org/spinner";
 
 export default function DeleteChecklistItemButton({
   checklistItemId,
@@ -36,15 +35,11 @@ export default function DeleteChecklistItemButton({
 
   return (
     <button
-      className="shrink-0 grow-0"
+      className="shrink-0 grow-0 disabled:opacity-50"
       onClick={handleDelete}
       disabled={isLoading}
     >
-      {isLoading ? (
-        <Spinner size="sm" color="danger" />
-      ) : (
-        <IconTrash className="text-zinc-500 hover:text-danger" size={18} />
-      )}
+      <IconTrash className="text-muted-foreground hover:text-destructive" size={18} />
     </button>
   );
 }

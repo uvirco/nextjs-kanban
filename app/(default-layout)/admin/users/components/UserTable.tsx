@@ -1,23 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@nextui-org/button";
-import { Chip } from "@nextui-org/chip";
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableColumn,
-  TableRow,
-  TableCell
-} from "@nextui-org/table";
-import {
-  Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownItem
-} from "@nextui-org/dropdown";
-import { IconDots, IconEdit, IconTrash, IconEye } from "@tabler/icons-react";
+import { IconDots, IconEdit, IconTrash, IconEye, IconUserOff, IconUserCheck } from "@tabler/icons-react";
 import EditUserModal from "./EditUserModal";
 
 interface User {
@@ -39,9 +23,11 @@ interface UserTableProps {
 
 export default function UserTable({ users }: UserTableProps) {
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
   const handleEditUser = (user: User) => {
     setEditingUser(user);
+    setOpenMenuId(null);
   };
 
   const handleDeleteUser = async (userId: string) => {
@@ -62,6 +48,7 @@ export default function UserTable({ users }: UserTableProps) {
     } catch (error) {
       alert("Error deleting user");
     }
+    setOpenMenuId(null);
   };
 
   const handleToggleActive = async (userId: string, isActive: boolean) => {
@@ -82,97 +69,102 @@ export default function UserTable({ users }: UserTableProps) {
     } catch (error) {
       alert("Error updating user");
     }
+    setOpenMenuId(null);
   };
 
   return (
     <>
-      <Table aria-label="Users table" className="bg-zinc-800">
-        <TableHeader>
-          <TableColumn>NAME</TableColumn>
-          <TableColumn>EMAIL</TableColumn>
-          <TableColumn>ROLE</TableColumn>
-          <TableColumn>STATUS</TableColumn>
-          <TableColumn>BOARDS</TableColumn>
-          <TableColumn>CREATED</TableColumn>
-          <TableColumn>ACTIONS</TableColumn>
-        </TableHeader>
-        <TableBody>
-          {users.map((user) => (
-            <TableRow key={user.id}>
-              <TableCell className="text-white">
-                {user.name || "No name"}
-              </TableCell>
-              <TableCell className="text-zinc-300">
-                {user.email}
-              </TableCell>
-              <TableCell>
-                <Chip
-                  color={
-                    user.role === 'ADMIN' ? 'danger' :
-                    user.role === 'MANAGER' ? 'primary' :
-                    'success'
-                  }
-                  size="sm"
-                  variant="flat"
-                >
-                  {user.role}
-                </Chip>
-              </TableCell>
-              <TableCell>
-                <Chip
-                  color={user.isActive ? 'success' : 'danger'}
-                  size="sm"
-                  variant="flat"
-                >
-                  {user.isActive ? 'Active' : 'Inactive'}
-                </Chip>
-              </TableCell>
-              <TableCell className="text-zinc-300">
-                {user._count.memberBoards}
-              </TableCell>
-              <TableCell className="text-zinc-400">
-                {new Date(user.createdAt).toLocaleDateString()}
-              </TableCell>
-              <TableCell>
-                <Dropdown>
-                  <DropdownTrigger>
-                    <Button isIconOnly size="sm" variant="light">
+      <div className="bg-zinc-800 rounded-lg overflow-hidden border border-zinc-700">
+        <table className="w-full">
+          <thead className="bg-zinc-700">
+            <tr>
+              <th className="px-4 py-3 text-left text-xs font-medium text-zinc-300 uppercase">Name</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-zinc-300 uppercase">Email</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-zinc-300 uppercase">Role</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-zinc-300 uppercase">Status</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-zinc-300 uppercase">Boards</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-zinc-300 uppercase">Created</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-zinc-300 uppercase">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-zinc-700">
+            {users.map((user) => (
+              <tr key={user.id} className="hover:bg-zinc-700/50">
+                <td className="px-4 py-3 text-white">
+                  {user.name || "No name"}
+                </td>
+                <td className="px-4 py-3 text-zinc-300">
+                  {user.email}
+                </td>
+                <td className="px-4 py-3">
+                  <span className={`px-2 py-1 rounded text-xs ${
+                    user.role === 'ADMIN' ? 'bg-red-600 text-white' :
+                    user.role === 'MANAGER' ? 'bg-blue-600 text-white' :
+                    'bg-green-600 text-white'
+                  }`}>
+                    {user.role}
+                  </span>
+                </td>
+                <td className="px-4 py-3">
+                  <span className={`px-2 py-1 rounded text-xs ${
+                    user.isActive ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
+                  }`}>
+                    {user.isActive ? 'Active' : 'Inactive'}
+                  </span>
+                </td>
+                <td className="px-4 py-3 text-zinc-300">
+                  {user._count.memberBoards}
+                </td>
+                <td className="px-4 py-3 text-zinc-400">
+                  {new Date(user.createdAt).toLocaleDateString()}
+                </td>
+                <td className="px-4 py-3">
+                  <div className="relative">
+                    <button
+                      onClick={() => setOpenMenuId(openMenuId === user.id ? null : user.id)}
+                      className="p-1 hover:bg-zinc-600 rounded"
+                    >
                       <IconDots size={16} />
-                    </Button>
-                  </DropdownTrigger>
-                  <DropdownMenu>
-                    <DropdownItem
-                      startContent={<IconEye size={16} />}
-                      onClick={() => handleEditUser(user)}
-                    >
-                      View/Edit
-                    </DropdownItem>
-                    <DropdownItem
-                      startContent={<IconEdit size={16} />}
-                      onClick={() => handleEditUser(user)}
-                    >
-                      Edit User
-                    </DropdownItem>
-                    <DropdownItem
-                      startContent={user.isActive ? <IconTrash size={16} /> : <IconEye size={16} />}
-                      onClick={() => handleToggleActive(user.id, user.isActive)}
-                    >
-                      {user.isActive ? 'Deactivate' : 'Activate'}
-                    </DropdownItem>
-                    <DropdownItem
-                      startContent={<IconTrash size={16} />}
-                      color="danger"
-                      onClick={() => handleDeleteUser(user.id)}
-                    >
-                      Delete User
-                    </DropdownItem>
-                  </DropdownMenu>
-                </Dropdown>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+                    </button>
+                    
+                    {openMenuId === user.id && (
+                      <>
+                        <div
+                          className="fixed inset-0 z-10"
+                          onClick={() => setOpenMenuId(null)}
+                        />
+                        <div className="absolute right-0 z-20 mt-1 w-48 bg-zinc-900 border border-zinc-700 rounded-md shadow-lg overflow-hidden">
+                          <button
+                            onClick={() => handleEditUser(user)}
+                            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-white hover:bg-zinc-800"
+                          >
+                            <IconEdit size={16} />
+                            Edit User
+                          </button>
+                          <button
+                            onClick={() => handleToggleActive(user.id, user.isActive)}
+                            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-white hover:bg-zinc-800"
+                          >
+                            {user.isActive ? <IconUserOff size={16} /> : <IconUserCheck size={16} />}
+                            {user.isActive ? 'Deactivate' : 'Activate'}
+                          </button>
+                          <button
+                            onClick={() => handleDeleteUser(user.id)}
+                            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-500 hover:bg-zinc-800"
+                          >
+                            <IconTrash size={16} />
+                            Delete User
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       {editingUser && (
         <EditUserModal

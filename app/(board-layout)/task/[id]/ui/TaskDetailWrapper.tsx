@@ -1,4 +1,5 @@
-import { Card, CardBody } from "@nextui-org/card";
+import { Card, CardContent } from "@/components/ui/card";
+
 export default function TaskDetailWrapper({
   children,
 }: {
@@ -6,7 +7,7 @@ export default function TaskDetailWrapper({
 }) {
   return (
     <Card className="z-10">
-      <CardBody className="bg-zinc-950">{children}</CardBody>
+      <CardContent className="p-0">{children}</CardContent>
     </Card>
   );
 }

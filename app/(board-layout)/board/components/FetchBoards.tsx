@@ -11,10 +11,44 @@ type BoardWithDetails = BoardMember & {
 export default async function FetchBoards() {
   const session = await auth();
   const userId = session?.user?.id;
+  const userRole = session?.user?.role;
+  
   if (!userId) {
     return [];
   }
 
+  // If admin, show all boards
+  if (userRole === 'ADMIN') {
+    const allBoards = await prisma.board.findMany({
+      select: {
+        id: true,
+        title: true,
+        backgroundUrl: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    return (
+      <>
+        {allBoards.map((board) => (
+          <Link
+            key={board.id}
+            href={`/board/${board.id}`}
+          >
+            <div className="h-32 flex flex-col justify-end rounded-xl shadow-lg bg-zinc-950 hover:bg-zinc-800 relative overflow-hidden">
+              <h4 className="font-semibold tracking-tight z-20 drop-shadow-lg py-3 px-4 overflow-ellipsis overflow-x-hidden whitespace-nowrap block">
+                {board.title}
+              </h4>
+            </div>
+          </Link>
+        ))}
+      </>
+    );
+  }
+
+  // Regular users only see their boards
   const boards: BoardWithDetails[] = await prisma.boardMember.findMany({
     where: {
       userId: userId,

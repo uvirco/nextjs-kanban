@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Button } from "@nextui-org/button";
+import { Button } from "@/components/ui/button";
 import { handleDeleteChecklist } from "@/server-actions/ChecklistServerActions";
 import { toast } from "sonner";
 
@@ -35,7 +35,8 @@ export default function DeleteChecklistButton({
       className="shrink-0 grow-0"
       size="sm"
       onClick={handleDelete}
-      isLoading={isLoading}
+      disabled={isLoading}
+      variant="destructive"
     >
       Delete
     </Button>

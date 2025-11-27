@@ -31,7 +31,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${inter.className} h-dvh flex flex-col`}
+      className={`${inter.className} h-dvh flex flex-col dark`}
     >
       <body className="flex flex-col grow text-zinc-200">
         <Toaster />

@@ -1,10 +1,10 @@
 "use client";
 import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { Popover, PopoverTrigger, PopoverContent } from "@nextui-org/popover";
-import { Input } from "@nextui-org/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Input } from "@/components/ui/input";
 import { IconCheckbox, IconPlus, IconX } from "@tabler/icons-react";
-import { Button } from "@nextui-org/button";
+import { Button } from "@/components/ui/button";
 import { handleCreateChecklist } from "@/server-actions/ChecklistServerActions";
 import { toast } from "sonner";
 import TaskPopoverWrapper from "../components/TaskPopoverWrapper";
@@ -63,18 +63,13 @@ export default function AddChecklist({
 
   return (
     <li className="flex items-center gap-2">
-      <Popover
-        placement="left-start"
-        triggerScaleOnOpen={false}
-        isOpen={isPopoverOpen}
-        onOpenChange={setIsPopoverOpen}
-      >
-        <PopoverTrigger>
-          <button className="px-2 py-2 bg-zinc-900 hover:bg-zinc-800 ring-zinc-800 rounded-md flex w-full items-center gap-2 ring-2 hover:ring-primary">
+      <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+        <PopoverTrigger asChild>
+          <button className="px-2 py-2 bg-muted hover:bg-muted/80 border border-border rounded-md flex w-full items-center gap-2 hover:border-primary transition-colors">
             <IconCheckbox size={14} /> Checklist
           </button>
         </PopoverTrigger>
-        <PopoverContent>
+        <PopoverContent side="left" align="start" className="w-80">
           <TaskPopoverWrapper>
             <TaskPopoverHeading title="Checklists" />
 
@@ -84,7 +79,6 @@ export default function AddChecklist({
             >
               <Input
                 autoComplete="off"
-                label="Checklist title (Optional)"
                 placeholder="Checklist"
                 {...register("title")}
               />
@@ -92,16 +86,15 @@ export default function AddChecklist({
               <div className="flex gap-2">
                 <Button
                   size="sm"
-                  color="primary"
-                  className="flex items-center"
                   type="submit"
-                  isLoading={isLoading}
+                  disabled={isLoading}
+                  className="flex items-center"
                 >
                   <IconPlus size={16} />
                   Create Checklist
                 </Button>
-                <Button size="sm" onClick={closePopover} isDisabled={isLoading}>
-                  <IconX size={16} className="flex items-center" />
+                <Button size="sm" onClick={closePopover} disabled={isLoading} variant="outline">
+                  <IconX size={16} className="flex items-center mr-1" />
                   Cancel
                 </Button>
               </div>

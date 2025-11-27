@@ -1,10 +1,10 @@
 "use client";
 import { useState } from "react";
-import { Popover, PopoverTrigger, PopoverContent } from "@nextui-org/popover";
 import { IconPlus, IconUser, IconMinus } from "@tabler/icons-react";
-import { Input } from "@nextui-org/input";
-import { Avatar } from "@nextui-org/avatar";
-import { Button } from "@nextui-org/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import TaskPopoverWrapper from "../components/TaskPopoverWrapper";
 import TaskPopoverHeading from "../components/TaskPopoverHeading";
 import TaskPopoverSubtitle from "../components/TaskPopoverSubtitle";
@@ -57,22 +57,20 @@ export default function AddToCardMembers({
   };
 
   return (
-    <li className="bg-zinc-900 hover:bg-zinc-800 ring-zinc-800 rounded-md ring-2 hover:ring-primary">
-      <Popover placement="left-start" triggerScaleOnOpen={false}>
-        <PopoverTrigger>
+    <li className="bg-muted hover:bg-muted/80 border border-border rounded-md hover:border-primary transition-colors">
+      <Popover>
+        <PopoverTrigger asChild>
           <button className="flex items-center gap-2 px-2 py-2 w-full">
             <IconUser size={14} /> Members
           </button>
         </PopoverTrigger>
-        <PopoverContent>
+        <PopoverContent className="w-80" align="start">
           <TaskPopoverWrapper>
             <TaskPopoverHeading title="Members" />
 
             <Input
               placeholder="Search Members..."
-              label="Members"
               className="mb-3"
-              size="sm"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -130,22 +128,31 @@ function MemberListItem({
   onRemoveClick,
   isCardMember,
 }: MemberListItemProps) {
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   return (
     <li
       key={member.user.id}
       className="flex justify-between items-center grow py-1"
     >
       <div className="flex gap-3">
-        <Avatar
-          showFallback
-          name={member.user.name || "Unknown"}
-          src={member.user.image || undefined}
-          isBordered
-        />
+        <Avatar className="w-10 h-10">
+          <AvatarImage src={member.user.image || undefined} alt={member.user.name || "User"} />
+          <AvatarFallback>
+            {getInitials(member.user.name || "?")}
+          </AvatarFallback>
+        </Avatar>
 
         <div className="flex flex-col grow-0 shrink">
           <div className="truncate">{member.user.name || "Unknown"}</div>
-          <div className="truncate text-zinc-400 text-xs">
+          <div className="truncate text-muted-foreground text-xs">
             {member.user.email || "Unknown Email"}
           </div>
         </div>
@@ -154,18 +161,16 @@ function MemberListItem({
       <div>
         {isCardMember ? (
           <Button
-            isIconOnly
+            variant="ghost"
             size="sm"
-            variant="flat"
             onClick={() => onRemoveClick(member.user.id)}
           >
             <IconMinus size={18} />
           </Button>
         ) : (
           <Button
-            isIconOnly
+            variant="ghost"
             size="sm"
-            variant="flat"
             onClick={() => onAddClick(member.user.id)}
           >
             <IconPlus size={18} />

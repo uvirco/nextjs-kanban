@@ -4,8 +4,6 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { handleCreateBoard } from "@/server-actions/BoardServerActions";
 import { IconLoader2, IconPlus } from "@tabler/icons-react";
-import { Button } from "@nextui-org/button";
-import { Input } from "@nextui-org/input";
 
 export default function CreateBoardForm() {
   const router = useRouter();
@@ -42,31 +40,42 @@ export default function CreateBoardForm() {
         onSubmit={handleSubmit}
         className="flex flex-col h-full justify-between"
       >
-        <Input
-          autoComplete="off"
-          type="text"
-          id="title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          label="Create a new board"
-          placeholder="Enter board name"
-          size="sm"
-          isClearable
-          isRequired
-          isInvalid={isInvalid}
-          errorMessage={errorMessage}
-        />
-        <div>
-          <Button
-            type="submit"
-            size="sm"
-            variant="flat"
-            className="gap-1"
-            isLoading={isSubmitting}
+        <div className="flex flex-col">
+          <label
+            htmlFor="title"
+            className="text-sm font-medium text-zinc-300 mb-1"
           >
-            <IconPlus size={16} className="shrink-0" />
+            Create a new board
+          </label>
+          <input
+            autoComplete="off"
+            type="text"
+            id="title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Enter board name"
+            className={`px-3 py-2 text-sm bg-zinc-900 border rounded-md text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              isInvalid ? "border-red-500" : "border-zinc-700"
+            }`}
+            required
+          />
+          {isInvalid && errorMessage && (
+            <p className="text-sm text-red-500 mt-1">{errorMessage}</p>
+          )}
+        </div>
+        <div>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-zinc-100 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-md transition-colors"
+          >
+            {isSubmitting ? (
+              <IconLoader2 size={16} className="shrink-0 animate-spin" />
+            ) : (
+              <IconPlus size={16} className="shrink-0" />
+            )}
             Create Board
-          </Button>
+          </button>
         </div>
       </form>
     </div>

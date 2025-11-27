@@ -1,20 +1,16 @@
 import Link from "next/link";
-import { Button } from "@nextui-org/button";
 import { IconArrowLeft } from "@tabler/icons-react";
 
 export default function TaskBackButton({ boardId }: { boardId: string }) {
   return (
     <div>
-      <Button
-        as={Link}
-        className="inline-flex"
+      <Link
         href={`/board/${boardId}`}
-        startContent={<IconArrowLeft size={18} />}
-        variant="flat"
-        color="primary"
+        className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
       >
+        <IconArrowLeft size={18} />
         Back to board
-      </Button>
+      </Link>
     </div>
   );
 }

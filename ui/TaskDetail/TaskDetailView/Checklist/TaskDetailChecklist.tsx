@@ -1,7 +1,6 @@
 import { IconCheckbox } from "@tabler/icons-react";
 import { ChecklistWithItems, DetailedTask } from "@/types/types";
 import TaskDetailItemContent from "../ui/TaskDetailItemContent";
-import { Progress } from "@nextui-org/progress";
 import ChecklistItemForm from "./ChecklistItemForm.client";
 import DeleteChecklistButton from "./DeleteChecklistButton.client";
 import ChecklistCheckboxGroup from "./ChecklistCheckboxGroup.client";
@@ -47,11 +46,12 @@ export default function TaskDetailChecklist({
               />
             </div>
             <TaskDetailItemContent indented>
-              <Progress
-                aria-label="Completion progress"
-                value={completionPercentage}
-                className="w-full mb-3"
-              />
+              <div className="w-full bg-muted rounded-full h-2 mb-3">
+                <div
+                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${completionPercentage}%` }}
+                ></div>
+              </div>
               <ChecklistCheckboxGroup
                 taskId={taskId}
                 checkedItemIds={checkedItemIds}

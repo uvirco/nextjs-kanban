@@ -1,27 +1,35 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { Modal, ModalContent, ModalBody } from "@nextui-org/modal";
-import { useDisclosure } from "@nextui-org/use-disclosure";
+import { useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogClose,
+} from "@/components/ui/dialog";
 
 export default function TaskModal({ children }: { children: React.ReactNode }) {
-  const { isOpen } = useDisclosure({ defaultOpen: true });
   const router = useRouter();
 
   const handleClose = () => {
     router.back();
   };
 
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        handleClose();
+      }
+    };
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, []);
+
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={handleClose}
-      size="5xl"
-      scrollBehavior="outside"
-      backdrop="blur"
-    >
-      <ModalContent>
-        <ModalBody className="p-0 gap-0">{children}</ModalBody>
-      </ModalContent>
-    </Modal>
+    <Dialog open={true} onOpenChange={handleClose}>
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto p-0">
+        <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground z-10" />
+        {children}
+      </DialogContent>
+    </Dialog>
   );
 }

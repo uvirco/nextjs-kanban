@@ -1,9 +1,9 @@
 "use client";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Avatar } from "@nextui-org/avatar";
-import { Input } from "@nextui-org/input";
-import { Button } from "@nextui-org/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { IconActivity, IconX } from "@tabler/icons-react";
 import TaskDetailActivityItem from "./TaskDetailActivityItem";
 import { handleCreateActivity } from "@/server-actions/ActivityServerActions";
@@ -74,20 +74,19 @@ export default function TaskDetailActivity({
       <TaskDetailItemContent indented>
         <div className="flex items-start mb-5 mt-4">
           <div className="w-[40px]">
-            <Avatar
-              showFallback
-              size="sm"
-              name={userName ?? "Unknown"}
-              src={userImage ?? undefined}
-              className="shrink-0"
-            />
+            <Avatar className="w-8 h-8">
+              <AvatarImage src={userImage ?? undefined} alt={userName ?? "Unknown"} />
+              <AvatarFallback className="text-xs">
+                {(userName ?? "?").charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
           </div>
           <div className="w-full">
             {!showForm ? (
               <div className="flex items-center h-[32px]">
                 <p
                   onClick={handleToggleForm}
-                  className="cursor-pointer text-primary pl-4"
+                  className="cursor-pointer text-primary hover:text-primary/80 pl-4 dark:text-blue-400 dark:hover:text-blue-300"
                 >
                   Add a comment
                 </p>
@@ -98,27 +97,21 @@ export default function TaskDetailActivity({
                   autoComplete="off"
                   className="mb-2"
                   placeholder="Add a comment..."
-                  label="Activity"
-                  size="sm"
-                  autoFocus
                   name="content"
                   value={content}
                   onChange={handleChange}
-                  isInvalid={!!error}
-                  errorMessage={error}
-                  isRequired
+                  required
                 />
 
                 <div className="flex items-center gap-2">
                   <Button
                     size="sm"
                     type="submit"
-                    color="primary"
-                    isLoading={isSubmitting}
+                    disabled={isSubmitting}
                   >
                     Save
                   </Button>
-                  <Button size="sm" onClick={handleToggleForm} isIconOnly>
+                  <Button size="sm" onClick={handleToggleForm} variant="outline">
                     <IconX size={20} />
                   </Button>
                 </div>

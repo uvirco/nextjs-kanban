@@ -5,11 +5,11 @@ import TaskModal from "@/ui/TaskModal";
 import FetchTask from "@/app/(board-layout)/task/[id]/FetchTask";
 
 interface BoardProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export default async function Task({ params }: BoardProps) {
-  const taskId = params.id;
+  const { id: taskId } = await params;
   const task = await FetchTask({ taskId });
 
   if (!task) {

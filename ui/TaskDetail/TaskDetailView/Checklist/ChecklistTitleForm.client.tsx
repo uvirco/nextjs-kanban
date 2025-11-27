@@ -1,8 +1,8 @@
 "use client";
 import { useState } from "react";
 import { handleEditChecklistName } from "@/server-actions/ChecklistServerActions";
-import { Input } from "@nextui-org/input";
-import { Button } from "@nextui-org/button";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { IconX } from "@tabler/icons-react";
 
 interface ChecklistTitleFormProps {
@@ -60,27 +60,24 @@ export default function ChecklistTitleForm({
             name="title"
             value={inputValue}
             onChange={handleInputChange}
-            labelPlacement="outside"
             placeholder="Enter a name for your checklist..."
             autoFocus
-            isInvalid={!!error}
-            errorMessage={error}
-            size="sm"
+            className="flex-1"
           />
-          <Button size="sm" color="primary" type="submit" isLoading={isLoading}>
+          <Button size="sm" type="submit" disabled={isLoading}>
             Submit
           </Button>
           <Button
             size="sm"
             onClick={toggleEditState}
-            isIconOnly
-            isDisabled={isLoading}
+            variant="outline"
+            disabled={isLoading}
           >
             <IconX size={16} />
           </Button>
         </form>
       ) : (
-        <h4 className="text-xl font-semibold grow" onClick={toggleEditState}>
+        <h4 className="text-xl font-semibold grow text-foreground" onClick={toggleEditState}>
           {checklistTitle || "Checklist"}
         </h4>
       )}

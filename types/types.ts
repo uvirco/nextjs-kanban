@@ -9,6 +9,11 @@ import {
   ChecklistItem,
   BoardMember,
   TaskAssignment,
+  Priority,
+  RiskLevel,
+  Attachment,
+  TaskWatcher,
+  TaskDependency,
 } from "@prisma/client";
 
 // NEW TYPES
@@ -43,6 +48,17 @@ export interface DetailedTask {
   updatedAt: Date;
   order: number;
   columnId: string;
+  // Advanced project fields
+  priority: Priority | null;
+  businessValue: string | null;
+  estimatedEffort: number | null;
+  budgetEstimate: number | null;
+  riskLevel: RiskLevel | null;
+  strategicAlignment: string | null;
+  roiEstimate: number | null;
+  stageGate: string | null;
+  timeSpent: number | null;
+  storyPoints: number | null;
   column: {
     title: string;
     boardId: string;
@@ -54,6 +70,10 @@ export interface DetailedTask {
   checklists: ChecklistWithItems[];
   activities: ActivityWithRelations[];
   assignedUsers: TaskAssignmentWithUser[];
+  attachments: Attachment[];
+  watchers: TaskWatcher[];
+  dependencies: TaskDependency[];
+  subtasks: Task[];
 }
 
 // Extend BoardMember to include the nested user object
@@ -126,6 +146,17 @@ export type TaskEditData = {
   title: Task["title"];
   description?: Task["description"];
   boardId: Board["id"];
+  // Advanced project fields
+  priority?: Priority;
+  businessValue?: string;
+  estimatedEffort?: number;
+  budgetEstimate?: number;
+  riskLevel?: RiskLevel;
+  strategicAlignment?: string;
+  roiEstimate?: number;
+  stageGate?: string;
+  timeSpent?: number;
+  storyPoints?: number;
 };
 
 export type TaskDeletionData = {

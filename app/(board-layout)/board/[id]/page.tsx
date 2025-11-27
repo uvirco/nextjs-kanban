@@ -10,35 +10,43 @@ export default async function BoardPage({
   params,
   searchParams,
 }: {
-  params: { id: string };
-  searchParams: { labels?: string };
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ labels?: string }>;
 }) {
   const session = await auth();
   const userId = session?.user?.id;
+  const userRole = session?.user?.role;
+  
   if (!userId) {
     return <div>User not authenticated</div>;
   }
 
-  try {
-    // Check if user is a member of the board
-    const isMember = await prisma.boardMember.findFirst({
-      where: {
-        boardId: params.id,
-        userId: userId,
-      },
-    });
+  const { id } = await params;
+  const { labels } = await searchParams;
 
-    // Redirect to board list if user is not a member
-    if (!isMember) {
-      redirect("/board");
+  try {
+    // Admins can access all boards
+    if (userRole !== 'ADMIN') {
+      // Check if user is a member of the board
+      const isMember = await prisma.boardMember.findFirst({
+        where: {
+          boardId: id,
+          userId: userId,
+        },
+      });
+
+      // Redirect to board list if user is not a member
+      if (!isMember) {
+        redirect("/board");
+      }
     }
 
     // Parse labels from searchParams
-    const labelFilter = searchParams.labels?.split(",") || [];
+    const labelFilter = labels?.split(",") || [];
 
     // Fetch board with columns and tasks
     const board: BoardWithColumns | null = await prisma.board.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         columns: {
           orderBy: { order: "asc" },
