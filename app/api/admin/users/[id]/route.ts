@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import prisma from "@/prisma/prisma";
+import { supabaseAdmin } from "@/lib/supabase";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 
@@ -27,32 +27,43 @@ export async function GET(
       );
     }
 
-    const user = await prisma.user.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        isActive: true,
-        createdAt: true,
-        updatedAt: true,
-        _count: {
-          select: {
-            memberBoards: true,
-          },
-        },
-      },
-    });
+    const { data: user, error } = await supabaseAdmin
+      .from('User')
+      .select(`
+        id,
+        name,
+        email,
+        role,
+        isActive,
+        createdAt,
+        updatedAt
+      `)
+      .eq('id', id)
+      .single();
 
-    if (!user) {
+    if (error || !user) {
       return NextResponse.json(
         { message: "User not found" },
         { status: 404 }
       );
     }
 
-    return NextResponse.json(user);
+    // Get board membership count
+    const { count: boardCount, error: countError } = await supabaseAdmin
+      .from('BoardMember')
+      .select('*', { count: 'exact', head: true })
+      .eq('userId', id);
+
+    if (countError) {
+      console.error("Error counting boards:", countError);
+    }
+
+    return NextResponse.json({
+      ...user,
+      _count: {
+        memberBoards: boardCount || 0,
+      },
+    });
   } catch (error) {
     console.error("Error fetching user:", error);
     return NextResponse.json(
@@ -81,23 +92,32 @@ export async function PATCH(
     const validatedData = updateUserSchema.parse(body);
 
     // Hash password if provided
-    let updateData = { ...validatedData };
+    let updateData: any = { ...validatedData };
     if (validatedData.password) {
       updateData.password = await bcrypt.hash(validatedData.password, 12);
     }
 
-    const user = await prisma.user.update({
-      where: { id },
-      data: updateData,
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        isActive: true,
-        updatedAt: true,
-      },
-    });
+    const { data: user, error: updateError } = await supabaseAdmin
+      .from('User')
+      .update(updateData)
+      .eq('id', id)
+      .select(`
+        id,
+        name,
+        email,
+        role,
+        isActive,
+        updatedAt
+      `)
+      .single();
+
+    if (updateError) {
+      console.error("Error updating user:", updateError);
+      return NextResponse.json(
+        { message: "Internal server error" },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json(user);
   } catch (error) {
@@ -140,9 +160,18 @@ export async function DELETE(
       );
     }
 
-    await prisma.user.delete({
-      where: { id },
-    });
+    const { error: deleteError } = await supabaseAdmin
+      .from('User')
+      .delete()
+      .eq('id', id);
+
+    if (deleteError) {
+      console.error("Error deleting user:", deleteError);
+      return NextResponse.json(
+        { message: "Internal server error" },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({ message: "User deleted successfully" });
   } catch (error) {

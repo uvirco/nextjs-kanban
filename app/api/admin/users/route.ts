@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import prisma from "@/prisma/prisma";
+import { supabaseAdmin } from "@/lib/supabase";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 
@@ -26,9 +26,11 @@ export async function POST(request: NextRequest) {
     const validatedData = createUserSchema.parse(body);
 
     // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email: validatedData.email }
-    });
+    const { data: existingUser, error: existingError } = await supabaseAdmin
+      .from('User')
+      .select('id')
+      .eq('email', validatedData.email)
+      .single();
 
     if (existingUser) {
       return NextResponse.json(
@@ -41,24 +43,33 @@ export async function POST(request: NextRequest) {
     const hashedPassword = await bcrypt.hash(validatedData.password, 12);
 
     // Create user
-    const user = await prisma.user.create({
-      data: {
+    const { data: user, error: createError } = await supabaseAdmin
+      .from('User')
+      .insert({
         name: validatedData.name,
         email: validatedData.email,
         password: hashedPassword,
         role: validatedData.role,
         isActive: true,
         createdBy: session.user.id,
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        isActive: true,
-        createdAt: true,
-      }
-    });
+      })
+      .select(`
+        id,
+        name,
+        email,
+        role,
+        isActive,
+        createdAt
+      `)
+      .single();
+
+    if (createError) {
+      console.error("Error creating user:", createError);
+      return NextResponse.json(
+        { message: "Internal server error" },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json(user);
   } catch (error) {

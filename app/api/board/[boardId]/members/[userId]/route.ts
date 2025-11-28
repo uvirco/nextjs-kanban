@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import prisma from "@/prisma/prisma";
+import { supabaseAdmin } from "@/lib/supabase";
 import { NextRequest, NextResponse } from "next/server";
 
 interface RouteParams {
@@ -23,55 +23,59 @@ export async function DELETE(
     }
 
     // Check if current user is a board member with owner role
-    const boardMembership = await prisma.boardMember.findFirst({
-      where: {
-        userId: currentUserId,
-        boardId: boardId,
-        role: "owner",
-      },
-    });
+    const { data: boardMembership, error: membershipError } = await supabaseAdmin
+      .from('BoardMember')
+      .select('*')
+      .eq('userId', currentUserId)
+      .eq('boardId', boardId)
+      .eq('role', 'owner')
+      .single();
 
-    if (!boardMembership) {
+    if (membershipError || !boardMembership) {
       return NextResponse.json({ error: "Forbidden - Only board owners can manage members" }, { status: 403 });
     }
 
     // Prevent removing yourself if you're the only owner
     if (targetUserId === currentUserId) {
-      const ownerCount = await prisma.boardMember.count({
-        where: {
-          boardId: boardId,
-          role: "owner",
-        },
-      });
+      const { count: ownerCount, error: countError } = await supabaseAdmin
+        .from('BoardMember')
+        .select('*', { count: 'exact', head: true })
+        .eq('boardId', boardId)
+        .eq('role', 'owner');
 
-      if (ownerCount <= 1) {
+      if (countError) {
+        console.error("Error counting owners:", countError);
+        return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+      }
+
+      if (ownerCount && ownerCount <= 1) {
         return NextResponse.json({ error: "Cannot remove the last owner from the board" }, { status: 400 });
       }
     }
 
     // Check if target user is a board member
-    const targetMembership = await prisma.boardMember.findUnique({
-      where: {
-        userId_boardId: {
-          userId: targetUserId,
-          boardId: boardId,
-        },
-      },
-    });
+    const { data: targetMembership, error: targetError } = await supabaseAdmin
+      .from('BoardMember')
+      .select('*')
+      .eq('userId', targetUserId)
+      .eq('boardId', boardId)
+      .single();
 
-    if (!targetMembership) {
+    if (targetError || !targetMembership) {
       return NextResponse.json({ error: "User is not a board member" }, { status: 400 });
     }
 
     // Remove user from board
-    await prisma.boardMember.delete({
-      where: {
-        userId_boardId: {
-          userId: targetUserId,
-          boardId: boardId,
-        },
-      },
-    });
+    const { error: deleteError } = await supabaseAdmin
+      .from('BoardMember')
+      .delete()
+      .eq('userId', targetUserId)
+      .eq('boardId', boardId);
+
+    if (deleteError) {
+      console.error("Error removing board member:", deleteError);
+      return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
