@@ -1,6 +1,6 @@
 "use server";
 import { auth } from "@/auth";
-import prisma from "@/prisma/prisma";
+import { supabaseAdmin } from "@/lib/supabase";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { MESSAGES } from "@/utils/messages";
@@ -48,19 +48,33 @@ export async function handleCreateBoard(data: { title: string }) {
   }
 
   try {
-    const createdBoard = await prisma.board.create({
-      data: {
+    // Create board
+    const { data: createdBoard, error: boardError } = await supabaseAdmin
+      .from('Board')
+      .insert({
         title: parse.data.title,
-      },
-    });
+      })
+      .select()
+      .single();
 
-    await prisma.boardMember.create({
-      data: {
+    if (boardError) {
+      console.error("Error creating board:", boardError);
+      return { success: false, message: MESSAGES.BOARD.CREATE_FAILURE };
+    }
+
+    // Add user as board owner
+    const { error: memberError } = await supabaseAdmin
+      .from('BoardMember')
+      .insert({
         boardId: createdBoard.id,
         userId: userId,
         role: "owner",
-      },
-    });
+      });
+
+    if (memberError) {
+      console.error("Error creating board member:", memberError);
+      return { success: false, message: MESSAGES.BOARD.CREATE_FAILURE };
+    }
 
     await createDefaultLabelsForBoard(createdBoard.id, userId);
 
@@ -79,19 +93,21 @@ export async function handleCreateBoard(data: { title: string }) {
 
 // Function to create default labels for a board
 async function createDefaultLabelsForBoard(boardId: string, userId: string) {
-  const labelCreations = DEFAULT_LABEL_COLORS.map((color) => {
-    return prisma.label.create({
-      data: {
-        color: color,
-        title: null,
-        boardId: boardId,
-        isDefault: true,
-        userId: userId,
-      },
-    });
-  });
+  const labels = DEFAULT_LABEL_COLORS.map((color) => ({
+    color: color,
+    title: null,
+    boardId: boardId,
+    isDefault: true,
+    userId: userId,
+  }));
 
-  await Promise.all(labelCreations);
+  const { error } = await supabaseAdmin
+    .from('Label')
+    .insert(labels);
+
+  if (error) {
+    console.error("Error creating default labels:", error);
+  }
 }
 
 // Edit Board
@@ -121,14 +137,17 @@ export async function handleEditBoard(data: {
   }
 
   try {
-    await prisma.board.update({
-      where: {
-        id: parse.data.boardId,
-      },
-      data: {
+    const { error } = await supabaseAdmin
+      .from('Board')
+      .update({
         title: parse.data.title,
-      },
-    });
+      })
+      .eq('id', parse.data.boardId);
+
+    if (error) {
+      console.error("Error editing board:", error);
+      return { success: false, message: MESSAGES.BOARD.UPDATE_FAILURE };
+    }
 
     revalidatePath(`/board/${parse.data.boardId}`);
 
@@ -162,27 +181,40 @@ export async function handleDeleteBoard(boardId: string) {
   }
 
   try {
-    await prisma.$transaction(async (tx) => {
-      const owner = await tx.boardMember.findFirst({
-        where: {
-          boardId: parse.data,
-          userId: userId,
-          role: "owner",
-        },
-      });
+    // Check if user is owner
+    const { data: owner, error: ownerError } = await supabaseAdmin
+      .from('BoardMember')
+      .select('*')
+      .eq('boardId', parse.data)
+      .eq('userId', userId)
+      .eq('role', 'owner')
+      .single();
 
-      if (!owner) {
-        throw new Error(MESSAGES.BOARD.OWNER_ONLY_DELETE);
-      }
+    if (ownerError || !owner) {
+      return { success: false, message: MESSAGES.BOARD.OWNER_ONLY_DELETE };
+    }
 
-      await tx.boardMember.deleteMany({
-        where: { boardId: parse.data },
-      });
+    // Delete board members first
+    const { error: memberDeleteError } = await supabaseAdmin
+      .from('BoardMember')
+      .delete()
+      .eq('boardId', parse.data);
 
-      await tx.board.delete({
-        where: { id: parse.data },
-      });
-    });
+    if (memberDeleteError) {
+      console.error("Error deleting board members:", memberDeleteError);
+      return { success: false, message: MESSAGES.BOARD.DELETE_FAILURE };
+    }
+
+    // Delete the board
+    const { error: boardDeleteError } = await supabaseAdmin
+      .from('Board')
+      .delete()
+      .eq('id', parse.data);
+
+    if (boardDeleteError) {
+      console.error("Error deleting board:", boardDeleteError);
+      return { success: false, message: MESSAGES.BOARD.DELETE_FAILURE };
+    }
 
     revalidatePath(`/board/`);
 
@@ -253,55 +285,68 @@ export async function handleUpdateBoard(boardId: string, boardData: BoardData) {
   }
 
   try {
-    await prisma.$transaction(async (tx) => {
-      // Updating columns
-      for (const column of boardData.columns) {
-        if (column.id) {
-          await tx.column.update({
-            where: { id: column.id },
-            data: { order: column.order },
-          });
+    // Update columns
+    for (const column of boardData.columns) {
+      if (column.id) {
+        const { error: columnError } = await supabaseAdmin
+          .from('Column')
+          .update({ order: column.order })
+          .eq('id', column.id);
+
+        if (columnError) {
+          console.error("Error updating column:", columnError);
+          return { success: false, message: MESSAGES.BOARD.UPDATE_FAILURE };
         }
       }
+    }
 
-      // Updating tasks and creating activity entries if needed
-      for (const column of boardData.columns) {
-        const originalColumn = boardData.originalColumns.find(
-          (col) => col.id === column.id
-        );
+    // Update tasks and create activity entries if needed
+    for (const column of boardData.columns) {
+      const originalColumn = boardData.originalColumns.find(
+        (col) => col.id === column.id
+      );
 
-        for (const task of column.tasks) {
-          if (task.id) {
-            // Update the task
-            await tx.task.update({
-              where: { id: task.id },
-              data: {
-                order: task.order,
-                columnId: column.id,
-              },
-            });
+      for (const task of column.tasks) {
+        if (task.id) {
+          // Update the task
+          const { error: taskError } = await supabaseAdmin
+            .from('Task')
+            .update({
+              order: task.order,
+              columnId: column.id,
+            })
+            .eq('id', task.id);
 
-            // Check if the task has been moved to a different column
-            const originalTask = originalColumn?.tasks.find(
-              (t) => t.id === task.id
-            );
+          if (taskError) {
+            console.error("Error updating task:", taskError);
+            return { success: false, message: MESSAGES.BOARD.UPDATE_FAILURE };
+          }
 
-            if (originalTask && originalTask.columnId !== column.id) {
-              await tx.activity.create({
-                data: {
-                  type: ActivityType.TASK_MOVED,
-                  userId: userId,
-                  taskId: task.id,
-                  boardId: boardId,
-                  oldColumnId: originalTask.columnId,
-                  newColumnId: column.id,
-                },
+          // Check if the task has been moved to a different column
+          const originalTask = originalColumn?.tasks.find(
+            (t) => t.id === task.id
+          );
+
+          if (originalTask && originalTask.columnId !== column.id) {
+            const { error: activityError } = await supabaseAdmin
+              .from('Activity')
+              .insert({
+                type: ActivityType.TASK_MOVED,
+                userId: userId,
+                taskId: task.id,
+                boardId: boardId,
+                oldColumnId: originalTask.columnId,
+                newColumnId: column.id,
               });
+
+            if (activityError) {
+              console.error("Error creating activity:", activityError);
+              // Don't fail the whole operation for activity errors
             }
           }
         }
       }
-    });
+    }
 
     revalidatePath(`/board/${parse.data.boardId}`);
 
@@ -337,14 +382,17 @@ export async function handleEditBoardImage(url: string, boardId: string) {
   }
 
   try {
-    await prisma.board.update({
-      where: {
-        id: parse.data.boardId,
-      },
-      data: {
+    const { error } = await supabaseAdmin
+      .from('Board')
+      .update({
         backgroundUrl: parse.data.url,
-      },
-    });
+      })
+      .eq('id', parse.data.boardId);
+
+    if (error) {
+      console.error("Error updating board image:", error);
+      return { success: false, message: MESSAGES.BG_IMAGE.IMAGE_SAVE_FAILURE };
+    }
 
     revalidatePath(`/board/${parse.data.boardId}`);
 
@@ -378,14 +426,17 @@ export async function handleRemoveBoardImage(boardId: string) {
   }
 
   try {
-    await prisma.board.update({
-      where: {
-        id: parse.data.boardId,
-      },
-      data: {
+    const { error } = await supabaseAdmin
+      .from('Board')
+      .update({
         backgroundUrl: null,
-      },
-    });
+      })
+      .eq('id', parse.data.boardId);
+
+    if (error) {
+      console.error("Error removing board image:", error);
+      return { success: false, message: MESSAGES.BG_IMAGE.IMAGE_REMOVE_FAILURE };
+    }
 
     revalidatePath(`/board/${parse.data.boardId}`);
 
