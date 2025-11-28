@@ -245,26 +245,19 @@ ALTER TABLE "Activity" ADD CONSTRAINT "Activity_targetUserId_fkey" FOREIGN KEY (
 ALTER TABLE "Activity" ADD CONSTRAINT "Activity_taskId_fkey" FOREIGN KEY ("taskId") REFERENCES "Task"("id") ON DELETE CASCADE;
 ALTER TABLE "Activity" ADD CONSTRAINT "Activity_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE;
 
--- Create indexes for better performance
-CREATE INDEX "Account_userId_idx" ON "Account"("userId");
-CREATE INDEX "Session_userId_idx" ON "Session"("userId");
-CREATE INDEX "BoardMember_boardId_idx" ON "BoardMember"("boardId");
-CREATE INDEX "BoardMember_userId_idx" ON "BoardMember"("userId");
-CREATE INDEX "Column_boardId_idx" ON "Column"("boardId");
-CREATE INDEX "Task_columnId_idx" ON "Task"("columnId");
-CREATE INDEX "Task_createdByUserId_idx" ON "Task"("createdByUserId");
-CREATE INDEX "Task_parentTaskId_idx" ON "Task"("parentTaskId");
-CREATE INDEX "Invitation_boardId_idx" ON "Invitation"("boardId");
-CREATE INDEX "Label_boardId_idx" ON "Label"("boardId");
-CREATE INDEX "Label_userId_idx" ON "Label"("userId");
-CREATE INDEX "Checklist_taskId_idx" ON "Checklist"("taskId");
-CREATE INDEX "ChecklistItem_checklistId_idx" ON "ChecklistItem"("checklistId");
-CREATE INDEX "Attachment_taskId_idx" ON "Attachment"("taskId");
-CREATE INDEX "TaskWatcher_taskId_idx" ON "TaskWatcher"("taskId");
-CREATE INDEX "TaskWatcher_userId_idx" ON "TaskWatcher"("userId");
-CREATE INDEX "Activity_userId_idx" ON "Activity"("userId");
-CREATE INDEX "Activity_taskId_idx" ON "Activity"("taskId");
-CREATE INDEX "Activity_boardId_idx" ON "Activity"("boardId");
+-- Create junction table for favorites (many-to-many relationship)
+CREATE TABLE "_favorites" (
+    "A" TEXT NOT NULL,
+    "B" TEXT NOT NULL
+);
+
+-- Create indexes for favorites junction table
+CREATE UNIQUE INDEX "_favorites_AB_unique" ON "_favorites"("A", "B");
+CREATE INDEX "_favorites_B_index" ON "_favorites"("B");
+
+-- Add foreign key constraints for favorites
+ALTER TABLE "_favorites" ADD CONSTRAINT "_favorites_A_fkey" FOREIGN KEY ("A") REFERENCES "Board"("id") ON DELETE CASCADE;
+ALTER TABLE "_favorites" ADD CONSTRAINT "_favorites_B_fkey" FOREIGN KEY ("B") REFERENCES "User"("id") ON DELETE CASCADE;
 
 -- Enable Row Level Security (RLS) for internal access
 -- Note: For internal system, you may not need strict RLS policies

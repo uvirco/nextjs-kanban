@@ -1,5 +1,5 @@
 "use server";
-import prisma from "@/prisma/prisma";
+import { supabaseAdmin } from "@/lib/supabase";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 
@@ -16,32 +16,31 @@ export async function handleFavoriteBoard(boardId: string) {
       };
     }
 
-    const user = await prisma.user.findUnique({
-      where: {
-        id: userId,
-      },
-      include: {
-        favoriteBoards: {
-          where: {
-            id: boardId,
-          },
-        },
-      },
-    });
+    // Check if the favorite relationship exists
+    const { data: existingFavorite, error: checkError } = await supabaseAdmin
+      .from('_favorites')
+      .select('*')
+      .eq('A', boardId)
+      .eq('B', userId)
+      .single();
 
-    if (user && user.favoriteBoards.length > 0) {
-      await prisma.user.update({
-        where: {
-          id: userId,
-        },
-        data: {
-          favoriteBoards: {
-            disconnect: {
-              id: boardId,
-            },
-          },
-        },
-      });
+    if (checkError && checkError.code !== 'PGRST116') { // PGRST116 is "no rows returned"
+      console.error("Error checking favorite:", checkError);
+      return { success: false, message: "An error occurred", status: 500 };
+    }
+
+    if (existingFavorite) {
+      // Remove favorite
+      const { error: deleteError } = await supabaseAdmin
+        .from('_favorites')
+        .delete()
+        .eq('A', boardId)
+        .eq('B', userId);
+
+      if (deleteError) {
+        console.error("Error removing favorite:", deleteError);
+        return { success: false, message: "An error occurred", status: 500 };
+      }
 
       revalidatePath(`/board/${boardId}`);
 
@@ -52,18 +51,18 @@ export async function handleFavoriteBoard(boardId: string) {
         status: 200,
       };
     } else {
-      await prisma.user.update({
-        where: {
-          id: userId,
-        },
-        data: {
-          favoriteBoards: {
-            connect: {
-              id: boardId,
-            },
-          },
-        },
-      });
+      // Add favorite
+      const { error: insertError } = await supabaseAdmin
+        .from('_favorites')
+        .insert({
+          A: boardId,
+          B: userId,
+        });
+
+      if (insertError) {
+        console.error("Error adding favorite:", insertError);
+        return { success: false, message: "An error occurred", status: 500 };
+      }
 
       revalidatePath(`/board/${boardId}`);
 
@@ -93,11 +92,19 @@ export async function handleDeleteAccount() {
       };
     }
 
-    await prisma.$transaction(async (prisma) => {
-      await prisma.user.delete({
-        where: { id: userId },
-      });
-    });
+    const { error } = await supabaseAdmin
+      .from('User')
+      .delete()
+      .eq('id', userId);
+
+    if (error) {
+      console.error("Error deleting user:", error);
+      return {
+        success: false,
+        message: "Error deleting account. Please try again later",
+        status: 500,
+      };
+    }
 
     return {
       success: true,
