@@ -259,6 +259,20 @@ CREATE INDEX "_favorites_B_index" ON "_favorites"("B");
 ALTER TABLE "_favorites" ADD CONSTRAINT "_favorites_A_fkey" FOREIGN KEY ("A") REFERENCES "Board"("id") ON DELETE CASCADE;
 ALTER TABLE "_favorites" ADD CONSTRAINT "_favorites_B_fkey" FOREIGN KEY ("B") REFERENCES "User"("id") ON DELETE CASCADE;
 
+-- Create junction table for labels on tasks (many-to-many relationship)
+CREATE TABLE "_LabelToTask" (
+    "A" TEXT NOT NULL,
+    "B" TEXT NOT NULL
+);
+
+-- Create indexes for label to task junction table
+CREATE UNIQUE INDEX "_LabelToTask_AB_unique" ON "_LabelToTask"("A", "B");
+CREATE INDEX "_LabelToTask_B_index" ON "_LabelToTask"("B");
+
+-- Add foreign key constraints for label to task
+ALTER TABLE "_LabelToTask" ADD CONSTRAINT "_LabelToTask_A_fkey" FOREIGN KEY ("A") REFERENCES "Label"("id") ON DELETE CASCADE;
+ALTER TABLE "_LabelToTask" ADD CONSTRAINT "_LabelToTask_B_fkey" FOREIGN KEY ("B") REFERENCES "Task"("id") ON DELETE CASCADE;
+
 -- Enable Row Level Security (RLS) for internal access
 -- Note: For internal system, you may not need strict RLS policies
 -- Uncomment and customize as needed

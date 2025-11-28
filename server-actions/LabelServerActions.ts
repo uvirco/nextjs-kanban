@@ -1,6 +1,6 @@
 "use server";
 import { auth } from "@/auth";
-import prisma from "@/prisma/prisma";
+import { supabaseAdmin } from "@/lib/supabase";
 import { revalidatePath } from "next/cache";
 
 export async function handleSaveLabel({
@@ -17,14 +17,17 @@ export async function handleSaveLabel({
   }
 
   try {
-    await prisma.task.update({
-      where: { id: taskId },
-      data: {
-        labels: {
-          connect: { id: labelId },
-        },
-      },
-    });
+    const { error } = await supabaseAdmin
+      .from('_LabelToTask')
+      .insert({
+        A: labelId,
+        B: taskId,
+      });
+
+    if (error) {
+      console.error("Error adding label to task:", error);
+      return { success: false, message: "Failed to associate label with task" };
+    }
 
     revalidatePath(`/board/${boardId}`);
 
@@ -49,14 +52,16 @@ export async function handleRemoveLabel({
   }
 
   try {
-    await prisma.task.update({
-      where: { id: taskId },
-      data: {
-        labels: {
-          disconnect: { id: labelId },
-        },
-      },
-    });
+    const { error } = await supabaseAdmin
+      .from('_LabelToTask')
+      .delete()
+      .eq('A', labelId)
+      .eq('B', taskId);
+
+    if (error) {
+      console.error("Error removing label from task:", error);
+      return { success: false, message: "Failed to remove label from task" };
+    }
 
     revalidatePath(`/board/${boardId}`);
 
@@ -83,13 +88,18 @@ export async function handleUpdateLabel({
   }
 
   try {
-    await prisma.label.update({
-      where: { id: labelId },
-      data: {
+    const { error } = await supabaseAdmin
+      .from('Label')
+      .update({
         title: title,
         color: color,
-      },
-    });
+      })
+      .eq('id', labelId);
+
+    if (error) {
+      console.error("Error updating label:", error);
+      return { success: false, message: "Failed to update label" };
+    }
 
     revalidatePath(`/board/${boardId}`);
 
@@ -122,24 +132,33 @@ export async function handleCreateLabel({
   }
 
   try {
-    const createdLabel = await prisma.label.create({
-      data: {
+    const { data: createdLabel, error: createError } = await supabaseAdmin
+      .from('Label')
+      .insert({
         userId: userId,
         title: title,
         color: color,
         boardId: boardId,
-      },
-    });
+      })
+      .select()
+      .single();
 
-    if (taskId) {
-      await prisma.task.update({
-        where: { id: taskId },
-        data: {
-          labels: {
-            connect: { id: createdLabel.id },
-          },
-        },
-      });
+    if (createError) {
+      console.error("Error creating label:", createError);
+      return { success: false, message: "Failed to create label" };
+    }
+
+    if (taskId && createdLabel) {
+      const { error: linkError } = await supabaseAdmin
+        .from('_LabelToTask')
+        .insert({
+          A: createdLabel.id,
+          B: taskId,
+        });
+
+      if (linkError) {
+        console.error("Error linking label to task:", linkError);
+      }
     }
 
     revalidatePath(`/board/${boardId}`);
@@ -167,9 +186,15 @@ export async function handleDeleteLabel({
   }
 
   try {
-    await prisma.label.delete({
-      where: { id: labelId },
-    });
+    const { error } = await supabaseAdmin
+      .from('Label')
+      .delete()
+      .eq('id', labelId);
+
+    if (error) {
+      console.error("Error deleting label:", error);
+      return { success: false, message: "Failed to remove label" };
+    }
 
     revalidatePath(`/board/${boardId}`);
 

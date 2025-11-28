@@ -1,6 +1,6 @@
 "use server";
 import { auth } from "@/auth";
-import prisma from "@/prisma/prisma";
+import { supabaseAdmin } from "@/lib/supabase";
 import { MESSAGES } from "@/utils/messages";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -32,20 +32,33 @@ export async function handleCreateColumn(data: {
   }
 
   try {
-    const maxOrderColumn = await prisma.column.findFirst({
-      where: { boardId: parse.data.boardId },
-      orderBy: { order: "desc" },
-      select: { order: true },
-    });
+    const { data: maxOrderColumn, error: maxError } = await supabaseAdmin
+      .from('Column')
+      .select('order')
+      .eq('boardId', parse.data.boardId)
+      .order('order', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (maxError && maxError.code !== 'PGRST116') {
+      console.error("Error finding max order:", maxError);
+      return { success: false, message: MESSAGES.COLUMN.CREATE_FAILURE };
+    }
+
     const newOrder = (maxOrderColumn?.order || 0) + 1;
 
-    await prisma.column.create({
-      data: {
+    const { error: createError } = await supabaseAdmin
+      .from('Column')
+      .insert({
         title: parse.data.title,
         boardId: parse.data.boardId,
         order: newOrder,
-      },
-    });
+      });
+
+    if (createError) {
+      console.error("Error creating column:", createError);
+      return { success: false, message: MESSAGES.COLUMN.CREATE_FAILURE };
+    }
 
     revalidatePath(`/board/${parse.data.boardId}`);
 
@@ -85,10 +98,15 @@ export async function handleEditColumn(data: {
   }
 
   try {
-    await prisma.column.update({
-      where: { id: parse.data.columnId },
-      data: { title: parse.data.title },
-    });
+    const { error } = await supabaseAdmin
+      .from('Column')
+      .update({ title: parse.data.title })
+      .eq('id', parse.data.columnId);
+
+    if (error) {
+      console.error("Error updating column:", error);
+      return { success: false, message: MESSAGES.COLUMN.UPDATE_FAILURE };
+    }
 
     revalidatePath(`/board/${parse.data.boardId}`);
 
@@ -126,19 +144,42 @@ export async function handleDeleteColumn(data: {
   }
 
   try {
-    const deletedColumn = await prisma.column.delete({
-      where: { id: parse.data.columnId },
-      select: { order: true },
-    });
+    const { data: deletedColumn, error: fetchError } = await supabaseAdmin
+      .from('Column')
+      .select('order')
+      .eq('id', parse.data.columnId)
+      .single();
+
+    if (fetchError) {
+      console.error("Error fetching column:", fetchError);
+      return { success: false, message: MESSAGES.COLUMN.DELETE_FAILURE };
+    }
+
+    const { error: deleteError } = await supabaseAdmin
+      .from('Column')
+      .delete()
+      .eq('id', parse.data.columnId);
+
+    if (deleteError) {
+      console.error("Error deleting column:", deleteError);
+      return { success: false, message: MESSAGES.COLUMN.DELETE_FAILURE };
+    }
 
     if (deletedColumn) {
-      await prisma.column.updateMany({
-        where: {
-          boardId: parse.data.boardId,
-          order: { gt: deletedColumn.order },
-        },
-        data: { order: { decrement: 1 } },
-      });
+      const { data: columnsToUpdate, error: fetchColsError } = await supabaseAdmin
+        .from('Column')
+        .select('id, order')
+        .eq('boardId', parse.data.boardId)
+        .gt('order', deletedColumn.order);
+
+      if (!fetchColsError && columnsToUpdate) {
+        for (const col of columnsToUpdate) {
+          await supabaseAdmin
+            .from('Column')
+            .update({ order: col.order - 1 })
+            .eq('id', col.id);
+        }
+      }
     }
 
     revalidatePath(`/board/${parse.data.boardId}`);
@@ -177,9 +218,18 @@ export async function handleDeleteColumnTasks(data: {
   }
 
   try {
-    await prisma.task.deleteMany({
-      where: { columnId: parse.data.columnId },
-    });
+    const { error } = await supabaseAdmin
+      .from('Task')
+      .delete()
+      .eq('columnId', parse.data.columnId);
+
+    if (error) {
+      console.error("Error deleting tasks within column:", error);
+      return {
+        success: false,
+        message: MESSAGES.COLUMN.DELETE_COLUMN_TASKS_FAILURE,
+      };
+    }
 
     revalidatePath(`/board/${parse.data.boardId}`);
 
