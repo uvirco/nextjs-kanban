@@ -52,14 +52,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     jwt: async ({ user, token }) => {
       if (user) {
-        token.uid = user.id;
+        token.sub = user.id; // Set the JWT subject to the user ID
         token.role = user.role;
       }
       return token;
     },
     session: async ({ session, token }) => {
       if (session?.user) {
-        session.user.id = token.uid as string;
+        session.user.id = token.sub as string; // Use token.sub for the user ID
         session.user.role = token.role as string;
       }
       return session;

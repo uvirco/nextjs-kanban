@@ -13,6 +13,8 @@ export async function handleCreateColumn(data: {
   const session = await auth();
   const userId = session?.user?.id;
 
+  console.log("handleCreateColumn called with:", { data, userId, session });
+
   if (!userId) {
     return { success: false, message: MESSAGES.AUTH.REQUIRED };
   }
@@ -32,6 +34,20 @@ export async function handleCreateColumn(data: {
   }
 
   try {
+    // Check if user is a member of the board
+    const { data: boardMember, error: memberError } = await supabaseAdmin
+      .from("BoardMember")
+      .select("role")
+      .eq("boardId", parse.data.boardId)
+      .eq("userId", userId)
+      .single();
+
+    console.log("Board member check:", { boardMember, memberError, userId, boardId: parse.data.boardId });
+
+    if (memberError || !boardMember) {
+      return { success: false, message: "You don't have permission to create columns on this board" };
+    }
+
     const { data: maxOrderColumn, error: maxError } = await supabaseAdmin
       .from("Column")
       .select("order")

@@ -106,10 +106,10 @@ export default function BoardSettingsClient({
   return (
     <div className="max-w-6xl mx-auto space-y-8">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Board Settings</h1>
+        <h1 className="text-3xl font-bold text-white">Board Settings</h1>
         <button
           onClick={() => window.history.back()}
-          className="px-4 py-2 text-sm bg-muted hover:bg-muted/80 rounded-md transition-colors"
+          className="px-4 py-2 text-sm bg-zinc-800 hover:bg-zinc-700 text-white rounded-md transition-colors"
         >
           ← Back to Board
         </button>
@@ -117,7 +117,7 @@ export default function BoardSettingsClient({
 
       {/* Current Members Section */}
       <div className="mb-8">
-        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2 text-white">
           <IconUser size={20} />
           Current Board Members ({currentMembers.length})
         </h2>
@@ -127,7 +127,7 @@ export default function BoardSettingsClient({
             {currentMembers.map((member) => (
               <div
                 key={member.id}
-                className="flex items-center justify-between p-3 border rounded-lg bg-card"
+                className="flex items-center justify-between p-3 border border-zinc-700 rounded-lg bg-zinc-900"
               >
                 <div className="flex items-center gap-3">
                   <Avatar className="w-10 h-10">
@@ -140,10 +140,10 @@ export default function BoardSettingsClient({
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <div className="font-medium">
+                    <div className="font-medium text-white">
                       {member.name || "Unknown"}
                     </div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-sm text-zinc-400">
                       {member.email}
                     </div>
                   </div>
@@ -157,7 +157,7 @@ export default function BoardSettingsClient({
                     size="sm"
                     onClick={() => handleRemoveMember(member.id)}
                     disabled={isLoading === member.id}
-                    className="text-destructive hover:text-destructive"
+                    className="text-red-400 hover:text-red-300 hover:bg-zinc-800"
                   >
                     <IconMinus size={16} />
                   </Button>
@@ -166,7 +166,7 @@ export default function BoardSettingsClient({
             ))}
           </div>
         ) : (
-          <p className="text-muted-foreground">
+          <p className="text-zinc-400">
             No members yet. Add some below!
           </p>
         )}
@@ -174,14 +174,14 @@ export default function BoardSettingsClient({
 
       {/* Add Members Section */}
       <div>
-        <h2 className="text-lg font-semibold mb-4">Add Board Members</h2>
+        <h2 className="text-lg font-semibold mb-4 text-white">Add Board Members</h2>
 
         <div className="mb-4">
           <Input
             placeholder="Search users by name or email..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="max-w-md"
+            className="max-w-md bg-zinc-900 border-zinc-700 text-white placeholder:text-zinc-500"
           />
         </div>
 
@@ -190,7 +190,7 @@ export default function BoardSettingsClient({
             {filteredAvailableUsers.map((user) => (
               <div
                 key={user.id}
-                className="flex items-center justify-between p-3 border rounded-lg bg-card hover:bg-accent transition-colors"
+                className="flex items-center justify-between p-3 border border-zinc-700 rounded-lg bg-zinc-900 hover:bg-zinc-800 transition-colors"
               >
                 <div className="flex items-center gap-3">
                   <Avatar className="w-10 h-10">
@@ -203,14 +203,14 @@ export default function BoardSettingsClient({
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <div className="font-medium">{user.name || "Unknown"}</div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="font-medium text-white">{user.name || "Unknown"}</div>
+                    <div className="text-sm text-zinc-400">
                       {user.email}
                     </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-xs">
+                  <Badge variant="outline" className="text-xs border-zinc-600 text-zinc-300">
                     {user.role}
                   </Badge>
                   <Button
@@ -218,7 +218,7 @@ export default function BoardSettingsClient({
                     size="sm"
                     onClick={() => handleAddMember(user.id)}
                     disabled={isLoading === user.id}
-                    className="text-primary hover:text-primary"
+                    className="text-blue-400 hover:text-blue-300 hover:bg-zinc-800"
                   >
                     <IconPlus size={16} />
                   </Button>
@@ -227,7 +227,7 @@ export default function BoardSettingsClient({
             ))}
           </div>
         ) : (
-          <p className="text-muted-foreground">
+          <p className="text-zinc-400">
             {searchTerm
               ? "No users found matching your search."
               : "All available users are already board members."}

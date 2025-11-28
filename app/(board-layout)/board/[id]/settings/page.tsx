@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import prisma from "@/prisma/prisma";
+import { supabaseAdmin } from "@/lib/supabase";
 import { redirect } from "next/navigation";
 import BoardSettingsClient from "./BoardSettingsClient";
 
@@ -21,72 +21,80 @@ export default async function BoardSettingsPage({
   }
 
   // Check if user is a board member with owner role (only owners can manage members)
-  const boardMembership = await prisma.boardMember.findFirst({
-    where: {
-      userId: userId,
-      boardId: id,
-      role: "owner",
-    },
-  });
+  const { data: boardMembership, error: memberError } = await supabaseAdmin
+    .from("BoardMember")
+    .select("role")
+    .eq("userId", userId)
+    .eq("boardId", id)
+    .eq("role", "owner")
+    .single();
 
-  if (!boardMembership) {
+  if (memberError || !boardMembership) {
     redirect("/board");
   }
 
   // Fetch board data
-  const board = await prisma.board.findUnique({
-    where: { id: id },
-    include: {
-      members: {
-        include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              image: true,
-              role: true,
-            },
-          },
-        },
-      },
-      labels: true,
-      settings: true,
-    },
-  });
+  const { data: board, error: boardError } = await supabaseAdmin
+    .from("Board")
+    .select("*")
+    .eq("id", id)
+    .single();
 
-  if (!board) {
+  if (boardError || !board) {
     redirect("/board");
   }
 
+  // Fetch board members
+  const { data: members } = await supabaseAdmin
+    .from("BoardMember")
+    .select("userId, boardId, role, createdAt, user:User(id, name, email, image, role)")
+    .eq("boardId", id);
+
+  // Fetch board labels
+  const { data: labels } = await supabaseAdmin
+    .from("Label")
+    .select("*")
+    .eq("boardId", id);
+
+  // Fetch board settings
+  const { data: settings } = await supabaseAdmin
+    .from("BoardSettings")
+    .select("*")
+    .eq("boardId", id)
+    .single();
+
   // Fetch all users (excluding ADMIN) for member management
-  const allUsers = await prisma.user.findMany({
-    where: {
-      role: {
-        not: "ADMIN",
-      },
-      isActive: true,
-    },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      image: true,
-      role: true,
-    },
-  });
+  const { data: allUsers } = await supabaseAdmin
+    .from("User")
+    .select("id, name, email, image, role")
+    .neq("role", "ADMIN")
+    .eq("isActive", true);
+
+  // Transform board data to match expected structure
+  const boardWithRelations = {
+    ...board,
+    members: (members || []).map((m: any) => ({
+      userId: m.userId,
+      boardId: m.boardId,
+      role: m.role,
+      createdAt: m.createdAt,
+      user: m.user
+    })),
+    labels: labels || [],
+    settings: settings || null
+  };
 
   // Get current board members
-  const currentMembers = board.members.map((member) => member.user);
+  const currentMembers = (members || []).map((member: any) => member.user);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-zinc-950 text-foreground">
       <div className="container mx-auto py-8 px-4">
         <BoardSettingsClient
-          board={board}
-          allUsers={allUsers}
+          board={boardWithRelations}
+          allUsers={allUsers || []}
           currentMembers={currentMembers}
-          labels={board.labels}
+          labels={labels || []}
         />
       </div>
     </div>
