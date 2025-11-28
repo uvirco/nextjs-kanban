@@ -1,7 +1,11 @@
 "use client";
 import { useState } from "react";
 import { IconTag } from "@tabler/icons-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Label } from "@prisma/client";
 import { LabelView } from "./LabelView";
 import { LabelEditMode } from "./LabelEditMode";
@@ -21,7 +25,7 @@ export default function AddToCardLabels({
   boardId,
 }: AddToCardLabelsProps) {
   const [selectedLabels, setSelectedLabels] = useState<string[]>(
-    activeLabels.map((label) => label.id),
+    activeLabels.map((label) => label.id)
   );
   const [editMode, setEditMode] = useState<boolean>(false);
   const [editingLabel, setEditingLabel] = useState<Label | null>(null);
@@ -30,10 +34,10 @@ export default function AddToCardLabels({
 
   const handleCheckboxChange = async (values: string[]) => {
     const newLabel = values.find(
-      (labelId) => !selectedLabels.includes(labelId),
+      (labelId) => !selectedLabels.includes(labelId)
     );
     const removedLabel = selectedLabels.find(
-      (labelId) => !values.includes(labelId),
+      (labelId) => !values.includes(labelId)
     );
 
     if (newLabel) {

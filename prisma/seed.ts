@@ -1,129 +1,129 @@
-const { PrismaClient } = require('@prisma/client');
-const bcrypt = require('bcryptjs');
+const { PrismaClient } = require("@prisma/client");
+const bcrypt = require("bcryptjs");
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Starting database seeding...');
+  console.log("🌱 Starting database seeding...");
 
   // Create default admin user
-  const adminPassword = await bcrypt.hash('admin123', 12);
+  const adminPassword = await bcrypt.hash("admin123", 12);
   const admin = await prisma.user.upsert({
-    where: { email: 'admin@company.com' },
+    where: { email: "admin@company.com" },
     update: {},
     create: {
-      email: 'admin@company.com',
-      name: 'Admin User',
+      email: "admin@company.com",
+      name: "Admin User",
       password: adminPassword,
-      role: 'ADMIN',
+      role: "ADMIN",
       isActive: true,
     },
   });
-  console.log('✅ Admin user created:', admin.email);
+  console.log("✅ Admin user created:", admin.email);
 
   // Create additional test users
   const testUsers = [
     {
-      email: 'pierre@uvirco.com',
-      name: 'Pierre',
-      password: 'pierre',
-      role: 'MANAGER' as const,
+      email: "pierre@uvirco.com",
+      name: "Pierre",
+      password: "pierre",
+      role: "MANAGER" as const,
     },
     {
-      email: 'jaco@uvirco.com',
-      name: 'Jaco',
-      password: 'jaco12',
-      role: 'MANAGER' as const,
+      email: "jaco@uvirco.com",
+      name: "Jaco",
+      password: "jaco12",
+      role: "MANAGER" as const,
     },
     {
-      email: 'michael@uvirco.com',
-      name: 'Michale',
-      password: 'michael',
-      role: 'MEMBER' as const,
+      email: "michael@uvirco.com",
+      name: "Michale",
+      password: "michael",
+      role: "MEMBER" as const,
     },
     {
-      email: 'ters@uvirco.com',
-      name: 'Ters',
-      password: 'ters12',
-      role: 'MEMBER' as const,
+      email: "ters@uvirco.com",
+      name: "Ters",
+      password: "ters12",
+      role: "MEMBER" as const,
     },
     {
-      email: 'ockert@uvirco.com',
-      name: 'Ockert',
-      password: 'ockert',
-      role: 'MEMBER' as const,
+      email: "ockert@uvirco.com",
+      name: "Ockert",
+      password: "ockert",
+      role: "MEMBER" as const,
     },
     {
-      email: 'mathew@uvirco.com',
-      name: 'Mathew',
-      password: 'mathew',
-      role: 'MEMBER' as const,
+      email: "mathew@uvirco.com",
+      name: "Mathew",
+      password: "mathew",
+      role: "MEMBER" as const,
     },
     {
-      email: 'leons@uvirco.com',
-      name: 'LeonS',
-      password: 'leons12',
-      role: 'MANAGER' as const,
+      email: "leons@uvirco.com",
+      name: "LeonS",
+      password: "leons12",
+      role: "MANAGER" as const,
     },
     {
-      email: 'leon@uvirco.com',
-      name: 'Leon',
-      password: 'leons12',
-      role: 'MEMBER' as const,
+      email: "leon@uvirco.com",
+      name: "Leon",
+      password: "leons12",
+      role: "MEMBER" as const,
     },
     {
-      email: 'ian@uvirco.com',
-      name: 'Ian',
-      password: 'ian123',
-      role: 'MEMBER' as const,
+      email: "ian@uvirco.com",
+      name: "Ian",
+      password: "ian123",
+      role: "MEMBER" as const,
     },
     {
-      email: 'marcel@uvirco.com',
-      name: 'Marcel',
-      password: 'marcel',
-      role: 'MEMBER' as const,
+      email: "marcel@uvirco.com",
+      name: "Marcel",
+      password: "marcel",
+      role: "MEMBER" as const,
     },
     {
-      email: 'tshepho@uvirco.com',
-      name: 'Tshepho',
-      password: 'tshepho',
-      role: 'MEMBER' as const,
+      email: "tshepho@uvirco.com",
+      name: "Tshepho",
+      password: "tshepho",
+      role: "MEMBER" as const,
     },
     {
-      email: 'nkele@uvirco.com',
-      name: 'Nkele',
-      password: 'nkele12',
-      role: 'MEMBER' as const,
+      email: "nkele@uvirco.com",
+      name: "Nkele",
+      password: "nkele12",
+      role: "MEMBER" as const,
     },
     {
-      email: 'madeleine@uvirco.com',
-      name: 'Madeleine',
-      password: 'madeleine',
-      role: 'MEMBER' as const,
+      email: "madeleine@uvirco.com",
+      name: "Madeleine",
+      password: "madeleine",
+      role: "MEMBER" as const,
     },
     {
-      email: 'tiffany@uvirco.com',
-      name: 'Tiffany',
-      password: 'tiffany',
-      role: 'MEMBER' as const,
+      email: "tiffany@uvirco.com",
+      name: "Tiffany",
+      password: "tiffany",
+      role: "MEMBER" as const,
     },
     {
-      email: 'rika@uvirco.com',
-      name: 'Rika',
-      password: 'rika12',
-      role: 'MEMBER' as const,
+      email: "rika@uvirco.com",
+      name: "Rika",
+      password: "rika12",
+      role: "MEMBER" as const,
     },
     {
-      email: 'ans@uvirco.com',
-      name: 'Ans',
-      password: 'ans123',
-      role: 'MEMBER' as const,
+      email: "ans@uvirco.com",
+      name: "Ans",
+      password: "ans123",
+      role: "MEMBER" as const,
     },
     {
-      email: 'kimon@uvirco.com',
-      name: 'Kimon',
-      password: 'kimon12',
-      role: 'MEMBER' as const,
+      email: "kimon@uvirco.com",
+      name: "Kimon",
+      password: "kimon12",
+      role: "MEMBER" as const,
     },
   ];
 
@@ -147,15 +147,15 @@ async function main() {
 
   // Create sample board
   const board = await prisma.board.upsert({
-    where: { id: 'sample-board-1' },
+    where: { id: "sample-board-1" },
     update: {},
     create: {
-      id: 'sample-board-1',
-      title: 'Sample Project Board',
+      id: "sample-board-1",
+      title: "Sample Project Board",
       backgroundUrl: null, // No background image to avoid 404 errors
     },
   });
-  console.log('✅ Sample board created:', board.title);
+  console.log("✅ Sample board created:", board.title);
 
   // Add admin as board member
   await prisma.boardMember.upsert({
@@ -169,7 +169,7 @@ async function main() {
     create: {
       userId: admin.id,
       boardId: board.id,
-      role: 'owner',
+      role: "owner",
     },
   });
 
@@ -186,7 +186,7 @@ async function main() {
       create: {
         userId: user.id,
         boardId: board.id,
-        role: user.role === 'MANAGER' ? 'owner' : 'member',
+        role: user.role === "MANAGER" ? "owner" : "member",
       },
     });
     console.log(`✅ Added ${user.name} as board member`);
@@ -194,10 +194,10 @@ async function main() {
 
   // Create default columns
   const columns = [
-    { title: 'To Do', order: 0 },
-    { title: 'In Progress', order: 1 },
-    { title: 'Review', order: 2 },
-    { title: 'Done', order: 3 },
+    { title: "To Do", order: 0 },
+    { title: "In Progress", order: 1 },
+    { title: "Review", order: 2 },
+    { title: "Done", order: 3 },
   ];
 
   for (const columnData of columns) {
@@ -216,19 +216,19 @@ async function main() {
           order: columnData.order,
         },
       });
-      console.log('✅ Column created:', column.title);
+      console.log("✅ Column created:", column.title);
     } else {
-      console.log('✅ Column already exists:', existingColumn.title);
+      console.log("✅ Column already exists:", existingColumn.title);
     }
   }
 
   // Create default labels
   const labels = [
-    { title: 'Bug', color: 'red' },
-    { title: 'Feature', color: 'blue' },
-    { title: 'Enhancement', color: 'green' },
-    { title: 'Documentation', color: 'yellow' },
-    { title: 'High Priority', color: 'orange' },
+    { title: "Bug", color: "red" },
+    { title: "Feature", color: "blue" },
+    { title: "Enhancement", color: "green" },
+    { title: "Documentation", color: "yellow" },
+    { title: "High Priority", color: "orange" },
   ];
 
   for (const labelData of labels) {
@@ -249,32 +249,35 @@ async function main() {
           isDefault: true,
         },
       });
-      console.log('✅ Label created:', label.title);
+      console.log("✅ Label created:", label.title);
     } else {
-      console.log('✅ Label already exists:', existingLabel.title);
+      console.log("✅ Label already exists:", existingLabel.title);
     }
   }
 
   // Create sample tasks
   const todoColumn = await prisma.column.findFirst({
-    where: { boardId: board.id, title: 'To Do' },
+    where: { boardId: board.id, title: "To Do" },
   });
 
   if (todoColumn) {
     const sampleTasks = [
       {
-        title: 'Welcome to TaskManager!',
-        description: 'This is a sample task to help you get started. Feel free to edit or delete it.',
+        title: "Welcome to TaskManager!",
+        description:
+          "This is a sample task to help you get started. Feel free to edit or delete it.",
         order: 0,
       },
       {
-        title: 'Create your first board',
-        description: 'Boards help you organize your projects. Try creating a new board for your next project.',
+        title: "Create your first board",
+        description:
+          "Boards help you organize your projects. Try creating a new board for your next project.",
         order: 1,
       },
       {
-        title: 'Invite team members',
-        description: 'Collaborate with your team by inviting them to boards and assigning tasks.',
+        title: "Invite team members",
+        description:
+          "Collaborate with your team by inviting them to boards and assigning tasks.",
         order: 2,
       },
     ];
@@ -297,9 +300,9 @@ async function main() {
             createdByUserId: admin.id,
           },
         });
-        console.log('✅ Sample task created:', task.title);
+        console.log("✅ Sample task created:", task.title);
       } else {
-        console.log('✅ Sample task already exists:', existingTask.title);
+        console.log("✅ Sample task already exists:", existingTask.title);
       }
     }
   }
@@ -324,24 +327,24 @@ async function main() {
       enableWatchers: false,
       enableAttachments: false,
       enableSubtasks: false,
-      defaultPriority: 'MEDIUM',
-      defaultRiskLevel: 'LOW',
+      defaultPriority: "MEDIUM",
+      defaultRiskLevel: "LOW",
     },
   });
-  console.log('✅ Board settings created');
+  console.log("✅ Board settings created");
 
-  console.log('🎉 Database seeding completed successfully!');
-  console.log('');
-  console.log('📋 Default Login Credentials:');
-  console.log('Email: admin@company.com');
-  console.log('Password: admin123');
-  console.log('');
-  console.log('🚀 You can now start using TaskManager!');
+  console.log("🎉 Database seeding completed successfully!");
+  console.log("");
+  console.log("📋 Default Login Credentials:");
+  console.log("Email: admin@company.com");
+  console.log("Password: admin123");
+  console.log("");
+  console.log("🚀 You can now start using TaskManager!");
 }
 
 main()
   .catch((e) => {
-    console.error('❌ Error during seeding:', e);
+    console.error("❌ Error during seeding:", e);
     process.exit(1);
   })
   .finally(async () => {

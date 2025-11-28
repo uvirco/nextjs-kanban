@@ -5,12 +5,15 @@ This project includes a comprehensive seeding system that populates the database
 ## What Gets Seeded
 
 ### 👤 Default Users
+
 - **Admin User**
+
   - **Email:** `admin@company.com`
   - **Password:** `admin123`
   - **Role:** ADMIN
 
 - **Managers**
+
   - **Pierre:** `pierre@uvirco.com` / `pierre`
   - **Jaco:** `jaco@uvirco.com` / `jaco12`
   - **LeonS:** `leons@uvirco.com` / `leons12`
@@ -32,16 +35,19 @@ This project includes a comprehensive seeding system that populates the database
   - **Kimon:** `kimon@uvirco.com` / `kimon12`
 
 ### 📋 Sample Board
+
 - **Title:** "Sample Project Board"
 - **Columns:** To Do, In Progress, Review, Done
 - **Labels:** Bug (red), Feature (blue), Enhancement (green), Documentation (yellow), High Priority (orange)
 
 ### ✅ Sample Tasks
+
 - "Welcome to TaskManager!" - Introduction task
 - "Create your first board" - Getting started guide
 - "Invite team members" - Collaboration guide
 
 ### ⚙️ Board Settings
+
 - Default project management settings
 - All advanced features disabled by default
 
@@ -90,7 +96,7 @@ Once seeded, you can:
 
 Individual seeding scripts are also available:
 
-```bash
+````bash
 # Create admin user only
 node scripts/create-admin-user.js
 
@@ -98,3 +104,4 @@ node scripts/create-admin-user.js
 node scripts/create-test-user.js
 ```</content>
 <parameter name="filePath">c:\swdev\next\nextjs-kanban/SEEDING.md
+````

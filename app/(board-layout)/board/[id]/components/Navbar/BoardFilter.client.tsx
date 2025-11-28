@@ -2,11 +2,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { LabelSummary } from "@/types/types";
-import {
-  IconFilter,
-  IconFilterFilled,
-  IconX,
-} from "@tabler/icons-react";
+import { IconFilter, IconFilterFilled, IconX } from "@tabler/icons-react";
 
 const LabelColorIndicator = ({ color }: { color: string }) => (
   <div className={`h-4 w-4 rounded-full bg-${color}-500`} />
@@ -29,9 +25,9 @@ export default function BoardFilter({ labels }: { labels: LabelSummary[] }) {
 
   const handleLabelToggle = (labelId: string) => {
     const newSelection = selectedLabels.includes(labelId)
-      ? selectedLabels.filter(id => id !== labelId)
+      ? selectedLabels.filter((id) => id !== labelId)
       : [...selectedLabels, labelId];
-    
+
     setSelectedLabels(newSelection);
 
     const params = new URLSearchParams(searchParams);

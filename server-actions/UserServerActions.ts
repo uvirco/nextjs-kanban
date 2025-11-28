@@ -18,13 +18,14 @@ export async function handleFavoriteBoard(boardId: string) {
 
     // Check if the favorite relationship exists
     const { data: existingFavorite, error: checkError } = await supabaseAdmin
-      .from('_favorites')
-      .select('*')
-      .eq('A', boardId)
-      .eq('B', userId)
+      .from("_favorites")
+      .select("*")
+      .eq("A", boardId)
+      .eq("B", userId)
       .single();
 
-    if (checkError && checkError.code !== 'PGRST116') { // PGRST116 is "no rows returned"
+    if (checkError && checkError.code !== "PGRST116") {
+      // PGRST116 is "no rows returned"
       console.error("Error checking favorite:", checkError);
       return { success: false, message: "An error occurred", status: 500 };
     }
@@ -32,10 +33,10 @@ export async function handleFavoriteBoard(boardId: string) {
     if (existingFavorite) {
       // Remove favorite
       const { error: deleteError } = await supabaseAdmin
-        .from('_favorites')
+        .from("_favorites")
         .delete()
-        .eq('A', boardId)
-        .eq('B', userId);
+        .eq("A", boardId)
+        .eq("B", userId);
 
       if (deleteError) {
         console.error("Error removing favorite:", deleteError);
@@ -53,7 +54,7 @@ export async function handleFavoriteBoard(boardId: string) {
     } else {
       // Add favorite
       const { error: insertError } = await supabaseAdmin
-        .from('_favorites')
+        .from("_favorites")
         .insert({
           A: boardId,
           B: userId,
@@ -93,9 +94,9 @@ export async function handleDeleteAccount() {
     }
 
     const { error } = await supabaseAdmin
-      .from('User')
+      .from("User")
       .delete()
-      .eq('id', userId);
+      .eq("id", userId);
 
     if (error) {
       console.error("Error deleting user:", error);

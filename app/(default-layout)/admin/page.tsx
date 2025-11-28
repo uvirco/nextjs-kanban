@@ -12,7 +12,7 @@ export default async function AdminDashboard() {
   // Get user statistics
   const totalUsers = await prisma.user.count();
   const activeUsers = await prisma.user.count({
-    where: { isActive: true }
+    where: { isActive: true },
   });
   const inactiveUsers = totalUsers - activeUsers;
 
@@ -27,7 +27,7 @@ export default async function AdminDashboard() {
       role: true,
       isActive: true,
       createdAt: true,
-    }
+    },
   });
 
   return (
@@ -78,23 +78,34 @@ export default async function AdminDashboard() {
         <div className="p-6">
           <div className="space-y-4">
             {recentUsers.map((user) => (
-              <div key={user.id} className="flex items-center justify-between p-3 bg-zinc-700 rounded-lg">
+              <div
+                key={user.id}
+                className="flex items-center justify-between p-3 bg-zinc-700 rounded-lg"
+              >
                 <div>
                   <p className="text-white font-medium">{user.name}</p>
                   <p className="text-zinc-400 text-sm">{user.email}</p>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <span className={`px-2 py-1 rounded text-xs ${
-                    user.role === 'ADMIN' ? 'bg-red-600 text-white' :
-                    user.role === 'MANAGER' ? 'bg-blue-600 text-white' :
-                    'bg-green-600 text-white'
-                  }`}>
+                  <span
+                    className={`px-2 py-1 rounded text-xs ${
+                      user.role === "ADMIN"
+                        ? "bg-red-600 text-white"
+                        : user.role === "MANAGER"
+                          ? "bg-blue-600 text-white"
+                          : "bg-green-600 text-white"
+                    }`}
+                  >
                     {user.role}
                   </span>
-                  <span className={`px-2 py-1 rounded text-xs ${
-                    user.isActive ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
-                  }`}>
-                    {user.isActive ? 'Active' : 'Inactive'}
+                  <span
+                    className={`px-2 py-1 rounded text-xs ${
+                      user.isActive
+                        ? "bg-green-600 text-white"
+                        : "bg-red-600 text-white"
+                    }`}
+                  >
+                    {user.isActive ? "Active" : "Inactive"}
                   </span>
                 </div>
               </div>

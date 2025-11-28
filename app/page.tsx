@@ -7,7 +7,6 @@ import {
 } from "@tabler/icons-react";
 import Image from "next/image";
 export default function Home() {
-
   return (
     <main className="min-h-dvh text-white bg-gradient-to-br from-black to-zinc-900 dark">
       <nav className="px-3 md:px-10 py-3 mb-5 flex justify-between items-center">
@@ -44,7 +43,10 @@ export default function Home() {
                   Get Started
                 </button>
               </Link>
-              <button className="bg-muted text-muted-foreground cursor-not-allowed h-10 px-4 py-2 rounded-md flex items-center gap-2" disabled>
+              <button
+                className="bg-muted text-muted-foreground cursor-not-allowed h-10 px-4 py-2 rounded-md flex items-center gap-2"
+                disabled
+              >
                 <IconBook />
                 Docs (Coming Soon)
               </button>

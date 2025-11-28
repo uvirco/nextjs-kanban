@@ -31,8 +31,14 @@ export default async function TaskDetailView({ task }: { task: DetailedTask }) {
       {task.assignedUsers.length > 0 && (
         <div className="flex -space-x-2 mb-4">
           {task.assignedUsers.map((assignment) => (
-            <Avatar key={assignment.user.id} className="w-8 h-8 border-2 border-white">
-              <AvatarImage src={assignment.user.image || undefined} alt={assignment.user.name || "Unknown"} />
+            <Avatar
+              key={assignment.user.id}
+              className="w-8 h-8 border-2 border-white"
+            >
+              <AvatarImage
+                src={assignment.user.image || undefined}
+                alt={assignment.user.name || "Unknown"}
+              />
               <AvatarFallback className="text-xs">
                 {(assignment.user.name || "?").charAt(0).toUpperCase()}
               </AvatarFallback>
@@ -137,7 +143,10 @@ export default async function TaskDetailView({ task }: { task: DetailedTask }) {
 
               {/* Estimated Effort */}
               <div className="space-y-2">
-                <Label htmlFor="estimatedEffort" className="text-xs font-medium">
+                <Label
+                  htmlFor="estimatedEffort"
+                  className="text-xs font-medium"
+                >
                   Estimated Effort (days)
                 </Label>
                 <Input
@@ -202,7 +211,10 @@ export default async function TaskDetailView({ task }: { task: DetailedTask }) {
             <div className="space-y-4">
               {/* Strategic Alignment */}
               <div className="space-y-2">
-                <Label htmlFor="strategicAlignment" className="text-xs font-medium">
+                <Label
+                  htmlFor="strategicAlignment"
+                  className="text-xs font-medium"
+                >
                   Strategic Alignment
                 </Label>
                 <Input

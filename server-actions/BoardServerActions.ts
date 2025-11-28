@@ -50,7 +50,7 @@ export async function handleCreateBoard(data: { title: string }) {
   try {
     // Create board
     const { data: createdBoard, error: boardError } = await supabaseAdmin
-      .from('Board')
+      .from("Board")
       .insert({
         title: parse.data.title,
       })
@@ -64,7 +64,7 @@ export async function handleCreateBoard(data: { title: string }) {
 
     // Add user as board owner
     const { error: memberError } = await supabaseAdmin
-      .from('BoardMember')
+      .from("BoardMember")
       .insert({
         boardId: createdBoard.id,
         userId: userId,
@@ -101,9 +101,7 @@ async function createDefaultLabelsForBoard(boardId: string, userId: string) {
     userId: userId,
   }));
 
-  const { error } = await supabaseAdmin
-    .from('Label')
-    .insert(labels);
+  const { error } = await supabaseAdmin.from("Label").insert(labels);
 
   if (error) {
     console.error("Error creating default labels:", error);
@@ -138,11 +136,11 @@ export async function handleEditBoard(data: {
 
   try {
     const { error } = await supabaseAdmin
-      .from('Board')
+      .from("Board")
       .update({
         title: parse.data.title,
       })
-      .eq('id', parse.data.boardId);
+      .eq("id", parse.data.boardId);
 
     if (error) {
       console.error("Error editing board:", error);
@@ -183,11 +181,11 @@ export async function handleDeleteBoard(boardId: string) {
   try {
     // Check if user is owner
     const { data: owner, error: ownerError } = await supabaseAdmin
-      .from('BoardMember')
-      .select('*')
-      .eq('boardId', parse.data)
-      .eq('userId', userId)
-      .eq('role', 'owner')
+      .from("BoardMember")
+      .select("*")
+      .eq("boardId", parse.data)
+      .eq("userId", userId)
+      .eq("role", "owner")
       .single();
 
     if (ownerError || !owner) {
@@ -196,9 +194,9 @@ export async function handleDeleteBoard(boardId: string) {
 
     // Delete board members first
     const { error: memberDeleteError } = await supabaseAdmin
-      .from('BoardMember')
+      .from("BoardMember")
       .delete()
-      .eq('boardId', parse.data);
+      .eq("boardId", parse.data);
 
     if (memberDeleteError) {
       console.error("Error deleting board members:", memberDeleteError);
@@ -207,9 +205,9 @@ export async function handleDeleteBoard(boardId: string) {
 
     // Delete the board
     const { error: boardDeleteError } = await supabaseAdmin
-      .from('Board')
+      .from("Board")
       .delete()
-      .eq('id', parse.data);
+      .eq("id", parse.data);
 
     if (boardDeleteError) {
       console.error("Error deleting board:", boardDeleteError);
@@ -289,9 +287,9 @@ export async function handleUpdateBoard(boardId: string, boardData: BoardData) {
     for (const column of boardData.columns) {
       if (column.id) {
         const { error: columnError } = await supabaseAdmin
-          .from('Column')
+          .from("Column")
           .update({ order: column.order })
-          .eq('id', column.id);
+          .eq("id", column.id);
 
         if (columnError) {
           console.error("Error updating column:", columnError);
@@ -310,12 +308,12 @@ export async function handleUpdateBoard(boardId: string, boardData: BoardData) {
         if (task.id) {
           // Update the task
           const { error: taskError } = await supabaseAdmin
-            .from('Task')
+            .from("Task")
             .update({
               order: task.order,
               columnId: column.id,
             })
-            .eq('id', task.id);
+            .eq("id", task.id);
 
           if (taskError) {
             console.error("Error updating task:", taskError);
@@ -329,7 +327,7 @@ export async function handleUpdateBoard(boardId: string, boardData: BoardData) {
 
           if (originalTask && originalTask.columnId !== column.id) {
             const { error: activityError } = await supabaseAdmin
-              .from('Activity')
+              .from("Activity")
               .insert({
                 type: ActivityType.TASK_MOVED,
                 userId: userId,
@@ -383,11 +381,11 @@ export async function handleEditBoardImage(url: string, boardId: string) {
 
   try {
     const { error } = await supabaseAdmin
-      .from('Board')
+      .from("Board")
       .update({
         backgroundUrl: parse.data.url,
       })
-      .eq('id', parse.data.boardId);
+      .eq("id", parse.data.boardId);
 
     if (error) {
       console.error("Error updating board image:", error);
@@ -427,15 +425,18 @@ export async function handleRemoveBoardImage(boardId: string) {
 
   try {
     const { error } = await supabaseAdmin
-      .from('Board')
+      .from("Board")
       .update({
         backgroundUrl: null,
       })
-      .eq('id', parse.data.boardId);
+      .eq("id", parse.data.boardId);
 
     if (error) {
       console.error("Error removing board image:", error);
-      return { success: false, message: MESSAGES.BG_IMAGE.IMAGE_REMOVE_FAILURE };
+      return {
+        success: false,
+        message: MESSAGES.BG_IMAGE.IMAGE_REMOVE_FAILURE,
+      };
     }
 
     revalidatePath(`/board/${parse.data.boardId}`);

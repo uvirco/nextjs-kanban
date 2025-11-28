@@ -1,7 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { IconDots, IconEdit, IconTrash, IconEye, IconUserOff, IconUserCheck } from "@tabler/icons-react";
+import {
+  IconDots,
+  IconEdit,
+  IconTrash,
+  IconEye,
+  IconUserOff,
+  IconUserCheck,
+} from "@tabler/icons-react";
 import EditUserModal from "./EditUserModal";
 
 interface User {
@@ -31,7 +38,11 @@ export default function UserTable({ users }: UserTableProps) {
   };
 
   const handleDeleteUser = async (userId: string) => {
-    if (!confirm("Are you sure you want to delete this user? This action cannot be undone.")) {
+    if (
+      !confirm(
+        "Are you sure you want to delete this user? This action cannot be undone."
+      )
+    ) {
       return;
     }
 
@@ -78,13 +89,27 @@ export default function UserTable({ users }: UserTableProps) {
         <table className="w-full">
           <thead className="bg-zinc-700">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium text-zinc-300 uppercase">Name</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-zinc-300 uppercase">Email</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-zinc-300 uppercase">Role</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-zinc-300 uppercase">Status</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-zinc-300 uppercase">Boards</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-zinc-300 uppercase">Created</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-zinc-300 uppercase">Actions</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-zinc-300 uppercase">
+                Name
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-zinc-300 uppercase">
+                Email
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-zinc-300 uppercase">
+                Role
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-zinc-300 uppercase">
+                Status
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-zinc-300 uppercase">
+                Boards
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-zinc-300 uppercase">
+                Created
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-zinc-300 uppercase">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-700">
@@ -93,23 +118,29 @@ export default function UserTable({ users }: UserTableProps) {
                 <td className="px-4 py-3 text-white">
                   {user.name || "No name"}
                 </td>
-                <td className="px-4 py-3 text-zinc-300">
-                  {user.email}
-                </td>
+                <td className="px-4 py-3 text-zinc-300">{user.email}</td>
                 <td className="px-4 py-3">
-                  <span className={`px-2 py-1 rounded text-xs ${
-                    user.role === 'ADMIN' ? 'bg-red-600 text-white' :
-                    user.role === 'MANAGER' ? 'bg-blue-600 text-white' :
-                    'bg-green-600 text-white'
-                  }`}>
+                  <span
+                    className={`px-2 py-1 rounded text-xs ${
+                      user.role === "ADMIN"
+                        ? "bg-red-600 text-white"
+                        : user.role === "MANAGER"
+                          ? "bg-blue-600 text-white"
+                          : "bg-green-600 text-white"
+                    }`}
+                  >
                     {user.role}
                   </span>
                 </td>
                 <td className="px-4 py-3">
-                  <span className={`px-2 py-1 rounded text-xs ${
-                    user.isActive ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
-                  }`}>
-                    {user.isActive ? 'Active' : 'Inactive'}
+                  <span
+                    className={`px-2 py-1 rounded text-xs ${
+                      user.isActive
+                        ? "bg-green-600 text-white"
+                        : "bg-red-600 text-white"
+                    }`}
+                  >
+                    {user.isActive ? "Active" : "Inactive"}
                   </span>
                 </td>
                 <td className="px-4 py-3 text-zinc-300">
@@ -121,12 +152,14 @@ export default function UserTable({ users }: UserTableProps) {
                 <td className="px-4 py-3">
                   <div className="relative">
                     <button
-                      onClick={() => setOpenMenuId(openMenuId === user.id ? null : user.id)}
+                      onClick={() =>
+                        setOpenMenuId(openMenuId === user.id ? null : user.id)
+                      }
                       className="p-1 hover:bg-zinc-600 rounded"
                     >
                       <IconDots size={16} />
                     </button>
-                    
+
                     {openMenuId === user.id && (
                       <>
                         <div
@@ -142,11 +175,17 @@ export default function UserTable({ users }: UserTableProps) {
                             Edit User
                           </button>
                           <button
-                            onClick={() => handleToggleActive(user.id, user.isActive)}
+                            onClick={() =>
+                              handleToggleActive(user.id, user.isActive)
+                            }
                             className="w-full flex items-center gap-2 px-4 py-2 text-sm text-white hover:bg-zinc-800"
                           >
-                            {user.isActive ? <IconUserOff size={16} /> : <IconUserCheck size={16} />}
-                            {user.isActive ? 'Deactivate' : 'Activate'}
+                            {user.isActive ? (
+                              <IconUserOff size={16} />
+                            ) : (
+                              <IconUserCheck size={16} />
+                            )}
+                            {user.isActive ? "Deactivate" : "Activate"}
                           </button>
                           <button
                             onClick={() => handleDeleteUser(user.id)}

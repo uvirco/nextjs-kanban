@@ -7,7 +7,10 @@ import { z } from "zod";
 const updateUserSchema = z.object({
   name: z.string().min(1, "Name is required").optional(),
   email: z.string().email("Invalid email").optional(),
-  password: z.string().min(4, "Password must be at least 4 characters").optional(),
+  password: z
+    .string()
+    .min(4, "Password must be at least 4 characters")
+    .optional(),
   role: z.enum(["ADMIN", "MANAGER", "MEMBER"]).optional(),
   isActive: z.boolean().optional(),
 });
@@ -21,15 +24,13 @@ export async function GET(
     const session = await auth();
 
     if (!session || !session.user || session.user.role !== "ADMIN") {
-      return NextResponse.json(
-        { message: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
     const { data: user, error } = await supabaseAdmin
-      .from('User')
-      .select(`
+      .from("User")
+      .select(
+        `
         id,
         name,
         email,
@@ -37,22 +38,20 @@ export async function GET(
         isActive,
         createdAt,
         updatedAt
-      `)
-      .eq('id', id)
+      `
+      )
+      .eq("id", id)
       .single();
 
     if (error || !user) {
-      return NextResponse.json(
-        { message: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 
     // Get board membership count
     const { count: boardCount, error: countError } = await supabaseAdmin
-      .from('BoardMember')
-      .select('*', { count: 'exact', head: true })
-      .eq('userId', id);
+      .from("BoardMember")
+      .select("*", { count: "exact", head: true })
+      .eq("userId", id);
 
     if (countError) {
       console.error("Error counting boards:", countError);
@@ -82,10 +81,7 @@ export async function PATCH(
     const session = await auth();
 
     if (!session || !session.user || session.user.role !== "ADMIN") {
-      return NextResponse.json(
-        { message: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
     const body = await request.json();
@@ -98,17 +94,19 @@ export async function PATCH(
     }
 
     const { data: user, error: updateError } = await supabaseAdmin
-      .from('User')
+      .from("User")
       .update(updateData)
-      .eq('id', id)
-      .select(`
+      .eq("id", id)
+      .select(
+        `
         id,
         name,
         email,
         role,
         isActive,
         updatedAt
-      `)
+      `
+      )
       .single();
 
     if (updateError) {
@@ -146,10 +144,7 @@ export async function DELETE(
     const session = await auth();
 
     if (!session || !session.user || session.user.role !== "ADMIN") {
-      return NextResponse.json(
-        { message: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
     // Prevent deleting the current admin user
@@ -161,9 +156,9 @@ export async function DELETE(
     }
 
     const { error: deleteError } = await supabaseAdmin
-      .from('User')
+      .from("User")
       .delete()
-      .eq('id', id);
+      .eq("id", id);
 
     if (deleteError) {
       console.error("Error deleting user:", deleteError);

@@ -16,10 +16,7 @@ export async function POST(request: NextRequest) {
     const session = await auth();
 
     if (!session || !session.user || session.user.role !== "ADMIN") {
-      return NextResponse.json(
-        { message: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
     const body = await request.json();
@@ -27,9 +24,9 @@ export async function POST(request: NextRequest) {
 
     // Check if user already exists
     const { data: existingUser, error: existingError } = await supabaseAdmin
-      .from('User')
-      .select('id')
-      .eq('email', validatedData.email)
+      .from("User")
+      .select("id")
+      .eq("email", validatedData.email)
       .single();
 
     if (existingUser) {
@@ -44,7 +41,7 @@ export async function POST(request: NextRequest) {
 
     // Create user
     const { data: user, error: createError } = await supabaseAdmin
-      .from('User')
+      .from("User")
       .insert({
         name: validatedData.name,
         email: validatedData.email,
@@ -53,14 +50,16 @@ export async function POST(request: NextRequest) {
         isActive: true,
         createdBy: session.user.id,
       })
-      .select(`
+      .select(
+        `
         id,
         name,
         email,
         role,
         isActive,
         createdAt
-      `)
+      `
+      )
       .single();
 
     if (createError) {

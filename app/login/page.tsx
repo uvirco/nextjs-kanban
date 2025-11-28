@@ -33,7 +33,9 @@ export default async function CustomSignInPage() {
                   <span className="w-full border-t border-gray-600" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-zinc-900 px-2 text-gray-400">Or continue with</span>
+                  <span className="bg-zinc-900 px-2 text-gray-400">
+                    Or continue with
+                  </span>
                 </div>
               </div>
               <p className="uppercase text-xs text-center text-primary">

@@ -18,7 +18,7 @@ export default function TaskDetailActivityItem({
 }: TaskDetailActivityItemProps) {
   const formattedDate = format(
     new Date(activity.createdAt),
-    "MM/dd/yyyy, HH:mm:ss",
+    "MM/dd/yyyy, HH:mm:ss"
   );
 
   const formatDate = (date: Date | null) => {
@@ -77,7 +77,10 @@ export default function TaskDetailActivityItem({
     <li className="flex items-start">
       <div className="w-[40px]">
         <Avatar className="w-8 h-8">
-          <AvatarImage src={activity.user.image ?? undefined} alt={activity.user.name ?? "Unknown"} />
+          <AvatarImage
+            src={activity.user.image ?? undefined}
+            alt={activity.user.name ?? "Unknown"}
+          />
           <AvatarFallback className="text-xs">
             {(activity.user.name ?? "?").charAt(0).toUpperCase()}
           </AvatarFallback>
@@ -87,7 +90,9 @@ export default function TaskDetailActivityItem({
         {activity.type === "COMMENT_ADDED" ? (
           <div className="bg-muted px-3 py-1 rounded-xl">
             <span className="font-semibold">{activity.user.name} </span>
-            <span className="text-muted-foreground text-xs">{formattedDate}</span>
+            <span className="text-muted-foreground text-xs">
+              {formattedDate}
+            </span>
             <div className="text-sm">{activity.content}</div>
             <div className="flex gap-2">
               <button onClick={handleReaction}>

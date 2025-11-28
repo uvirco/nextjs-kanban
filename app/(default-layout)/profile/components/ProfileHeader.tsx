@@ -7,13 +7,22 @@ export default async function ProfileHeader() {
   const userImage = session?.user?.image
     ? session.user.image
     : "default-image-url.jpg";
-  const initials = userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  const initials = userName
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 
   return (
     <div className="flex items-center gap-5 mb-10">
       <div className="shrink-0 grow-0 w-16 h-16 rounded-full bg-zinc-700 flex items-center justify-center text-xl font-semibold overflow-hidden">
         {userImage && userImage !== "default-image-url.jpg" ? (
-          <img src={userImage} alt={userName} className="w-full h-full object-cover" />
+          <img
+            src={userImage}
+            alt={userName}
+            className="w-full h-full object-cover"
+          />
         ) : (
           <span>{initials}</span>
         )}

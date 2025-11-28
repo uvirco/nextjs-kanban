@@ -40,7 +40,11 @@ export default function ColumnActions({
   };
 
   const handleDeleteTasksClick = async () => {
-    if (window.confirm("Are you sure you want to delete all the tasks in this column?")) {
+    if (
+      window.confirm(
+        "Are you sure you want to delete all the tasks in this column?"
+      )
+    ) {
       const response = await handleDeleteColumnTasks({ columnId, boardId });
       if (response.success) {
         toast.success(response.message);

@@ -38,14 +38,15 @@ export async function handleCreateTask(data: TaskCreationData) {
   try {
     // Find the maximum order in the column
     const { data: maxOrderTask, error: maxOrderError } = await supabaseAdmin
-      .from('Task')
-      .select('order')
-      .eq('columnId', parse.data.columnId)
-      .order('order', { ascending: false })
+      .from("Task")
+      .select("order")
+      .eq("columnId", parse.data.columnId)
+      .order("order", { ascending: false })
       .limit(1)
       .single();
 
-    if (maxOrderError && maxOrderError.code !== 'PGRST116') { // PGRST116 is "no rows returned"
+    if (maxOrderError && maxOrderError.code !== "PGRST116") {
+      // PGRST116 is "no rows returned"
       console.error("Error finding max order:", maxOrderError);
       return { success: false, message: MESSAGES.TASK.CREATE_FAILURE };
     }
@@ -54,7 +55,7 @@ export async function handleCreateTask(data: TaskCreationData) {
 
     // Create the task
     const { data: createdTask, error: taskError } = await supabaseAdmin
-      .from('Task')
+      .from("Task")
       .insert({
         title: parse.data.taskTitle,
         columnId: parse.data.columnId,
@@ -72,7 +73,7 @@ export async function handleCreateTask(data: TaskCreationData) {
     // Create activity entry
     if (createdTask) {
       const { error: activityError } = await supabaseAdmin
-        .from('Activity')
+        .from("Activity")
         .insert({
           type: ActivityType.TASK_CREATED,
           userId: userId,
@@ -136,7 +137,7 @@ export async function handleEditTask(data: TaskEditData) {
 
   try {
     const { error } = await supabaseAdmin
-      .from('Task')
+      .from("Task")
       .update({
         title: parse.data.title,
         description: parse.data.description,
@@ -152,7 +153,7 @@ export async function handleEditTask(data: TaskEditData) {
         timeSpent: parse.data.timeSpent,
         storyPoints: parse.data.storyPoints,
       })
-      .eq('id', parse.data.id);
+      .eq("id", parse.data.id);
 
     if (error) {
       console.error("Error updating task:", error);
@@ -194,9 +195,9 @@ export async function handleDeleteTask(data: TaskDeletionData) {
   try {
     // Get the task order before deleting
     const { data: taskToDelete, error: fetchError } = await supabaseAdmin
-      .from('Task')
-      .select('order')
-      .eq('id', parse.data.id)
+      .from("Task")
+      .select("order")
+      .eq("id", parse.data.id)
       .single();
 
     if (fetchError) {
@@ -206,9 +207,9 @@ export async function handleDeleteTask(data: TaskDeletionData) {
 
     // Delete the task
     const { error: deleteError } = await supabaseAdmin
-      .from('Task')
+      .from("Task")
       .delete()
-      .eq('id', parse.data.id);
+      .eq("id", parse.data.id);
 
     if (deleteError) {
       console.error("Error deleting task:", deleteError);
@@ -217,11 +218,12 @@ export async function handleDeleteTask(data: TaskDeletionData) {
 
     // Update the order of remaining tasks in the column
     if (taskToDelete) {
-      const { data: tasksToUpdate, error: fetchTasksError } = await supabaseAdmin
-        .from('Task')
-        .select('id, order')
-        .eq('columnId', parse.data.columnId)
-        .gt('order', taskToDelete.order);
+      const { data: tasksToUpdate, error: fetchTasksError } =
+        await supabaseAdmin
+          .from("Task")
+          .select("id, order")
+          .eq("columnId", parse.data.columnId)
+          .gt("order", taskToDelete.order);
 
       if (fetchTasksError) {
         console.error("Error fetching tasks to update:", fetchTasksError);
@@ -229,9 +231,9 @@ export async function handleDeleteTask(data: TaskDeletionData) {
         // Decrement order for each task
         for (const task of tasksToUpdate) {
           const { error: updateOrderError } = await supabaseAdmin
-            .from('Task')
+            .from("Task")
             .update({ order: task.order - 1 })
-            .eq('id', task.id);
+            .eq("id", task.id);
 
           if (updateOrderError) {
             console.error("Error updating task order:", updateOrderError);

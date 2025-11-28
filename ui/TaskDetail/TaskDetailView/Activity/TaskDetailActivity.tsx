@@ -75,7 +75,10 @@ export default function TaskDetailActivity({
         <div className="flex items-start mb-5 mt-4">
           <div className="w-[40px]">
             <Avatar className="w-8 h-8">
-              <AvatarImage src={userImage ?? undefined} alt={userName ?? "Unknown"} />
+              <AvatarImage
+                src={userImage ?? undefined}
+                alt={userName ?? "Unknown"}
+              />
               <AvatarFallback className="text-xs">
                 {(userName ?? "?").charAt(0).toUpperCase()}
               </AvatarFallback>
@@ -104,14 +107,14 @@ export default function TaskDetailActivity({
                 />
 
                 <div className="flex items-center gap-2">
-                  <Button
-                    size="sm"
-                    type="submit"
-                    disabled={isSubmitting}
-                  >
+                  <Button size="sm" type="submit" disabled={isSubmitting}>
                     Save
                   </Button>
-                  <Button size="sm" onClick={handleToggleForm} variant="outline">
+                  <Button
+                    size="sm"
+                    onClick={handleToggleForm}
+                    variant="outline"
+                  >
                     <IconX size={20} />
                   </Button>
                 </div>

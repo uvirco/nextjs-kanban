@@ -16,7 +16,7 @@ export default async function BoardPage({
   const session = await auth();
   const userId = session?.user?.id;
   const userRole = session?.user?.role;
-  
+
   if (!userId) {
     return <div>User not authenticated</div>;
   }
@@ -26,7 +26,7 @@ export default async function BoardPage({
 
   try {
     // Admins can access all boards
-    if (userRole !== 'ADMIN') {
+    if (userRole !== "ADMIN") {
       // Check if user is a member of the board
       const isMember = await prisma.boardMember.findFirst({
         where: {

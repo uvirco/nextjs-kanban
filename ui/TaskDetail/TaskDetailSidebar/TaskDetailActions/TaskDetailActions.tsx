@@ -4,7 +4,9 @@ import DeleteTaskForm from "@/ui/Forms/DeleteTaskForm";
 export default function TaskDetailActions({ task }: { task: DetailedTask }) {
   return (
     <>
-      <h4 className="text-sm text-muted-foreground font-semibold mb-1">Actions</h4>
+      <h4 className="text-sm text-muted-foreground font-semibold mb-1">
+        Actions
+      </h4>
       <ul className="text-sm space-y-2">
         <li className="px-2 py-2 rounded-md bg-destructive text-destructive-foreground">
           <DeleteTaskForm

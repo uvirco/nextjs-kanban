@@ -35,7 +35,10 @@ const SignInCredentials = () => {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="relative">
-        <IconMail size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-500" />
+        <IconMail
+          size={18}
+          className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-500"
+        />
         <input
           type="email"
           placeholder="Email"
@@ -46,7 +49,10 @@ const SignInCredentials = () => {
         />
       </div>
       <div className="relative">
-        <IconLock size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-500" />
+        <IconLock
+          size={18}
+          className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-500"
+        />
         <input
           type="password"
           placeholder="Password (any password works in dev)"

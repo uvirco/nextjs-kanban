@@ -70,8 +70,8 @@ export default function BoardAddUsers({
                 <>
                   <BoardAddUsersLink invitationLink={invitationLink} />
                   <p className="mt-1 text-xs text-red-500">
-                    Note: emails are not currently sending, please share this link
-                    with the recipient.
+                    Note: emails are not currently sending, please share this
+                    link with the recipient.
                   </p>
                 </>
               )}

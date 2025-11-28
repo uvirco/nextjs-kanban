@@ -33,27 +33,25 @@ export async function handleCreateColumn(data: {
 
   try {
     const { data: maxOrderColumn, error: maxError } = await supabaseAdmin
-      .from('Column')
-      .select('order')
-      .eq('boardId', parse.data.boardId)
-      .order('order', { ascending: false })
+      .from("Column")
+      .select("order")
+      .eq("boardId", parse.data.boardId)
+      .order("order", { ascending: false })
       .limit(1)
       .single();
 
-    if (maxError && maxError.code !== 'PGRST116') {
+    if (maxError && maxError.code !== "PGRST116") {
       console.error("Error finding max order:", maxError);
       return { success: false, message: MESSAGES.COLUMN.CREATE_FAILURE };
     }
 
     const newOrder = (maxOrderColumn?.order || 0) + 1;
 
-    const { error: createError } = await supabaseAdmin
-      .from('Column')
-      .insert({
-        title: parse.data.title,
-        boardId: parse.data.boardId,
-        order: newOrder,
-      });
+    const { error: createError } = await supabaseAdmin.from("Column").insert({
+      title: parse.data.title,
+      boardId: parse.data.boardId,
+      order: newOrder,
+    });
 
     if (createError) {
       console.error("Error creating column:", createError);
@@ -99,9 +97,9 @@ export async function handleEditColumn(data: {
 
   try {
     const { error } = await supabaseAdmin
-      .from('Column')
+      .from("Column")
       .update({ title: parse.data.title })
-      .eq('id', parse.data.columnId);
+      .eq("id", parse.data.columnId);
 
     if (error) {
       console.error("Error updating column:", error);
@@ -145,9 +143,9 @@ export async function handleDeleteColumn(data: {
 
   try {
     const { data: deletedColumn, error: fetchError } = await supabaseAdmin
-      .from('Column')
-      .select('order')
-      .eq('id', parse.data.columnId)
+      .from("Column")
+      .select("order")
+      .eq("id", parse.data.columnId)
       .single();
 
     if (fetchError) {
@@ -156,9 +154,9 @@ export async function handleDeleteColumn(data: {
     }
 
     const { error: deleteError } = await supabaseAdmin
-      .from('Column')
+      .from("Column")
       .delete()
-      .eq('id', parse.data.columnId);
+      .eq("id", parse.data.columnId);
 
     if (deleteError) {
       console.error("Error deleting column:", deleteError);
@@ -166,18 +164,19 @@ export async function handleDeleteColumn(data: {
     }
 
     if (deletedColumn) {
-      const { data: columnsToUpdate, error: fetchColsError } = await supabaseAdmin
-        .from('Column')
-        .select('id, order')
-        .eq('boardId', parse.data.boardId)
-        .gt('order', deletedColumn.order);
+      const { data: columnsToUpdate, error: fetchColsError } =
+        await supabaseAdmin
+          .from("Column")
+          .select("id, order")
+          .eq("boardId", parse.data.boardId)
+          .gt("order", deletedColumn.order);
 
       if (!fetchColsError && columnsToUpdate) {
         for (const col of columnsToUpdate) {
           await supabaseAdmin
-            .from('Column')
+            .from("Column")
             .update({ order: col.order - 1 })
-            .eq('id', col.id);
+            .eq("id", col.id);
         }
       }
     }
@@ -219,9 +218,9 @@ export async function handleDeleteColumnTasks(data: {
 
   try {
     const { error } = await supabaseAdmin
-      .from('Task')
+      .from("Task")
       .delete()
-      .eq('columnId', parse.data.columnId);
+      .eq("columnId", parse.data.columnId);
 
     if (error) {
       console.error("Error deleting tasks within column:", error);

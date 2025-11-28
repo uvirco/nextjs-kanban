@@ -1,7 +1,11 @@
 "use client";
 import { useState } from "react";
 import { IconPlus, IconUser, IconMinus } from "@tabler/icons-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -35,13 +39,13 @@ export default function AddToCardMembers({
   };
 
   const availableBoardMembers = boardMembers.filter(
-    (member) => !isMemberInCard(member.user.id),
+    (member) => !isMemberInCard(member.user.id)
   );
 
   const filteredMembers = availableBoardMembers.filter(
     (member) =>
       member.user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      member.user.email?.toLowerCase().includes(searchTerm.toLowerCase()),
+      member.user.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleAddClick = async (targetUserId: string) => {
@@ -52,7 +56,7 @@ export default function AddToCardMembers({
     const result = await handleRemoveUserFromTask(
       targetUserId,
       taskId,
-      boardId,
+      boardId
     );
   };
 
@@ -130,9 +134,9 @@ function MemberListItem({
 }: MemberListItemProps) {
   const getInitials = (name: string) => {
     return name
-      .split(' ')
-      .map(n => n[0])
-      .join('')
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
       .toUpperCase()
       .slice(0, 2);
   };
@@ -144,7 +148,10 @@ function MemberListItem({
     >
       <div className="flex gap-3">
         <Avatar className="w-10 h-10">
-          <AvatarImage src={member.user.image || undefined} alt={member.user.name || "User"} />
+          <AvatarImage
+            src={member.user.image || undefined}
+            alt={member.user.name || "User"}
+          />
           <AvatarFallback>
             {getInitials(member.user.name || "?")}
           </AvatarFallback>

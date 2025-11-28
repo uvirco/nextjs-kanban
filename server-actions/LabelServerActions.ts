@@ -17,12 +17,10 @@ export async function handleSaveLabel({
   }
 
   try {
-    const { error } = await supabaseAdmin
-      .from('_LabelToTask')
-      .insert({
-        A: labelId,
-        B: taskId,
-      });
+    const { error } = await supabaseAdmin.from("_LabelToTask").insert({
+      A: labelId,
+      B: taskId,
+    });
 
     if (error) {
       console.error("Error adding label to task:", error);
@@ -53,10 +51,10 @@ export async function handleRemoveLabel({
 
   try {
     const { error } = await supabaseAdmin
-      .from('_LabelToTask')
+      .from("_LabelToTask")
       .delete()
-      .eq('A', labelId)
-      .eq('B', taskId);
+      .eq("A", labelId)
+      .eq("B", taskId);
 
     if (error) {
       console.error("Error removing label from task:", error);
@@ -89,12 +87,12 @@ export async function handleUpdateLabel({
 
   try {
     const { error } = await supabaseAdmin
-      .from('Label')
+      .from("Label")
       .update({
         title: title,
         color: color,
       })
-      .eq('id', labelId);
+      .eq("id", labelId);
 
     if (error) {
       console.error("Error updating label:", error);
@@ -133,7 +131,7 @@ export async function handleCreateLabel({
 
   try {
     const { data: createdLabel, error: createError } = await supabaseAdmin
-      .from('Label')
+      .from("Label")
       .insert({
         userId: userId,
         title: title,
@@ -150,7 +148,7 @@ export async function handleCreateLabel({
 
     if (taskId && createdLabel) {
       const { error: linkError } = await supabaseAdmin
-        .from('_LabelToTask')
+        .from("_LabelToTask")
         .insert({
           A: createdLabel.id,
           B: taskId,
@@ -187,9 +185,9 @@ export async function handleDeleteLabel({
 
   try {
     const { error } = await supabaseAdmin
-      .from('Label')
+      .from("Label")
       .delete()
-      .eq('id', labelId);
+      .eq("id", labelId);
 
     if (error) {
       console.error("Error deleting label:", error);

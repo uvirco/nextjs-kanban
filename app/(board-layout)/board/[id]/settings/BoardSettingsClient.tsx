@@ -32,10 +32,10 @@ export default function BoardSettingsClient({
   const [isLoading, setIsLoading] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log('BoardSettingsClient mounted', { 
-      boardId: board?.id, 
+    console.log("BoardSettingsClient mounted", {
+      boardId: board?.id,
       membersCount: currentMembers?.length,
-      usersCount: allUsers?.length 
+      usersCount: allUsers?.length,
     });
   }, []);
 
@@ -131,12 +131,21 @@ export default function BoardSettingsClient({
               >
                 <div className="flex items-center gap-3">
                   <Avatar className="w-10 h-10">
-                    <AvatarImage src={member.image || undefined} alt={member.name || "User"} />
-                    <AvatarFallback>{getInitials(member.name || "?")}</AvatarFallback>
+                    <AvatarImage
+                      src={member.image || undefined}
+                      alt={member.name || "User"}
+                    />
+                    <AvatarFallback>
+                      {getInitials(member.name || "?")}
+                    </AvatarFallback>
                   </Avatar>
                   <div>
-                    <div className="font-medium">{member.name || "Unknown"}</div>
-                    <div className="text-sm text-muted-foreground">{member.email}</div>
+                    <div className="font-medium">
+                      {member.name || "Unknown"}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {member.email}
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -157,7 +166,9 @@ export default function BoardSettingsClient({
             ))}
           </div>
         ) : (
-          <p className="text-muted-foreground">No members yet. Add some below!</p>
+          <p className="text-muted-foreground">
+            No members yet. Add some below!
+          </p>
         )}
       </div>
 
@@ -183,12 +194,19 @@ export default function BoardSettingsClient({
               >
                 <div className="flex items-center gap-3">
                   <Avatar className="w-10 h-10">
-                    <AvatarImage src={user.image || undefined} alt={user.name || "User"} />
-                    <AvatarFallback>{getInitials(user.name || "?")}</AvatarFallback>
+                    <AvatarImage
+                      src={user.image || undefined}
+                      alt={user.name || "User"}
+                    />
+                    <AvatarFallback>
+                      {getInitials(user.name || "?")}
+                    </AvatarFallback>
                   </Avatar>
                   <div>
                     <div className="font-medium">{user.name || "Unknown"}</div>
-                    <div className="text-sm text-muted-foreground">{user.email}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {user.email}
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -210,7 +228,9 @@ export default function BoardSettingsClient({
           </div>
         ) : (
           <p className="text-muted-foreground">
-            {searchTerm ? "No users found matching your search." : "All available users are already board members."}
+            {searchTerm
+              ? "No users found matching your search."
+              : "All available users are already board members."}
           </p>
         )}
       </div>

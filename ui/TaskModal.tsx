@@ -1,11 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogClose,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogClose } from "@/components/ui/dialog";
 import { ThemeProvider } from "next-themes";
 
 export default function TaskModal({ children }: { children: React.ReactNode }) {
@@ -35,9 +31,7 @@ export default function TaskModal({ children }: { children: React.ReactNode }) {
           themes={["light", "dark"]}
           enableSystem={false}
         >
-          <div className="dark">
-            {children}
-          </div>
+          <div className="dark">{children}</div>
         </ThemeProvider>
       </DialogContent>
     </Dialog>

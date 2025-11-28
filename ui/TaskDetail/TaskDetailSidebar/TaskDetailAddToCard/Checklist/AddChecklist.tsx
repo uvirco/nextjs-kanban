@@ -1,7 +1,11 @@
 "use client";
 import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { IconCheckbox, IconPlus, IconX } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
@@ -93,7 +97,12 @@ export default function AddChecklist({
                   <IconPlus size={16} />
                   Create Checklist
                 </Button>
-                <Button size="sm" onClick={closePopover} disabled={isLoading} variant="outline">
+                <Button
+                  size="sm"
+                  onClick={closePopover}
+                  disabled={isLoading}
+                  variant="outline"
+                >
                   <IconX size={16} className="flex items-center mr-1" />
                   Cancel
                 </Button>

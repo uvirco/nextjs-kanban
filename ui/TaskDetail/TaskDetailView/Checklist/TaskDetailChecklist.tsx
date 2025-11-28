@@ -18,7 +18,7 @@ export default function TaskDetailChecklist({
       {checklists.map((checklist) => {
         const totalItems = checklist.items.length;
         const completedItems = checklist.items.filter(
-          (item) => item.isChecked,
+          (item) => item.isChecked
         ).length;
         const completionPercentage =
           totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
