@@ -19,7 +19,8 @@ export default function NavbarAvatarClient({
     if (action === "profile") {
       router.push("/profile");
     } else if (action === "signout") {
-      signOut({ callbackUrl: "/" });
+      await signOut({ redirect: false });
+      router.push("/");
     }
   };
 

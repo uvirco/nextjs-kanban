@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { IconUsers, IconSettings, IconDashboard } from "@tabler/icons-react";
+import AdminSignOutButton from "./AdminSignOutButton";
 
 export default async function AdminLayout({
   children,
@@ -30,14 +31,7 @@ export default async function AdminLayout({
               >
                 Back to App
               </Link>
-              <form action="/api/auth/signout" method="post" className="inline">
-                <button
-                  type="submit"
-                  className="text-zinc-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  Sign Out
-                </button>
-              </form>
+              <AdminSignOutButton />
             </div>
           </div>
         </div>
@@ -74,9 +68,7 @@ export default async function AdminLayout({
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 p-8">
-          {children}
-        </div>
+        <div className="flex-1 p-8">{children}</div>
       </div>
     </div>
   );
