@@ -76,7 +76,7 @@ export default async function FetchTask({
 
       return {
         ...checklist,
-        items: items || []
+        items: items || [],
       };
     })
   );
@@ -134,11 +134,13 @@ export default async function FetchTask({
         .eq("id", taskId)
         .single();
 
-      const { data: board } = activity.boardId ? await supabaseAdmin
-        .from("Board")
-        .select("*")
-        .eq("id", activity.boardId)
-        .single() : { data: null };
+      const { data: board } = activity.boardId
+        ? await supabaseAdmin
+            .from("Board")
+            .select("*")
+            .eq("id", activity.boardId)
+            .single()
+        : { data: null };
 
       return {
         ...activity,
@@ -147,7 +149,7 @@ export default async function FetchTask({
         newColumn,
         originalColumn,
         task: activityTask,
-        board
+        board,
       };
     })
   );
@@ -188,8 +190,8 @@ export default async function FetchTask({
       title: column?.title || "",
       boardId: column?.boardId || "",
       board: {
-        backgroundUrl: (column?.board as any)?.backgroundUrl || null
-      }
+        backgroundUrl: (column?.board as any)?.backgroundUrl || null,
+      },
     },
     labels: (labelAssignments || []).map((la: any) => la.label),
     checklists: checklistsWithItems,
@@ -198,7 +200,7 @@ export default async function FetchTask({
     attachments: attachments || [],
     watchers: watchers || [],
     dependencies: dependencies || [],
-    subtasks: subtasks || []
+    subtasks: subtasks || [],
   };
 
   return detailedTask;

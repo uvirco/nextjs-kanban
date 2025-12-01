@@ -47,7 +47,9 @@ export default async function BoardSettingsPage({
   // Fetch board members
   const { data: members } = await supabaseAdmin
     .from("BoardMember")
-    .select("userId, boardId, role, createdAt, user:User(id, name, email, image, role)")
+    .select(
+      "userId, boardId, role, createdAt, user:User(id, name, email, image, role)"
+    )
     .eq("boardId", id);
 
   // Fetch board labels
@@ -78,10 +80,10 @@ export default async function BoardSettingsPage({
       boardId: m.boardId,
       role: m.role,
       createdAt: m.createdAt,
-      user: m.user
+      user: m.user,
     })),
     labels: labels || [],
-    settings: settings || null
+    settings: settings || null,
   };
 
   // Get current board members

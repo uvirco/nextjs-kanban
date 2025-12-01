@@ -9,6 +9,7 @@ import {
   IconMessage,
   IconCircle,
   IconShield,
+  IconTarget,
 } from "@tabler/icons-react";
 import SidebarHeader from "./SidebarHeader";
 import SidebarSearch from "./SidebarSearch";
@@ -65,6 +66,11 @@ export default async function SidebarMenu() {
           title="All Boards"
           icon={<IconLayoutKanban stroke={1.5} size={20} />}
           submenuItems={submenuBoardItems}
+        />
+        <MenuItem
+          path="/epics"
+          title="Epic Portfolio"
+          icon={<IconTarget stroke={1.5} size={20} />}
         />
         <MenuItem
           path="/inbox"

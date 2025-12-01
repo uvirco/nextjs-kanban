@@ -42,10 +42,18 @@ export async function handleCreateColumn(data: {
       .eq("userId", userId)
       .single();
 
-    console.log("Board member check:", { boardMember, memberError, userId, boardId: parse.data.boardId });
+    console.log("Board member check:", {
+      boardMember,
+      memberError,
+      userId,
+      boardId: parse.data.boardId,
+    });
 
     if (memberError || !boardMember) {
-      return { success: false, message: "You don't have permission to create columns on this board" };
+      return {
+        success: false,
+        message: "You don't have permission to create columns on this board",
+      };
     }
 
     const { data: maxOrderColumn, error: maxError } = await supabaseAdmin

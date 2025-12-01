@@ -95,13 +95,17 @@ export default async function BoardPage({
         .map((la: any) => la.label),
       assignedUsers: (userAssignments || [])
         .filter((ua: any) => ua.taskId === task.id)
-        .map((ua: any) => ({ userId: ua.userId, taskId: ua.taskId, user: ua.user }))
+        .map((ua: any) => ({
+          userId: ua.userId,
+          taskId: ua.taskId,
+          user: ua.user,
+        })),
     }));
 
     // Group tasks by column
     const columnsWithTasks = (columnsData || []).map((column: any) => ({
       ...column,
-      tasks: enrichedTasks.filter((task: any) => task.columnId === column.id)
+      tasks: enrichedTasks.filter((task: any) => task.columnId === column.id),
     }));
 
     // Apply label filter if needed
@@ -115,7 +119,7 @@ export default async function BoardPage({
 
     const board: BoardWithColumns = {
       ...boardBasic,
-      columns: columnsWithTasks
+      columns: columnsWithTasks,
     };
 
     return (

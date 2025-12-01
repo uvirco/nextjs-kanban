@@ -143,9 +143,7 @@ export default function BoardSettingsClient({
                     <div className="font-medium text-white">
                       {member.name || "Unknown"}
                     </div>
-                    <div className="text-sm text-zinc-400">
-                      {member.email}
-                    </div>
+                    <div className="text-sm text-zinc-400">{member.email}</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -166,15 +164,15 @@ export default function BoardSettingsClient({
             ))}
           </div>
         ) : (
-          <p className="text-zinc-400">
-            No members yet. Add some below!
-          </p>
+          <p className="text-zinc-400">No members yet. Add some below!</p>
         )}
       </div>
 
       {/* Add Members Section */}
       <div>
-        <h2 className="text-lg font-semibold mb-4 text-white">Add Board Members</h2>
+        <h2 className="text-lg font-semibold mb-4 text-white">
+          Add Board Members
+        </h2>
 
         <div className="mb-4">
           <Input
@@ -203,14 +201,17 @@ export default function BoardSettingsClient({
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <div className="font-medium text-white">{user.name || "Unknown"}</div>
-                    <div className="text-sm text-zinc-400">
-                      {user.email}
+                    <div className="font-medium text-white">
+                      {user.name || "Unknown"}
                     </div>
+                    <div className="text-sm text-zinc-400">{user.email}</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-xs border-zinc-600 text-zinc-300">
+                  <Badge
+                    variant="outline"
+                    className="text-xs border-zinc-600 text-zinc-300"
+                  >
                     {user.role}
                   </Badge>
                   <Button
