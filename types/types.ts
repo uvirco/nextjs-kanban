@@ -16,6 +16,18 @@ import {
   TaskDependency,
 } from "@prisma/client";
 
+// Department type
+export interface Department {
+  id: string;
+  name: string;
+  description: string | null;
+  managerId: string | null;
+  manager?: User | null;
+  tasks: Task[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // NEW TYPES
 // Extend TaskAssignment to include the nested user object
 export interface TaskAssignmentWithUser extends TaskAssignment {
@@ -50,7 +62,8 @@ export interface DetailedTask {
   columnId: string;
   // Advanced project fields
   projectName?: string | null;
-  department?: string | null;
+  departmentId?: string | null;
+  department?: Department | null;
   priority?: Priority | null;
   status?: string | null;
   businessValue?: string | null;
@@ -152,7 +165,7 @@ export type TaskEditData = {
   boardId: Board["id"];
   // Advanced project fields
   projectName?: string;
-  department?: string;
+  departmentId?: string;
   priority?: Priority;
   status?: string;
   businessValue?: string;

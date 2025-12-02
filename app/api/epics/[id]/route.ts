@@ -18,6 +18,7 @@ export async function PUT(
     const {
       title,
       description,
+      departmentId,
       businessValue,
       riskLevel,
       priority,
@@ -42,6 +43,7 @@ export async function PUT(
     const updateData = {
       title,
       description: description || null,
+      departmentId: departmentId || null,
       businessValue: businessValue || null,
       riskLevel: riskLevel || null,
       priority: priority || null,

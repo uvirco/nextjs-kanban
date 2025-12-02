@@ -5,6 +5,7 @@ import {
   IconUsers,
   IconAlertTriangle,
   IconClock,
+  IconBuilding,
 } from "@tabler/icons-react";
 import { notFound } from "next/navigation";
 import EpicTeamMembers from "./EpicTeamMembers";
@@ -16,7 +17,7 @@ async function getEpicDetails(epicId: string) {
   // Fetch epic
   const { data: epic, error: epicError } = await supabase
     .from("Task")
-    .select("*")
+    .select("*, department:Department(id, name, description)")
     .eq("id", epicId)
     .single();
 
@@ -220,6 +221,12 @@ export default async function EpicDetailPage({
               <div className="flex items-center gap-2">
                 <IconClock size={18} />
                 <span>Due: {new Date(epic.dueDate).toLocaleDateString()}</span>
+              </div>
+            )}
+            {epic.department && (
+              <div className="flex items-center gap-2">
+                <IconBuilding size={18} />
+                <span>Department: {epic.department.name}</span>
               </div>
             )}
           </div>

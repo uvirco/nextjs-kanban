@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { IconLoader } from "@tabler/icons-react";
 
@@ -10,6 +10,12 @@ interface Board {
     id: string;
     title: string;
   }>;
+}
+
+interface Department {
+  id: string;
+  name: string;
+  description: string | null;
 }
 
 interface CreateEpicFormProps {
@@ -23,15 +29,34 @@ export default function CreateEpicForm({
 }: CreateEpicFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [departments, setDepartments] = useState<Department[]>([]);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
+    departmentId: "",
     businessValue: "",
     riskLevel: "",
     priority: "",
     effort: "",
     dueDate: "",
   });
+
+  // Fetch departments
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        const response = await fetch("/api/departments");
+        if (response.ok) {
+          const data = await response.json();
+          setDepartments(data);
+        }
+      } catch (error) {
+        console.error("Error fetching departments:", error);
+      }
+    };
+
+    fetchDepartments();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,6 +68,7 @@ export default function CreateEpicForm({
         title: formData.title,
         description: formData.description || null,
         taskType: "EPIC",
+        departmentId: formData.departmentId || null,
         businessValue: formData.businessValue || null,
         riskLevel: formData.riskLevel || null,
         priority: formData.priority || null,
@@ -128,6 +154,24 @@ export default function CreateEpicForm({
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-zinc-300 mb-2">
+              Department
+            </label>
+            <select
+              value={formData.departmentId}
+              onChange={(e) => handleChange("departmentId", e.target.value)}
+              className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:border-zinc-600 focus:outline-none"
+            >
+              <option value="">Select department...</option>
+              {departments.map((dept) => (
+                <option key={dept.id} value={dept.id}>
+                  {dept.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-zinc-300 mb-2">
               Business Value
             </label>
             <select
@@ -142,22 +186,22 @@ export default function CreateEpicForm({
               <option value="LOW">Low</option>
             </select>
           </div>
+        </div>
 
-          <div>
-            <label className="block text-sm font-medium text-zinc-300 mb-2">
-              Risk Level
-            </label>
-            <select
-              value={formData.riskLevel}
-              onChange={(e) => handleChange("riskLevel", e.target.value)}
-              className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:border-zinc-600 focus:outline-none"
-            >
-              <option value="">Select risk...</option>
-              <option value="HIGH">High</option>
-              <option value="MEDIUM">Medium</option>
-              <option value="LOW">Low</option>
-            </select>
-          </div>
+        <div>
+          <label className="block text-sm font-medium text-zinc-300 mb-2">
+            Risk Level
+          </label>
+          <select
+            value={formData.riskLevel}
+            onChange={(e) => handleChange("riskLevel", e.target.value)}
+            className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:border-zinc-600 focus:outline-none"
+          >
+            <option value="">Select risk...</option>
+            <option value="HIGH">High</option>
+            <option value="MEDIUM">Medium</option>
+            <option value="LOW">Low</option>
+          </select>
         </div>
 
         <div className="grid grid-cols-2 gap-4">

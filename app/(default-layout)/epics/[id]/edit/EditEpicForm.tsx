@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { IconLoader, IconPlus, IconX, IconUser } from "@tabler/icons-react";
@@ -19,6 +19,7 @@ interface Epic {
   stageGate: string | null;
   dueDate: string | null;
   startDate: string | null;
+  departmentId: string | null;
 }
 
 interface EpicMember {
@@ -40,6 +41,12 @@ interface User {
   image: string | null;
 }
 
+interface Department {
+  id: string;
+  name: string;
+  description: string | null;
+}
+
 interface EditEpicFormProps {
   epic: Epic;
   initialMembers?: EpicMember[];
@@ -53,6 +60,7 @@ export default function EditEpicForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [members, setMembers] = useState<EpicMember[]>(initialMembers);
   const [users, setUsers] = useState<User[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
   const [isAddingMember, setIsAddingMember] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState("");
   const [selectedRole, setSelectedRole] = useState("");
@@ -61,6 +69,7 @@ export default function EditEpicForm({
   const [formData, setFormData] = useState({
     title: epic.title,
     description: epic.description || "",
+    departmentId: epic.departmentId || "",
     businessValue: epic.businessValue || "",
     riskLevel: epic.riskLevel || "",
     priority: epic.priority || "",
@@ -104,6 +113,22 @@ export default function EditEpicForm({
       console.error("Error fetching users:", error);
     }
   };
+
+  const fetchDepartments = async () => {
+    try {
+      const response = await fetch("/api/departments");
+      if (response.ok) {
+        const data = await response.json();
+        setDepartments(data);
+      }
+    } catch (error) {
+      console.error("Error fetching departments:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchDepartments();
+  }, []);
 
   const addMember = async () => {
     if (!selectedUserId || !selectedRole) return;
@@ -201,6 +226,7 @@ export default function EditEpicForm({
       const updateData: any = {
         title: formData.title,
         description: formData.description || null,
+        departmentId: formData.departmentId || null,
         businessValue: formData.businessValue || null,
         riskLevel: formData.riskLevel || null,
         priority: formData.priority || null,
@@ -288,6 +314,24 @@ export default function EditEpicForm({
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-zinc-300 mb-2">
+              Department
+            </label>
+            <select
+              value={formData.departmentId}
+              onChange={(e) => handleChange("departmentId", e.target.value)}
+              className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Select department...</option>
+              {departments.map((dept) => (
+                <option key={dept.id} value={dept.id}>
+                  {dept.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-zinc-300 mb-2">
               Priority
             </label>
             <select
@@ -302,7 +346,9 @@ export default function EditEpicForm({
               <option value="CRITICAL">Critical</option>
             </select>
           </div>
+        </div>
 
+        <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-zinc-300 mb-2">
               Business Value
@@ -319,9 +365,7 @@ export default function EditEpicForm({
               <option value="CRITICAL">Critical</option>
             </select>
           </div>
-        </div>
 
-        <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-zinc-300 mb-2">
               Risk Level
@@ -337,21 +381,21 @@ export default function EditEpicForm({
               <option value="HIGH">High</option>
             </select>
           </div>
+        </div>
 
-          <div>
-            <label className="block text-sm font-medium text-zinc-300 mb-2">
-              Strategic Alignment
-            </label>
-            <input
-              type="text"
-              value={formData.strategicAlignment}
-              onChange={(e) =>
-                handleChange("strategicAlignment", e.target.value)
-              }
-              placeholder="e.g., Q1 2025 Goals"
-              className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+        <div>
+          <label className="block text-sm font-medium text-zinc-300 mb-2">
+            Strategic Alignment
+          </label>
+          <input
+            type="text"
+            value={formData.strategicAlignment}
+            onChange={(e) =>
+              handleChange("strategicAlignment", e.target.value)
+            }
+            placeholder="e.g., Q1 2025 Goals"
+            className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
         </div>
       </div>
 

@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { IconUsers, IconSettings, IconDashboard } from "@tabler/icons-react";
+import { IconUsers, IconSettings, IconDashboard, IconBuilding } from "@tabler/icons-react";
 import AdminSignOutButton from "./AdminSignOutButton";
 
 export default async function AdminLayout({
@@ -55,6 +55,13 @@ export default async function AdminLayout({
               >
                 <IconUsers size={20} className="mr-3" />
                 User Management
+              </Link>
+              <Link
+                href="/admin/departments"
+                className="flex items-center px-4 py-2 text-zinc-300 hover:bg-zinc-800 hover:text-white rounded-md"
+              >
+                <IconBuilding size={20} className="mr-3" />
+                Departments
               </Link>
               <Link
                 href="/admin/settings"

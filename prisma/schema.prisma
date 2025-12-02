@@ -38,6 +38,17 @@ model Session {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model Department {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  managerId   String?
+  manager     User?    @relation(fields: [managerId], references: [id])
+  tasks       Task[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 model User {
   id                  String           @id @default(cuid())
   name                String?
@@ -62,6 +73,7 @@ model User {
   assignedTasks       TaskAssignment[] @relation("UserAssignments")
   watchedTasks        TaskWatcher[]
   favoriteBoards      Board[]          @relation("favorites")
+  managedDepartments  Department[]
 }
 
 model VerificationToken {
@@ -156,7 +168,8 @@ model Task {
   stageGate          String?
   timeSpent          Float?           @default(0)
   storyPoints        Int?
-  department         String?
+  departmentId       String?
+  department         Department?      @relation(fields: [departmentId], references: [id])
   parentTaskId       String?
   activities         Activity[]
   attachments        Attachment[]

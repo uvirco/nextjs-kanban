@@ -84,7 +84,7 @@ export default async function TaskDetailView({ task }: { task: DetailedTask }) {
                 <Input
                   id="department"
                   placeholder="Enter department"
-                  defaultValue={task.department || ""}
+                  defaultValue={task.department?.name || ""}
                   className="h-8"
                 />
               </div>
