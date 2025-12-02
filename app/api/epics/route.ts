@@ -31,22 +31,51 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get the Epics board's Backlog column (simplified query)
+    // Find the Epics board dynamically
+    const { data: epicsBoard, error: boardError } = await supabaseAdmin
+      .from("Board")
+      .select("id")
+      .eq("title", "Epics")
+      .single();
+
+    if (boardError || !epicsBoard) {
+      console.error("Epics board not found:", boardError);
+      return NextResponse.json(
+        {
+          error: `Epics board not found. Please ensure the database migration has been run. Error: ${boardError?.message || "Unknown"}`,
+        },
+        { status: 500 }
+      );
+    }
+
+    // Get the Epics board's Backlog column
     const { data: backlogColumn, error: columnError } = await supabaseAdmin
       .from("Column")
       .select("id")
       .eq("title", "📋 Backlog")
-      .eq("boardId", "63831445-8cb8-4f5e-a190-ed6163b3fa38") // Hardcode the Epics board ID for now
+      .eq("boardId", epicsBoard.id)
       .single();
 
     if (columnError || !backlogColumn) {
-      console.error("Column query error:", columnError);
+      console.error("Backlog column query error:", columnError);
       return NextResponse.json(
         {
-          error: `Epics board column not found. Error: ${columnError?.message || "Unknown"}`,
+          error: `Epics board Backlog column not found. Error: ${columnError?.message || "Unknown"}`,
         },
         { status: 500 }
       );
+    }
+
+    // Map effort string values to numeric values
+    let estimatedEffortValue = null;
+    if (estimatedEffort) {
+      const effortMapping: Record<string, number> = {
+        'SMALL': 2,    // 1-2 weeks
+        'MEDIUM': 8,   // 1-3 months (average ~8 weeks)
+        'LARGE': 20,   // 3-6 months (average ~20 weeks)
+        'XLARGE': 30,  // 6+ months (minimum 30 weeks)
+      };
+      estimatedEffortValue = effortMapping[estimatedEffort] || null;
     }
 
     // Create the epic
@@ -59,7 +88,7 @@ export async function POST(request: NextRequest) {
       businessValue: businessValue || null,
       riskLevel: riskLevel || null,
       priority: priority || null,
-      estimatedEffort: estimatedEffort || null,
+      estimatedEffort: estimatedEffortValue,
       dueDate: dueDate || null,
       createdByUserId: userId,
       columnId: backlogColumn.id, // Assign to Epics board's Backlog column

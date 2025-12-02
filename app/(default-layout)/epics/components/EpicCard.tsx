@@ -9,6 +9,10 @@ interface Epic {
   businessValue: string | null;
   riskLevel: string | null;
   dueDate: string | null;
+  department?: {
+    id: string;
+    name: string;
+  } | null;
   metrics: {
     totalTasks: number;
     completedTasks: number;
@@ -53,6 +57,11 @@ export default function EpicCard({ epic }: EpicCardProps) {
           {epic.businessValue && (
             <span className="px-2 py-1 text-xs font-medium bg-blue-900/30 text-blue-400 rounded">
                {epic.businessValue}
+            </span>
+          )}
+          {epic.department && (
+            <span className="px-2 py-1 text-xs font-medium bg-purple-900/30 text-purple-400 rounded">
+              {epic.department.name}
             </span>
           )}
           <div className="flex items-center gap-2 text-sm text-zinc-400">

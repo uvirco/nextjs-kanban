@@ -33,6 +33,7 @@ export default async function EpicPortfolioPage() {
       createdAt,
       updatedAt,
       columnId,
+      department:Department(id, name),
       column:Column(id, title, board:Board(id, title))
     `
     )
