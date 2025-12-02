@@ -7,6 +7,19 @@ export async function DELETE(
 ) {
   const params = await props.params;
   try {
+    // First, remove all RACI entries for this user in this epic
+    const { error: raciError } = await supabaseAdmin
+      .from("RACIMatrix")
+      .delete()
+      .eq("epicId", params.id)
+      .eq("userId", params.userId);
+
+    if (raciError) {
+      console.error("Error removing RACI entries:", raciError);
+      // Continue with member removal even if RACI cleanup fails
+    }
+
+    // Then remove the member from the epic
     const { error } = await supabaseAdmin
       .from("EpicMember")
       .delete()
