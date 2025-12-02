@@ -96,6 +96,8 @@ export interface Task {
   storyPoints: number | null;
   departmentId: string | null;
   parentTaskId: string | null;
+  acceptanceCriteria: string | null;
+  readinessScore: number;
 }
 
 export interface Activity {
@@ -253,6 +255,8 @@ export interface DetailedTask {
   timeSpent?: number | null;
   storyPoints?: number | null;
   notes?: string | null;
+  acceptanceCriteria?: string | null;
+  readinessScore?: number;
   column: {
     title: string;
     boardId: string;
@@ -355,6 +359,7 @@ export type TaskEditData = {
   timeSpent?: number;
   storyPoints?: number;
   notes?: string;
+  acceptanceCriteria?: string;
 };
 
 export type TaskDeletionData = {
