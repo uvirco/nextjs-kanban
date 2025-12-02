@@ -1,6 +1,11 @@
 "use client";
 import Link from "next/link";
-import { IconUsers, IconAlertTriangle, IconClock, IconGripVertical } from "@tabler/icons-react";
+import {
+  IconUsers,
+  IconAlertTriangle,
+  IconClock,
+  IconGripVertical,
+} from "@tabler/icons-react";
 
 interface EpicTask {
   id: string;
@@ -53,7 +58,11 @@ interface EpicTaskItemProps {
   dragHandleProps?: any;
 }
 
-export default function EpicTaskItem({ task, epic, dragHandleProps }: EpicTaskItemProps) {
+export default function EpicTaskItem({
+  task,
+  epic,
+  dragHandleProps,
+}: EpicTaskItemProps) {
   const formatDate = (date: string | null) => {
     if (!date) return "No due date";
     return new Date(date).toLocaleDateString("en-US", {
@@ -142,12 +151,17 @@ export default function EpicTaskItem({ task, epic, dragHandleProps }: EpicTaskIt
 
             <div className="flex flex-wrap gap-1 mb-2">
               {task.priority && (
-                <span className={`px-1.5 py-0.5 text-xs font-medium rounded ${
-                  task.priority === 'CRITICAL' ? 'bg-red-900/30 text-red-400' :
-                  task.priority === 'HIGH' ? 'bg-orange-900/30 text-orange-400' :
-                  task.priority === 'MEDIUM' ? 'bg-yellow-900/30 text-yellow-400' :
-                  'bg-green-900/30 text-green-400'
-                }`}>
+                <span
+                  className={`px-1.5 py-0.5 text-xs font-medium rounded ${
+                    task.priority === "CRITICAL"
+                      ? "bg-red-900/30 text-red-400"
+                      : task.priority === "HIGH"
+                        ? "bg-orange-900/30 text-orange-400"
+                        : task.priority === "MEDIUM"
+                          ? "bg-yellow-900/30 text-yellow-400"
+                          : "bg-green-900/30 text-green-400"
+                  }`}
+                >
                   {task.priority}
                 </span>
               )}
@@ -166,7 +180,9 @@ export default function EpicTaskItem({ task, epic, dragHandleProps }: EpicTaskIt
             <div className="flex items-center justify-between text-xs text-zinc-400">
               <div className="flex items-center gap-3">
                 <span>{metrics.progress}%</span>
-                <span>{metrics.completedTasks}/{metrics.totalTasks} tasks</span>
+                <span>
+                  {metrics.completedTasks}/{metrics.totalTasks} tasks
+                </span>
                 <div className="flex items-center gap-1">
                   <IconClock size={12} />
                   <span>{formatDate(dueDate)}</span>

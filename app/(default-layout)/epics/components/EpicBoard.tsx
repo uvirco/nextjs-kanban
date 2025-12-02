@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   DragDropContext,
   Droppable,
@@ -18,7 +18,13 @@ import { Spinner } from "@nextui-org/spinner";
 
 import { Epic } from "@/types/types";
 
-export default function EpicBoard({ board, epics }: { board: BoardWithColumns; epics: Epic[] }) {
+export default function EpicBoard({
+  board,
+  epics,
+}: {
+  board: BoardWithColumns;
+  epics: Epic[];
+}) {
   const [currentBoard, setCurrentBoard] = useState<BoardWithColumns>(board);
   const [originalBoard, setOriginalBoard] = useState<BoardWithColumns>(board);
   const [isSaving, setIsSaving] = useState(false);
@@ -27,10 +33,28 @@ export default function EpicBoard({ board, epics }: { board: BoardWithColumns; e
   // Helper function to safely convert dates to strings
   const formatDateForEpicTask = (date: Date | string | null): string | null => {
     if (!date) return null;
-    if (typeof date === 'string') return date;
+    if (typeof date === "string") return date;
     if (date instanceof Date) return date.toISOString();
     return null;
   };
+
+  // Create a Set of filtered epic IDs for efficient lookup
+  const filteredEpicIds = useMemo(
+    () => new Set(epics.map((e) => e.id)),
+    [epics]
+  );
+
+  // Filter board columns to only show filtered epics
+  const filteredBoard = useMemo(
+    () => ({
+      ...currentBoard,
+      columns: currentBoard.columns.map((column) => ({
+        ...column,
+        tasks: column.tasks.filter((task) => filteredEpicIds.has(task.id)),
+      })),
+    }),
+    [currentBoard, filteredEpicIds]
+  );
 
   const onDragStart = () => {
     setOriginalBoard({ ...currentBoard });
@@ -57,10 +81,10 @@ export default function EpicBoard({ board, epics }: { board: BoardWithColumns; e
       };
     } else {
       const sourceColumn = currentBoard.columns.find(
-        (col) => col.id === source.droppableId,
+        (col) => col.id === source.droppableId
       );
       const destColumn = currentBoard.columns.find(
-        (col) => col.id === destination.droppableId,
+        (col) => col.id === destination.droppableId
       );
 
       if (!sourceColumn || !destColumn) return;
@@ -74,7 +98,7 @@ export default function EpicBoard({ board, epics }: { board: BoardWithColumns; e
         newBoard = {
           ...currentBoard,
           columns: currentBoard.columns.map((col) =>
-            col.id === sourceColumn.id ? { ...col, tasks: copiedTasks } : col,
+            col.id === sourceColumn.id ? { ...col, tasks: copiedTasks } : col
           ),
         };
       } else {
@@ -128,12 +152,18 @@ export default function EpicBoard({ board, epics }: { board: BoardWithColumns; e
     setMounted(true);
   }, []);
 
+  // Use currentBoard for SSR, filteredBoard after mounting
+  const displayBoard = mounted ? filteredBoard : currentBoard;
+
   if (!mounted) {
     return (
       <div className="z-10 flex flex-col grow">
         <div className="grow flex overflow-x-scroll px-2">
           {currentBoard.columns.map((column) => (
-            <div key={column.id} className="shrink-0 w-80 md:w-96 lg:w-[28rem] mx-2">
+            <div
+              key={column.id}
+              className="shrink-0 w-80 md:w-96 lg:w-[28rem] mx-2"
+            >
               <Card>
                 <CardHeader className="tracking-tight">
                   <div className="flex justify-between items-center gap-2">
@@ -152,7 +182,7 @@ export default function EpicBoard({ board, epics }: { board: BoardWithColumns; e
                       </div>
                     ) : (
                       column.tasks.map((task) => {
-                        const epic = epics.find(e => e.id === task.id);
+                        const epic = epics.find((e) => e.id === task.id);
                         const taskWithStringDates = {
                           ...task,
                           dueDate: formatDateForEpicTask(task.dueDate),
@@ -160,7 +190,10 @@ export default function EpicBoard({ board, epics }: { board: BoardWithColumns; e
                         };
                         return (
                           <div key={task.id} className="mb-2">
-                            <EpicTaskItem task={taskWithStringDates} epic={epic} />
+                            <EpicTaskItem
+                              task={taskWithStringDates}
+                              epic={epic}
+                            />
                           </div>
                         );
                       })
@@ -201,7 +234,7 @@ export default function EpicBoard({ board, epics }: { board: BoardWithColumns; e
               ref={provided.innerRef}
               {...provided.droppableProps}
             >
-              {currentBoard.columns.map((column, columnIndex) => (
+              {displayBoard.columns.map((column, columnIndex) => (
                 <Draggable
                   key={column.id}
                   draggableId={column.id}
@@ -242,11 +275,17 @@ export default function EpicBoard({ board, epics }: { board: BoardWithColumns; e
                                   </div>
                                 ) : (
                                   column.tasks.map((task, taskIndex) => {
-                                    const epic = epics.find(e => e.id === task.id);
+                                    const epic = epics.find(
+                                      (e) => e.id === task.id
+                                    );
                                     const taskWithStringDates = {
                                       ...task,
-                                      dueDate: formatDateForEpicTask(task.dueDate),
-                                      startDate: formatDateForEpicTask(task.startDate),
+                                      dueDate: formatDateForEpicTask(
+                                        task.dueDate
+                                      ),
+                                      startDate: formatDateForEpicTask(
+                                        task.startDate
+                                      ),
                                     };
                                     return (
                                       <Draggable

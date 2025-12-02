@@ -412,7 +412,9 @@ export default function EpicPortfolioClient({
       {/* View Content */}
       {view === "priority" && <EpicPriorityView epics={filteredEpics} />}
       {view === "table" && <EpicTableView epics={filteredEpics} />}
-      {view === "board" && epicBoard && <EpicBoard board={epicBoard} epics={filteredEpics} />}
+      {view === "board" && epicBoard && (
+        <EpicBoard board={epicBoard} epics={filteredEpics} />
+      )}
       {view === "board" && !epicBoard && (
         <div className="text-zinc-400">
           Epic board not found. Please create a board named "Epics".

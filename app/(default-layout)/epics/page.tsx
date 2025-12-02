@@ -153,7 +153,9 @@ export default async function EpicPortfolioPage() {
     // Group tasks by column
     const columnsWithTasks = (columnsData || []).map((column: any) => ({
       ...column,
-      tasks: (tasksData || []).filter((task: any) => task.columnId === column.id),
+      tasks: (tasksData || []).filter(
+        (task: any) => task.columnId === column.id
+      ),
     }));
 
     epicBoard = {
