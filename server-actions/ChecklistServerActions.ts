@@ -42,12 +42,10 @@ export async function handleCreateChecklist({
   }
 
   try {
-    const { error } = await supabaseAdmin
-      .from("Checklist")
-      .insert({
-        title: parse.data.title,
-        taskId: parse.data.taskId,
-      });
+    const { error } = await supabaseAdmin.from("Checklist").insert({
+      title: parse.data.title,
+      taskId: parse.data.taskId,
+    });
 
     if (error) {
       console.error(error);
@@ -201,17 +199,18 @@ export async function handleCreateChecklistItem({
   }
 
   try {
-    const { error } = await supabaseAdmin
-      .from("ChecklistItem")
-      .insert({
-        content: parse.data.content,
-        isChecked: false,
-        checklistId: parse.data.checklistId,
-      });
+    const { error } = await supabaseAdmin.from("ChecklistItem").insert({
+      content: parse.data.content,
+      isChecked: false,
+      checklistId: parse.data.checklistId,
+    });
 
     if (error) {
       console.error(error);
-      return { success: false, message: MESSAGES.CHECKLIST_ITEM.CREATE_FAILURE };
+      return {
+        success: false,
+        message: MESSAGES.CHECKLIST_ITEM.CREATE_FAILURE,
+      };
     }
 
     revalidatePath(`/task/${parse.data.taskId}`);
@@ -263,7 +262,10 @@ export async function handleDeleteChecklistItem({
 
     if (error) {
       console.error(error);
-      return { success: false, message: MESSAGES.CHECKLIST_ITEM.DELETE_FAILURE };
+      return {
+        success: false,
+        message: MESSAGES.CHECKLIST_ITEM.DELETE_FAILURE,
+      };
     }
 
     revalidatePath(`/task/${parse.data.taskId}`);
@@ -318,7 +320,10 @@ export async function handleToggleCheckedItem({
 
     if (error) {
       console.error(error);
-      return { success: false, message: MESSAGES.CHECKLIST_ITEM.TOGGLE_FAILURE };
+      return {
+        success: false,
+        message: MESSAGES.CHECKLIST_ITEM.TOGGLE_FAILURE,
+      };
     }
 
     revalidatePath(`/task/${parse.data.taskId}`);

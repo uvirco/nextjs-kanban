@@ -28,8 +28,12 @@ export default async function EpicRolesPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-white">Epic Role Management</h1>
-          <p className="text-zinc-400 mt-2">Create, edit, and manage epic team member roles</p>
+          <h1 className="text-3xl font-bold text-white">
+            Epic Role Management
+          </h1>
+          <p className="text-zinc-400 mt-2">
+            Create, edit, and manage epic team member roles
+          </p>
         </div>
         <CreateRoleModal
           trigger={

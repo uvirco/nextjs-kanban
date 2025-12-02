@@ -93,11 +93,7 @@ export async function handleSendBoardInvitation({
 }
 
 // Accept board invitation
-export async function handleAcceptInvitation({
-  token,
-}: {
-  token: string;
-}) {
+export async function handleAcceptInvitation({ token }: { token: string }) {
   const session = await auth();
   const loggedInUserId = session?.user?.id;
   const loggedInUserEmail = session?.user?.email;
@@ -146,7 +142,10 @@ export async function handleAcceptInvitation({
     if (existingMembership) {
       // User is already a member, just delete the invitation
       await supabaseAdmin.from("Invitation").delete().eq("id", invitation.id);
-      return { success: true, message: "You are already a member of this board." };
+      return {
+        success: true,
+        message: "You are already a member of this board.",
+      };
     }
 
     // Add user to the board members

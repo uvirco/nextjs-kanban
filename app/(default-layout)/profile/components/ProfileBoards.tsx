@@ -15,7 +15,8 @@ export default async function ProfileBoards() {
 
   const { data: user, error: userError } = await supabaseAdmin
     .from("User")
-    .select(`
+    .select(
+      `
       *,
       favoriteBoards:Board!UserFavoriteBoard (
         *,
@@ -24,7 +25,8 @@ export default async function ProfileBoards() {
           tasks:Task (*)
         )
       )
-    `)
+    `
+    )
     .eq("id", userId)
     .single();
 

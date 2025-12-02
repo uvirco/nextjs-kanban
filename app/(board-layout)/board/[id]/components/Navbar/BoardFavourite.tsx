@@ -12,16 +12,19 @@ export default async function BoardFavourite({ boardId }: { boardId: string }) {
   // Get board with favorited users
   const { data: boardData } = await supabaseAdmin
     .from("Board")
-    .select(`
+    .select(
+      `
       id,
       favoritedBy:UserFavoriteBoard (userId)
-    `)
+    `
+    )
     .eq("id", boardId)
     .single();
 
-  const isFavorite = boardData?.favoritedBy?.some(
-    (fav: { userId: string }) => fav.userId === userId
-  ) || false;
+  const isFavorite =
+    boardData?.favoritedBy?.some(
+      (fav: { userId: string }) => fav.userId === userId
+    ) || false;
 
   return <BoardFavouriteClient isFavorite={isFavorite} boardId={boardId} />;
 }

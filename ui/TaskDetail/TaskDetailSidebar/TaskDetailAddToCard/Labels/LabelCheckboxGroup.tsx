@@ -36,7 +36,10 @@ export function LabelCheckboxGroup({
             )}
           </div>
           <button onClick={() => enterEditMode(label)}>
-            <IconEdit className="text-muted-foreground hover:text-primary" size={22} />
+            <IconEdit
+              className="text-muted-foreground hover:text-primary"
+              size={22}
+            />
           </button>
         </Checkbox>
       ))}

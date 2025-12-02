@@ -34,19 +34,22 @@ export default async function UsersPage() {
   }
 
   // Map users with their board count
-  const users = usersData?.map(user => ({
-    ...user,
-    _count: {
-      memberBoards: memberCountMap[user.id] || 0,
-    },
-  })) || [];
+  const users =
+    usersData?.map((user) => ({
+      ...user,
+      _count: {
+        memberBoards: memberCountMap[user.id] || 0,
+      },
+    })) || [];
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-white">User Management</h1>
-          <p className="text-zinc-400 mt-2">Create, edit, and manage user accounts</p>
+          <p className="text-zinc-400 mt-2">
+            Create, edit, and manage user accounts
+          </p>
         </div>
         <CreateUserModal
           trigger={

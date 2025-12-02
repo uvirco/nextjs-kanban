@@ -41,15 +41,13 @@ export async function handleCreateActivity(
   }
 
   try {
-    const { error } = await supabaseAdmin
-      .from("Activity")
-      .insert({
-        type: ActivityType.COMMENT_ADDED,
-        content: parse.data.content,
-        userId: userId,
-        taskId: parse.data.taskId,
-        boardId: parse.data.boardId,
-      });
+    const { error } = await supabaseAdmin.from("Activity").insert({
+      type: ActivityType.COMMENT_ADDED,
+      content: parse.data.content,
+      userId: userId,
+      taskId: parse.data.taskId,
+      boardId: parse.data.boardId,
+    });
 
     if (error) {
       return { success: false, message: MESSAGES.ACTIVITY.CREATE_FAILURE };

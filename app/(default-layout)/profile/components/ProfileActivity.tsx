@@ -14,7 +14,8 @@ export default async function ProfileActivity() {
   // Query activities with complex joins
   const { data: activities, error } = await supabaseAdmin
     .from("Activity")
-    .select(`
+    .select(
+      `
       *,
       user:User (*),
       task:Task (title),
@@ -23,7 +24,8 @@ export default async function ProfileActivity() {
       newColumn:Column!newColumnId (*),
       originalColumn:Column!originalColumnId (*),
       targetUser:User!targetUserId (id, name)
-    `)
+    `
+    )
     .eq("userId", userId)
     .order("createdAt", { ascending: false })
     .limit(5);

@@ -27,14 +27,16 @@ export default async function SidebarMenu() {
 
   const { data: boardMembers, error } = await supabaseAdmin
     .from("BoardMember")
-    .select(`
+    .select(
+      `
       *,
       board:Board (
         id,
         title,
         backgroundUrl
       )
-    `)
+    `
+    )
     .eq("userId", userId)
     .order("createdAt", { ascending: true });
 

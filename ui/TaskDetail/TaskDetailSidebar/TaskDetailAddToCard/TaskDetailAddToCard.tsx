@@ -21,17 +21,20 @@ export default async function TaskDetailAddToCard({
 
   const { data: boardMembersData, error: membersError } = await supabaseAdmin
     .from("BoardMember")
-    .select(`
+    .select(
+      `
       *,
       user:User (*)
-    `)
+    `
+    )
     .eq("boardId", boardId);
 
   if (membersError) {
     console.error("Failed to fetch board members:", membersError);
   }
 
-  const boardMembers: BoardMemberWithUser[] = boardMembersData as BoardMemberWithUser[] || [];
+  const boardMembers: BoardMemberWithUser[] =
+    (boardMembersData as BoardMemberWithUser[]) || [];
 
   const { data: labels, error: labelsError } = await supabaseAdmin
     .from("Label")

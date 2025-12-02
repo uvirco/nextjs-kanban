@@ -19,10 +19,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     if (error) {
       console.error("Error fetching role:", error);
-      return NextResponse.json(
-        { error: "Role not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Role not found" }, { status: 404 });
     }
 
     return NextResponse.json(role);

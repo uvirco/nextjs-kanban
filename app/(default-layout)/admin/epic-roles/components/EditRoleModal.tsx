@@ -44,7 +44,11 @@ const categories = [
   { value: "other", label: "Other" },
 ];
 
-export default function EditRoleModal({ role, isOpen, onClose }: EditRoleModalProps) {
+export default function EditRoleModal({
+  role,
+  isOpen,
+  onClose,
+}: EditRoleModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -106,9 +110,7 @@ export default function EditRoleModal({ role, isOpen, onClose }: EditRoleModalPr
     <Modal isOpen={isOpen} onOpenChange={onClose}>
       <ModalContent>
         <form onSubmit={handleSubmit}>
-          <ModalHeader className="flex flex-col gap-1">
-            Edit Role
-          </ModalHeader>
+          <ModalHeader className="flex flex-col gap-1">Edit Role</ModalHeader>
           <ModalBody>
             <div className="space-y-4">
               <Input
@@ -151,18 +153,10 @@ export default function EditRoleModal({ role, isOpen, onClose }: EditRoleModalPr
             </div>
           </ModalBody>
           <ModalFooter>
-            <Button
-              color="danger"
-              variant="light"
-              onPress={onClose}
-            >
+            <Button color="danger" variant="light" onPress={onClose}>
               Cancel
             </Button>
-            <Button
-              color="primary"
-              type="submit"
-              isLoading={isSubmitting}
-            >
+            <Button color="primary" type="submit" isLoading={isSubmitting}>
               {isSubmitting ? "Updating..." : "Update Role"}
             </Button>
           </ModalFooter>

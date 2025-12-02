@@ -3,11 +3,9 @@ import { auth } from "@/auth";
 import InvitationButtons from "./components/InvitationButtons";
 import Link from "next/link";
 
-export default async function AcceptInvitation(
-  props: {
-    searchParams: Promise<{ token?: string }>;
-  }
-) {
+export default async function AcceptInvitation(props: {
+  searchParams: Promise<{ token?: string }>;
+}) {
   const searchParams = await props.searchParams;
   const session = await auth();
   const token = searchParams.token;
@@ -30,11 +28,13 @@ export default async function AcceptInvitation(
   try {
     const { data: foundInvitation, error } = await supabaseAdmin
       .from("Invitation")
-      .select(`
+      .select(
+        `
         *,
         board:Board (*),
         inviter:User (*)
-      `)
+      `
+      )
       .eq("token", token)
       .eq("email", session.user.email)
       .single();
@@ -75,10 +75,7 @@ export default async function AcceptInvitation(
             </h2>
           </div>
 
-          <InvitationButtons
-            token={token}
-            boardId={foundInvitation.board.id}
-          />
+          <InvitationButtons token={token} boardId={foundInvitation.board.id} />
         </div>
       </div>
     );

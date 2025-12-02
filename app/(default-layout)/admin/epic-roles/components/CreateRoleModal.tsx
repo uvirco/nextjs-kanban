@@ -144,11 +144,7 @@ export default function CreateRoleModal({ trigger }: CreateRoleModalProps) {
               >
                 Cancel
               </Button>
-              <Button
-                color="primary"
-                type="submit"
-                isLoading={isSubmitting}
-              >
+              <Button color="primary" type="submit" isLoading={isSubmitting}>
                 {isSubmitting ? "Creating..." : "Create Role"}
               </Button>
             </ModalFooter>

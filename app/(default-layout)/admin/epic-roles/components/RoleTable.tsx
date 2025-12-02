@@ -137,7 +137,9 @@ export default function RoleTable({ roles }: RoleTableProps) {
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white ${getCategoryColor(role.category)}`}>
+                  <span
+                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white ${getCategoryColor(role.category)}`}
+                  >
                     {role.category}
                   </span>
                 </td>
@@ -147,16 +149,16 @@ export default function RoleTable({ roles }: RoleTableProps) {
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-zinc-300">
-                    {role.sortOrder}
-                  </div>
+                  <div className="text-sm text-zinc-300">{role.sortOrder}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    role.isActive
-                      ? "bg-green-100 text-green-800"
-                      : "bg-red-100 text-red-800"
-                  }`}>
+                  <span
+                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      role.isActive
+                        ? "bg-green-100 text-green-800"
+                        : "bg-red-100 text-red-800"
+                    }`}
+                  >
                     {role.isActive ? "Active" : "Inactive"}
                   </span>
                 </td>
@@ -182,7 +184,9 @@ export default function RoleTable({ roles }: RoleTableProps) {
                             Edit Role
                           </button>
                           <button
-                            onClick={() => handleToggleActive(role.id, role.isActive)}
+                            onClick={() =>
+                              handleToggleActive(role.id, role.isActive)
+                            }
                             className="flex items-center w-full px-4 py-2 text-sm text-zinc-300 hover:bg-zinc-700 hover:text-white"
                           >
                             {role.isActive ? (

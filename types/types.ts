@@ -3,26 +3,26 @@
 // Enums
 export enum Role {
   member = "member",
-  owner = "owner"
+  owner = "owner",
 }
 
 export enum UserRole {
   ADMIN = "ADMIN",
   MANAGER = "MANAGER",
-  MEMBER = "MEMBER"
+  MEMBER = "MEMBER",
 }
 
 export enum Priority {
   LOW = "LOW",
   MEDIUM = "MEDIUM",
   HIGH = "HIGH",
-  CRITICAL = "CRITICAL"
+  CRITICAL = "CRITICAL",
 }
 
 export enum RiskLevel {
   LOW = "LOW",
   MEDIUM = "MEDIUM",
-  HIGH = "HIGH"
+  HIGH = "HIGH",
 }
 
 export enum ActivityType {
@@ -39,7 +39,7 @@ export enum ActivityType {
   DUE_DATE_UPDATED = "DUE_DATE_UPDATED",
   DUE_DATE_REMOVED = "DUE_DATE_REMOVED",
   TASK_ASSIGNED = "TASK_ASSIGNED",
-  TASK_UNASSIGNED = "TASK_UNASSIGNED"
+  TASK_UNASSIGNED = "TASK_UNASSIGNED",
 }
 
 // Base Models

@@ -54,28 +54,33 @@ export default async function ProfileInvites() {
     .eq("userId", userId)
     .eq("role", "owner");
 
-  const boardIds = ownedBoards?.map(b => b.boardId) || [];
+  const boardIds = ownedBoards?.map((b) => b.boardId) || [];
 
   const { data: sentInvitations, error: sentError } = await supabaseAdmin
     .from("Invitation")
-    .select(`
+    .select(
+      `
       *,
       board:Board (*)
-    `)
+    `
+    )
     .in("boardId", boardIds);
 
   if (sentError) {
     console.error("Failed to fetch sent invitations:", sentError);
   }
 
-  const { data: receivedInvitations, error: receivedError } = await supabaseAdmin
-    .from("Invitation")
-    .select(`
+  const { data: receivedInvitations, error: receivedError } =
+    await supabaseAdmin
+      .from("Invitation")
+      .select(
+        `
       *,
       board:Board (*),
       inviter:User (*)
-    `)
-    .eq("email", user.email);
+    `
+      )
+      .eq("email", user.email);
 
   if (receivedError) {
     console.error("Failed to fetch received invitations:", receivedError);
@@ -106,10 +111,7 @@ export default async function ProfileInvites() {
         {receivedInvitations && receivedInvitations.length > 0 ? (
           <ul>
             {receivedInvitations.map((invite: Invitation) => (
-              <ProfileInviteReceivedActions
-                key={invite.id}
-                invite={invite}
-              />
+              <ProfileInviteReceivedActions key={invite.id} invite={invite} />
             ))}
           </ul>
         ) : (

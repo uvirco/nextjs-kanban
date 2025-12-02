@@ -12,10 +12,12 @@ export default async function BoardUsers({ boardId }: { boardId: string }) {
 
   const { data: boardMembersData, error } = await supabaseAdmin
     .from("BoardMember")
-    .select(`
+    .select(
+      `
       *,
       user:User (*)
-    `)
+    `
+    )
     .eq("boardId", boardId);
 
   if (error) {

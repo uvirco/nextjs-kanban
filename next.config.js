@@ -4,7 +4,7 @@ const nextConfig = {
   turbopack: {
     root: __dirname,
   },
-  output: 'standalone',
+  output: "standalone",
   images: {
     remotePatterns: [
       {

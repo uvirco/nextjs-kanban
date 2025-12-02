@@ -66,7 +66,7 @@ export async function handleAddDate(data: {
     }
 
     const activityType =
-      existingTask && ((existingTask as any)[data.dateType])
+      existingTask && (existingTask as any)[data.dateType]
         ? data.dateType === "dueDate"
           ? ActivityType.DUE_DATE_UPDATED
           : ActivityType.START_DATE_UPDATED

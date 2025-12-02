@@ -17,7 +17,7 @@ export default async function OverdueTaskCount() {
     .select("boardId")
     .eq("userId", userId);
 
-  const boardIds = boardMembers?.map(b => b.boardId) || [];
+  const boardIds = boardMembers?.map((b) => b.boardId) || [];
 
   if (boardIds.length === 0) {
     return 0;
@@ -29,7 +29,7 @@ export default async function OverdueTaskCount() {
     .select("id")
     .in("boardId", boardIds);
 
-  const columnIds = columns?.map(c => c.id) || [];
+  const columnIds = columns?.map((c) => c.id) || [];
 
   if (columnIds.length === 0) {
     return 0;
