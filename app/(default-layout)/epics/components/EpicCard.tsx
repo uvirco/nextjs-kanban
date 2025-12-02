@@ -9,6 +9,7 @@ interface Epic {
   businessValue: string | null;
   riskLevel: string | null;
   dueDate: string | null;
+  readinessScore?: number;
   department?: {
     id: string;
     name: string;
@@ -43,9 +44,51 @@ export default function EpicCard({ epic }: EpicCardProps) {
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
-          <h3 className="text-lg font-semibold text-white truncate">
-            {epic.title}
-          </h3>
+          <div className="flex items-center gap-3">
+            <h3 className="text-lg font-semibold text-white truncate">
+              {epic.title}
+            </h3>
+            {epic.readinessScore !== undefined && (
+              <div className="flex items-center gap-1.5 shrink-0">
+                <div className="relative w-10 h-10">
+                  <svg className="w-10 h-10 transform -rotate-90">
+                    <circle
+                      cx="20"
+                      cy="20"
+                      r="16"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      fill="none"
+                      className="text-zinc-800"
+                    />
+                    <circle
+                      cx="20"
+                      cy="20"
+                      r="16"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      fill="none"
+                      strokeDasharray={`${2 * Math.PI * 16}`}
+                      strokeDashoffset={`${2 * Math.PI * 16 * (1 - epic.readinessScore / 100)}`}
+                      className={`transition-all ${
+                        epic.readinessScore >= 80
+                          ? "text-green-500"
+                          : epic.readinessScore >= 50
+                            ? "text-yellow-500"
+                            : "text-red-500"
+                      }`}
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-xs font-semibold text-white">
+                      {epic.readinessScore}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
           {epic.description && (
             <p className="text-sm text-zinc-400 line-clamp-2 mt-1">
               {epic.description}
@@ -56,7 +99,7 @@ export default function EpicCard({ epic }: EpicCardProps) {
         <div className="flex flex-col items-end gap-2 shrink-0">
           {epic.businessValue && (
             <span className="px-2 py-1 text-xs font-medium bg-blue-900/30 text-blue-400 rounded">
-               {epic.businessValue}
+              {epic.businessValue}
             </span>
           )}
           {epic.department && (
@@ -94,14 +137,16 @@ export default function EpicCard({ epic }: EpicCardProps) {
         </div>
 
         {epic.riskLevel && (
-          <span className={`px-2 py-1 text-xs font-medium rounded ${
-            epic.riskLevel.toUpperCase() === "HIGH"
-              ? "bg-red-900/30 text-red-400"
-              : epic.riskLevel.toUpperCase() === "MEDIUM"
-              ? "bg-yellow-900/30 text-yellow-400"
-              : "bg-green-900/30 text-green-400"
-          }`}>
-             {epic.riskLevel} Risk
+          <span
+            className={`px-2 py-1 text-xs font-medium rounded ${
+              epic.riskLevel.toUpperCase() === "HIGH"
+                ? "bg-red-900/30 text-red-400"
+                : epic.riskLevel.toUpperCase() === "MEDIUM"
+                  ? "bg-yellow-900/30 text-yellow-400"
+                  : "bg-green-900/30 text-green-400"
+            }`}
+          >
+            {epic.riskLevel} Risk
           </span>
         )}
       </div>

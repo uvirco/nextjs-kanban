@@ -58,7 +58,11 @@ export default async function SidebarMenu() {
     );
   }
 
-  const boards: BoardWithDetails[] = boardMembers as BoardWithDetails[];
+  const boards: BoardWithDetails[] = (
+    boardMembers as BoardWithDetails[]
+  ).filter(
+    (boardMember) => boardMember.board && boardMember.board.title !== "Epics"
+  );
 
   const submenuBoardItems = boards.map((boardMember) => ({
     id: boardMember.board.id,

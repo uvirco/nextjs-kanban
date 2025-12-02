@@ -1,12 +1,15 @@
 ﻿"use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   IconLayoutGrid,
   IconCalendar,
   IconTable,
   IconPlus,
+  IconList,
 } from "@tabler/icons-react";
 import EpicPriorityView from "./EpicPriorityView";
+import EpicTableView from "./EpicTableView";
+import EpicBoard from "./EpicBoard";
 import Link from "next/link";
 
 interface Epic {
@@ -17,6 +20,10 @@ interface Epic {
   businessValue: string | null;
   riskLevel: string | null;
   dueDate: string | null;
+  startDate: string | null;
+  readinessScore?: number;
+  estimatedEffort?: number | null;
+  budgetEstimate?: number | null;
   department?: {
     id: string;
     name: string;
@@ -34,42 +41,139 @@ interface Epic {
 
 interface EpicPortfolioClientProps {
   epics: Epic[];
+  epicBoard: any;
+}
+
+const STORAGE_KEY = "epic-portfolio-state";
+
+interface SavedState {
+  view: "priority" | "timeline" | "matrix" | "table" | "board";
+  filter: "all" | "active" | "backlog";
+  departmentFilter: string;
+  riskFilter: string;
+  businessValueFilter: string;
+  dueDateFilter: string;
 }
 
 export default function EpicPortfolioClient({
   epics,
+  epicBoard,
 }: EpicPortfolioClientProps) {
-  const [view, setView] = useState<"priority" | "timeline" | "matrix">(
-    "priority"
+  // Load saved state from localStorage
+  const loadSavedState = (): SavedState => {
+    if (typeof window === "undefined")
+      return {
+        view: "priority",
+        filter: "all",
+        departmentFilter: "all",
+        riskFilter: "all",
+        businessValueFilter: "all",
+        dueDateFilter: "all",
+      };
+
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return saved
+        ? JSON.parse(saved)
+        : {
+            view: "priority",
+            filter: "all",
+            departmentFilter: "all",
+            riskFilter: "all",
+            businessValueFilter: "all",
+            dueDateFilter: "all",
+          };
+    } catch (error) {
+      console.error("Error loading saved state:", error);
+      return {
+        view: "priority",
+        filter: "all",
+        departmentFilter: "all",
+        riskFilter: "all",
+        businessValueFilter: "all",
+        dueDateFilter: "all",
+      };
+    }
+  };
+
+  const savedState = loadSavedState();
+
+  const [view, setView] = useState<
+    "priority" | "timeline" | "matrix" | "table" | "board"
+  >(savedState.view);
+  const [filter, setFilter] = useState<"all" | "active" | "backlog">(
+    savedState.filter
   );
-  const [filter, setFilter] = useState<"all" | "active" | "backlog">("all");
-  const [departmentFilter, setDepartmentFilter] = useState<string>("all");
-  const [riskFilter, setRiskFilter] = useState<string>("all");
-  const [businessValueFilter, setBusinessValueFilter] = useState<string>("all");
-  const [dueDateFilter, setDueDateFilter] = useState<string>("all");
+  const [departmentFilter, setDepartmentFilter] = useState<string>(
+    savedState.departmentFilter
+  );
+  const [riskFilter, setRiskFilter] = useState<string>(savedState.riskFilter);
+  const [businessValueFilter, setBusinessValueFilter] = useState<string>(
+    savedState.businessValueFilter
+  );
+  const [dueDateFilter, setDueDateFilter] = useState<string>(
+    savedState.dueDateFilter
+  );
+
+  // Save state to localStorage whenever it changes
+  useEffect(() => {
+    const stateToSave: SavedState = {
+      view,
+      filter,
+      departmentFilter,
+      riskFilter,
+      businessValueFilter,
+      dueDateFilter,
+    };
+
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
+    } catch (error) {
+      console.error("Error saving state:", error);
+    }
+  }, [
+    view,
+    filter,
+    departmentFilter,
+    riskFilter,
+    businessValueFilter,
+    dueDateFilter,
+  ]);
 
   // Get unique departments for filter dropdown
   const departments = Array.from(
-    new Set(
-      epics
-        .map((epic) => epic.department?.name)
-        .filter(Boolean)
-    )
+    new Set(epics.map((epic) => epic.department?.name).filter(Boolean))
   ).sort();
 
   const filteredEpics = epics.filter((epic) => {
     // Status filter
-    if (filter === "active" && !(epic.metrics.progress > 0 && epic.metrics.progress < 100)) return false;
+    if (
+      filter === "active" &&
+      !(epic.metrics.progress > 0 && epic.metrics.progress < 100)
+    )
+      return false;
     if (filter === "backlog" && epic.metrics.progress !== 0) return false;
 
     // Department filter
-    if (departmentFilter !== "all" && epic.department?.name !== departmentFilter) return false;
+    if (
+      departmentFilter !== "all" &&
+      epic.department?.name !== departmentFilter
+    )
+      return false;
 
     // Risk filter
-    if (riskFilter !== "all" && epic.riskLevel?.toUpperCase() !== riskFilter.toUpperCase()) return false;
+    if (
+      riskFilter !== "all" &&
+      epic.riskLevel?.toUpperCase() !== riskFilter.toUpperCase()
+    )
+      return false;
 
     // Business value filter
-    if (businessValueFilter !== "all" && epic.businessValue?.toUpperCase() !== businessValueFilter.toUpperCase()) return false;
+    if (
+      businessValueFilter !== "all" &&
+      epic.businessValue?.toUpperCase() !== businessValueFilter.toUpperCase()
+    )
+      return false;
 
     // Due date filter
     if (dueDateFilter !== "all") {
@@ -87,12 +191,22 @@ export default function EpicPortfolioClient({
           if (dueDate > weekFromNow || dueDate < now) return false;
           break;
         case "this-month":
-          const monthFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+          const monthFromNow = new Date(
+            now.getTime() + 30 * 24 * 60 * 60 * 1000
+          );
           if (dueDate > monthFromNow || dueDate < now) return false;
           break;
         case "next-month":
-          const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, now.getDate());
-          const monthAfter = new Date(now.getFullYear(), now.getMonth() + 2, now.getDate());
+          const nextMonth = new Date(
+            now.getFullYear(),
+            now.getMonth() + 1,
+            now.getDate()
+          );
+          const monthAfter = new Date(
+            now.getFullYear(),
+            now.getMonth() + 2,
+            now.getDate()
+          );
           if (dueDate < nextMonth || dueDate >= monthAfter) return false;
           break;
       }
@@ -134,6 +248,28 @@ export default function EpicPortfolioClient({
           >
             <IconLayoutGrid size={18} />
             Priority View
+          </button>
+          <button
+            onClick={() => setView("table")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+              view === "table"
+                ? "bg-zinc-800 text-white"
+                : "bg-zinc-900 text-zinc-400 hover:bg-zinc-800"
+            }`}
+          >
+            <IconList size={18} />
+            Table View
+          </button>
+          <button
+            onClick={() => setView("board")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+              view === "board"
+                ? "bg-zinc-800 text-white"
+                : "bg-zinc-900 text-zinc-400 hover:bg-zinc-800"
+            }`}
+          >
+            <IconTable size={18} />
+            Board View
           </button>
           <button
             onClick={() => setView("timeline")}
@@ -255,7 +391,10 @@ export default function EpicPortfolioClient({
           </select>
         </div>
 
-        {(departmentFilter !== "all" || riskFilter !== "all" || businessValueFilter !== "all" || dueDateFilter !== "all") && (
+        {(departmentFilter !== "all" ||
+          riskFilter !== "all" ||
+          businessValueFilter !== "all" ||
+          dueDateFilter !== "all") && (
           <button
             onClick={() => {
               setDepartmentFilter("all");
@@ -272,6 +411,13 @@ export default function EpicPortfolioClient({
 
       {/* View Content */}
       {view === "priority" && <EpicPriorityView epics={filteredEpics} />}
+      {view === "table" && <EpicTableView epics={filteredEpics} />}
+      {view === "board" && epicBoard && <EpicBoard board={epicBoard} epics={filteredEpics} />}
+      {view === "board" && !epicBoard && (
+        <div className="text-zinc-400">
+          Epic board not found. Please create a board named "Epics".
+        </div>
+      )}
       {view === "timeline" && (
         <div className="text-zinc-400">Timeline view coming soon...</div>
       )}

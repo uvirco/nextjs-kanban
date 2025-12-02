@@ -33,6 +33,7 @@ export default async function EpicPortfolioPage() {
       createdAt,
       updatedAt,
       columnId,
+      readinessScore,
       department:Department(id, name),
       column:Column(id, title, board:Board(id, title))
     `
@@ -100,10 +101,74 @@ export default async function EpicPortfolioPage() {
     })
   );
 
+  // Fetch the Epic board
+  const { data: epicBoardBasic } = await supabaseAdmin
+    .from("Board")
+    .select("id, title, backgroundUrl")
+    .eq("title", "Epics")
+    .single();
+
+  if (!epicBoardBasic) {
+    console.error("Epic board not found");
+  }
+
+  let epicBoard = null;
+
+  if (epicBoardBasic) {
+    // Fetch columns
+    const { data: columnsData } = await supabaseAdmin
+      .from("Column")
+      .select("*")
+      .eq("boardId", epicBoardBasic.id)
+      .order("order", { ascending: true });
+
+    // Fetch all epic tasks for the board columns
+    const columnIds = (columnsData || []).map((col: any) => col.id);
+    const { data: tasksData } = await supabaseAdmin
+      .from("Task")
+      .select(
+        `
+        id,
+        title,
+        description,
+        dueDate,
+        startDate,
+        coverImage,
+        order,
+        priority,
+        businessValue,
+        riskLevel,
+        departmentId,
+        readinessScore,
+        taskType,
+        columnId,
+        department:Department(id, name),
+        assignedUsers:TaskAssignment(user:User(id, name, image))
+      `
+      )
+      .in("columnId", columnIds)
+      .eq("taskType", "EPIC")
+      .order("order", { ascending: true });
+
+    // Group tasks by column
+    const columnsWithTasks = (columnsData || []).map((column: any) => ({
+      ...column,
+      tasks: (tasksData || []).filter((task: any) => task.columnId === column.id),
+    }));
+
+    epicBoard = {
+      ...epicBoardBasic,
+      columns: columnsWithTasks,
+    };
+  }
+
   return (
     <main className="min-h-screen bg-zinc-950 text-white">
       <div className="container mx-auto py-8 px-4">
-        <EpicPortfolioClient epics={epicsWithMetrics || []} />
+        <EpicPortfolioClient
+          epics={epicsWithMetrics || []}
+          epicBoard={epicBoard || null}
+        />
       </div>
     </main>
   );

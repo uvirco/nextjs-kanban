@@ -347,6 +347,7 @@ export async function handleUpdateBoard(boardId: string, boardData: BoardData) {
     }
 
     revalidatePath(`/board/${parse.data.boardId}`);
+    revalidatePath("/epics");
 
     return { success: true, message: MESSAGES.BOARD.UPDATE_SUCCESS };
   } catch (error) {

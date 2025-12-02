@@ -20,11 +20,12 @@ export default async function FetchBoards() {
 
   let boards: BoardWithDetails[] = [];
 
-  // If admin, show all boards
+  // If admin, show all boards except Epic board
   if (userRole === "ADMIN") {
     const { data, error } = await supabaseAdmin
       .from("Board")
       .select("id, title, backgroundUrl")
+      .neq("title", "Epics")
       .order("createdAt", { ascending: false });
 
     if (error) {
@@ -34,15 +35,16 @@ export default async function FetchBoards() {
 
     boards = data || [];
   } else {
-    // Regular users only see their boards
+    // Regular users only see their boards (excluding Epic board)
     const { data, error } = await supabaseAdmin
       .from("BoardMember")
       .select(
         `
-        board:Board(id, title, backgroundUrl)
+        board:Board!inner(id, title, backgroundUrl)
       `
       )
       .eq("userId", userId)
+      .neq("board.title", "Epics")
       .order("createdAt", { ascending: true });
 
     if (error) {

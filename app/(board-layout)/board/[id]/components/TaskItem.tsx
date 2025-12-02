@@ -42,13 +42,13 @@ export default function TaskItem({ task, dragHandleProps }: TaskItemProps) {
       task.description ||
       task.startDate ||
       task.dueDate ||
-      task.assignedUsers.length > 0
+      (task.assignedUsers && task.assignedUsers.length > 0)
     );
   }, [
     task.description,
     task.startDate,
     task.dueDate,
-    task.assignedUsers.length,
+    task.assignedUsers?.length,
   ]);
 
   return (
@@ -61,7 +61,7 @@ export default function TaskItem({ task, dragHandleProps }: TaskItemProps) {
       </div>
 
       <Link className="flex-grow pr-3 py-2" href={`/task/${task.id}`}>
-        {task.labels.length > 0 && (
+        {task.labels && task.labels.length > 0 && (
           <div className="grid grid-cols-5 gap-1 w-full mb-1">
             {task.labels.map((label) => (
               <span
@@ -92,7 +92,7 @@ export default function TaskItem({ task, dragHandleProps }: TaskItemProps) {
           </div>
         )}
         <div className="flex justify-between items-center mt-3">
-          {task.assignedUsers.length > 0 ? (
+          {task.assignedUsers && task.assignedUsers.length > 0 ? (
             <AvatarGroup size="sm">
               {task.assignedUsers.map((assignment) => (
                 <Avatar

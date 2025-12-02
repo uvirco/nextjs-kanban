@@ -195,6 +195,34 @@ export interface Department {
   updatedAt: Date;
 }
 
+// Epic type for epic portfolio functionality
+export interface Epic {
+  id: string;
+  title: string;
+  description: string | null;
+  priority: string | null;
+  businessValue: string | null;
+  riskLevel: string | null;
+  dueDate: string | null;
+  startDate: string | null;
+  readinessScore?: number;
+  estimatedEffort?: number | null;
+  budgetEstimate?: number | null;
+  department?: {
+    id: string;
+    name: string;
+  } | null;
+  metrics: {
+    totalTasks: number;
+    completedTasks: number;
+    blockedTasks: number;
+    progress: number;
+  };
+  owner: any;
+  raciAssignments: any[];
+  stakeholders: any[];
+}
+
 // FunctionalRole type for epic member roles
 export interface FunctionalRole {
   id: string;
