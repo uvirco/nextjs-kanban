@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import prisma from "@/prisma/prisma";
+import { supabaseAdmin } from "@/lib/supabase";
 import UserTable from "./components/UserTable";
 import CreateUserModal from "./components/CreateUserModal";
 import { Button } from "@nextui-org/button";
@@ -12,23 +12,34 @@ export default async function UsersPage() {
     return <div>Access denied</div>;
   }
 
-  const users = await prisma.user.findMany({
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      role: true,
-      isActive: true,
-      createdAt: true,
-      updatedAt: true,
-      _count: {
-        select: {
-          memberBoards: true,
-        },
-      },
-    },
-    orderBy: { createdAt: "desc" },
+  // Get all board members count per user
+  const { data: boardMemberCounts } = await supabaseAdmin
+    .from("BoardMember")
+    .select("userId");
+
+  // Create a map of userId to count
+  const memberCountMap: Record<string, number> = {};
+  boardMemberCounts?.forEach((bm) => {
+    memberCountMap[bm.userId] = (memberCountMap[bm.userId] || 0) + 1;
   });
+
+  // Get users
+  const { data: usersData, error: usersError } = await supabaseAdmin
+    .from("User")
+    .select("id, name, email, role, isActive, createdAt, updatedAt")
+    .order("createdAt", { ascending: false });
+
+  if (usersError) {
+    console.error("Failed to fetch users:", usersError);
+  }
+
+  // Map users with their board count
+  const users = usersData?.map(user => ({
+    ...user,
+    _count: {
+      memberBoards: memberCountMap[user.id] || 0,
+    },
+  })) || [];
 
   return (
     <div className="space-y-6">

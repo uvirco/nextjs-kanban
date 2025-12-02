@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import prisma from "@/prisma/prisma";
+import { supabaseAdmin } from "@/lib/supabase";
 
 export default async function OverdueTaskCount() {
   const session = await auth();
@@ -9,24 +9,43 @@ export default async function OverdueTaskCount() {
     throw new Error("User not authenticated");
   }
 
-  const today = new Date();
+  const today = new Date().toISOString();
 
-  const count = await prisma.task.count({
-    where: {
-      column: {
-        board: {
-          members: {
-            some: {
-              userId: userId,
-            },
-          },
-        },
-      },
-      dueDate: {
-        lt: today,
-      },
-    },
-  });
+  // Get boards where user is a member
+  const { data: boardMembers } = await supabaseAdmin
+    .from("BoardMember")
+    .select("boardId")
+    .eq("userId", userId);
 
-  return count;
+  const boardIds = boardMembers?.map(b => b.boardId) || [];
+
+  if (boardIds.length === 0) {
+    return 0;
+  }
+
+  // Get columns for those boards
+  const { data: columns } = await supabaseAdmin
+    .from("Column")
+    .select("id")
+    .in("boardId", boardIds);
+
+  const columnIds = columns?.map(c => c.id) || [];
+
+  if (columnIds.length === 0) {
+    return 0;
+  }
+
+  // Count overdue tasks
+  const { count, error } = await supabaseAdmin
+    .from("Task")
+    .select("*", { count: "exact", head: true })
+    .in("columnId", columnIds)
+    .lt("dueDate", today);
+
+  if (error) {
+    console.error("Failed to count overdue tasks:", error);
+    return 0;
+  }
+
+  return count || 0;
 }

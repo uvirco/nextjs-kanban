@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import prisma from "@/prisma/prisma";
+import { supabaseAdmin } from "@/lib/supabase";
 import { IconUsers, IconUserCheck, IconUserX } from "@tabler/icons-react";
 
 export default async function AdminDashboard() {
@@ -10,25 +10,27 @@ export default async function AdminDashboard() {
   }
 
   // Get user statistics
-  const totalUsers = await prisma.user.count();
-  const activeUsers = await prisma.user.count({
-    where: { isActive: true },
-  });
-  const inactiveUsers = totalUsers - activeUsers;
+  const { count: totalUsers } = await supabaseAdmin
+    .from("User")
+    .select("*", { count: "exact", head: true });
+
+  const { count: activeUsers } = await supabaseAdmin
+    .from("User")
+    .select("*", { count: "exact", head: true })
+    .eq("isActive", true);
+
+  const inactiveUsers = (totalUsers || 0) - (activeUsers || 0);
 
   // Get recent users
-  const recentUsers = await prisma.user.findMany({
-    take: 5,
-    orderBy: { createdAt: "desc" },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      role: true,
-      isActive: true,
-      createdAt: true,
-    },
-  });
+  const { data: recentUsers, error } = await supabaseAdmin
+    .from("User")
+    .select("id, name, email, role, isActive, createdAt")
+    .order("createdAt", { ascending: false })
+    .limit(5);
+
+  if (error) {
+    console.error("Failed to fetch recent users:", error);
+  }
 
   return (
     <div className="space-y-6">
@@ -77,7 +79,7 @@ export default async function AdminDashboard() {
         </div>
         <div className="p-6">
           <div className="space-y-4">
-            {recentUsers.map((user) => (
+            {recentUsers && recentUsers.map((user) => (
               <div
                 key={user.id}
                 className="flex items-center justify-between p-3 bg-zinc-700 rounded-lg"

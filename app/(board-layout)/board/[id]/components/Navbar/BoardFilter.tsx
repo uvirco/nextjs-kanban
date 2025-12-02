@@ -1,16 +1,19 @@
 import BoardFilter from "./BoardFilter.client";
-import prisma from "@/prisma/prisma";
+import { supabaseAdmin } from "@/lib/supabase";
 
 export default async function BoardFilterFetch({
   boardId,
 }: {
   boardId: string;
 }) {
-  const labels = await prisma.label.findMany({
-    where: {
-      boardId: boardId,
-    },
-  });
+  const { data: labels, error } = await supabaseAdmin
+    .from("Label")
+    .select("*")
+    .eq("boardId", boardId);
 
-  return <BoardFilter labels={labels} />;
+  if (error) {
+    console.error("Failed to fetch labels:", error);
+  }
+
+  return <BoardFilter labels={labels || []} />;
 }

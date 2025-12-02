@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import prisma from "@/prisma/prisma";
+import { supabaseAdmin } from "@/lib/supabase";
 import { DetailedTask, BoardMemberWithUser } from "@/types/types";
 import AddToCardLabels from "./Labels/AddToCardLabels";
 import AddToCardDates from "./Dates/AddToCardDates";
@@ -19,20 +19,28 @@ export default async function TaskDetailAddToCard({
     return <div>User not authenticated</div>;
   }
 
-  const boardMembers: BoardMemberWithUser[] = await prisma.boardMember.findMany(
-    {
-      where: { boardId: boardId },
-      include: {
-        user: true,
-      },
-    }
-  );
+  const { data: boardMembersData, error: membersError } = await supabaseAdmin
+    .from("BoardMember")
+    .select(`
+      *,
+      user:User (*)
+    `)
+    .eq("boardId", boardId);
 
-  const labels = await prisma.label.findMany({
-    where: {
-      boardId: boardId,
-    },
-  });
+  if (membersError) {
+    console.error("Failed to fetch board members:", membersError);
+  }
+
+  const boardMembers: BoardMemberWithUser[] = boardMembersData as BoardMemberWithUser[] || [];
+
+  const { data: labels, error: labelsError } = await supabaseAdmin
+    .from("Label")
+    .select("*")
+    .eq("boardId", boardId);
+
+  if (labelsError) {
+    console.error("Failed to fetch labels:", labelsError);
+  }
 
   return (
     <div className="mb-5">
@@ -48,7 +56,7 @@ export default async function TaskDetailAddToCard({
           boardId={task.column.boardId}
         />
         <AddToCardLabels
-          labels={labels}
+          labels={labels || []}
           taskId={task.id}
           activeLabels={task.labels}
           boardId={task.column.boardId}

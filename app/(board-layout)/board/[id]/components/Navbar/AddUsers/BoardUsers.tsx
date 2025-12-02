@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import prisma from "@/prisma/prisma";
+import { supabaseAdmin } from "@/lib/supabase";
 import BoardAddUsers from "../AddUsers/BoardAddUsers";
 
 export default async function BoardUsers({ boardId }: { boardId: string }) {
@@ -10,10 +10,19 @@ export default async function BoardUsers({ boardId }: { boardId: string }) {
     return <div>User not authenticated</div>;
   }
 
-  const boardMembers = await prisma.boardMember.findMany({
-    where: { boardId: boardId },
-    include: { user: true },
-  });
+  const { data: boardMembersData, error } = await supabaseAdmin
+    .from("BoardMember")
+    .select(`
+      *,
+      user:User (*)
+    `)
+    .eq("boardId", boardId);
+
+  if (error) {
+    console.error("Failed to fetch board members:", error);
+  }
+
+  const boardMembers = boardMembersData || [];
 
   const owner =
     boardMembers.find((member) => member.role === "owner")?.user ?? null;

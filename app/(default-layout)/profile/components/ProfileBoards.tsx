@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import prisma from "@/prisma/prisma";
+import { supabaseAdmin } from "@/lib/supabase";
 import Link from "next/link";
 import Image from "next/image";
 import { IconList } from "@tabler/icons-react";
@@ -13,24 +13,23 @@ export default async function ProfileBoards() {
     return <p>Please log in to view your favorite boards.</p>;
   }
 
-  const user = await prisma.user.findUnique({
-    where: {
-      id: userId,
-    },
-    include: {
-      favoriteBoards: {
-        include: {
-          columns: {
-            include: {
-              tasks: true,
-            },
-          },
-        },
-      },
-    },
-  });
+  const { data: user, error: userError } = await supabaseAdmin
+    .from("User")
+    .select(`
+      *,
+      favoriteBoards:Board!UserFavoriteBoard (
+        *,
+        columns:Column (
+          *,
+          tasks:Task (*)
+        )
+      )
+    `)
+    .eq("id", userId)
+    .single();
 
-  if (!user) {
+  if (userError || !user) {
+    console.error("Failed to fetch user:", userError);
     return (
       <div className="text-center p-4">
         <p className="text-red-400 mb-2">User data not found in database.</p>
@@ -43,10 +42,10 @@ export default async function ProfileBoards() {
     );
   }
 
-  const boards = user.favoriteBoards.map((board) => ({
+  const boards = (user.favoriteBoards || []).map((board: any) => ({
     ...board,
-    tasksCount: board.columns.reduce(
-      (sum: number, column) => sum + column.tasks.length,
+    tasksCount: (board.columns || []).reduce(
+      (sum: number, column: any) => sum + (column.tasks?.length || 0),
       0
     ),
     isFavorited: true,
@@ -58,7 +57,7 @@ export default async function ProfileBoards() {
 
   return (
     <>
-      {boards.map((board) => (
+      {boards.map((board: any) => (
         <Link key={board.id} href={`/board/${board.id}`}>
           <div className="h-32 flex flex-col justify-end rounded-xl shadow-md bg-zinc-800 hover:bg-zinc-950 relative overflow-hidden">
             {/* <div className="absolute top-0 bottom-0 left-0 right-0 bg-white/40 backdrop-blur-md z-10"></div> */}

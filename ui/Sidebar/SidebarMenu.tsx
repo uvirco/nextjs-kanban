@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import prisma from "@/prisma/prisma";
+import { supabaseAdmin } from "@/lib/supabase";
 import { BoardMember, Board } from "@/types/types";
 import { Sidebar, Menu, SubMenu, MenuItem } from "./SidebarComponent";
 import {
@@ -25,23 +25,38 @@ export default async function SidebarMenu() {
     return [];
   }
 
-  const boards: BoardWithDetails[] = await prisma.boardMember.findMany({
-    where: {
-      userId: userId,
-    },
-    include: {
-      board: {
-        select: {
-          id: true,
-          title: true,
-          backgroundUrl: true,
-        },
-      },
-    },
-    orderBy: {
-      createdAt: "asc",
-    },
-  });
+  const { data: boardMembers, error } = await supabaseAdmin
+    .from("BoardMember")
+    .select(`
+      *,
+      board:Board (
+        id,
+        title,
+        backgroundUrl
+      )
+    `)
+    .eq("userId", userId)
+    .order("createdAt", { ascending: true });
+
+  if (error || !boardMembers) {
+    console.error("Failed to fetch boards:", error);
+    return (
+      <Sidebar>
+        <SidebarHeader />
+        <SidebarSearch />
+        <hr className="border-zinc-900 my-3" />
+        <Menu>
+          <MenuItem
+            path="/profile"
+            title="Profile"
+            icon={<IconUser stroke={1.5} size={20} />}
+          />
+        </Menu>
+      </Sidebar>
+    );
+  }
+
+  const boards: BoardWithDetails[] = boardMembers as BoardWithDetails[];
 
   const submenuBoardItems = boards.map((boardMember) => ({
     id: boardMember.board.id,

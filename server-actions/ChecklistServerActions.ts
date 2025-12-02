@@ -3,7 +3,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { MESSAGES } from "@/utils/messages";
-import prisma from "@/prisma/prisma";
+import { supabaseAdmin } from "@/lib/supabase";
 
 // Create a new checklist
 export async function handleCreateChecklist({
@@ -42,12 +42,17 @@ export async function handleCreateChecklist({
   }
 
   try {
-    await prisma.checklist.create({
-      data: {
+    const { error } = await supabaseAdmin
+      .from("Checklist")
+      .insert({
         title: parse.data.title,
         taskId: parse.data.taskId,
-      },
-    });
+      });
+
+    if (error) {
+      console.error(error);
+      return { success: false, message: MESSAGES.CHECKLIST.CREATE_FAILURE };
+    }
 
     revalidatePath(`/board/${parse.data.boardId}`);
 
@@ -91,10 +96,15 @@ export async function handleEditChecklistName(formData: FormData) {
   }
 
   try {
-    await prisma.checklist.update({
-      where: { id: parse.data.checklistId },
-      data: { title: parse.data.title },
-    });
+    const { error } = await supabaseAdmin
+      .from("Checklist")
+      .update({ title: parse.data.title })
+      .eq("id", parse.data.checklistId);
+
+    if (error) {
+      console.error(error);
+      return { success: false, message: "Failed to update checklist name" };
+    }
 
     revalidatePath(`/task/${parse.data.taskId}`);
 
@@ -135,11 +145,15 @@ export async function handleDeleteChecklist({
   }
 
   try {
-    await prisma.checklist.delete({
-      where: {
-        id: parse.data.checklistId,
-      },
-    });
+    const { error } = await supabaseAdmin
+      .from("Checklist")
+      .delete()
+      .eq("id", parse.data.checklistId);
+
+    if (error) {
+      console.error(error);
+      return { success: false, message: MESSAGES.CHECKLIST.DELETE_FAILURE };
+    }
 
     revalidatePath(`/task/${parse.data.taskId}`);
     return { success: true, message: MESSAGES.CHECKLIST.DELETE_SUCCESS };
@@ -187,13 +201,18 @@ export async function handleCreateChecklistItem({
   }
 
   try {
-    await prisma.checklistItem.create({
-      data: {
+    const { error } = await supabaseAdmin
+      .from("ChecklistItem")
+      .insert({
         content: parse.data.content,
         isChecked: false,
         checklistId: parse.data.checklistId,
-      },
-    });
+      });
+
+    if (error) {
+      console.error(error);
+      return { success: false, message: MESSAGES.CHECKLIST_ITEM.CREATE_FAILURE };
+    }
 
     revalidatePath(`/task/${parse.data.taskId}`);
 
@@ -237,11 +256,15 @@ export async function handleDeleteChecklistItem({
   }
 
   try {
-    await prisma.checklistItem.delete({
-      where: {
-        id: parse.data.checklistItemId,
-      },
-    });
+    const { error } = await supabaseAdmin
+      .from("ChecklistItem")
+      .delete()
+      .eq("id", parse.data.checklistItemId);
+
+    if (error) {
+      console.error(error);
+      return { success: false, message: MESSAGES.CHECKLIST_ITEM.DELETE_FAILURE };
+    }
 
     revalidatePath(`/task/${parse.data.taskId}`);
 
@@ -288,10 +311,15 @@ export async function handleToggleCheckedItem({
   }
 
   try {
-    await prisma.checklistItem.update({
-      where: { id: parse.data.checklistItemId },
-      data: { isChecked: parse.data.isChecked },
-    });
+    const { error } = await supabaseAdmin
+      .from("ChecklistItem")
+      .update({ isChecked: parse.data.isChecked })
+      .eq("id", parse.data.checklistItemId);
+
+    if (error) {
+      console.error(error);
+      return { success: false, message: MESSAGES.CHECKLIST_ITEM.TOGGLE_FAILURE };
+    }
 
     revalidatePath(`/task/${parse.data.taskId}`);
 
@@ -336,10 +364,18 @@ export async function handleEditChecklistItemContent(formData: FormData) {
   }
 
   try {
-    await prisma.checklistItem.update({
-      where: { id: parse.data.checklistItemId },
-      data: { content: parse.data.content },
-    });
+    const { error } = await supabaseAdmin
+      .from("ChecklistItem")
+      .update({ content: parse.data.content })
+      .eq("id", parse.data.checklistItemId);
+
+    if (error) {
+      console.error(error);
+      return {
+        success: false,
+        message: MESSAGES.CHECKLIST_ITEM.UPDATE_FAILURE,
+      };
+    }
 
     revalidatePath(`/task/${parse.data.taskId}`);
 

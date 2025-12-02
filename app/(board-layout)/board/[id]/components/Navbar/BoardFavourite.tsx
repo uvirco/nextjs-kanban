@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import prisma from "@/prisma/prisma";
+import { supabaseAdmin } from "@/lib/supabase";
 import BoardFavouriteClient from "./BoardFavourite.client";
 
 export default async function BoardFavourite({ boardId }: { boardId: string }) {
@@ -9,17 +9,19 @@ export default async function BoardFavourite({ boardId }: { boardId: string }) {
     return <div>User not authenticated</div>;
   }
 
-  const board = await prisma.board.findUnique({
-    where: {
-      id: boardId,
-    },
-    include: {
-      favoritedBy: true,
-    },
-  });
+  // Get board with favorited users
+  const { data: boardData } = await supabaseAdmin
+    .from("Board")
+    .select(`
+      id,
+      favoritedBy:UserFavoriteBoard (userId)
+    `)
+    .eq("id", boardId)
+    .single();
 
-  const isFavorite =
-    board?.favoritedBy.some((user) => user.id === userId) || false;
+  const isFavorite = boardData?.favoritedBy?.some(
+    (fav: { userId: string }) => fav.userId === userId
+  ) || false;
 
   return <BoardFavouriteClient isFavorite={isFavorite} boardId={boardId} />;
 }

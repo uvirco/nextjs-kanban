@@ -1,4 +1,4 @@
-import prisma from "@/prisma/prisma";
+import { supabaseAdmin } from "@/lib/supabase";
 import { auth } from "@/auth";
 import InvitationButtons from "./components/InvitationButtons";
 import Link from "next/link";
@@ -28,18 +28,18 @@ export default async function AcceptInvitation(
   }
 
   try {
-    const foundInvitation = await prisma.invitation.findFirst({
-      where: {
-        token: token,
-        email: session.user.email,
-      },
-      include: {
-        board: true,
-        inviter: true,
-      },
-    });
+    const { data: foundInvitation, error } = await supabaseAdmin
+      .from("Invitation")
+      .select(`
+        *,
+        board:Board (*),
+        inviter:User (*)
+      `)
+      .eq("token", token)
+      .eq("email", session.user.email)
+      .single();
 
-    if (!foundInvitation) {
+    if (!foundInvitation || error) {
       return (
         <p>
           Invitation not found, already processed, or you're not the intended

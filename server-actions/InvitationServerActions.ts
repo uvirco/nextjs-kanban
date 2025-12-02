@@ -1,7 +1,7 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
-import prisma from "@/prisma/prisma";
+import { supabaseAdmin } from "@/lib/supabase";
 import { z } from "zod";
 import crypto from "crypto";
 import { MESSAGES } from "@/utils/messages";
@@ -43,14 +43,14 @@ export async function handleSendBoardInvitation({
 
   try {
     // Check for an existing invitation
-    const existingInvitation = await prisma.invitation.findFirst({
-      where: {
-        boardId: parse.data.boardId,
-        email: parse.data.userEmail,
-      },
-    });
+    const { data: existingInvitation, error: checkError } = await supabaseAdmin
+      .from("Invitation")
+      .select("*")
+      .eq("boardId", parse.data.boardId)
+      .eq("email", parse.data.userEmail)
+      .single();
 
-    if (existingInvitation) {
+    if (existingInvitation && !checkError) {
       return {
         success: false,
         message: MESSAGES.INVITATION.INVITATION_ALREADY_SENT,
@@ -61,14 +61,19 @@ export async function handleSendBoardInvitation({
     const token = generateUniqueToken();
 
     // Create a new invitation record
-    await prisma.invitation.create({
-      data: {
+    const { error: createError } = await supabaseAdmin
+      .from("Invitation")
+      .insert({
         boardId: parse.data.boardId,
         email: parse.data.userEmail,
         token: token,
         inviterId: loggedInUserId,
-      },
-    });
+      });
+
+    if (createError) {
+      console.error("Failed to create invitation:", createError);
+      return { success: false, message: MESSAGES.INVITATION.CREATE_FAILURE };
+    }
 
     // Generate the invitation link
     const baseUrl = process.env.AUTH_URL;
@@ -116,14 +121,14 @@ export async function handleAcceptInvitation({
 
   try {
     // Find the invitation by token and verify it matches the logged-in user's email
-    const invitation = await prisma.invitation.findFirst({
-      where: {
-        token: parse.data.token,
-        email: loggedInUserEmail, // Ensure the invitation is for the logged-in user
-      },
-    });
+    const { data: invitation, error: invitationError } = await supabaseAdmin
+      .from("Invitation")
+      .select("*")
+      .eq("token", parse.data.token)
+      .eq("email", loggedInUserEmail)
+      .single();
 
-    if (!invitation) {
+    if (!invitation || invitationError) {
       return {
         success: false,
         message: MESSAGES.INVITATION.INVALID_OR_PROCESSED,
@@ -131,30 +136,42 @@ export async function handleAcceptInvitation({
     }
 
     // Check if user is already a member of this board
-    const existingMembership = await prisma.boardMember.findFirst({
-      where: {
-        boardId: invitation.boardId,
-        userId: loggedInUserId,
-      },
-    });
+    const { data: existingMembership } = await supabaseAdmin
+      .from("BoardMember")
+      .select("*")
+      .eq("boardId", invitation.boardId)
+      .eq("userId", loggedInUserId)
+      .single();
 
     if (existingMembership) {
       // User is already a member, just delete the invitation
-      await prisma.invitation.delete({ where: { id: invitation.id } });
+      await supabaseAdmin.from("Invitation").delete().eq("id", invitation.id);
       return { success: true, message: "You are already a member of this board." };
     }
 
     // Add user to the board members
-    await prisma.boardMember.create({
-      data: {
+    const { error: memberError } = await supabaseAdmin
+      .from("BoardMember")
+      .insert({
         boardId: invitation.boardId,
         userId: loggedInUserId,
         role: "member",
-      },
-    });
+      });
+
+    if (memberError) {
+      console.error("Failed to add board member:", memberError);
+      return { success: false, message: MESSAGES.INVITATION.ACCEPT_FAILURE };
+    }
 
     // Delete the invitation record
-    await prisma.invitation.delete({ where: { id: invitation.id } });
+    const { error: deleteError } = await supabaseAdmin
+      .from("Invitation")
+      .delete()
+      .eq("id", invitation.id);
+
+    if (deleteError) {
+      console.error("Failed to delete invitation:", deleteError);
+    }
 
     revalidatePath(`/board/`);
     revalidatePath(`/profile/`);
@@ -189,11 +206,13 @@ export async function handleRejectInvitation({ token }: { token: string }) {
 
   try {
     // Find the invitation by token
-    const invitation = await prisma.invitation.findUnique({
-      where: { token: parse.data.token },
-    });
+    const { data: invitation, error: findError } = await supabaseAdmin
+      .from("Invitation")
+      .select("*")
+      .eq("token", parse.data.token)
+      .single();
 
-    if (!invitation) {
+    if (!invitation || findError) {
       return {
         success: false,
         message: MESSAGES.INVITATION.INVALID_OR_PROCESSED,
@@ -201,7 +220,15 @@ export async function handleRejectInvitation({ token }: { token: string }) {
     }
 
     // Delete the invitation record
-    await prisma.invitation.delete({ where: { id: invitation.id } });
+    const { error: deleteError } = await supabaseAdmin
+      .from("Invitation")
+      .delete()
+      .eq("id", invitation.id);
+
+    if (deleteError) {
+      console.error("Failed to delete invitation:", deleteError);
+      return { success: false, message: MESSAGES.INVITATION.REJECT_FAILURE };
+    }
 
     revalidatePath(`/profile/`);
     return { success: true, message: MESSAGES.INVITATION.REJECT_SUCCESS };
@@ -243,25 +270,29 @@ export async function handleResendInvitation({
 
   try {
     // Delete existing invitation
-    await prisma.invitation.deleteMany({
-      where: {
-        boardId: parse.data.boardId,
-        email: parse.data.email,
-      },
-    });
+    await supabaseAdmin
+      .from("Invitation")
+      .delete()
+      .eq("boardId", parse.data.boardId)
+      .eq("email", parse.data.email);
 
     // Generate a unique token
     const token = generateUniqueToken();
 
     // Create a new invitation record
-    await prisma.invitation.create({
-      data: {
+    const { error: createError } = await supabaseAdmin
+      .from("Invitation")
+      .insert({
         boardId: parse.data.boardId,
         email: parse.data.email,
         token: token,
         inviterId: loggedInUserId,
-      },
-    });
+      });
+
+    if (createError) {
+      console.error("Failed to resend invitation:", createError);
+      return { success: false, message: "Failed to resend invitation." };
+    }
 
     // Generate the invitation link
     const baseUrl = process.env.AUTH_URL;
@@ -312,14 +343,14 @@ export async function handleGetInvitationLink({
 
   try {
     // Find the existing invitation
-    const invitation = await prisma.invitation.findFirst({
-      where: {
-        boardId: parse.data.boardId,
-        email: parse.data.email,
-      },
-    });
+    const { data: invitation, error: findError } = await supabaseAdmin
+      .from("Invitation")
+      .select("*")
+      .eq("boardId", parse.data.boardId)
+      .eq("email", parse.data.email)
+      .single();
 
-    if (!invitation) {
+    if (!invitation || findError) {
       return {
         success: false,
         message: "Invitation not found.",
@@ -372,13 +403,13 @@ export async function handleRemoveUserFromBoard({
 
   try {
     // Check if the logged-in user is the board owner
-    const boardMember = await prisma.boardMember.findFirst({
-      where: {
-        boardId: parse.data.boardId,
-        userId: loggedInUserId,
-        role: "owner",
-      },
-    });
+    const { data: boardMember } = await supabaseAdmin
+      .from("BoardMember")
+      .select("*")
+      .eq("boardId", parse.data.boardId)
+      .eq("userId", loggedInUserId)
+      .eq("role", "owner")
+      .single();
 
     if (!boardMember) {
       return {
@@ -388,12 +419,12 @@ export async function handleRemoveUserFromBoard({
     }
 
     // Cannot remove the board owner
-    const targetUser = await prisma.boardMember.findFirst({
-      where: {
-        boardId: parse.data.boardId,
-        userId: parse.data.userId,
-      },
-    });
+    const { data: targetUser } = await supabaseAdmin
+      .from("BoardMember")
+      .select("*")
+      .eq("boardId", parse.data.boardId)
+      .eq("userId", parse.data.userId)
+      .single();
 
     if (targetUser?.role === "owner") {
       return {
@@ -403,12 +434,16 @@ export async function handleRemoveUserFromBoard({
     }
 
     // Remove the user from the board
-    await prisma.boardMember.deleteMany({
-      where: {
-        boardId: parse.data.boardId,
-        userId: parse.data.userId,
-      },
-    });
+    const { error: removeError } = await supabaseAdmin
+      .from("BoardMember")
+      .delete()
+      .eq("boardId", parse.data.boardId)
+      .eq("userId", parse.data.userId);
+
+    if (removeError) {
+      console.error("Failed to remove user from board:", removeError);
+      return { success: false, message: "Failed to remove user from board." };
+    }
 
     revalidatePath(`/board/${parse.data.boardId}`);
     return { success: true, message: "User removed from board successfully." };

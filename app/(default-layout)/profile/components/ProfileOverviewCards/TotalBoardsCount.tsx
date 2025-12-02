@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import prisma from "@/prisma/prisma";
+import { supabaseAdmin } from "@/lib/supabase";
 
 export default async function TotalBoardsCount() {
   const session = await auth();
@@ -9,11 +9,15 @@ export default async function TotalBoardsCount() {
     throw new Error("User not authenticated");
   }
 
-  const totalBoards = await prisma.boardMember.count({
-    where: {
-      userId: userId,
-    },
-  });
+  const { count, error } = await supabaseAdmin
+    .from("BoardMember")
+    .select("*", { count: "exact", head: true })
+    .eq("userId", userId);
 
-  return totalBoards;
+  if (error) {
+    console.error("Failed to count boards:", error);
+    return 0;
+  }
+
+  return count || 0;
 }

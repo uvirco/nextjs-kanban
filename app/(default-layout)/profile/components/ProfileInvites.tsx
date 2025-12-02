@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import prisma from "@/prisma/prisma";
+import { supabaseAdmin } from "@/lib/supabase";
 import {
   ProfileInviteReceivedActions,
   ProfileInviteSentActions,
@@ -36,46 +36,56 @@ export default async function ProfileInvites() {
     return <div>User is not authenticated or user ID is not available.</div>;
   }
 
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { email: true },
-  });
+  const { data: user, error: userError } = await supabaseAdmin
+    .from("User")
+    .select("email")
+    .eq("id", userId)
+    .single();
 
-  if (!user || !user.email) {
+  if (userError || !user || !user.email) {
+    console.error("Failed to fetch user email:", userError);
     return <div>No invitations found.</div>;
   }
 
-  const sentInvitations = await prisma.invitation.findMany({
-    where: {
-      board: {
-        members: {
-          some: {
-            userId: userId,
-            role: "owner",
-          },
-        },
-      },
-    },
-    include: {
-      board: true,
-    },
-  });
+  // Get boards where user is owner, then get invitations for those boards
+  const { data: ownedBoards } = await supabaseAdmin
+    .from("BoardMember")
+    .select("boardId")
+    .eq("userId", userId)
+    .eq("role", "owner");
 
-  const receivedInvitations = await prisma.invitation.findMany({
-    where: {
-      email: user.email,
-    },
-    include: {
-      board: true,
-      inviter: true,
-    },
-  });
+  const boardIds = ownedBoards?.map(b => b.boardId) || [];
+
+  const { data: sentInvitations, error: sentError } = await supabaseAdmin
+    .from("Invitation")
+    .select(`
+      *,
+      board:Board (*)
+    `)
+    .in("boardId", boardIds);
+
+  if (sentError) {
+    console.error("Failed to fetch sent invitations:", sentError);
+  }
+
+  const { data: receivedInvitations, error: receivedError } = await supabaseAdmin
+    .from("Invitation")
+    .select(`
+      *,
+      board:Board (*),
+      inviter:User (*)
+    `)
+    .eq("email", user.email);
+
+  if (receivedError) {
+    console.error("Failed to fetch received invitations:", receivedError);
+  }
 
   return (
     <div className="grid grid-cols-1">
       <div>
         <h4 className="font-semibold">Sent Invitations</h4>
-        {sentInvitations.length > 0 ? (
+        {sentInvitations && sentInvitations.length > 0 ? (
           <ul className="mb-2">
             {sentInvitations.map((invite: SentInvitation) => (
               <li
@@ -93,7 +103,7 @@ export default async function ProfileInvites() {
 
       <div>
         <h4 className="font-semibold">Received Invitations</h4>
-        {receivedInvitations.length > 0 ? (
+        {receivedInvitations && receivedInvitations.length > 0 ? (
           <ul>
             {receivedInvitations.map((invite: Invitation) => (
               <ProfileInviteReceivedActions

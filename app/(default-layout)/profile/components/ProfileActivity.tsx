@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import prisma from "@/prisma/prisma";
+import { supabaseAdmin } from "@/lib/supabase";
 import { ActivityWithUser } from "@/types/types";
 import { generateActivityMessage } from "./activityMessage";
 
@@ -11,42 +11,25 @@ export default async function ProfileActivity() {
     throw new Error("User not authenticated");
   }
 
-  const activities = await prisma.activity.findMany({
-    where: {
-      userId: userId,
-      board: {
-        members: {
-          some: {
-            userId: userId,
-          },
-        },
-      },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-    take: 5,
-    include: {
-      user: true,
-      task: {
-        select: {
-          title: true,
-        },
-      },
-      board: true,
-      oldColumn: true,
-      newColumn: true,
-      originalColumn: true,
-      targetUser: {
-        select: {
-          id: true,
-          name: true,
-        },
-      },
-    },
-  });
+  // Query activities with complex joins
+  const { data: activities, error } = await supabaseAdmin
+    .from("Activity")
+    .select(`
+      *,
+      user:User (*),
+      task:Task (title),
+      board:Board (*),
+      oldColumn:Column!oldColumnId (*),
+      newColumn:Column!newColumnId (*),
+      originalColumn:Column!originalColumnId (*),
+      targetUser:User!targetUserId (id, name)
+    `)
+    .eq("userId", userId)
+    .order("createdAt", { ascending: false })
+    .limit(5);
 
-  if (activities.length === 0) {
+  if (error || !activities || activities.length === 0) {
+    console.error("Failed to fetch activities:", error);
     return (
       <li className="border-b-1 last:border-b-0 border-zinc-700 py-1">
         No activities found
