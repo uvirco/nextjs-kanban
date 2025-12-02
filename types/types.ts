@@ -193,6 +193,18 @@ export interface Department {
   updatedAt: Date;
 }
 
+// FunctionalRole type for epic member roles
+export interface FunctionalRole {
+  id: string;
+  name: string;
+  description: string | null;
+  category: string;
+  isActive: boolean;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // NEW TYPES
 // Extend TaskAssignment to include the nested user object
 export interface TaskAssignmentWithUser extends TaskAssignment {

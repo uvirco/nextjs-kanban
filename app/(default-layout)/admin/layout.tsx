@@ -6,6 +6,7 @@ import {
   IconSettings,
   IconDashboard,
   IconBuilding,
+  IconUserCheck,
 } from "@tabler/icons-react";
 import AdminSignOutButton from "./AdminSignOutButton";
 
@@ -67,6 +68,13 @@ export default async function AdminLayout({
               >
                 <IconBuilding size={20} className="mr-3" />
                 Departments
+              </Link>
+              <Link
+                href="/admin/epic-roles"
+                className="flex items-center px-4 py-2 text-zinc-300 hover:bg-zinc-800 hover:text-white rounded-md"
+              >
+                <IconUserCheck size={20} className="mr-3" />
+                Epic Roles
               </Link>
               <Link
                 href="/admin/settings"

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { IconLoader, IconPlus, IconX, IconUser } from "@tabler/icons-react";
 import EpicRACI from "./RACI/EpicRACI";
+import { Department, FunctionalRole } from "@/types/types";
 
 interface Epic {
   id: string;
@@ -41,10 +42,15 @@ interface User {
   image: string | null;
 }
 
-interface Department {
+interface Role {
   id: string;
   name: string;
   description: string | null;
+  category: string;
+  isActive: boolean;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface EditEpicFormProps {
@@ -61,6 +67,7 @@ export default function EditEpicForm({
   const [members, setMembers] = useState<EpicMember[]>(initialMembers);
   const [users, setUsers] = useState<User[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
+  const [roles, setRoles] = useState<FunctionalRole[]>([]);
   const [isAddingMember, setIsAddingMember] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState("");
   const [selectedRole, setSelectedRole] = useState("");
@@ -126,8 +133,21 @@ export default function EditEpicForm({
     }
   };
 
+  const fetchRoles = async () => {
+    try {
+      const response = await fetch("/api/roles");
+      if (response.ok) {
+        const data = await response.json();
+        setRoles(data);
+      }
+    } catch (error) {
+      console.error("Error fetching roles:", error);
+    }
+  };
+
   useEffect(() => {
     fetchDepartments();
+    fetchRoles();
   }, []);
 
   const addMember = async () => {
@@ -499,6 +519,7 @@ export default function EditEpicForm({
             onClick={() => {
               setIsAddingMember(true);
               fetchUsers();
+              fetchRoles();
             }}
             className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
           >
@@ -542,9 +563,10 @@ export default function EditEpicForm({
                   className="w-full px-3 py-2 bg-zinc-700 border border-zinc-600 rounded text-white"
                 >
                   <option value="">Select a role...</option>
-                  {functionalRoles.map((role) => (
-                    <option key={role} value={role}>
-                      {role}
+                  {roles.map((role) => (
+                    <option key={role.id} value={role.name}>
+                      {role.name}
+                      {role.description && ` - ${role.description}`}
                     </option>
                   ))}
                 </select>
