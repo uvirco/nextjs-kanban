@@ -1,10 +1,10 @@
 "use server";
-import prisma from "@/prisma/prisma";
+import { supabaseAdmin } from "@/lib/supabase";
 import { auth } from "@/auth";
 import { z } from "zod";
 import { MESSAGES } from "@/utils/messages";
 import { revalidatePath } from "next/cache";
-import { ActivityType } from "@prisma/client";
+import { ActivityType } from "@/types/types";
 
 // Add User to Task
 export async function handleAddUserToTask(
@@ -39,22 +39,32 @@ export async function handleAddUserToTask(
   }
 
   try {
-    await prisma.taskAssignment.create({
-      data: {
+    const { error: assignmentError } = await supabaseAdmin
+      .from("TaskAssignment")
+      .insert({
         userId: parse.data.targetUserId,
         taskId: parse.data.taskId,
-      },
-    });
+      });
 
-    await prisma.activity.create({
-      data: {
+    if (assignmentError) {
+      console.error("Error creating task assignment:", assignmentError);
+      return { success: false, message: MESSAGES.USER_TO_TASK.CREATE_FAILURE };
+    }
+
+    const { error: activityError } = await supabaseAdmin
+      .from("Activity")
+      .insert({
         type: ActivityType.TASK_ASSIGNED,
         userId: userId,
         taskId: parse.data.taskId,
         boardId: parse.data.boardId,
         targetUserId: parse.data.targetUserId,
-      },
-    });
+      });
+
+    if (activityError) {
+      console.error("Error creating activity:", activityError);
+      // Don't fail the whole operation for activity errors
+    }
 
     revalidatePath(`/board/${parse.data.boardId}`);
 
@@ -100,24 +110,31 @@ export async function handleRemoveUserFromTask(
   }
 
   try {
-    await prisma.taskAssignment.delete({
-      where: {
-        userId_taskId: {
-          userId: parse.data.targetUserId,
-          taskId: parse.data.taskId,
-        },
-      },
-    });
+    const { error: assignmentError } = await supabaseAdmin
+      .from("TaskAssignment")
+      .delete()
+      .eq("userId", parse.data.targetUserId)
+      .eq("taskId", parse.data.taskId);
 
-    await prisma.activity.create({
-      data: {
+    if (assignmentError) {
+      console.error("Error deleting task assignment:", assignmentError);
+      return { success: false, message: MESSAGES.USER_TO_TASK.DELETE_FAILURE };
+    }
+
+    const { error: activityError } = await supabaseAdmin
+      .from("Activity")
+      .insert({
         type: ActivityType.TASK_UNASSIGNED,
         userId: userId,
         taskId: parse.data.taskId,
         boardId: parse.data.boardId,
         targetUserId: parse.data.targetUserId,
-      },
-    });
+      });
+
+    if (activityError) {
+      console.error("Error creating activity:", activityError);
+      // Don't fail the whole operation for activity errors
+    }
 
     revalidatePath(`/board/${parse.data.boardId}`);
 

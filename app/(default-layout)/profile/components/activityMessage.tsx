@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 import { ActivityWithUser } from "@/types/types";
-import { ActivityType } from "@prisma/client";
+import { ActivityType } from "@/types/types";
 
 const bold = (text: string) => <span className="font-semibold">{text}</span>;
 

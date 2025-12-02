@@ -6,7 +6,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Label } from "@prisma/client";
+import { Label } from "@/types/types";
 import { LabelView } from "./LabelView";
 import { LabelEditMode } from "./LabelEditMode";
 import { saveLabel, removeLabel } from "./LabelActions";

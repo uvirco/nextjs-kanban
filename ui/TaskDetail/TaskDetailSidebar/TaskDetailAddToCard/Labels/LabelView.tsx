@@ -2,7 +2,7 @@
 import { Button } from "@nextui-org/button";
 import { IconArrowLeft, IconPlus, IconX } from "@tabler/icons-react";
 import { LabelCheckboxGroup } from "./LabelCheckboxGroup";
-import { Label } from "@prisma/client";
+import { Label } from "@/types/types";
 import TaskPopoverHeading from "../components/TaskPopoverHeading";
 import TaskPopoverWrapper from "../components/TaskPopoverWrapper";
 

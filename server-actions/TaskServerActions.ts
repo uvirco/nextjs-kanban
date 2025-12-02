@@ -1,7 +1,7 @@
 "use server";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
-import { ActivityType } from "@prisma/client";
+import { ActivityType } from "@/types/types";
 import { supabaseAdmin } from "@/lib/supabase";
 import { auth } from "@/auth";
 import {

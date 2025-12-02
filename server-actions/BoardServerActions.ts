@@ -4,7 +4,7 @@ import { supabaseAdmin } from "@/lib/supabase";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { MESSAGES } from "@/utils/messages";
-import { ActivityType } from "@prisma/client";
+import { ActivityType } from "@/types/types";
 
 // Enums
 enum LabelColor {

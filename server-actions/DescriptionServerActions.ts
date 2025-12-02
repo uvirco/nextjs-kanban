@@ -1,7 +1,7 @@
 "use server";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
-import prisma from "@/prisma/prisma";
+import { supabaseAdmin } from "@/lib/supabase";
 import { auth } from "@/auth";
 import { MESSAGES } from "@/utils/messages";
 
@@ -38,10 +38,15 @@ export async function handleEditTaskDescription(
   }
 
   try {
-    await prisma.task.update({
-      where: { id: parse.data.taskId },
-      data: { description: parse.data.description },
-    });
+    const { error } = await supabaseAdmin
+      .from("Task")
+      .update({ description: parse.data.description })
+      .eq("id", parse.data.taskId);
+
+    if (error) {
+      console.error("Error updating description:", error);
+      return { success: false, message: MESSAGES.DESCRIPTION.UPDATE_FAILURE };
+    }
 
     revalidatePath(`/board/${parse.data.boardId}`);
 
@@ -78,10 +83,15 @@ export async function handleDeleteTaskDescription(
   }
 
   try {
-    await prisma.task.update({
-      where: { id: parse.data.taskId },
-      data: { description: null },
-    });
+    const { error } = await supabaseAdmin
+      .from("Task")
+      .update({ description: null })
+      .eq("id", parse.data.taskId);
+
+    if (error) {
+      console.error("Error deleting description:", error);
+      return { success: false, message: MESSAGES.DESCRIPTION.DELETE_FAILURE };
+    }
 
     revalidatePath(`/board/${parse.data.boardId}`);
 

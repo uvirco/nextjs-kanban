@@ -5,7 +5,7 @@ import BoardAddUsersList from "./BoardAddUsersList";
 import BoardAddUsersLink from "./BoardAddUsersLink";
 import BoardAddUsersForm from "./BoardAddUsersForm";
 import { BoardMemberWithUser } from "@/types/types";
-import { User } from "@prisma/client";
+import { User } from "@/types/types";
 
 interface BoardAddUsersProps {
   boardId: string;

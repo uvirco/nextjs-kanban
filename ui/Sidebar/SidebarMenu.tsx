@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import prisma from "@/prisma/prisma";
-import { BoardMember, Board } from "@prisma/client";
+import { BoardMember, Board } from "@/types/types";
 import { Sidebar, Menu, SubMenu, MenuItem } from "./SidebarComponent";
 import {
   IconLayoutKanban,

@@ -1,8 +1,8 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { ActivityType } from "@prisma/client";
-import prisma from "@/prisma/prisma";
+import { ActivityType } from "@/types/types";
+import { supabaseAdmin } from "@/lib/supabase";
 import { auth } from "@/auth";
 import { MESSAGES } from "@/utils/messages";
 
@@ -41,15 +41,19 @@ export async function handleCreateActivity(
   }
 
   try {
-    await prisma.activity.create({
-      data: {
+    const { error } = await supabaseAdmin
+      .from("Activity")
+      .insert({
         type: ActivityType.COMMENT_ADDED,
         content: parse.data.content,
         userId: userId,
         taskId: parse.data.taskId,
         boardId: parse.data.boardId,
-      },
-    });
+      });
+
+    if (error) {
+      return { success: false, message: MESSAGES.ACTIVITY.CREATE_FAILURE };
+    }
 
     revalidatePath(`/task/${taskId}`);
 
@@ -86,9 +90,14 @@ export async function handleDeleteActivity(data: {
   }
 
   try {
-    await prisma.activity.delete({
-      where: { id: parse.data.activityId },
-    });
+    const { error } = await supabaseAdmin
+      .from("Activity")
+      .delete()
+      .eq("id", parse.data.activityId);
+
+    if (error) {
+      return { success: false, message: MESSAGES.ACTIVITY.DELETE_FAILURE };
+    }
 
     revalidatePath(`/board/${parse.data.boardId}`);
     return { success: true, message: MESSAGES.ACTIVITY.DELETE_SUCCESS };

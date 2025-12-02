@@ -1,5 +1,5 @@
 "use server";
-import prisma from "@/prisma/prisma";
+import { supabaseAdmin } from "@/lib/supabase";
 import { auth } from "@/auth";
 import { z } from "zod";
 import { MESSAGES } from "@/utils/messages";
@@ -9,7 +9,7 @@ import {
   TaskEditData,
   TaskDeletionData,
 } from "@/types/types";
-import { ActivityType } from "@prisma/client";
+import { ActivityType } from "@/types/types";
 
 // Add/update a date
 export async function handleAddDate(data: {
@@ -44,15 +44,26 @@ export async function handleAddDate(data: {
   try {
     const dateObject = new Date(data.date);
 
-    const existingTask = await prisma.task.findUnique({
-      where: { id: data.taskId },
-      select: { [data.dateType]: true },
-    });
+    const { data: existingTask, error: fetchError } = await supabaseAdmin
+      .from("Task")
+      .select(data.dateType)
+      .eq("id", data.taskId)
+      .single();
 
-    await prisma.task.update({
-      where: { id: data.taskId },
-      data: { [data.dateType]: dateObject },
-    });
+    if (fetchError) {
+      console.error("Error fetching task:", fetchError);
+      return { success: false, message: MESSAGES.DATE.CREATE_FAILURE };
+    }
+
+    const { error: updateError } = await supabaseAdmin
+      .from("Task")
+      .update({ [data.dateType]: dateObject.toISOString() })
+      .eq("id", data.taskId);
+
+    if (updateError) {
+      console.error("Error updating task date:", updateError);
+      return { success: false, message: MESSAGES.DATE.CREATE_FAILURE };
+    }
 
     const activityType =
       existingTask && existingTask[data.dateType]
@@ -63,14 +74,19 @@ export async function handleAddDate(data: {
           ? ActivityType.DUE_DATE_ADDED
           : ActivityType.START_DATE_ADDED;
 
-    await prisma.activity.create({
-      data: {
+    const { error: activityError } = await supabaseAdmin
+      .from("Activity")
+      .insert({
         type: activityType,
         taskId: data.taskId,
         userId: userId,
-        [data.dateType]: dateObject,
-      },
-    });
+        [data.dateType]: dateObject.toISOString(),
+      });
+
+    if (activityError) {
+      console.error("Error creating activity:", activityError);
+      // Don't fail the whole operation for activity errors
+    }
 
     revalidatePath(`/board/${data.boardId}`);
     return {
@@ -99,23 +115,33 @@ export async function handleRemoveDate(data: {
   }
 
   try {
-    await prisma.task.update({
-      where: { id: data.taskId },
-      data: { [data.dateType]: null },
-    });
+    const { error: updateError } = await supabaseAdmin
+      .from("Task")
+      .update({ [data.dateType]: null })
+      .eq("id", data.taskId);
+
+    if (updateError) {
+      console.error("Error removing task date:", updateError);
+      return { success: false, message: MESSAGES.DATE.DELETE_FAILURE };
+    }
 
     const activityType =
       data.dateType === "dueDate"
         ? ActivityType.DUE_DATE_REMOVED
         : ActivityType.START_DATE_REMOVED;
 
-    await prisma.activity.create({
-      data: {
+    const { error: activityError } = await supabaseAdmin
+      .from("Activity")
+      .insert({
         type: activityType,
         taskId: data.taskId,
         userId: userId,
-      },
-    });
+      });
+
+    if (activityError) {
+      console.error("Error creating activity:", activityError);
+      // Don't fail the whole operation for activity errors
+    }
 
     revalidatePath(`/board/${data.boardId}`);
     return {

@@ -6,7 +6,7 @@ import { IconMinus } from "@tabler/icons-react";
 import { handleRemoveUserFromBoard } from "@/server-actions/InvitationServerActions";
 import { toast } from "sonner";
 import { BoardMemberWithUser } from "@/types/types";
-import { User } from "@prisma/client";
+import { User } from "@/types/types";
 
 interface BoardAddUsersListProps {
   owner: User | null;
