@@ -1,7 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { IconPlus, IconEdit, IconTrash, IconUser, IconBuilding } from "@tabler/icons-react";
+import {
+  IconPlus,
+  IconEdit,
+  IconTrash,
+  IconUser,
+  IconBuilding,
+} from "@tabler/icons-react";
 
 interface Department {
   id: string;
@@ -32,9 +38,12 @@ export default function DepartmentsManagement({
   initialDepartments,
   users,
 }: DepartmentsManagementProps) {
-  const [departments, setDepartments] = useState<Department[]>(initialDepartments);
+  const [departments, setDepartments] =
+    useState<Department[]>(initialDepartments);
   const [isAddingDepartment, setIsAddingDepartment] = useState(false);
-  const [editingDepartment, setEditingDepartment] = useState<Department | null>(null);
+  const [editingDepartment, setEditingDepartment] = useState<Department | null>(
+    null
+  );
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -73,9 +82,11 @@ export default function DepartmentsManagement({
         const updatedDepartment = await response.json();
 
         if (editingDepartment) {
-          setDepartments(departments.map(dept =>
-            dept.id === editingDepartment.id ? updatedDepartment : dept
-          ));
+          setDepartments(
+            departments.map((dept) =>
+              dept.id === editingDepartment.id ? updatedDepartment : dept
+            )
+          );
         } else {
           setDepartments([...departments, updatedDepartment]);
         }
@@ -101,7 +112,11 @@ export default function DepartmentsManagement({
   };
 
   const handleDelete = async (departmentId: string) => {
-    if (!confirm("Are you sure you want to delete this department? This action cannot be undone.")) {
+    if (
+      !confirm(
+        "Are you sure you want to delete this department? This action cannot be undone."
+      )
+    ) {
       return;
     }
 
@@ -111,7 +126,7 @@ export default function DepartmentsManagement({
       });
 
       if (response.ok) {
-        setDepartments(departments.filter(dept => dept.id !== departmentId));
+        setDepartments(departments.filter((dept) => dept.id !== departmentId));
       } else {
         const error = await response.json();
         alert(error.error || "Failed to delete department");
@@ -129,7 +144,8 @@ export default function DepartmentsManagement({
         <div>
           <h2 className="text-xl font-semibold text-white">Departments</h2>
           <p className="text-zinc-400 text-sm">
-            {departments.length} department{departments.length !== 1 ? "s" : ""} configured
+            {departments.length} department{departments.length !== 1 ? "s" : ""}{" "}
+            configured
           </p>
         </div>
         <button
@@ -157,7 +173,9 @@ export default function DepartmentsManagement({
                 type="text"
                 required
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 className="w-full px-3 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter department name"
               />
@@ -169,7 +187,9 @@ export default function DepartmentsManagement({
               </label>
               <textarea
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
                 rows={3}
                 className="w-full px-3 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Describe the department's purpose and responsibilities"
@@ -182,7 +202,9 @@ export default function DepartmentsManagement({
               </label>
               <select
                 value={formData.managerId}
-                onChange={(e) => setFormData({ ...formData, managerId: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, managerId: e.target.value })
+                }
                 className="w-full px-3 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Select a manager (optional)</option>
@@ -233,16 +255,23 @@ export default function DepartmentsManagement({
                     <div className="flex items-center gap-3">
                       <IconBuilding size={20} className="text-blue-400" />
                       <div>
-                        <h3 className="text-white font-medium">{department.name}</h3>
+                        <h3 className="text-white font-medium">
+                          {department.name}
+                        </h3>
                         {department.description && (
-                          <p className="text-zinc-400 text-sm">{department.description}</p>
+                          <p className="text-zinc-400 text-sm">
+                            {department.description}
+                          </p>
                         )}
                       </div>
                     </div>
                     {department.manager && (
                       <div className="flex items-center gap-2 mt-2 text-sm text-zinc-400">
                         <IconUser size={14} />
-                        <span>Manager: {department.manager.name || department.manager.email}</span>
+                        <span>
+                          Manager:{" "}
+                          {department.manager.name || department.manager.email}
+                        </span>
                       </div>
                     )}
                   </div>

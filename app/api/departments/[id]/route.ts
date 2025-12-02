@@ -4,8 +4,9 @@ import { supabaseAdmin } from "@/lib/supabase";
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
+  const params = await props.params;
   try {
     const session = await auth();
     if (!session?.user?.id || session.user.role !== "ADMIN") {
@@ -32,10 +33,12 @@ export async function PUT(
         updatedAt: new Date().toISOString(),
       })
       .eq("id", departmentId)
-      .select(`
+      .select(
+        `
         *,
         manager:User(id, name, email)
-      `)
+      `
+      )
       .single();
 
     if (error) {
@@ -58,8 +61,9 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
+  const params = await props.params;
   try {
     const session = await auth();
     if (!session?.user?.id || session.user.role !== "ADMIN") {
@@ -69,11 +73,12 @@ export async function DELETE(
     const departmentId = params.id;
 
     // Check if department is being used by any tasks
-    const { data: tasksUsingDepartment, error: checkError } = await supabaseAdmin
-      .from("Task")
-      .select("id")
-      .eq("departmentId", departmentId)
-      .limit(1);
+    const { data: tasksUsingDepartment, error: checkError } =
+      await supabaseAdmin
+        .from("Task")
+        .select("id")
+        .eq("departmentId", departmentId)
+        .limit(1);
 
     if (checkError) {
       console.error("Error checking department usage:", checkError);
@@ -85,7 +90,10 @@ export async function DELETE(
 
     if (tasksUsingDepartment && tasksUsingDepartment.length > 0) {
       return NextResponse.json(
-        { error: "Cannot delete department that is assigned to tasks. Please reassign tasks first." },
+        {
+          error:
+            "Cannot delete department that is assigned to tasks. Please reassign tasks first.",
+        },
         { status: 400 }
       );
     }

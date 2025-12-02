@@ -3,8 +3,9 @@ import { supabaseAdmin } from "@/lib/supabase";
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string; userId: string } }
+  props: { params: Promise<{ id: string; userId: string }> }
 ) {
+  const params = await props.params;
   try {
     const { error } = await supabaseAdmin
       .from("EpicMember")

@@ -51,11 +51,12 @@ async function getEpic(epicId: string) {
   };
 }
 
-export default async function EditEpicPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default async function EditEpicPage(
+  props: {
+    params: Promise<{ id: string }>;
+  }
+) {
+  const params = await props.params;
   const session = await auth();
   const userId = session?.user?.id;
 

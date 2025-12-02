@@ -11,10 +11,12 @@ export async function GET() {
 
     const { data: departments, error } = await supabaseAdmin
       .from("Department")
-      .select(`
+      .select(
+        `
         *,
         manager:User(id, name, email)
-      `)
+      `
+      )
       .order("name");
 
     if (error) {
@@ -59,10 +61,12 @@ export async function POST(request: Request) {
         description: description || null,
         managerId: managerId || null,
       })
-      .select(`
+      .select(
+        `
         *,
         manager:User(id, name, email)
-      `)
+      `
+      )
       .single();
 
     if (error) {

@@ -1,7 +1,12 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { IconUsers, IconSettings, IconDashboard, IconBuilding } from "@tabler/icons-react";
+import {
+  IconUsers,
+  IconSettings,
+  IconDashboard,
+  IconBuilding,
+} from "@tabler/icons-react";
 import AdminSignOutButton from "./AdminSignOutButton";
 
 export default async function AdminLayout({

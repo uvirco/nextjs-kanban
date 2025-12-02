@@ -85,11 +85,10 @@ async function getEpicDetails(epicId: string) {
   };
 }
 
-export default async function EpicDetailPage({
-  params,
-}: {
-  params: { id: string };
+export default async function EpicDetailPage(props: {
+  params: Promise<{ id: string }>;
 }) {
+  const params = await props.params;
   const epic = await getEpicDetails(params.id);
 
   if (!epic) {

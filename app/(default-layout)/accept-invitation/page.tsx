@@ -3,11 +3,12 @@ import { auth } from "@/auth";
 import InvitationButtons from "./components/InvitationButtons";
 import Link from "next/link";
 
-export default async function AcceptInvitation({
-  searchParams,
-}: {
-  searchParams: { token?: string };
-}) {
+export default async function AcceptInvitation(
+  props: {
+    searchParams: Promise<{ token?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const session = await auth();
   const token = searchParams.token;
 
