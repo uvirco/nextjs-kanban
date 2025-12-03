@@ -10,6 +10,7 @@ import {
 import EpicPriorityView from "./EpicPriorityView";
 import EpicTableView from "./EpicTableView";
 import EpicBoard from "./EpicBoard";
+import EpicBubbleChart from "./EpicBubbleChart";
 import Link from "next/link";
 
 interface Epic {
@@ -423,9 +424,7 @@ export default function EpicPortfolioClient({
       {view === "timeline" && (
         <div className="text-zinc-400">Timeline view coming soon...</div>
       )}
-      {view === "matrix" && (
-        <div className="text-zinc-400">Matrix view coming soon...</div>
-      )}
+      {view === "matrix" && <EpicBubbleChart epics={filteredEpics} />}
     </div>
   );
 }

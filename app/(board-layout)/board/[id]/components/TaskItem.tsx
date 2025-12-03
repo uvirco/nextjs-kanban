@@ -7,8 +7,6 @@ import {
 } from "@tabler/icons-react";
 import Link from "next/link";
 import { useMemo } from "react";
-import { Avatar, AvatarGroup } from "@nextui-org/avatar";
-import { Chip } from "@nextui-org/chip";
 import { DraggableProvidedDragHandleProps } from "@hello-pangea/dnd";
 import { BoardTask } from "@/types/types";
 
@@ -93,16 +91,37 @@ export default function TaskItem({ task, dragHandleProps }: TaskItemProps) {
         )}
         <div className="flex justify-between items-center mt-3">
           {task.assignedUsers && task.assignedUsers.length > 0 ? (
-            <AvatarGroup size="sm">
-              {task.assignedUsers.map((assignment) => (
-                <Avatar
+            <div className="flex -space-x-2">
+              {task.assignedUsers.slice(0, 3).map((assignment) => (
+                <div
                   key={assignment.user.id}
-                  showFallback
-                  name={assignment.user.name || "Unknown"}
-                  src={assignment.user.image || undefined}
-                />
+                  className="w-6 h-6 rounded-full border-2 border-zinc-900 bg-zinc-700 flex items-center justify-center overflow-hidden"
+                  title={assignment.user.name || "Unknown"}
+                >
+                  {assignment.user.image ? (
+                    <img
+                      src={assignment.user.image}
+                      alt={assignment.user.name || "Unknown"}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-xs text-zinc-300">
+                      {(assignment.user.name || "?").charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                </div>
               ))}
-            </AvatarGroup>
+              {task.assignedUsers.length > 3 && (
+                <div
+                  className="w-6 h-6 rounded-full border-2 border-zinc-900 bg-zinc-700 flex items-center justify-center"
+                  title={`+${task.assignedUsers.length - 3} more`}
+                >
+                  <span className="text-xs text-zinc-300">
+                    +{task.assignedUsers.length - 3}
+                  </span>
+                </div>
+              )}
+            </div>
           ) : (
             <div />
           )}

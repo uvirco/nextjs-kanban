@@ -280,7 +280,7 @@ export default function EditEpicForm({
         throw new Error("Failed to update epic");
       }
 
-      router.push(`/epics/${epic.id}`);
+      router.push(`/epics`);
     } catch (error) {
       console.error("Error updating epic:", error);
       alert("Failed to update epic. Please try again.");

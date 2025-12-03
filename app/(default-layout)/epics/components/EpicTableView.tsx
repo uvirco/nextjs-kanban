@@ -6,6 +6,7 @@ import {
   IconChevronDown,
   IconSettings,
   IconExternalLink,
+  IconEdit,
 } from "@tabler/icons-react";
 
 interface Epic {
@@ -486,13 +487,22 @@ export default function EpicTableView({ epics }: EpicTableViewProps) {
                     }
                   })}
                   <td className="px-4 py-3">
-                    <Link
-                      href={`/epics/${epic.id}`}
-                      className="inline-flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors"
-                    >
-                      <span className="text-sm">View</span>
-                      <IconExternalLink size={14} />
-                    </Link>
+                    <div className="flex items-center gap-3">
+                      <Link
+                        href={`/epics/${epic.id}/edit`}
+                        className="inline-flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors"
+                      >
+                        <IconEdit size={16} />
+                        <span className="text-sm">Edit</span>
+                      </Link>
+                      <Link
+                        href={`/epics/${epic.id}`}
+                        className="inline-flex items-center gap-1 text-zinc-400 hover:text-zinc-300 transition-colors"
+                      >
+                        <IconExternalLink size={14} />
+                        <span className="text-sm">View</span>
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               ))}
