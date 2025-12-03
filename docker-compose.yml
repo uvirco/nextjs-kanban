@@ -6,13 +6,14 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - NEXTAUTH_URL=http://your-server-ip:3000
+      - NEXTAUTH_URL=http://localhost:3000
       - AUTH_SECRET=your-super-secret-jwt-secret-key-here-change-this-in-production
       - DATABASE_URL=postgresql://postgres:admin@your-db-server:5432/kanban
       - SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5weXhib2dmZmJvanFxdWpudXJ2Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2MzAyMjc0NywiZXhwIjoyMDc4NTk4NzQ3fQ.vjn32g3jXh9T7ZfeAL93Uc7CRCRMERXbgpKAk7VcTtw
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+    networks:
+      - internal-network
+
+networks:
+  internal-network:
+    driver: bridge

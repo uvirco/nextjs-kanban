@@ -1,23 +1,41 @@
-# Next.js Kanban Deployment Guide
+# Next.js Kanban Internal Deployment Guide
 
 ## Prerequisites
-- Docker and Docker Compose installed on target server
-- PostgreSQL database accessible from the server
-- Domain name or IP address for the server
+- Docker and Docker Compose installed on internal server
+- PostgreSQL database accessible from the internal network
+- SSH access to the internal server
+- Internal network access to the server
+
+## Required Information
+Before deployment, gather these details:
+
+### Server Access
+- **Server IP/Hostname**: Internal IP address or hostname of your server
+- **SSH Username**: Username for SSH access (e.g., `admin`, `ubuntu`, `root`)
+- **SSH Password**: Password for SSH access, OR
+- **SSH Key Path**: Path to your SSH private key (e.g., `~/.ssh/id_rsa`)
+
+### Database Access
+- **Database Host**: Internal IP/hostname of PostgreSQL server
+- **Database Port**: Usually `5432` for PostgreSQL
+- **Database Username**: Database user (e.g., `postgres`)
+- **Database Password**: Database user password
+- **Database Name**: Database name (e.g., `kanban`)
 
 ## Deployment Steps
 
-### 1. Transfer Files to Server
+### 1. Transfer Files to Internal Server
 ```bash
-# Copy the Docker image and source code to your server
-scp nextjs-kanban.tar user@your-server:/path/to/app/
-scp docker-compose.yml user@your-server:/path/to/app/
+# Copy the Docker image and source code to your internal server
+# Replace [SSH_USER] and [INTERNAL_SERVER] with your actual values
+scp nextjs-kanban.tar [SSH_USER]@[INTERNAL_SERVER]:/opt/nextjs-kanban/
+scp docker-compose.yml [SSH_USER]@[INTERNAL_SERVER]:/opt/nextjs-kanban/
 ```
 
 ### 2. Load Docker Image on Server
 ```bash
-# SSH to your server
-ssh user@your-server
+# SSH to your internal server
+ssh [SSH_USER]@[INTERNAL_SERVER]
 
 # Load the Docker image
 docker load < nextjs-kanban.tar
@@ -25,10 +43,11 @@ docker load < nextjs-kanban.tar
 
 ### 3. Configure Environment Variables
 Edit `docker-compose.yml` and update:
-- `NEXTAUTH_URL`: Change `your-server-ip` to your actual server IP/domain
-- `DATABASE_URL`: Update with your database connection details
-- `AUTH_SECRET`: Use a secure random string in production
+- `DATABASE_URL`: Update with your internal database connection details
+- `AUTH_SECRET`: Use a secure random string
 - `SUPABASE_SERVICE_ROLE_KEY`: Your Supabase service role key
+
+**Note**: `NEXTAUTH_URL` is already set to `http://localhost:3000` for internal use.
 
 ### 4. Deploy the Application
 ```bash
@@ -42,43 +61,18 @@ docker-compose ps
 docker-compose logs -f nextjs-kanban
 ```
 
-### 5. Configure Reverse Proxy (Optional but Recommended)
-For production, set up Nginx or Apache as a reverse proxy:
-
-```nginx
-# /etc/nginx/sites-available/nextjs-kanban
-server {
-    listen 80;
-    server_name your-domain.com;
-
-    location / {
-        proxy_pass http://localhost:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_cache_bypass $http_upgrade;
-    }
-}
-```
-
-### 6. SSL Certificate (Production)
-```bash
-# Install certbot for Let's Encrypt
-sudo apt install certbot python3-certbot-nginx
-sudo certbot --nginx -d your-domain.com
-```
+### 5. Access the Application
+The application will be available at:
+- **Internal URL**: `http://[INTERNAL_SERVER_IP]:3000`
+- **Local access**: `http://localhost:3000` (from the server itself)
 
 ## Environment Variables Reference
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `NEXTAUTH_URL` | Full URL of your application | `https://your-domain.com` |
+| `NEXTAUTH_URL` | Internal application URL | `http://localhost:3000` |
 | `AUTH_SECRET` | JWT secret for NextAuth | `your-secure-random-string` |
-| `DATABASE_URL` | PostgreSQL connection string | `postgresql://user:pass@host:5432/db` |
+| `DATABASE_URL` | PostgreSQL connection string | `postgresql://user:pass@db-server:5432/db` |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key | `eyJhbGciOiJIUzI1NiIs...` |
 
 ## Troubleshooting
@@ -109,3 +103,21 @@ docker load < new-nextjs-kanban.tar
 # Start again
 docker-compose up -d
 ```
+
+## Internal Network Considerations
+
+### Database Access
+- Ensure the PostgreSQL database is accessible from the internal server
+- Use internal IP addresses or hostnames for database connections
+- Configure firewall rules to allow database access
+
+### User Access
+- Users can access the application via `http://server-ip:3000`
+- No SSL required for internal networks (unless your security policy requires it)
+- Consider using internal DNS names for easier access
+
+### Security Notes
+- Since this is internal, focus on network-level security
+- Use strong `AUTH_SECRET` values
+- Regularly update the Docker images
+- Monitor application logs for security events
