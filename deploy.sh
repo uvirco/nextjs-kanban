@@ -74,6 +74,8 @@ echo "🌐 Application available at: http://$SERVER_IP:3000"
 echo "🏠 Local access (on server): http://localhost:3000"
 EOF
 
+fi
+
 if [ "$DRY_RUN" -eq 1 ]; then
     echo "[dry-run] Finished — nothing executed. To run for real, re-run without --dry-run (or pass explicit server/user/key)."
 else
