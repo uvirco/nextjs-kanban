@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { supabaseAdmin } from "@/lib/supabase";
+import type { BoardMemberWithUser } from "@/types/types";
 import BoardAddUsers from "../AddUsers/BoardAddUsers";
 
 export default async function BoardUsers({ boardId }: { boardId: string }) {
@@ -24,13 +25,12 @@ export default async function BoardUsers({ boardId }: { boardId: string }) {
     console.error("Failed to fetch board members:", error);
   }
 
-  const boardMembers = boardMembersData || [];
+  const boardMembers = (boardMembersData || []) as BoardMemberWithUser[];
 
-  const owner =
-    boardMembers.find((member) => member.role === "owner")?.user ?? null;
+  const owner = boardMembers.find((member: BoardMemberWithUser) => member.role === "owner")?.user ?? null;
   const isOwner = owner?.id === userId;
 
-  const members = boardMembers.filter((member) => member.role === "member");
+  const members = boardMembers.filter((member: BoardMemberWithUser) => member.role === "member");
 
   return (
     <BoardAddUsers
