@@ -19,7 +19,7 @@ export default async function UsersPage() {
 
   // Create a map of userId to count
   const memberCountMap: Record<string, number> = {};
-  boardMemberCounts?.forEach((bm) => {
+  boardMemberCounts?.forEach((bm: { userId: string }) => {
     memberCountMap[bm.userId] = (memberCountMap[bm.userId] || 0) + 1;
   });
 
@@ -35,7 +35,7 @@ export default async function UsersPage() {
 
   // Map users with their board count
   const users =
-    usersData?.map((user) => ({
+    usersData?.map((user: any) => ({
       ...user,
       _count: {
         memberBoards: memberCountMap[user.id] || 0,
