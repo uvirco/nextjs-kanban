@@ -13,9 +13,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        console.log('Auth attempt:', credentials?.email);
+        console.log("Auth attempt:", credentials?.email);
         if (!credentials?.email || !credentials?.password) {
-          console.log('Missing credentials');
+          console.log("Missing credentials");
           return null;
         }
 
@@ -26,17 +26,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           .single();
 
         if (error) {
-          console.log('Database error:', error.message);
+          console.log("Database error:", error.message);
           return null;
         }
 
         if (!user) {
-          console.log('User not found');
+          console.log("User not found");
           return null;
         }
 
         if (!user.password || !user.isActive) {
-          console.log('User inactive or no password');
+          console.log("User inactive or no password");
           return null;
         }
 
@@ -46,11 +46,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         );
 
         if (!isValidPassword) {
-          console.log('Password invalid');
+          console.log("Password invalid");
           return null;
         }
 
-        console.log('Auth successful for:', user.email);
+        console.log("Auth successful for:", user.email);
         return {
           id: user.id,
           email: user.email,

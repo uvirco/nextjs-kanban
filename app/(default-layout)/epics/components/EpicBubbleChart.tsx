@@ -31,7 +31,11 @@ interface EpicBubbleChartProps {
   epics: Epic[];
 }
 
-type ChartMode = "value-risk" | "readiness-priority" | "readiness-value" | "readiness-duedate";
+type ChartMode =
+  | "value-risk"
+  | "readiness-priority"
+  | "readiness-value"
+  | "readiness-duedate";
 
 export default function EpicBubbleChart({ epics }: EpicBubbleChartProps) {
   const [chartMode, setChartMode] = useState<ChartMode>("value-risk");
@@ -96,34 +100,43 @@ export default function EpicBubbleChart({ epics }: EpicBubbleChartProps) {
           y = valueToNumber(epic.priority);
           hasAllData = epic.readinessScore !== undefined && epic.priority;
           break;
-        
+
         case "readiness-value":
           x = epic.readinessScore || 0;
           y = valueToNumber(epic.businessValue);
           hasAllData = epic.readinessScore !== undefined && epic.businessValue;
           break;
-        
+
         case "readiness-duedate":
-          const daysUntilDue = epic.dueDate 
-            ? Math.ceil((new Date(epic.dueDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+          const daysUntilDue = epic.dueDate
+            ? Math.ceil(
+                (new Date(epic.dueDate).getTime() - Date.now()) /
+                  (1000 * 60 * 60 * 24)
+              )
             : 0;
           x = epic.readinessScore || 0;
           y = Math.max(0, Math.min(365, daysUntilDue)); // Cap at 1 year
           hasAllData = epic.readinessScore !== undefined && epic.dueDate;
           break;
-        
+
         case "value-risk":
         default:
           x = valueToNumber(epic.businessValue);
           y = riskToNumber(epic.riskLevel);
-          hasAllData = epic.businessValue && epic.riskLevel && (epic.estimatedEffort || epic.budgetEstimate);
+          hasAllData =
+            epic.businessValue &&
+            epic.riskLevel &&
+            (epic.estimatedEffort || epic.budgetEstimate);
       }
-      
+
       return {
         ...epic,
         x,
         y,
-        size: ((epic.estimatedEffort || epic.budgetEstimate || 5) / maxEffort) * 50 + 15,
+        size:
+          ((epic.estimatedEffort || epic.budgetEstimate || 5) / maxEffort) *
+            50 +
+          15,
         color: getPriorityColor(epic.priority),
         incomplete: !hasAllData,
       };
@@ -138,71 +151,150 @@ export default function EpicBubbleChart({ epics }: EpicBubbleChartProps) {
           xMax: 100,
           yMax: 4,
           xScale: (value: number) => padding + (value / 100) * chartWidth,
-          yScale: (value: number) => height - padding - (value / 4) * chartHeight,
+          yScale: (value: number) =>
+            height - padding - (value / 4) * chartHeight,
           xLabels: [0, 25, 50, 75, 100],
           yLabels: ["None", "LOW", "MEDIUM", "HIGH", "CRITICAL"],
           xTitle: "Readiness Score (%) →",
           yTitle: "Priority →",
           quadrantLabels: [
-            { x: 25, y: 1, label: "Not Ready\nLow Priority", class: "text-gray-500" },
-            { x: 75, y: 1, label: "Ready\nLow Priority", class: "text-gray-400" },
-            { x: 25, y: 3, label: "Not Ready\nHigh Priority\nNEEDS ATTENTION", class: "text-yellow-300" },
-            { x: 75, y: 3, label: "Ready\nHigh Priority\nSTART NOW", class: "text-green-300" },
+            {
+              x: 25,
+              y: 1,
+              label: "Not Ready\nLow Priority",
+              class: "text-gray-500",
+            },
+            {
+              x: 75,
+              y: 1,
+              label: "Ready\nLow Priority",
+              class: "text-gray-400",
+            },
+            {
+              x: 25,
+              y: 3,
+              label: "Not Ready\nHigh Priority\nNEEDS ATTENTION",
+              class: "text-yellow-300",
+            },
+            {
+              x: 75,
+              y: 3,
+              label: "Ready\nHigh Priority\nSTART NOW",
+              class: "text-green-300",
+            },
           ],
         };
-      
+
       case "readiness-value":
         return {
           xMax: 100,
           yMax: 4,
           xScale: (value: number) => padding + (value / 100) * chartWidth,
-          yScale: (value: number) => height - padding - (value / 4) * chartHeight,
+          yScale: (value: number) =>
+            height - padding - (value / 4) * chartHeight,
           xLabels: [0, 25, 50, 75, 100],
           yLabels: ["None", "LOW", "MEDIUM", "HIGH", "CRITICAL"],
           xTitle: "Readiness Score (%) →",
           yTitle: "Business Value →",
           quadrantLabels: [
-            { x: 25, y: 1, label: "Not Ready\nLow Value", class: "text-gray-500" },
+            {
+              x: 25,
+              y: 1,
+              label: "Not Ready\nLow Value",
+              class: "text-gray-500",
+            },
             { x: 75, y: 1, label: "Ready\nLow Value", class: "text-gray-400" },
-            { x: 25, y: 3, label: "Not Ready\nHigh Value\nDEFINE FIRST", class: "text-yellow-300" },
-            { x: 75, y: 3, label: "Ready\nHigh Value\nQUICK WINS", class: "text-green-300" },
+            {
+              x: 25,
+              y: 3,
+              label: "Not Ready\nHigh Value\nDEFINE FIRST",
+              class: "text-yellow-300",
+            },
+            {
+              x: 75,
+              y: 3,
+              label: "Ready\nHigh Value\nQUICK WINS",
+              class: "text-green-300",
+            },
           ],
         };
-      
+
       case "readiness-duedate":
         return {
           xMax: 100,
           yMax: 365,
           xScale: (value: number) => padding + (value / 100) * chartWidth,
-          yScale: (value: number) => height - padding - (value / 365) * chartHeight,
+          yScale: (value: number) =>
+            height - padding - (value / 365) * chartHeight,
           xLabels: [0, 25, 50, 75, 100],
           yLabels: ["Overdue", "30d", "90d", "180d", "365d"],
           xTitle: "Readiness Score (%) →",
           yTitle: "Days Until Due →",
           quadrantLabels: [
-            { x: 25, y: 90, label: "Not Ready\nUrgent\nDANGER ZONE", class: "text-red-300" },
-            { x: 75, y: 90, label: "Ready\nUrgent\nEXECUTE", class: "text-orange-300" },
-            { x: 25, y: 270, label: "Not Ready\nLater\nPLAN NOW", class: "text-yellow-300" },
-            { x: 75, y: 270, label: "Ready\nLater\nON TRACK", class: "text-green-300" },
+            {
+              x: 25,
+              y: 90,
+              label: "Not Ready\nUrgent\nDANGER ZONE",
+              class: "text-red-300",
+            },
+            {
+              x: 75,
+              y: 90,
+              label: "Ready\nUrgent\nEXECUTE",
+              class: "text-orange-300",
+            },
+            {
+              x: 25,
+              y: 270,
+              label: "Not Ready\nLater\nPLAN NOW",
+              class: "text-yellow-300",
+            },
+            {
+              x: 75,
+              y: 270,
+              label: "Ready\nLater\nON TRACK",
+              class: "text-green-300",
+            },
           ],
         };
-      
+
       case "value-risk":
       default:
         return {
           xMax: 4,
           yMax: 3,
           xScale: (value: number) => padding + (value / 4) * chartWidth,
-          yScale: (value: number) => height - padding - (value / 3) * chartHeight,
+          yScale: (value: number) =>
+            height - padding - (value / 3) * chartHeight,
           xLabels: ["None", "LOW", "MEDIUM", "HIGH", "CRITICAL"],
           yLabels: ["None", "LOW", "MEDIUM", "HIGH"],
           xTitle: "Business Value →",
           yTitle: "Risk Level →",
           quadrantLabels: [
-            { x: 1, y: 2.5, label: "Low Value\nHigh Risk", class: "text-red-300" },
-            { x: 3, y: 2.5, label: "High Value\nHigh Risk\nNeeds Mitigation", class: "text-yellow-300" },
-            { x: 1, y: 0.5, label: "Low Value\nLow Risk", class: "text-gray-400" },
-            { x: 3, y: 0.5, label: "QUICK WINS\nHigh Value, Low Risk", class: "text-green-300" },
+            {
+              x: 1,
+              y: 2.5,
+              label: "Low Value\nHigh Risk",
+              class: "text-red-300",
+            },
+            {
+              x: 3,
+              y: 2.5,
+              label: "High Value\nHigh Risk\nNeeds Mitigation",
+              class: "text-yellow-300",
+            },
+            {
+              x: 1,
+              y: 0.5,
+              label: "Low Value\nLow Risk",
+              class: "text-gray-400",
+            },
+            {
+              x: 3,
+              y: 0.5,
+              label: "QUICK WINS\nHigh Value, Low Risk",
+              class: "text-green-300",
+            },
           ],
         };
     }
@@ -266,7 +358,9 @@ export default function EpicBubbleChart({ epics }: EpicBubbleChartProps) {
       {/* Legend */}
       <div className="flex items-center justify-between bg-zinc-900 border border-zinc-800 rounded-lg p-4">
         <div>
-          <h3 className="text-sm font-medium text-zinc-400 mb-2">Priority (Color)</h3>
+          <h3 className="text-sm font-medium text-zinc-400 mb-2">
+            Priority (Color)
+          </h3>
           <div className="flex gap-3">
             {[
               { label: "Critical", color: "#ef4444" },
@@ -285,11 +379,15 @@ export default function EpicBubbleChart({ epics }: EpicBubbleChartProps) {
           </div>
         </div>
         <div>
-          <h3 className="text-sm font-medium text-zinc-400 mb-2">Bubble Size</h3>
+          <h3 className="text-sm font-medium text-zinc-400 mb-2">
+            Bubble Size
+          </h3>
           <p className="text-xs text-zinc-500">Estimated Effort (hours)</p>
         </div>
         <div>
-          <h3 className="text-sm font-medium text-zinc-400 mb-2">Incomplete Data</h3>
+          <h3 className="text-sm font-medium text-zinc-400 mb-2">
+            Incomplete Data
+          </h3>
           <div className="flex items-center gap-2">
             <svg width="20" height="20">
               <circle
@@ -303,7 +401,9 @@ export default function EpicBubbleChart({ epics }: EpicBubbleChartProps) {
                 strokeDasharray="3,3"
               />
             </svg>
-            <span className="text-xs text-zinc-500">Missing value/risk/effort</span>
+            <span className="text-xs text-zinc-500">
+              Missing value/risk/effort
+            </span>
           </div>
         </div>
       </div>
@@ -350,66 +450,72 @@ export default function EpicBubbleChart({ epics }: EpicBubbleChartProps) {
           />
 
           {/* Grid lines */}
-          {chartMode === "value-risk" && [1, 2, 3, 4].map((i) => (
-            <line
-              key={`v-${i}`}
-              x1={axisConfig.xScale(i)}
-              y1={padding}
-              x2={axisConfig.xScale(i)}
-              y2={height - padding}
-              stroke="#3f3f46"
-              strokeWidth="1"
-              strokeDasharray="4"
-            />
-          ))}
-          {chartMode !== "value-risk" && [25, 50, 75].map((i) => (
-            <line
-              key={`v-${i}`}
-              x1={axisConfig.xScale(i)}
-              y1={padding}
-              x2={axisConfig.xScale(i)}
-              y2={height - padding}
-              stroke="#3f3f46"
-              strokeWidth="1"
-              strokeDasharray="4"
-            />
-          ))}
-          {chartMode === "value-risk" && [1, 2, 3].map((i) => (
-            <line
-              key={`h-${i}`}
-              x1={padding}
-              y1={axisConfig.yScale(i)}
-              x2={width - padding}
-              y2={axisConfig.yScale(i)}
-              stroke="#3f3f46"
-              strokeWidth="1"
-              strokeDasharray="4"
-            />
-          ))}
-          {chartMode === "readiness-duedate" && [30, 90, 180, 270].map((i) => (
-            <line
-              key={`h-${i}`}
-              x1={padding}
-              y1={axisConfig.yScale(i)}
-              x2={width - padding}
-              y2={axisConfig.yScale(i)}
-              stroke="#3f3f46"
-              strokeWidth="1"
-              strokeDasharray="4"
-            />
-          ))}
-          {(chartMode === "readiness-priority" || chartMode === "readiness-value") && [1, 2, 3].map((i) => (
-            <line
-              key={`h-${i}`}
-              x1={padding}
-              y1={axisConfig.yScale(i)}
-              x2={width - padding}
-              y2={axisConfig.yScale(i)}
-              stroke="#3f3f46"
-              strokeWidth="1"
-              strokeDasharray="4"
-            />
-          ))}
+          {chartMode === "value-risk" &&
+            [1, 2, 3, 4].map((i) => (
+              <line
+                key={`v-${i}`}
+                x1={axisConfig.xScale(i)}
+                y1={padding}
+                x2={axisConfig.xScale(i)}
+                y2={height - padding}
+                stroke="#3f3f46"
+                strokeWidth="1"
+                strokeDasharray="4"
+              />
+            ))}
+          {chartMode !== "value-risk" &&
+            [25, 50, 75].map((i) => (
+              <line
+                key={`v-${i}`}
+                x1={axisConfig.xScale(i)}
+                y1={padding}
+                x2={axisConfig.xScale(i)}
+                y2={height - padding}
+                stroke="#3f3f46"
+                strokeWidth="1"
+                strokeDasharray="4"
+              />
+            ))}
+          {chartMode === "value-risk" &&
+            [1, 2, 3].map((i) => (
+              <line
+                key={`h-${i}`}
+                x1={padding}
+                y1={axisConfig.yScale(i)}
+                x2={width - padding}
+                y2={axisConfig.yScale(i)}
+                stroke="#3f3f46"
+                strokeWidth="1"
+                strokeDasharray="4"
+              />
+            ))}
+          {chartMode === "readiness-duedate" &&
+            [30, 90, 180, 270].map((i) => (
+              <line
+                key={`h-${i}`}
+                x1={padding}
+                y1={axisConfig.yScale(i)}
+                x2={width - padding}
+                y2={axisConfig.yScale(i)}
+                stroke="#3f3f46"
+                strokeWidth="1"
+                strokeDasharray="4"
+              />
+            ))}
+          {(chartMode === "readiness-priority" ||
+            chartMode === "readiness-value") &&
+            [1, 2, 3].map((i) => (
+              <line
+                key={`h-${i}`}
+                x1={padding}
+                y1={axisConfig.yScale(i)}
+                x2={width - padding}
+                y2={axisConfig.yScale(i)}
+                stroke="#3f3f46"
+                strokeWidth="1"
+                strokeDasharray="4"
+              />
+            ))}
 
           {/* Axes */}
           <line
@@ -430,7 +536,7 @@ export default function EpicBubbleChart({ epics }: EpicBubbleChartProps) {
           />
 
           {/* X-axis labels */}
-          {typeof axisConfig.xLabels[0] === 'string' 
+          {typeof axisConfig.xLabels[0] === "string"
             ? axisConfig.xLabels.map((label, i) => (
                 <text
                   key={`x-${i}`}
@@ -445,18 +551,17 @@ export default function EpicBubbleChart({ epics }: EpicBubbleChartProps) {
             : axisConfig.xLabels.map((label, i) => (
                 <text
                   key={`x-${label}`}
-                  x={axisConfig.xScale(label)}
+                  x={axisConfig.xScale(label as number)}
                   y={height - padding + 25}
                   textAnchor="middle"
                   className="fill-zinc-400 text-xs"
                 >
                   {label}%
                 </text>
-              ))
-          }
+              ))}
 
           {/* Y-axis labels */}
-          {typeof axisConfig.yLabels[0] === 'string'
+          {typeof axisConfig.yLabels[0] === "string"
             ? axisConfig.yLabels.map((label, i) => (
                 <text
                   key={`y-${i}`}
@@ -480,8 +585,7 @@ export default function EpicBubbleChart({ epics }: EpicBubbleChartProps) {
                     {label === 0 ? "Overdue" : `${label}d`}
                   </text>
                 ))
-              : null
-          }
+              : null}
 
           {/* Axis titles */}
           <text
@@ -511,8 +615,12 @@ export default function EpicBubbleChart({ epics }: EpicBubbleChartProps) {
               textAnchor="middle"
               className={`${quad.class} text-xs font-medium opacity-50`}
             >
-              {quad.label.split('\n').map((line, j) => (
-                <tspan key={j} x={axisConfig.xScale(quad.x)} dy={j === 0 ? 0 : 14}>
+              {quad.label.split("\n").map((line, j) => (
+                <tspan
+                  key={j}
+                  x={axisConfig.xScale(quad.x)}
+                  dy={j === 0 ? 0 : 14}
+                >
                   {line}
                 </tspan>
               ))}
@@ -576,14 +684,19 @@ export default function EpicBubbleChart({ epics }: EpicBubbleChartProps) {
                 <span className="text-sm text-white">
                   {epic.title}
                   {epic.incomplete && (
-                    <span className="ml-2 text-xs text-zinc-500">(incomplete)</span>
+                    <span className="ml-2 text-xs text-zinc-500">
+                      (incomplete)
+                    </span>
                   )}
                 </span>
               </div>
               <div className="flex items-center gap-3 text-xs text-zinc-400">
                 <span>Value: {epic.businessValue || "N/A"}</span>
                 <span>Risk: {epic.riskLevel || "N/A"}</span>
-                <span>Effort: {epic.estimatedEffort || epic.budgetEstimate || "N/A"}h</span>
+                <span>
+                  Effort: {epic.estimatedEffort || epic.budgetEstimate || "N/A"}
+                  h
+                </span>
               </div>
             </Link>
           ))}
