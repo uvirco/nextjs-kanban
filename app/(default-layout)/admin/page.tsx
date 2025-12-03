@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { supabaseAdmin } from "@/lib/supabase";
 import { IconUsers, IconUserCheck, IconUserX } from "@tabler/icons-react";
+import type { User } from "@/types/types";
 
 export default async function AdminDashboard() {
   const session = await auth();
@@ -80,7 +81,7 @@ export default async function AdminDashboard() {
         <div className="p-6">
           <div className="space-y-4">
             {recentUsers &&
-              recentUsers.map((user) => (
+              (recentUsers as User[]).map((user: User) => (
                 <div
                   key={user.id}
                   className="flex items-center justify-between p-3 bg-zinc-700 rounded-lg"
