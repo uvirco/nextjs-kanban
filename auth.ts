@@ -1,6 +1,11 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { supabaseAdmin } from "@/lib/supabase";
+// Don't import the admin client at module-load time because `auth` is
+// imported from middleware (proxy.ts) — creating the admin client eagerly
+// throws when the deployed environment doesn't expose the service key.
+// We'll import it lazily inside the authorize handler so that it's only
+// constructed during the sign-in request (server runtime), not during
+// middleware initialization.
 import bcrypt from "bcryptjs";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
@@ -16,6 +21,24 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         console.log("Auth attempt:", credentials?.email);
         if (!credentials?.email || !credentials?.password) {
           console.log("Missing credentials");
+          return null;
+        }
+
+        // Import the admin client lazily so middleware imports won't attempt
+        // to construct the Supabase client and crash when the key is absent
+        // (edge/middleware environments often don't expose server secrets).
+        let supabaseAdmin: any;
+        try {
+          ({ supabaseAdmin } = await import("@/lib/supabase"));
+        } catch (e) {
+          console.log("Unable to import supabaseAdmin during authorize:", e);
+          return null;
+        }
+
+        if (!supabaseAdmin) {
+          console.log(
+            "supabaseAdmin not available — ensure SUPABASE_SERVICE_ROLE_KEY is set for server runtime"
+          );
           return null;
         }
 

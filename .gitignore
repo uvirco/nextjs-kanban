@@ -45,3 +45,4 @@ run-*.js
 *.key
 *.secret
 nextjs-kanban.tar
+.vercel
