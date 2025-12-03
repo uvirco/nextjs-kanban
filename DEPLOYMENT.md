@@ -28,14 +28,14 @@ Before deployment, gather these details:
 ```bash
 # Copy the Docker image and source code to your internal server
 # Replace [SSH_USER] and [INTERNAL_SERVER] with your actual values
-scp nextjs-kanban.tar [SSH_USER]@[INTERNAL_SERVER]:/opt/nextjs-kanban/
-scp docker-compose.yml [SSH_USER]@[INTERNAL_SERVER]:/opt/nextjs-kanban/
+scp nextjs-kanban.tar pierre@uvir-pierre-sql:/opt/nextjs-kanban/
+scp docker-compose.yml pierre@uvir-pierre-sql:/opt/nextjs-kanban/
 ```
 
 ### 2. Load Docker Image on Server
 ```bash
 # SSH to your internal server
-ssh [SSH_USER]@[INTERNAL_SERVER]
+ssh pierre@uvir-pierre-sql
 
 # Load the Docker image
 docker load < nextjs-kanban.tar
