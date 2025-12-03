@@ -44,3 +44,4 @@ create-*.js
 run-*.js
 *.key
 *.secret
+nextjs-kanban.tar
