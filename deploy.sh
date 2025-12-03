@@ -24,8 +24,14 @@ echo "🚀 Deploying Next.js Kanban to internal server $SERVER_IP (ssh user: $SS
 
 # Create remote directory
 echo "📁 Creating remote directory..."
-SSH_CMD="ssh -i $SSH_KEY $SSH_USER@$SERVER_IP"
-SCP_CMD="scp -i $SSH_KEY"
+if [ -f "$SSH_KEY" ]; then
+    SSH_CMD="ssh -i $SSH_KEY $SSH_USER@$SERVER_IP"
+    SCP_CMD="scp -i $SSH_KEY"
+else
+    echo "Note: SSH key not found at $SSH_KEY — using default SSH agent/config for authentication"
+    SSH_CMD="ssh $SSH_USER@$SERVER_IP"
+    SCP_CMD="scp"
+fi
 
 if [ "$DRY_RUN" -eq 1 ]; then
     echo "[dry-run] Would run: $SSH_CMD 'sudo mkdir -p $REMOTE_PATH && sudo chown $SSH_USER:$SSH_USER $REMOTE_PATH'"
