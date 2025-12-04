@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { IconLoader, IconPlus, IconX, IconUser } from "@tabler/icons-react";
-import EpicRACI from "./RACI/EpicRACI";
+import RaciMatrixSection from "../RaciMatrixSection";
 import { Department, FunctionalRole } from "@/types/types";
 
 interface Epic {
@@ -694,8 +694,8 @@ export default function EditEpicForm({
         </div>
       </div>
 
-      {/* RACI Matrix */}
-      <EpicRACI epicId={epic.id} teamMembers={members} />
+      {/* RACI Matrix (read-only for edit view) */}
+      <RaciMatrixSection epicId={epic.id} defaultCollapsed={false} storageKey={`epic:${epic.id}:section:raci:edit`} />
 
       {/* Submit */}
       <div className="flex gap-4 pt-6">

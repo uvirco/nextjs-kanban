@@ -1,13 +1,13 @@
 import { supabaseAdmin } from "@/lib/supabase";
 import Link from "next/link";
 import {
-  IconArrowLeft,
   IconUsers,
   IconClock,
   IconBuilding,
 } from "@tabler/icons-react";
 import { notFound } from "next/navigation";
 import EpicContent from "./EpicContent.client";
+import RaciMatrixSection from "./RaciMatrixSection";
 import TeamMembers from "@/ui/TeamMembers/TeamMembers.client";
 
 async function getEpicDetails(epicId: string) {
@@ -118,16 +118,7 @@ export default async function EpicDetailPage(props: {
     notFound();
   }
 
-  const raciByRole = {
-    RESPONSIBLE: epic.raciAssignments.filter(
-      (r: any) => r.role === "RESPONSIBLE"
-    ),
-    ACCOUNTABLE: epic.raciAssignments.filter(
-      (r: any) => r.role === "ACCOUNTABLE"
-    ),
-    CONSULTED: epic.raciAssignments.filter((r: any) => r.role === "CONSULTED"),
-    INFORMED: epic.raciAssignments.filter((r: any) => r.role === "INFORMED"),
-  };
+  // RACI will be rendered in the client component via raciUsers (see EpicContent)
 
   // Get unique users with RACI assignments
   const raciUsers = Array.from(
@@ -165,11 +156,7 @@ export default async function EpicDetailPage(props: {
               </div>
 
               <div className="col-span-5 flex items-start justify-end gap-4">
-                {/* top-right spacer: place team members in header */}
-                <div className="hidden lg:block w-64 mr-2">
-                  {/* render a client-side TeamMembers widget in the top-right */}
-                  <TeamMembers epicId={epic.id} />
-                </div>
+                {/* top-right spacer: (currently unused) */}
 
                 <div className="flex gap-2 items-center">
                   <Link
@@ -282,11 +269,21 @@ export default async function EpicDetailPage(props: {
             <div className="col-span-3 bg-red-600/30 border border-red-600 rounded-lg p-6 text-sm text-red-300 flex items-center justify-center">
               Left 1/4
             </div>
-            <div className="col-span-6 bg-green-600/30 border border-green-600 rounded-lg p-6 text-sm text-green-300 flex items-center justify-center">
-              Center 1/2
+            <div className="col-span-6 bg-green-600/30 border border-green-600 rounded-lg p-6 text-sm text-green-300">
+              {/* Center 1/2 - RACI matrix */}
+              <div className="w-full h-full">
+                <RaciMatrixSection
+                  raciUsers={raciUsers}
+                  storageKey={`epic:${epic.id}:section:raci:fullbleed`}
+                  defaultCollapsed={true}
+                />
+              </div>
             </div>
-            <div className="col-span-3 bg-blue-600/30 border border-blue-600 rounded-lg p-6 text-sm text-blue-300 flex items-center justify-center">
-              Right 1/4
+            <div className="col-span-3 bg-blue-600/30 border border-blue-600 rounded-lg p-6 text-sm text-blue-300">
+              {/* Right 1/4 - Team members widget (client) */}
+              <div className="w-full h-full">
+                <TeamMembers epicId={epic.id} />
+              </div>
             </div>
           </div>
         </div>

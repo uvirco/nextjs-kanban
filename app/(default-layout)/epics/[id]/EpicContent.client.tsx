@@ -16,7 +16,6 @@ import {
   handleGetSignedUrl,
 } from "@/server-actions/AttachmentServerActions";
 import TeamMembers from "@/ui/TeamMembers/TeamMembers.client";
-import RaciMatrixSection from "./RaciMatrixSection";
 import EpicAddChecklist from "./EpicAddChecklist";
 import ChecklistTitleForm from "@/ui/TaskDetail/TaskDetailView/Checklist/ChecklistTitleForm.client";
 import DeleteChecklistButton from "@/ui/TaskDetail/TaskDetailView/Checklist/DeleteChecklistButton.client";
@@ -164,16 +163,6 @@ export default function EpicContent({
       {/* Center area (1/2 width) */}
       <div className="col-span-6">
         <CollapsibleSection
-          title="RACI Matrix"
-          icon="👥"
-          defaultCollapsed={true}
-          storageKey={`epic:${params.id}:section:raci`}
-        >
-          <RaciMatrixSection raciUsers={raciUsers} />
-        </CollapsibleSection>
-
-        {/* Subtasks */}
-        <CollapsibleSection
           title="Subtasks"
           icon="📋"
           defaultCollapsed={true}
@@ -219,85 +208,104 @@ export default function EpicContent({
               </div>
             )}
 
-            {error && <div className="text-red-400 text-sm">{error}</div>}
-
-            <div className="space-y-2">
-              {epic.attachments?.filter((a: any) => a.mimeType !== "link")
-                .length ? (
-                epic.attachments
-                  .filter((a: any) => a.mimeType !== "link")
-                  .map((att: any) => (
-                    <div
-                      key={att.id}
-                      className="flex items-center justify-between p-3 bg-zinc-800 rounded-lg"
-                    >
-                      <div className="flex items-center gap-3">
-                        <IconPaperclip className="text-zinc-400" />
-                        <div className="flex flex-col">
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-semibold text-white">
-                              {att.filename}
-                            </span>
-                            <span className="text-xs text-zinc-400">
-                              (file)
-                            </span>
-                          </div>
-                          {att.storage_path && (
-                            <div className="text-xs text-zinc-500 mt-1">
-                              {(() => {
-                                const parts =
-                                  String(att.storage_path).split("/").pop() ||
-                                  "";
-                                const idx = parts.lastIndexOf("-");
-                                return idx >= 0
-                                  ? parts.substring(idx + 1)
-                                  : parts;
-                              })()}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={async () => {
-                            setError("");
-                            setDownloadingId(att.id);
-                            const res = await handleGetSignedUrl({
-                              attachmentId: att.id,
-                            });
-                            setDownloadingId(null);
-                            if (res.success && res.url) {
-                              window.open(res.url, "_blank");
-                            } else {
-                              setError(
-                                res.message || "Failed to get download url"
-                              );
-                            }
-                          }}
-                          className="text-zinc-400 hover:text-white text-sm flex items-center gap-1"
-                        >
-                          <IconDownload size={14} />{" "}
-                          {downloadingId === att.id
-                            ? "Starting..."
-                            : "Download"}
-                        </button>
-                        <button
-                          onClick={() => handleDelete(att.id)}
-                          className="text-red-400 hover:text-red-500 text-sm flex items-center gap-1"
-                        >
-                          <IconTrash size={14} /> Remove
-                        </button>
-                      </div>
-                    </div>
-                  ))
-              ) : (
-                <div className="text-zinc-500 text-center py-4">
-                  No files yet
-                </div>
-              )}
-            </div>
+            {/* Files used to be rendered inside the Subtasks section — moved to its own collapsible below */}
           </div>
         </CollapsibleSection>
+
+            {/* Files / Attachments (non-links) */}
+            <CollapsibleSection
+              title="Files"
+              icon="📎"
+              defaultCollapsed={true}
+              storageKey={`epic:${params.id}:section:files`}
+            >
+              <div className="space-y-4">
+                <form onSubmit={handleFileSubmit} className="flex items-center gap-2">
+                  <input
+                    type="file"
+                    name="file"
+                    className="px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-white text-sm"
+                  />
+                  <button
+                    type="submit"
+                    disabled={uploading}
+                    className="px-3 py-1 bg-zinc-700 hover:bg-zinc-600 rounded text-sm text-white"
+                  >
+                    {uploading ? "Uploading..." : "Upload file"}
+                  </button>
+                </form>
+
+                {error && <div className="text-red-400 text-sm">{error}</div>}
+
+                <div className="space-y-2">
+                  {epic.attachments?.filter((a: any) => a.mimeType !== "link")
+                    .length ? (
+                    epic.attachments
+                      .filter((a: any) => a.mimeType !== "link")
+                      .map((att: any) => (
+                        <div
+                          key={att.id}
+                          className="flex items-center justify-between p-3 bg-zinc-800 rounded-lg"
+                        >
+                          <div className="flex items-center gap-3">
+                            <IconPaperclip className="text-zinc-400" />
+                            <div className="flex flex-col">
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-semibold text-white">
+                                  {att.filename}
+                                </span>
+                                <span className="text-xs text-zinc-400">(file)</span>
+                              </div>
+                              {att.storage_path && (
+                                <div className="text-xs text-zinc-500 mt-1">
+                                  {(() => {
+                                    const parts =
+                                      String(att.storage_path).split("/").pop() ||
+                                      "";
+                                    const idx = parts.lastIndexOf("-");
+                                    return idx >= 0
+                                      ? parts.substring(idx + 1)
+                                      : parts;
+                                  })()}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={async () => {
+                                setError("");
+                                setDownloadingId(att.id);
+                                const res = await handleGetSignedUrl({
+                                  attachmentId: att.id,
+                                });
+                                setDownloadingId(null);
+                                if (res.success && res.url) {
+                                  window.open(res.url, "_blank");
+                                } else {
+                                  setError(res.message || "Failed to get download url");
+                                }
+                              }}
+                              className="text-zinc-400 hover:text-white text-sm flex items-center gap-1"
+                            >
+                              <IconDownload size={14} />{' '}
+                              {downloadingId === att.id ? "Starting..." : "Download"}
+                            </button>
+                            <button
+                              onClick={() => handleDelete(att.id)}
+                              className="text-red-400 hover:text-red-500 text-sm flex items-center gap-1"
+                            >
+                              <IconTrash size={14} /> Remove
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                  ) : (
+                    <div className="text-zinc-500 text-center py-4">No files yet</div>
+                  )}
+                </div>
+              </div>
+            </CollapsibleSection>
 
         <CollapsibleSection
           title="Links"
