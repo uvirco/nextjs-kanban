@@ -8,6 +8,7 @@ import {
 } from "@tabler/icons-react";
 import { notFound } from "next/navigation";
 import EpicContent from "./EpicContent.client";
+import TeamMembers from "@/ui/TeamMembers/TeamMembers.client";
 
 async function getEpicDetails(epicId: string) {
   const supabase = supabaseAdmin;
@@ -164,6 +165,12 @@ export default async function EpicDetailPage(props: {
               </div>
 
               <div className="col-span-5 flex items-start justify-end gap-4">
+                {/* top-right spacer: place team members in header */}
+                <div className="hidden lg:block w-64 mr-2">
+                  {/* render a client-side TeamMembers widget in the top-right */}
+                  <TeamMembers epicId={epic.id} />
+                </div>
+
                 <div className="flex gap-2 items-center">
                   <Link
                     href={`/epics/${epic.id}/edit`}
