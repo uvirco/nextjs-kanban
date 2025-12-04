@@ -15,7 +15,7 @@ import {
   handleDeleteAttachment,
   handleGetSignedUrl,
 } from "@/server-actions/AttachmentServerActions";
-import EpicTeamMembers from "./EpicTeamMembers";
+import TeamMembers from "@/ui/TeamMembers/TeamMembers.client";
 import RaciMatrixSection from "./RaciMatrixSection";
 import EpicAddChecklist from "./EpicAddChecklist";
 import ChecklistTitleForm from "@/ui/TaskDetail/TaskDetailView/Checklist/ChecklistTitleForm.client";
@@ -516,7 +516,7 @@ export default function EpicContent({
             defaultCollapsed={true}
             storageKey={`epic:${params.id}:section:team`}
           >
-            <EpicTeamMembers epicId={params.id} />
+            <TeamMembers epicId={params.id} />
           </CollapsibleSection>
         </div>
       </div>

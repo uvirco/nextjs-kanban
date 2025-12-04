@@ -46,3 +46,4 @@ run-*.js
 *.secret
 nextjs-kanban.tar
 .vercel
+tsconfig.tsbuildinfo
