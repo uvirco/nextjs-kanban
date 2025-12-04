@@ -20,7 +20,8 @@ export default async function UpcomingDeadlinesCount() {
     .select("boardId")
     .eq("userId", userId);
 
-  const boardIds = boardMembers?.map((b: { boardId: string }) => b.boardId) || [];
+  const boardIds =
+    boardMembers?.map((b: { boardId: string }) => b.boardId) || [];
 
   if (boardIds.length === 0) {
     return 0;

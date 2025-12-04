@@ -101,7 +101,7 @@ export default function AddChecklist({
                   size="sm"
                   onClick={closePopover}
                   disabled={isLoading}
-                  variant="outline"
+                  variant="ghost"
                 >
                   <IconX size={16} className="flex items-center mr-1" />
                   Cancel

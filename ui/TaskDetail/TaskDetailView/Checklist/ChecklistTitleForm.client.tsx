@@ -70,14 +70,17 @@ export default function ChecklistTitleForm({
           <Button
             size="sm"
             onClick={toggleEditState}
-            variant="outline"
+            variant="ghost"
             disabled={isLoading}
           >
             <IconX size={16} />
           </Button>
         </form>
       ) : (
-        <h4 className="text-xl font-semibold grow text-foreground" onClick={toggleEditState}>
+        <h4
+          className="text-xl font-semibold grow text-foreground"
+          onClick={toggleEditState}
+        >
           {checklistTitle || "Checklist"}
         </h4>
       )}

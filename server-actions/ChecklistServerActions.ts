@@ -105,6 +105,7 @@ export async function handleEditChecklistName(formData: FormData) {
     }
 
     revalidatePath(`/task/${parse.data.taskId}`);
+    revalidatePath(`/epics/${parse.data.taskId}`); // Also revalidate epic pages
 
     return { success: true, message: "Checklist title updated" };
   } catch (e) {
@@ -154,6 +155,7 @@ export async function handleDeleteChecklist({
     }
 
     revalidatePath(`/task/${parse.data.taskId}`);
+    revalidatePath(`/epics/${parse.data.taskId}`); // Also revalidate epic pages
     return { success: true, message: MESSAGES.CHECKLIST.DELETE_SUCCESS };
   } catch (e) {
     console.error(e);
@@ -214,8 +216,9 @@ export async function handleCreateChecklistItem({
     }
 
     revalidatePath(`/task/${parse.data.taskId}`);
+    revalidatePath(`/epics/${parse.data.taskId}`); // Also revalidate epic pages
 
-    return { success: true, message: MESSAGES.CHECKLIST_ITEM.CREATE_SUCCESS };
+    return { success: true, message: MESSAGES.CHECKLIST.CREATE_SUCCESS };
   } catch (e) {
     console.error(e);
     return { success: false, message: MESSAGES.CHECKLIST_ITEM.CREATE_FAILURE };
@@ -269,6 +272,7 @@ export async function handleDeleteChecklistItem({
     }
 
     revalidatePath(`/task/${parse.data.taskId}`);
+    revalidatePath(`/epics/${parse.data.taskId}`); // Also revalidate epic pages
 
     return { success: true, message: MESSAGES.CHECKLIST_ITEM.DELETE_SUCCESS };
   } catch (e) {
@@ -327,6 +331,7 @@ export async function handleToggleCheckedItem({
     }
 
     revalidatePath(`/task/${parse.data.taskId}`);
+    revalidatePath(`/epics/${parse.data.taskId}`); // Also revalidate epic pages
 
     return { success: true, message: MESSAGES.CHECKLIST_ITEM.TOGGLE_SUCCESS };
   } catch (e) {
@@ -383,6 +388,7 @@ export async function handleEditChecklistItemContent(formData: FormData) {
     }
 
     revalidatePath(`/task/${parse.data.taskId}`);
+    revalidatePath(`/epics/${parse.data.taskId}`); // Also revalidate epic pages
 
     return { success: true, message: MESSAGES.CHECKLIST_ITEM.UPDATE_SUCCESS };
   } catch (e) {

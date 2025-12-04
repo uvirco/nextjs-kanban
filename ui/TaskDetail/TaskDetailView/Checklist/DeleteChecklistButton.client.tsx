@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { IconTrash } from "@tabler/icons-react";
 import { handleDeleteChecklist } from "@/server-actions/ChecklistServerActions";
 import { toast } from "sonner";
 
@@ -38,7 +39,7 @@ export default function DeleteChecklistButton({
       disabled={isLoading}
       variant="destructive"
     >
-      Delete
+      <IconTrash size={16} />
     </Button>
   );
 }

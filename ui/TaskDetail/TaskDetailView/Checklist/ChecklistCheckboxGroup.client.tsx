@@ -71,13 +71,15 @@ export default function ChecklistCheckboxGroup({
             <Checkbox
               id={item.id}
               checked={checkedItemIds.includes(item.id)}
-              onCheckedChange={(checked) => handleToggle(item.id, checked as boolean)}
+              onCheckedChange={(checked) =>
+                handleToggle(item.id, checked as boolean)
+              }
               className="mr-2"
             />
             {editingItemId !== item.id && (
               <label
                 htmlFor={item.id}
-                className={`cursor-pointer flex-1 ${checkedItemIds.includes(item.id) ? 'line-through text-muted-foreground' : ''}`}
+                className={`cursor-pointer flex-1 ${checkedItemIds.includes(item.id) ? "line-through text-muted-foreground" : ""}`}
               >
                 {item.content}
               </label>
@@ -107,7 +109,7 @@ export default function ChecklistCheckboxGroup({
                   size="sm"
                   type="button"
                   onClick={handleCancelOrSubmit}
-                  variant="outline"
+                  variant="ghost"
                 >
                   <IconX size={16} />
                 </Button>

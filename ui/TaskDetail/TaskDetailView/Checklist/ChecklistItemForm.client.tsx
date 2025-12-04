@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { IconX } from "@tabler/icons-react";
+import { IconX, IconPlus } from "@tabler/icons-react";
 import { handleCreateChecklistItem } from "@/server-actions/ChecklistServerActions";
 import { toast } from "sonner";
 
@@ -47,8 +47,12 @@ export default function ChecklistItemForm({
   return (
     <div>
       {!showInput && (
-        <Button size="sm" onClick={toggleInput} variant="outline">
-          Add an item
+        <Button
+          size="sm"
+          onClick={toggleInput}
+          className="bg-zinc-700 hover:bg-zinc-600 text-white border-zinc-600"
+        >
+          <IconPlus size={16} />
         </Button>
       )}
       {showInput && (
@@ -68,15 +72,17 @@ export default function ChecklistItemForm({
               type="submit"
               size="sm"
               disabled={isLoading}
+              className="bg-zinc-700 hover:bg-zinc-600 text-white border-zinc-600"
             >
-              Add Item
+              <IconPlus size={16} />
             </Button>
             <Button
               type="button"
               size="sm"
               onClick={toggleInput}
-              variant="outline"
+              variant="ghost"
               disabled={isLoading}
+              className="text-zinc-400 hover:text-white hover:bg-zinc-700"
             >
               <IconX size={16} />
             </Button>

@@ -54,7 +54,8 @@ export default async function ProfileInvites() {
     .eq("userId", userId)
     .eq("role", "owner");
 
-  const boardIds = ownedBoards?.map((b: { boardId: string }) => b.boardId) || [];
+  const boardIds =
+    ownedBoards?.map((b: { boardId: string }) => b.boardId) || [];
 
   const { data: sentInvitations, error: sentError } = await supabaseAdmin
     .from("Invitation")

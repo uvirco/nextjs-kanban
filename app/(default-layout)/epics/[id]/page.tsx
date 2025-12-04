@@ -3,13 +3,11 @@ import Link from "next/link";
 import {
   IconArrowLeft,
   IconUsers,
-  IconAlertTriangle,
   IconClock,
   IconBuilding,
 } from "@tabler/icons-react";
 import { notFound } from "next/navigation";
-import EpicTeamMembers from "./EpicTeamMembers";
-import RaciMatrixSection from "./RaciMatrixSection";
+import EpicContent from "./EpicContent.client";
 
 async function getEpicDetails(epicId: string) {
   const supabase = supabaseAdmin;
@@ -50,12 +48,28 @@ async function getEpicDetails(epicId: string) {
     .select("*, user:User(id, name, email)")
     .eq("taskId", epicId);
 
-  // Fetch subtasks
+  // Fetch subtasks (tasks that belong to this epic)
   const { data: subtasks } = await supabase
     .from("Task")
-    .select("*, assignedUser:User(id, name, email), column:Column(title)")
-    .eq("parentTaskId", epicId)
-    .order("orderIndex");
+    .select(
+      `
+      *,
+      assignedUser:User(id, name, email),
+      column:Column(id, title)
+    `
+    )
+    .eq("epicId", epicId);
+
+  // Fetch checklists for the epic
+  const { data: checklists } = await supabase
+    .from("Checklist")
+    .select(
+      `
+      *,
+      items:ChecklistItem(*)
+    `
+    )
+    .eq("taskId", epicId);
 
   // Calculate metrics
   const totalTasks = subtasks?.length || 0;
@@ -81,6 +95,7 @@ async function getEpicDetails(epicId: string) {
     members: members || [],
     stakeholders: stakeholders || [],
     subtasks: subtasks || [],
+    checklists: checklists || [],
     metrics: { totalTasks, completedTasks, blockedTasks, progress },
   };
 }
@@ -231,94 +246,7 @@ export default async function EpicDetailPage(props: {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-6">
-          {/* RACI Matrix */}
-          <div className="col-span-2">
-            <RaciMatrixSection raciUsers={raciUsers} />
-
-            {/* Subtasks */}
-            <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6 mt-6">
-              <h2 className="text-xl font-bold text-white mb-4">📋 Subtasks</h2>
-              <div className="space-y-2">
-                {epic.subtasks.length > 0 ? (
-                  epic.subtasks.map((subtask: any) => (
-                    <div
-                      key={subtask.id}
-                      className="flex items-center justify-between p-3 bg-zinc-800 rounded-lg"
-                    >
-                      <div className="flex items-center gap-3">
-                        <input
-                          type="checkbox"
-                          checked={subtask.status === "DONE"}
-                          readOnly
-                          className="w-4 h-4"
-                        />
-                        <span
-                          className={`${subtask.status === "DONE" ? "line-through text-zinc-500" : "text-white"}`}
-                        >
-                          {subtask.title}
-                        </span>
-                        {subtask.isBlocked && (
-                          <span className="text-red-400 text-xs flex items-center gap-1">
-                            <IconAlertTriangle size={14} />
-                            Blocked
-                          </span>
-                        )}
-                      </div>
-                      {subtask.assignedUser && (
-                        <span className="text-zinc-400 text-sm">
-                          {subtask.assignedUser.name}
-                        </span>
-                      )}
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-zinc-500 text-center py-8">
-                    No subtasks yet
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Stakeholders */}
-          <div>
-            <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
-              <h2 className="text-xl font-bold text-white mb-4">
-                👥 Stakeholders
-              </h2>
-              <div className="space-y-3">
-                {epic.stakeholders.length > 0 ? (
-                  epic.stakeholders.map((stakeholder: any) => (
-                    <div
-                      key={stakeholder.id}
-                      className="p-3 bg-zinc-800 rounded-lg"
-                    >
-                      <div className="font-medium text-white">
-                        {stakeholder.user?.name || stakeholder.user?.email}
-                      </div>
-                      <div className="text-sm text-zinc-400 mt-1">
-                        {stakeholder.stakeholderType}
-                      </div>
-                      <div className="text-xs text-zinc-500 mt-1">
-                        Notify: {stakeholder.notificationPreference}
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-zinc-500 text-center py-8">
-                    No stakeholders assigned
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Epic Team Members */}
-            <div className="mt-6">
-              <EpicTeamMembers epicId={params.id} />
-            </div>
-          </div>
-        </div>
+        <EpicContent epic={epic} raciUsers={raciUsers} params={params} />
       </div>
     </div>
   );

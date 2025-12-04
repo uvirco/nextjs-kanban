@@ -27,10 +27,14 @@ export default async function BoardUsers({ boardId }: { boardId: string }) {
 
   const boardMembers = (boardMembersData || []) as BoardMemberWithUser[];
 
-  const owner = boardMembers.find((member: BoardMemberWithUser) => member.role === "owner")?.user ?? null;
+  const owner =
+    boardMembers.find((member: BoardMemberWithUser) => member.role === "owner")
+      ?.user ?? null;
   const isOwner = owner?.id === userId;
 
-  const members = boardMembers.filter((member: BoardMemberWithUser) => member.role === "member");
+  const members = boardMembers.filter(
+    (member: BoardMemberWithUser) => member.role === "member"
+  );
 
   return (
     <BoardAddUsers
