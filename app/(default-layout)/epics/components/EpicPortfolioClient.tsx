@@ -442,7 +442,10 @@ export default function EpicPortfolioClient({
               ? parseFloat(epic.businessValue)
               : null,
             // include readiness score (nullable)
-            readiness: typeof epic.readinessScore === 'number' ? epic.readinessScore : null,
+            readiness:
+              typeof epic.readinessScore === "number"
+                ? epic.readinessScore
+                : null,
           }))}
         />
       )}

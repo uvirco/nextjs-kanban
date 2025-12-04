@@ -124,7 +124,8 @@ export default function EpicTimeline({ epics }: EpicTimelineProps) {
 
   // Get readiness color classes
   const getReadinessColor = (score: number | null) => {
-    if (score === null || typeof score === "undefined") return "bg-zinc-600 text-zinc-200";
+    if (score === null || typeof score === "undefined")
+      return "bg-zinc-600 text-zinc-200";
     if (score >= 80) return "bg-emerald-500 text-emerald-900";
     if (score >= 50) return "bg-yellow-400 text-yellow-900";
     return "bg-red-500 text-red-900";
@@ -298,16 +299,46 @@ export default function EpicTimeline({ epics }: EpicTimelineProps) {
                         </span>
                       )}
 
-                      {/* Readiness badge */}
+                      {/* Readiness circle (styled like Board view) */}
                       {typeof epic.readiness === "number" && (
-                        <span
-                          className={`ml-3 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${getReadinessColor(
-                            epic.readiness
-                          )}`}
-                          title={`Readiness ${epic.readiness}%`}
-                        >
-                          {epic.readiness}%
-                        </span>
+                        <div className="ml-3 flex items-center gap-1 shrink-0">
+                          <div className="relative w-6 h-6">
+                            <svg className="w-6 h-6 transform -rotate-90">
+                              <circle
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                fill="none"
+                                className="text-zinc-700"
+                              />
+                              <circle
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                fill="none"
+                                strokeDasharray={`${2 * Math.PI * 10}`}
+                                strokeDashoffset={`${2 * Math.PI * 10 * (1 - epic.readiness / 100)}`}
+                                className={`transition-all ${
+                                  epic.readiness >= 80
+                                    ? "text-emerald-500"
+                                    : epic.readiness >= 50
+                                      ? "text-yellow-500"
+                                      : "text-red-500"
+                                }`}
+                                strokeLinecap="round"
+                              />
+                            </svg>
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <span className="text-xs font-semibold text-white">
+                                {epic.readiness}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -321,42 +352,7 @@ export default function EpicTimeline({ epics }: EpicTimelineProps) {
                   style={getEpicStyle(epic)}
                   title={`${epic.title} (${epic.progress}% complete)`}
                 >
-                  {/* Readiness overlay (thin bar at top) */}
-                  {typeof epic.readiness === "number" && (
-                    <div
-                      className="absolute left-0 top-0 rounded-t h-1 opacity-95"
-                      style={{
-                        width: `${Math.max(1, epic.readiness)}%`,
-                        zIndex: 30,
-                        background:
-                          epic.readiness >= 80
-                            ? "linear-gradient(90deg, rgba(16,185,129,0.95), rgba(34,197,94,0.95))"
-                            : epic.readiness >= 50
-                            ? "linear-gradient(90deg, rgba(250,204,21,0.95), rgba(245,158,11,0.95))"
-                            : "linear-gradient(90deg, rgba(239,68,68,0.95), rgba(220,38,38,0.95))",
-                      }}
-                      title={`Readiness ${epic.readiness}%`}
-                    />
-                  )}
-
-                  {/* Readiness indicator bar (bigger, easier to read) */}
-                  {typeof epic.readiness === "number" && (
-                    <div
-                      className="absolute left-0 rounded h-2.5 -translate-y-1/2 top-1/2"
-                      style={{
-                        width: `${Math.max(2, epic.readiness)}%`, // minimum small width
-                        zIndex: 35,
-                        boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
-                        background:
-                          epic.readiness >= 80
-                            ? "linear-gradient(90deg, rgba(16,185,129,0.95), rgba(34,197,94,0.95))"
-                            : epic.readiness >= 50
-                            ? "linear-gradient(90deg, rgba(250,204,21,0.95), rgba(245,158,11,0.95))"
-                            : "linear-gradient(90deg, rgba(239,68,68,0.95), rgba(220,38,38,0.95))",
-                      }}
-                      title={`Readiness ${epic.readiness}%`}
-                    />
-                  )}
+                  {/* Readiness visual moved to the title area (circle) — keep timeline bar focused on schedule & progress */}
 
                   {/* Progress Overlay */}
                   <div
