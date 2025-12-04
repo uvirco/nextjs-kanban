@@ -153,9 +153,13 @@ export default function EpicContent({
     else setError(res.message || "Delete failed");
   };
   return (
-    <div className="grid grid-cols-3 gap-6">
+    <div className="grid grid-cols-5 gap-6">
+      {/* Left Widget Column (reserved) */}
+      <div className="col-span-1">
+        {/* reserved for future widgets */}
+      </div>
       {/* RACI Matrix */}
-      <div className="col-span-2">
+      <div className="col-span-3">
         <CollapsibleSection
           title="RACI Matrix"
           icon="👥"
@@ -207,45 +211,8 @@ export default function EpicContent({
                 </div>
               ))
             ) : (
-              <div className="text-zinc-500 text-center py-8">
-                No subtasks yet
-              </div>
+              <div className="text-zinc-500 text-center py-8">No subtasks yet</div>
             )}
-          </div>
-        </CollapsibleSection>
-
-        {/* Attachments (epic-level) */}
-        <CollapsibleSection
-          title="Files"
-          icon="📎"
-          defaultCollapsed={true}
-          storageKey={`epic:${params.id}:section:files`}
-        >
-          <div className="space-y-4">
-            <div className="flex gap-4">
-              <form
-                onSubmit={handleFileSubmit}
-                className="flex items-center gap-2"
-              >
-                <input
-                  type="file"
-                  name="file"
-                  className="text-sm text-zinc-300"
-                />
-                <input
-                  name="name"
-                  placeholder="Display name (optional)"
-                  className="px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-white text-sm"
-                />
-                <button
-                  type="submit"
-                  className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-white text-sm"
-                  disabled={uploading}
-                >
-                  {uploading ? "Uploading..." : "Upload"}
-                </button>
-              </form>
-            </div>
 
             {error && <div className="text-red-400 text-sm">{error}</div>}
 
@@ -503,48 +470,45 @@ export default function EpicContent({
         </CollapsibleSection>
       </div>
 
-      {/* Sidebar */}
-      <div>
-        <CollapsibleSection
-          title="Stakeholders"
-          icon="👥"
-          defaultCollapsed={true}
-          storageKey={`epic:${params.id}:section:stakeholders`}
-        >
-          <div className="space-y-3">
-            {epic.stakeholders.length > 0 ? (
-              epic.stakeholders.map((stakeholder: any) => (
-                <div
-                  key={stakeholder.id}
-                  className="p-3 bg-zinc-800 rounded-lg"
-                >
-                  <div className="font-medium text-white">
-                    {stakeholder.user?.name || stakeholder.user?.email}
+      {/* Right Widget Column (Stakeholders / Team Members) */}
+      <div className="col-span-1">
+        <div className="space-y-4">
+          <CollapsibleSection
+            title="Stakeholders"
+            icon="👥"
+            defaultCollapsed={true}
+            storageKey={`epic:${params.id}:section:stakeholders`}
+          >
+            <div className="space-y-3">
+              {epic.stakeholders.length > 0 ? (
+                epic.stakeholders.map((stakeholder: any) => (
+                  <div key={stakeholder.id} className="p-3 bg-zinc-800 rounded-lg">
+                    <div className="font-medium text-white">
+                      {stakeholder.user?.name || stakeholder.user?.email}
+                    </div>
+                    <div className="text-sm text-zinc-400 mt-1">
+                      {stakeholder.stakeholderType}
+                    </div>
+                    <div className="text-xs text-zinc-500 mt-1">
+                      Notify: {stakeholder.notificationPreference}
+                    </div>
                   </div>
-                  <div className="text-sm text-zinc-400 mt-1">
-                    {stakeholder.stakeholderType}
-                  </div>
-                  <div className="text-xs text-zinc-500 mt-1">
-                    Notify: {stakeholder.notificationPreference}
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="text-zinc-500 text-center py-8">
-                No stakeholders assigned
-              </div>
-            )}
-          </div>
-        </CollapsibleSection>
+                ))
+              ) : (
+                <div className="text-zinc-500 text-center py-8">No stakeholders assigned</div>
+              )}
+            </div>
+          </CollapsibleSection>
 
-        <CollapsibleSection
-          title="Team Members"
-          icon="👥"
-          defaultCollapsed={true}
-          storageKey={`epic:${params.id}:section:team`}
-        >
-          <EpicTeamMembers epicId={params.id} />
-        </CollapsibleSection>
+          <CollapsibleSection
+            title="Team Members"
+            icon="👥"
+            defaultCollapsed={true}
+            storageKey={`epic:${params.id}:section:team`}
+          >
+            <EpicTeamMembers epicId={params.id} />
+          </CollapsibleSection>
+        </div>
       </div>
     </div>
   );
