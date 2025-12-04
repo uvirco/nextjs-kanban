@@ -1,34 +1,29 @@
 import { auth } from "@/auth";
-import { NextResponse } from "next/server";
 
 export default auth((req) => {
-  const isAuth = !!req.auth;
-  const isAuthPage = req.nextUrl.pathname.startsWith("/login");
-  const isApiRoute = req.nextUrl.pathname.startsWith("/api");
-
-  if (isApiRoute) {
-    return NextResponse.next();
+  // Skip authentication in development if SKIP_AUTH is set
+  if (process.env.SKIP_AUTH === "true") {
+    return;
   }
 
-  if (isAuthPage) {
-    if (isAuth) {
-      return NextResponse.redirect(new URL("/board", req.nextUrl));
-    }
-    return NextResponse.next();
+  const protectedPaths = ["/dashboard", "/board", "/task", "/profile"];
+  const adminPaths = ["/admin"];
+  const isProtectedRoute = protectedPaths.some((path) =>
+    req.nextUrl.pathname.startsWith(path)
+  );
+  const isAdminRoute = adminPaths.some((path) =>
+    req.nextUrl.pathname.startsWith(path)
+  );
+
+  if (isProtectedRoute && !req.auth) {
+    const newUrl = new URL("/login", req.nextUrl.origin);
+    return Response.redirect(newUrl);
   }
 
-  if (!isAuth) {
-    let from = req.nextUrl.pathname;
-    if (req.nextUrl.search) {
-      from += req.nextUrl.search;
-    }
-
-    return NextResponse.redirect(
-      new URL(`/login?from=${encodeURIComponent(from)}`, req.nextUrl)
-    );
+  if (isAdminRoute && (!req.auth || req.auth.user?.role !== "ADMIN")) {
+    const newUrl = new URL("/dashboard", req.nextUrl.origin);
+    return Response.redirect(newUrl);
   }
-
-  return NextResponse.next();
 });
 
 export const config = {
