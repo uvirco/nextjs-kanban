@@ -20,6 +20,7 @@ interface TimelineEpic {
   department?: { id: string; name: string };
   businessValue: number | null;
   column?: { title: string };
+  readiness?: number | null;
 }
 
 interface EpicTimelineProps {
@@ -119,6 +120,14 @@ export default function EpicTimeline({ epics }: EpicTimelineProps) {
     if (!riskLevel) return null;
     const isHighRisk = riskLevel.toUpperCase() === "HIGH";
     return isHighRisk ? "⚠️" : null;
+  };
+
+  // Get readiness color classes
+  const getReadinessColor = (score: number | null) => {
+    if (score === null || typeof score === "undefined") return "bg-zinc-600 text-zinc-200";
+    if (score >= 80) return "bg-emerald-500 text-emerald-900";
+    if (score >= 50) return "bg-yellow-400 text-yellow-900";
+    return "bg-red-500 text-red-900";
   };
 
   // Calculate epic position and width
@@ -288,6 +297,18 @@ export default function EpicTimeline({ epics }: EpicTimelineProps) {
                           {getRiskIndicator(epic.riskLevel)}
                         </span>
                       )}
+
+                      {/* Readiness badge */}
+                      {typeof epic.readiness === "number" && (
+                        <span
+                          className={`ml-3 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${getReadinessColor(
+                            epic.readiness
+                          )}`}
+                          title={`Readiness ${epic.readiness}%`}
+                        >
+                          {epic.readiness}%
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -300,6 +321,43 @@ export default function EpicTimeline({ epics }: EpicTimelineProps) {
                   style={getEpicStyle(epic)}
                   title={`${epic.title} (${epic.progress}% complete)`}
                 >
+                  {/* Readiness overlay (thin bar at top) */}
+                  {typeof epic.readiness === "number" && (
+                    <div
+                      className="absolute left-0 top-0 rounded-t h-1 opacity-95"
+                      style={{
+                        width: `${Math.max(1, epic.readiness)}%`,
+                        zIndex: 30,
+                        background:
+                          epic.readiness >= 80
+                            ? "linear-gradient(90deg, rgba(16,185,129,0.95), rgba(34,197,94,0.95))"
+                            : epic.readiness >= 50
+                            ? "linear-gradient(90deg, rgba(250,204,21,0.95), rgba(245,158,11,0.95))"
+                            : "linear-gradient(90deg, rgba(239,68,68,0.95), rgba(220,38,38,0.95))",
+                      }}
+                      title={`Readiness ${epic.readiness}%`}
+                    />
+                  )}
+
+                  {/* Readiness indicator bar (bigger, easier to read) */}
+                  {typeof epic.readiness === "number" && (
+                    <div
+                      className="absolute left-0 rounded h-2.5 -translate-y-1/2 top-1/2"
+                      style={{
+                        width: `${Math.max(2, epic.readiness)}%`, // minimum small width
+                        zIndex: 35,
+                        boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
+                        background:
+                          epic.readiness >= 80
+                            ? "linear-gradient(90deg, rgba(16,185,129,0.95), rgba(34,197,94,0.95))"
+                            : epic.readiness >= 50
+                            ? "linear-gradient(90deg, rgba(250,204,21,0.95), rgba(245,158,11,0.95))"
+                            : "linear-gradient(90deg, rgba(239,68,68,0.95), rgba(220,38,38,0.95))",
+                      }}
+                      title={`Readiness ${epic.readiness}%`}
+                    />
+                  )}
+
                   {/* Progress Overlay */}
                   <div
                     className="h-full bg-white/20 rounded-l"
@@ -335,6 +393,10 @@ export default function EpicTimeline({ epics }: EpicTimelineProps) {
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-green-500" />
             <span>Low Priority</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-emerald-500" />
+            <span>Readiness (higher = more ready)</span>
           </div>
           <div className="flex items-center gap-2">
             <span>⚠️ High Risk</span>
