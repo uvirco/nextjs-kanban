@@ -190,7 +190,7 @@ export default async function EpicDetailPage(props: {
           </div>
 
           {/* Metrics */}
-          <div className="grid grid-cols-4 gap-4 mt-6">
+          <div className="grid grid-cols-5 gap-4 mt-6">
             <div className="bg-zinc-800 p-4 rounded-lg">
               <div className="text-zinc-400 text-sm mb-1">Progress</div>
               <div className="text-2xl font-bold text-white">
@@ -200,6 +200,24 @@ export default async function EpicDetailPage(props: {
                 <div
                   className="bg-blue-600 h-2 rounded-full"
                   style={{ width: `${epic.metrics.progress}%` }}
+                ></div>
+              </div>
+            </div>
+            <div className="bg-zinc-800 p-4 rounded-lg">
+              <div className="text-zinc-400 text-sm mb-1">Readiness</div>
+              <div className="text-2xl font-bold text-white">
+                {epic.readinessScore || 0}%
+              </div>
+              <div className="w-full bg-zinc-700 rounded-full h-2 mt-2">
+                <div
+                  className={`h-2 rounded-full ${
+                    (epic.readinessScore || 0) >= 80
+                      ? "bg-green-600"
+                      : (epic.readinessScore || 0) >= 50
+                        ? "bg-yellow-600"
+                        : "bg-red-600"
+                  }`}
+                  style={{ width: `${epic.readinessScore || 0}%` }}
                 ></div>
               </div>
             </div>

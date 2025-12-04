@@ -57,13 +57,6 @@ export default function EpicTeamMembers({ epicId }: EpicTeamMembersProps) {
     <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-bold text-white">👥 Epic Team Members</h2>
-        <Link
-          href={`/epics/${epicId}/edit`}
-          className="flex items-center gap-2 px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg transition-colors"
-        >
-          <IconEdit size={16} />
-          Edit Team
-        </Link>
       </div>
 
       {/* Members List */}
