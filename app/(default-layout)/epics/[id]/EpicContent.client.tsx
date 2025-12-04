@@ -127,9 +127,18 @@ export default function EpicContent({
     setUploading(false);
   };
 
+  const handleDelete = async (id: string) => {
+    const ok = confirm("Delete this attachment?");
+    if (!ok) return;
+    const res = await handleDeleteAttachment({ id, taskId: params.id });
+    if (res.success) window.location.reload();
+    else setError(res.message || "Delete failed");
+  };
+
   const handleAddLink = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
+
     const data = new FormData();
     data.append("url", linkUrl);
     data.append("name", linkName || linkUrl);
@@ -141,25 +150,19 @@ export default function EpicContent({
     } else {
       setLinkUrl("");
       setLinkName("");
+      // refresh to show new link
       window.location.reload();
     }
   };
-
-  const handleDelete = async (id: string) => {
-    const ok = confirm("Delete this attachment?");
-    if (!ok) return;
-    const res = await handleDeleteAttachment({ id, taskId: params.id });
-    if (res.success) window.location.reload();
-    else setError(res.message || "Delete failed");
-  };
   return (
-    <div className="grid grid-cols-5 gap-6">
-      {/* Left Widget Column (reserved) */}
-      <div className="col-span-1">
-        {/* reserved for future widgets */}
-      </div>
-      {/* RACI Matrix */}
+    <div className="grid grid-cols-12 gap-6">
+      {/* Left widget column (quarter) */}
       <div className="col-span-3">
+        {/* reserved for left widgets (timeline, quick actions, etc) */}
+      </div>
+
+      {/* Center area (1/2 width) */}
+      <div className="col-span-6">
         <CollapsibleSection
           title="RACI Matrix"
           icon="👥"
@@ -211,7 +214,9 @@ export default function EpicContent({
                 </div>
               ))
             ) : (
-              <div className="text-zinc-500 text-center py-8">No subtasks yet</div>
+              <div className="text-zinc-500 text-center py-8">
+                No subtasks yet
+              </div>
             )}
 
             {error && <div className="text-red-400 text-sm">{error}</div>}
@@ -471,7 +476,7 @@ export default function EpicContent({
       </div>
 
       {/* Right Widget Column (Stakeholders / Team Members) */}
-      <div className="col-span-1">
+      <div className="col-span-3">
         <div className="space-y-4">
           <CollapsibleSection
             title="Stakeholders"
@@ -482,7 +487,10 @@ export default function EpicContent({
             <div className="space-y-3">
               {epic.stakeholders.length > 0 ? (
                 epic.stakeholders.map((stakeholder: any) => (
-                  <div key={stakeholder.id} className="p-3 bg-zinc-800 rounded-lg">
+                  <div
+                    key={stakeholder.id}
+                    className="p-3 bg-zinc-800 rounded-lg"
+                  >
                     <div className="font-medium text-white">
                       {stakeholder.user?.name || stakeholder.user?.email}
                     </div>
@@ -495,7 +503,9 @@ export default function EpicContent({
                   </div>
                 ))
               ) : (
-                <div className="text-zinc-500 text-center py-8">No stakeholders assigned</div>
+                <div className="text-zinc-500 text-center py-8">
+                  No stakeholders assigned
+                </div>
               )}
             </div>
           </CollapsibleSection>
