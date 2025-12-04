@@ -11,6 +11,7 @@ import EpicPriorityView from "./EpicPriorityView";
 import EpicTableView from "./EpicTableView";
 import EpicBoard from "./EpicBoard";
 import EpicBubbleChart from "./EpicBubbleChart";
+import EpicTimeline from "./EpicTimeline";
 import Link from "next/link";
 
 interface Epic {
@@ -422,7 +423,26 @@ export default function EpicPortfolioClient({
         </div>
       )}
       {view === "timeline" && (
-        <div className="text-zinc-400">Timeline view coming soon...</div>
+        <EpicTimeline
+          epics={filteredEpics.map((epic) => ({
+            id: epic.id,
+            title: epic.title,
+            startDate: epic.startDate ? new Date(epic.startDate) : null,
+            dueDate: epic.dueDate ? new Date(epic.dueDate) : null,
+            progress: epic.metrics.progress,
+            priority: epic.priority as
+              | "CRITICAL"
+              | "HIGH"
+              | "MEDIUM"
+              | "LOW"
+              | null,
+            riskLevel: epic.riskLevel as "HIGH" | "MEDIUM" | "LOW" | null,
+            department: epic.department || undefined,
+            businessValue: epic.businessValue
+              ? parseFloat(epic.businessValue)
+              : null,
+          }))}
+        />
       )}
       {view === "matrix" && <EpicBubbleChart epics={filteredEpics} />}
     </div>

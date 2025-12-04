@@ -29,7 +29,9 @@ function CollapsibleSection({
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
 
   return (
-    <div className={`bg-zinc-900 border border-zinc-800 rounded-lg p-6 ${isNested ? 'mt-4' : 'mt-6'}`}>
+    <div
+      className={`bg-zinc-900 border border-zinc-800 rounded-lg p-6 ${isNested ? "mt-4" : "mt-6"}`}
+    >
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
         className="flex items-center gap-2 w-full text-left hover:bg-zinc-800/50 -m-2 p-2 rounded transition-colors"
@@ -39,7 +41,9 @@ function CollapsibleSection({
         ) : (
           <IconChevronDown size={20} className="text-zinc-400" />
         )}
-        <h2 className={`${isNested ? 'text-lg' : 'text-xl'} font-bold text-white`}>
+        <h2
+          className={`${isNested ? "text-lg" : "text-xl"} font-bold text-white`}
+        >
           {icon} {title}
         </h2>
       </button>
