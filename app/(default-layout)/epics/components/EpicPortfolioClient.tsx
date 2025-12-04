@@ -6,12 +6,14 @@ import {
   IconTable,
   IconPlus,
   IconList,
+  IconChartLine,
 } from "@tabler/icons-react";
 import EpicPriorityView from "./EpicPriorityView";
 import EpicTableView from "./EpicTableView";
 import EpicBoard from "./EpicBoard";
 import EpicBubbleChart from "./EpicBubbleChart";
 import EpicTimeline from "./EpicTimeline";
+import EpicBurndownChart from "./EpicBurndownChart";
 import Link from "next/link";
 
 interface Epic {
@@ -49,7 +51,7 @@ interface EpicPortfolioClientProps {
 const STORAGE_KEY = "epic-portfolio-state";
 
 interface SavedState {
-  view: "priority" | "timeline" | "matrix" | "table" | "board";
+  view: "priority" | "timeline" | "matrix" | "table" | "board" | "burndown";
   filter: "all" | "active" | "backlog";
   departmentFilter: string;
   riskFilter: string;
@@ -101,7 +103,7 @@ export default function EpicPortfolioClient({
   const savedState = loadSavedState();
 
   const [view, setView] = useState<
-    "priority" | "timeline" | "matrix" | "table" | "board"
+    "priority" | "timeline" | "matrix" | "table" | "board" | "burndown"
   >(savedState.view);
   const [filter, setFilter] = useState<"all" | "active" | "backlog">(
     savedState.filter
@@ -295,6 +297,17 @@ export default function EpicPortfolioClient({
             <IconTable size={18} />
             Value Matrix
           </button>
+          <button
+            onClick={() => setView("burndown")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+              view === "burndown"
+                ? "bg-zinc-800 text-white"
+                : "bg-zinc-900 text-zinc-400 hover:bg-zinc-800"
+            }`}
+          >
+            <IconChartLine size={18} />
+            Burndown
+          </button>
         </div>
 
         <div className="flex gap-2">
@@ -449,6 +462,7 @@ export default function EpicPortfolioClient({
           }))}
         />
       )}
+      {view === "burndown" && <EpicBurndownChart epics={filteredEpics} />}
       {view === "matrix" && <EpicBubbleChart epics={filteredEpics} />}
     </div>
   );
