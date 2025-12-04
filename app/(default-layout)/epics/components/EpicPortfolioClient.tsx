@@ -63,61 +63,55 @@ export default function EpicPortfolioClient({
   epics,
   epicBoard,
 }: EpicPortfolioClientProps) {
-  // Load saved state from localStorage
-  const loadSavedState = (): SavedState => {
-    if (typeof window === "undefined")
-      return {
-        view: "priority",
-        filter: "all",
-        departmentFilter: "all",
-        riskFilter: "all",
-        businessValueFilter: "all",
-        dueDateFilter: "all",
-      };
-
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      return saved
-        ? JSON.parse(saved)
-        : {
-            view: "priority",
-            filter: "all",
-            departmentFilter: "all",
-            riskFilter: "all",
-            businessValueFilter: "all",
-            dueDateFilter: "all",
-          };
-    } catch (error) {
-      console.error("Error loading saved state:", error);
-      return {
-        view: "priority",
-        filter: "all",
-        departmentFilter: "all",
-        riskFilter: "all",
-        businessValueFilter: "all",
-        dueDateFilter: "all",
-      };
-    }
+  // Server-safe defaults for saved UI state — avoids hydration mismatch
+  const DEFAULT_SAVED_STATE: SavedState = {
+    view: "priority",
+    filter: "all",
+    departmentFilter: "all",
+    riskFilter: "all",
+    businessValueFilter: "all",
+    dueDateFilter: "all",
   };
-
-  const savedState = loadSavedState();
 
   const [view, setView] = useState<
     "priority" | "timeline" | "matrix" | "table" | "board" | "burndown"
-  >(savedState.view);
+  >(DEFAULT_SAVED_STATE.view);
   const [filter, setFilter] = useState<"all" | "active" | "backlog">(
-    savedState.filter
+    DEFAULT_SAVED_STATE.filter
   );
   const [departmentFilter, setDepartmentFilter] = useState<string>(
-    savedState.departmentFilter
+    DEFAULT_SAVED_STATE.departmentFilter
   );
-  const [riskFilter, setRiskFilter] = useState<string>(savedState.riskFilter);
+  const [riskFilter, setRiskFilter] = useState<string>(
+    DEFAULT_SAVED_STATE.riskFilter
+  );
   const [businessValueFilter, setBusinessValueFilter] = useState<string>(
-    savedState.businessValueFilter
+    DEFAULT_SAVED_STATE.businessValueFilter
   );
   const [dueDateFilter, setDueDateFilter] = useState<string>(
-    savedState.dueDateFilter
+    DEFAULT_SAVED_STATE.dueDateFilter
   );
+
+  // After mount, load saved state from localStorage and apply client-side only
+  useEffect(() => {
+    try {
+      if (typeof window === "undefined") return;
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (!saved) return;
+      const parsed = JSON.parse(saved) as Partial<SavedState> | null;
+      if (!parsed) return;
+
+      if (parsed.view) setView(parsed.view);
+      if (parsed.filter) setFilter(parsed.filter);
+      if (parsed.departmentFilter) setDepartmentFilter(parsed.departmentFilter);
+      if (parsed.riskFilter) setRiskFilter(parsed.riskFilter);
+      if (parsed.businessValueFilter)
+        setBusinessValueFilter(parsed.businessValueFilter);
+      if (parsed.dueDateFilter) setDueDateFilter(parsed.dueDateFilter);
+    } catch (error) {
+      console.error("Error loading saved state:", error);
+    }
+  }, []);
 
   // Save state to localStorage whenever it changes
   useEffect(() => {
@@ -243,17 +237,6 @@ export default function EpicPortfolioClient({
       <div className="flex items-center justify-between">
         <div className="flex gap-2">
           <button
-            onClick={() => setView("priority")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-              view === "priority"
-                ? "bg-zinc-800 text-white"
-                : "bg-zinc-900 text-zinc-400 hover:bg-zinc-800"
-            }`}
-          >
-            <IconLayoutGrid size={18} />
-            Priority View
-          </button>
-          <button
             onClick={() => setView("table")}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
               view === "table"
@@ -296,6 +279,29 @@ export default function EpicPortfolioClient({
           >
             <IconTable size={18} />
             Value Matrix
+          </button>
+          <button
+            onClick={() => setView("burndown")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+              view === "burndown"
+                ? "bg-zinc-800 text-white"
+                : "bg-zinc-900 text-zinc-400 hover:bg-zinc-800"
+            }`}
+          >
+            <IconChartLine size={18} />
+            Burndown
+          </button>
+          {/* Moved Priority View to the far right — keeps view focused on other modes first */}
+          <button
+            onClick={() => setView("priority")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+              view === "priority"
+                ? "bg-zinc-800 text-white"
+                : "bg-zinc-900 text-zinc-400 hover:bg-zinc-800"
+            }`}
+          >
+            <IconLayoutGrid size={18} />
+            Priority View
           </button>
           <button
             onClick={() => setView("burndown")}

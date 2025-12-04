@@ -155,6 +155,9 @@ export interface Attachment {
   id: string;
   filename: string;
   url: string;
+  storage_path?: string | null;
+  parent_type?: string | null;
+  parent_id?: string | null;
   size: number | null;
   mimeType: string | null;
   taskId: string;

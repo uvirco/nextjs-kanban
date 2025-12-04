@@ -88,6 +88,12 @@ async function getEpicDetails(epicId: string) {
   const progress =
     totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
+  // Fetch attachments for this epic (attachments stored in Attachment table via taskId)
+  const { data: attachments } = await supabase
+    .from("Attachment")
+    .select("*")
+    .eq("taskId", epicId);
+
   return {
     ...epic,
     owner,
@@ -97,6 +103,7 @@ async function getEpicDetails(epicId: string) {
     subtasks: subtasks || [],
     checklists: checklists || [],
     metrics: { totalTasks, completedTasks, blockedTasks, progress },
+    attachments: attachments || [],
   };
 }
 
