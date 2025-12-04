@@ -166,7 +166,7 @@ export default async function EpicPortfolioPage() {
 
   return (
     <main className="min-h-screen bg-zinc-950 text-white">
-      <div className="container mx-auto py-8 px-4">
+      <div className="w-full px-6 py-8">
         <EpicPortfolioClient
           epics={epicsWithMetrics || []}
           epicBoard={epicBoard || null}

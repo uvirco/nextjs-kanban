@@ -65,7 +65,8 @@ export default function EpicPortfolioClient({
 }: EpicPortfolioClientProps) {
   // Server-safe defaults for saved UI state — avoids hydration mismatch
   const DEFAULT_SAVED_STATE: SavedState = {
-    view: "priority",
+    // Default to table view per UX preference; localStorage will override when present
+    view: "table",
     filter: "all",
     departmentFilter: "all",
     riskFilter: "all",
