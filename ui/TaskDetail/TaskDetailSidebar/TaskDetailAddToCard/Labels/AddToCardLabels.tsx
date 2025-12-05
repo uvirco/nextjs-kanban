@@ -73,38 +73,39 @@ export default function AddToCardLabels({
   };
 
   return (
-    <li className="bg-muted hover:bg-muted/80 border border-border rounded-md hover:border-primary transition-colors">
-      <Popover>
-        <PopoverTrigger asChild>
-          <button className="flex items-center gap-2 px-2 py-2 w-full">
-            <IconTag size={14} /> Labels
-          </button>
-        </PopoverTrigger>
-        <PopoverContent className="w-80" align="start">
-          {editMode ? (
-            <LabelEditMode
-              editingLabel={editingLabel}
-              tempLabelTitle={tempLabelTitle}
-              setTempLabelTitle={setTempLabelTitle}
-              tempLabelColor={tempLabelColor}
-              setTempLabelColor={setTempLabelColor}
-              exitEditMode={exitEditMode}
-              closePopover={closePopover}
-              boardId={boardId}
-              taskId={taskId}
-            />
-          ) : (
-            <LabelView
-              labels={labels}
-              selectedLabels={selectedLabels}
-              handleCheckboxChange={handleCheckboxChange}
-              enterEditMode={enterEditMode}
-              enterCreateMode={enterCreateMode}
-              closePopover={closePopover}
-            />
-          )}
-        </PopoverContent>
-      </Popover>
-    </li>
+    <Popover>
+      <PopoverTrigger asChild>
+        <button
+          className="w-8 h-8 flex items-center justify-center rounded-md bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 hover:border-zinc-600 transition-colors"
+          title="Add Labels"
+        >
+          <IconTag size={16} className="text-zinc-400" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-80" align="start">
+        {editMode ? (
+          <LabelEditMode
+            editingLabel={editingLabel}
+            tempLabelTitle={tempLabelTitle}
+            setTempLabelTitle={setTempLabelTitle}
+            tempLabelColor={tempLabelColor}
+            setTempLabelColor={setTempLabelColor}
+            exitEditMode={exitEditMode}
+            closePopover={closePopover}
+            boardId={boardId}
+            taskId={taskId}
+          />
+        ) : (
+          <LabelView
+            labels={labels}
+            selectedLabels={selectedLabels}
+            handleCheckboxChange={handleCheckboxChange}
+            enterEditMode={enterEditMode}
+            enterCreateMode={enterCreateMode}
+            closePopover={closePopover}
+          />
+        )}
+      </PopoverContent>
+    </Popover>
   );
 }

@@ -27,19 +27,19 @@ export default async function TaskDetailView({ task }: { task: DetailedTask }) {
   const session = await auth();
 
   return (
-    <div className="col-span-3">
+    <div className="col-span-3 text-zinc-100">
       {task.assignedUsers.length > 0 && (
         <div className="flex -space-x-2 mb-4">
           {task.assignedUsers.map((assignment) => (
             <Avatar
               key={assignment.user.id}
-              className="w-8 h-8 border-2 border-white"
+              className="w-8 h-8 border-2 border-zinc-700"
             >
               <AvatarImage
                 src={assignment.user.image || undefined}
                 alt={assignment.user.name || "Unknown"}
               />
-              <AvatarFallback className="text-xs">
+              <AvatarFallback className="text-xs bg-zinc-700 text-zinc-100">
                 {(assignment.user.name || "?").charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>

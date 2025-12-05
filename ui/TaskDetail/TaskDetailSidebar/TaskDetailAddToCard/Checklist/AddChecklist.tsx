@@ -66,51 +66,52 @@ export default function AddChecklist({
   };
 
   return (
-    <li className="flex items-center gap-2">
-      <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-        <PopoverTrigger asChild>
-          <button className="px-2 py-2 bg-muted hover:bg-muted/80 border border-border rounded-md flex w-full items-center gap-2 hover:border-primary transition-colors">
-            <IconCheckbox size={14} /> Checklist
-          </button>
-        </PopoverTrigger>
-        <PopoverContent side="left" align="start" className="w-80">
-          <TaskPopoverWrapper>
-            <TaskPopoverHeading title="Checklists" />
+    <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+      <PopoverTrigger asChild>
+        <button
+          className="w-8 h-8 flex items-center justify-center rounded-md bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 hover:border-zinc-600 transition-colors"
+          title="Add Checklist"
+        >
+          <IconCheckbox size={16} className="text-zinc-400" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent side="left" align="start" className="w-80">
+        <TaskPopoverWrapper>
+          <TaskPopoverHeading title="Checklists" />
 
-            <form
-              onSubmit={handleSubmit(onSubmit)}
-              className="px-1 py-2 w-full space-y-3"
-            >
-              <Input
-                autoComplete="off"
-                placeholder="Checklist"
-                {...register("title")}
-              />
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="px-1 py-2 w-full space-y-3"
+          >
+            <Input
+              autoComplete="off"
+              placeholder="Checklist"
+              {...register("title")}
+            />
 
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  type="submit"
-                  disabled={isLoading}
-                  className="flex items-center"
-                >
-                  <IconPlus size={16} />
-                  Create Checklist
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={closePopover}
-                  disabled={isLoading}
-                  variant="ghost"
-                >
-                  <IconX size={16} className="flex items-center mr-1" />
-                  Cancel
-                </Button>
-              </div>
-            </form>
-          </TaskPopoverWrapper>
-        </PopoverContent>
-      </Popover>
-    </li>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                type="submit"
+                disabled={isLoading}
+                className="flex items-center"
+              >
+                <IconPlus size={16} />
+                Create Checklist
+              </Button>
+              <Button
+                size="sm"
+                onClick={closePopover}
+                disabled={isLoading}
+                variant="ghost"
+              >
+                <IconX size={16} className="flex items-center mr-1" />
+                Cancel
+              </Button>
+            </div>
+          </form>
+        </TaskPopoverWrapper>
+      </PopoverContent>
+    </Popover>
   );
 }

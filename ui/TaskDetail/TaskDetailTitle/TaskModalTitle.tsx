@@ -18,19 +18,19 @@ export default function TaskDetailTitle({
   taskUpdatedAt: Date;
 }) {
   return (
-    <div className="flex gap-3 p-5">
-      <IconCards size={32} />
+    <div className="flex gap-3 p-5 bg-zinc-900 border-b border-zinc-800">
+      <IconCards size={32} className="text-zinc-400" />
 
       <div className="flex-col w-full pr-5">
         <EditTaskNameForm taskId={taskId} title={taskTitle} boardId={boardId} />
 
-        <div className="text-sm font-normal text-muted-foreground">
+        <div className="text-sm font-normal text-zinc-400">
           <p>
             Created on {format(new Date(taskCreatedAt), "MMMM d, yyyy")} |
             Updated on {format(new Date(taskUpdatedAt), "MMMM d, yyyy")}
           </p>
           <p>
-            In column <span className="text-blue-600 dark:text-blue-400">{columnTitle}</span>
+            In column <span className="text-blue-400">{columnTitle}</span>
           </p>
         </div>
       </div>

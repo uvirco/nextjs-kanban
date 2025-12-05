@@ -20,22 +20,23 @@ export default function AddToCardDates({
   dueDate: Date | null;
 }) {
   return (
-    <li className="bg-muted hover:bg-muted/80 border border-border rounded-md hover:border-primary transition-colors">
-      <Popover>
-        <PopoverTrigger asChild>
-          <button className="flex items-center gap-2 px-2 py-2 w-full">
-            <IconCalendar size={14} /> Dates
-          </button>
-        </PopoverTrigger>
-        <PopoverContent side="left" align="start">
-          <AddToCardDatesCalendar
-            taskId={taskId}
-            boardId={boardId}
-            startDate={startDate}
-            dueDate={dueDate}
-          />
-        </PopoverContent>
-      </Popover>
-    </li>
+    <Popover>
+      <PopoverTrigger asChild>
+        <button
+          className="w-8 h-8 flex items-center justify-center rounded-md bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 hover:border-zinc-600 transition-colors"
+          title="Add Dates"
+        >
+          <IconCalendar size={16} className="text-zinc-400" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent side="left" align="start">
+        <AddToCardDatesCalendar
+          taskId={taskId}
+          boardId={boardId}
+          startDate={startDate}
+          dueDate={dueDate}
+        />
+      </PopoverContent>
+    </Popover>
   );
 }

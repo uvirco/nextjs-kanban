@@ -12,8 +12,10 @@ export default function TaskDetailItemHeading({
   return (
     <div className="flex w-full items-center justify-between mb-1">
       <div className="flex items-center">
-        <div className="w-[40px] grow-0 shrink-0 justify-center">{icon}</div>
-        <h4 className="text-xl font-semibold text-foreground">{title}</h4>
+        <div className="w-[40px] grow-0 shrink-0 justify-center text-zinc-400">
+          {icon}
+        </div>
+        <h4 className="text-xl font-semibold text-zinc-100">{title}</h4>
       </div>
       {endContent && <div>{endContent}</div>}
     </div>

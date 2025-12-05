@@ -378,7 +378,11 @@ export default function Board({ boardId, epicId }: BoardProps) {
 
                               <Link
                                 className="flex-grow pr-3 py-2"
-                                href={`/task/${task.id}`}
+                                href={
+                                  epicId
+                                    ? `/tasks/${task.id}`
+                                    : `/task/${task.id}`
+                                }
                               >
                                 {/* Labels would go here if available */}
                                 {task.labels && task.labels.length > 0 && (

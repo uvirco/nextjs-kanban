@@ -25,6 +25,24 @@ export default async function SidebarMenu() {
     return [];
   }
 
+  if (!supabaseAdmin) {
+    console.error("Supabase admin client not available");
+    return (
+      <Sidebar>
+        <SidebarHeader />
+        <SidebarSearch />
+        <hr className="border-zinc-900 my-3" />
+        <Menu>
+          <MenuItem
+            path="/profile"
+            title="Profile"
+            icon={<IconUser stroke={1.5} size={20} />}
+          />
+        </Menu>
+      </Sidebar>
+    );
+  }
+
   const { data: boardMembers, error } = await supabaseAdmin
     .from("BoardMember")
     .select(
@@ -47,7 +65,15 @@ export default async function SidebarMenu() {
         <SidebarHeader />
         <SidebarSearch />
         <hr className="border-zinc-900 my-3" />
+        <div className="px-4 py-2 text-sm text-zinc-400">
+          Unable to load boards
+        </div>
         <Menu>
+          <MenuItem
+            path="/epics"
+            title="Epics"
+            icon={<IconTarget stroke={1.5} size={20} />}
+          />
           <MenuItem
             path="/profile"
             title="Profile"

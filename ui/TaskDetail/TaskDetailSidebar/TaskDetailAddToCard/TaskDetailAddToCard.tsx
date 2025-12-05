@@ -47,11 +47,7 @@ export default async function TaskDetailAddToCard({
 
   return (
     <div className="mb-5">
-      <h4 className="text-sm text-muted-foreground font-semibold mb-1">
-        Add to card
-      </h4>
-
-      <ul className="text-sm space-y-2">
+      <div className="flex flex-col gap-2">
         <AddToCardMembers
           boardMembers={boardMembers}
           cardMembers={task.assignedUsers}
@@ -71,12 +67,7 @@ export default async function TaskDetailAddToCard({
           startDate={task.startDate}
           dueDate={task.dueDate}
         />
-
-        {/*
-          <li className='flex items-center gap-2 bg-zinc-800 px-2 py-2 rounded-md'><IconPaperclip size={14} /> Attachement</li>
-          <li className='flex items-center gap-2 bg-zinc-800 px-2 py-2 rounded-md'><IconPaint size={14} /> Cover</li>
-        */}
-      </ul>
+      </div>
     </div>
   );
 }

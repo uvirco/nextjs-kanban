@@ -61,61 +61,62 @@ export default function AddToCardMembers({
   };
 
   return (
-    <li className="bg-muted hover:bg-muted/80 border border-border rounded-md hover:border-primary transition-colors">
-      <Popover>
-        <PopoverTrigger asChild>
-          <button className="flex items-center gap-2 px-2 py-2 w-full">
-            <IconUser size={14} /> Members
-          </button>
-        </PopoverTrigger>
-        <PopoverContent className="w-80" align="start">
-          <TaskPopoverWrapper>
-            <TaskPopoverHeading title="Members" />
+    <Popover>
+      <PopoverTrigger asChild>
+        <button
+          className="w-8 h-8 flex items-center justify-center rounded-md bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 hover:border-zinc-600 transition-colors"
+          title="Add Members"
+        >
+          <IconUser size={16} className="text-zinc-400" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-80" align="start">
+        <TaskPopoverWrapper>
+          <TaskPopoverHeading title="Members" />
 
-            <Input
-              placeholder="Search Members..."
-              className="mb-3"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+          <Input
+            placeholder="Search Members..."
+            className="mb-3"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
 
-            {cardMembers.length > 0 && (
-              <>
-                <TaskPopoverSubtitle>Card Members</TaskPopoverSubtitle>
-                <ul className="flex flex-col gap-y-3 mb-5">
-                  {cardMembers.map((cardMember) => (
-                    <MemberListItem
-                      key={cardMember.user.id}
-                      member={cardMember}
-                      onAddClick={handleAddClick}
-                      onRemoveClick={handleRemoveClick}
-                      isCardMember={true}
-                    />
-                  ))}
-                </ul>
-              </>
-            )}
+          {cardMembers.length > 0 && (
+            <>
+              <TaskPopoverSubtitle>Card Members</TaskPopoverSubtitle>
+              <ul className="flex flex-col gap-y-3 mb-5">
+                {cardMembers.map((cardMember) => (
+                  <MemberListItem
+                    key={cardMember.user.id}
+                    member={cardMember}
+                    onAddClick={handleAddClick}
+                    onRemoveClick={handleRemoveClick}
+                    isCardMember={true}
+                  />
+                ))}
+              </ul>
+            </>
+          )}
 
-            {filteredMembers.length > 0 && (
-              <>
-                <TaskPopoverSubtitle>Board Members</TaskPopoverSubtitle>
-                <ul className="flex flex-col gap-y-3 mb-5">
-                  {filteredMembers.map((member) => (
-                    <MemberListItem
-                      key={member.user.id}
-                      member={member}
-                      onAddClick={handleAddClick}
-                      onRemoveClick={handleRemoveClick}
-                      isCardMember={false}
-                    />
-                  ))}
-                </ul>
-              </>
-            )}
-          </TaskPopoverWrapper>
-        </PopoverContent>
-      </Popover>
-    </li>
+          {filteredMembers.length > 0 && (
+            <>
+              <TaskPopoverSubtitle>Board Members</TaskPopoverSubtitle>
+              <ul className="flex flex-col gap-y-3 mb-5">
+                {filteredMembers.map((member) => (
+                  <MemberListItem
+                    key={member.user.id}
+                    member={member}
+                    onAddClick={handleAddClick}
+                    onRemoveClick={handleRemoveClick}
+                    isCardMember={false}
+                  />
+                ))}
+              </ul>
+            </>
+          )}
+        </TaskPopoverWrapper>
+      </PopoverContent>
+    </Popover>
   );
 }
 
