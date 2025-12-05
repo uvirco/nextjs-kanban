@@ -5,12 +5,6 @@ import {
   IconChevronRight,
   IconAlertTriangle,
 } from "@tabler/icons-react";
-import TeamMembers from "@/ui/TeamMembers/TeamMembers.client";
-import EpicAddChecklist from "./EpicAddChecklist";
-import ChecklistTitleForm from "@/ui/TaskDetail/TaskDetailView/Checklist/ChecklistTitleForm.client";
-import DeleteChecklistButton from "@/ui/TaskDetail/TaskDetailView/Checklist/DeleteChecklistButton.client";
-import ChecklistItemForm from "@/ui/TaskDetail/TaskDetailView/Checklist/ChecklistItemForm.client";
-import ChecklistCheckboxGroup from "@/ui/TaskDetail/TaskDetailView/Checklist/ChecklistCheckboxGroup.client";
 
 function CollapsibleSection({
   title,
@@ -148,127 +142,12 @@ export default function EpicContent({
             {/* Files used to be rendered inside the Subtasks section — moved to its own collapsible below */}
           </div>
         </CollapsibleSection>
-
-        {/* Checklists */}
-        <CollapsibleSection
-          title="Checklists"
-          icon="✅"
-          defaultCollapsed={true}
-          storageKey={`epic:${params.id}:section:checklists`}
-        >
-          <div className="space-y-4">
-            {epic.checklists.length > 0 ? (
-              epic.checklists.map((checklist: any) => {
-                const totalItems = checklist.items?.length || 0;
-                const completedItems =
-                  checklist.items?.filter((item: any) => item.isChecked)
-                    .length || 0;
-                const completionPercentage =
-                  totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
-
-                return (
-                  <CollapsibleSection
-                    key={checklist.id}
-                    title={`${checklist.title || "Checklist"} (${completedItems}/${totalItems})`}
-                    icon="📋"
-                    defaultCollapsed={true}
-                    isNested={true}
-                    storageKey={`epic:${params.id}:checklist:${checklist.id}`}
-                  >
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <ChecklistTitleForm
-                          checklistTitle={checklist.title}
-                          checklistId={checklist.id}
-                          taskId={params.id}
-                        />
-                        <DeleteChecklistButton
-                          checklistId={checklist.id}
-                          taskId={params.id}
-                        />
-                      </div>
-
-                      {/* Progress bar */}
-                      <div className="w-full bg-zinc-700 rounded-full h-2">
-                        <div
-                          className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                          style={{ width: `${completionPercentage}%` }}
-                        ></div>
-                      </div>
-
-                      {/* Checklist items */}
-                      <ChecklistCheckboxGroup
-                        taskId={params.id}
-                        checkedItemIds={checklist.items
-                          .filter((item: any) => item.isChecked)
-                          .map((item: any) => item.id)}
-                        checklist={checklist}
-                      />
-
-                      {/* Add new item */}
-                      <ChecklistItemForm
-                        checklistId={checklist.id}
-                        taskId={params.id}
-                      />
-                    </div>
-                  </CollapsibleSection>
-                );
-              })
-            ) : (
-              <div className="text-zinc-500 text-center py-8">
-                No checklists yet
-              </div>
-            )}
-
-            {/* Add Checklist */}
-            <EpicAddChecklist epicId={params.id} />
-          </div>
-        </CollapsibleSection>
       </div>
 
       {/* Right Widget Column (Stakeholders / Team Members) */}
       <div className="col-span-3">
         <div className="space-y-4">
-          <CollapsibleSection
-            title="Stakeholders"
-            icon="👥"
-            defaultCollapsed={true}
-            storageKey={`epic:${params.id}:section:stakeholders`}
-          >
-            <div className="space-y-3">
-              {epic.stakeholders.length > 0 ? (
-                epic.stakeholders.map((stakeholder: any) => (
-                  <div
-                    key={stakeholder.id}
-                    className="p-3 bg-zinc-800 rounded-lg"
-                  >
-                    <div className="font-medium text-white">
-                      {stakeholder.user?.name || stakeholder.user?.email}
-                    </div>
-                    <div className="text-sm text-zinc-400 mt-1">
-                      {stakeholder.stakeholderType}
-                    </div>
-                    <div className="text-xs text-zinc-500 mt-1">
-                      Notify: {stakeholder.notificationPreference}
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-zinc-500 text-center py-8">
-                  No stakeholders assigned
-                </div>
-              )}
-            </div>
-          </CollapsibleSection>
-
-          <CollapsibleSection
-            title="Team Members"
-            icon="👥"
-            defaultCollapsed={true}
-            storageKey={`epic:${params.id}:section:team`}
-          >
-            <TeamMembers epicId={params.id} />
-          </CollapsibleSection>
+          {/* Team Members moved to page.tsx blue block */}
         </div>
       </div>
     </div>

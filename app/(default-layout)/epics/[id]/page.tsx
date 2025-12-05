@@ -12,6 +12,8 @@ import RaciMatrixSection from "./RaciMatrixSection";
 import TeamMembers from "@/ui/TeamMembers/TeamMembers.client";
 import EpicFilesSection from "./EpicFilesSection.client";
 import EpicLinksSection from "./EpicLinksSection.client";
+import EpicChecklistsSection from "./EpicChecklistsSection.client";
+import EpicStakeholdersSection from "./EpicStakeholdersSection.client";
 
 async function getEpicDetails(epicId: string) {
   const supabase = supabaseAdmin;
@@ -279,11 +281,14 @@ export default async function EpicDetailPage(props: {
         {/* full-bleed visual debug row (edge-to-edge) */}
         <div className="w-full mb-6">
           <div className="grid grid-cols-12 gap-4 px-6">
-            <div className="col-span-3 bg-red-600/30 border border-red-600 rounded-lg p-6 text-sm text-red-300">
-              {/* Left 1/4 - Empty for now */}
-            </div>
-            <div className="col-span-6 bg-green-600/30 border border-green-600 rounded-lg p-6 text-sm text-green-300">
-              {/* Center 1/2 - RACI matrix */}
+            <div className="col-span-9 bg-green-600/30 border border-green-600 rounded-lg p-6 text-sm text-green-300">
+              {/* Checklists section above RACI matrix */}
+              <div className="mb-6">
+                <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
+                  <EpicChecklistsSection epic={epic} params={params} />
+                </div>
+              </div>
+              {/* Center 3/4 - RACI matrix */}
               <div className="w-full h-full">
                 <RaciMatrixSection
                   raciUsers={raciUsers}
@@ -297,7 +302,11 @@ export default async function EpicDetailPage(props: {
               <div className="w-full">
                 <TeamMembers epicId={epic.id} />
               </div>
-              {/* Files and Links sections below team members */}
+              {/* Stakeholders section below team members */}
+              <div className="mt-6">
+                <EpicStakeholdersSection epic={epic} params={params} />
+              </div>
+              {/* Files and Links sections below stakeholders */}
               <div className="mt-6 space-y-6">
                 <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
                   <EpicFilesSection epic={epic} params={params} />
