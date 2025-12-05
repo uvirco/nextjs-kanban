@@ -24,6 +24,9 @@ export async function handleCreateTask(data: TaskCreationData) {
     taskTitle: z.string().min(1, MESSAGES.TASK.TITLE_TOO_SHORT),
     columnId: z.string().min(1, MESSAGES.COMMON.COLUMN_ID_REQUIRED),
     boardId: z.string().min(1, MESSAGES.COMMON.BOARD_ID_REQUIRED),
+    description: z.string().optional(),
+    parentTaskId: z.string().optional(),
+    assignedUserId: z.string().optional(),
   });
 
   const parse = CreateTaskSchema.safeParse(data);
@@ -58,9 +61,11 @@ export async function handleCreateTask(data: TaskCreationData) {
       .from("Task")
       .insert({
         title: parse.data.taskTitle,
+        description: parse.data.description || null,
         columnId: parse.data.columnId,
         order: newOrder,
         createdByUserId: userId,
+        parentTaskId: parse.data.parentTaskId || null,
       })
       .select()
       .single();
@@ -68,6 +73,21 @@ export async function handleCreateTask(data: TaskCreationData) {
     if (taskError) {
       console.error("Error creating task:", taskError);
       return { success: false, message: MESSAGES.TASK.CREATE_FAILURE };
+    }
+
+    // Create task assignment if assignedUserId is provided
+    if (parse.data.assignedUserId && createdTask) {
+      const { error: assignmentError } = await supabaseAdmin
+        .from("TaskAssignment")
+        .insert({
+          userId: parse.data.assignedUserId,
+          taskId: createdTask.id,
+        });
+
+      if (assignmentError) {
+        console.error("Error creating task assignment:", assignmentError);
+        // Don't fail the whole operation for assignment errors
+      }
     }
 
     // Create activity entry

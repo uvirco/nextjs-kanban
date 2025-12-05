@@ -14,6 +14,8 @@ import EpicFilesSection from "./EpicFilesSection.client";
 import EpicLinksSection from "./EpicLinksSection.client";
 import EpicChecklistsSection from "./EpicChecklistsSection.client";
 import EpicStakeholdersSection from "./EpicStakeholdersSection.client";
+import EpicSubtasksSection from "./EpicSubtasksSection.client";
+import EpicTaskboardSection from "./EpicTaskboardSection.client";
 
 async function getEpicDetails(epicId: string) {
   const supabase = supabaseAdmin;
@@ -60,11 +62,11 @@ async function getEpicDetails(epicId: string) {
     .select(
       `
       *,
-      assignedUser:User(id, name, email),
-      column:Column(id, title)
+      column:Column(id, title),
+      assignments:TaskAssignment(user:User(id, name, email))
     `
     )
-    .eq("epicId", epicId);
+    .eq("parentTaskId", epicId);
 
   // Fetch checklists for the epic
   const { data: checklists } = await supabase
@@ -287,6 +289,18 @@ export default async function EpicDetailPage(props: {
                 <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
                   <EpicChecklistsSection epic={epic} params={params} />
                 </div>
+              </div>
+              {/* Subtasks section between Checklist and RACI */}
+              <div className="mb-6">
+                <EpicSubtasksSection
+                  epic={epic}
+                  params={params}
+                  raciUsers={raciUsers}
+                />
+              </div>
+              {/* Taskboard section between Subtasks and RACI */}
+              <div className="mb-6">
+                <EpicTaskboardSection epic={epic} params={params} />
               </div>
               {/* Center 3/4 - RACI matrix */}
               <div className="w-full h-full">

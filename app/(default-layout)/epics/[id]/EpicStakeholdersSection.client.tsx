@@ -50,7 +50,9 @@ function CollapsibleSection({
   }, [isCollapsed, storageKey]);
 
   return (
-    <div className={`${isNested ? "ml-4" : ""} bg-zinc-900 border border-zinc-800 rounded-lg`}>
+    <div
+      className={`${isNested ? "ml-4" : ""} bg-zinc-900 border border-zinc-800 rounded-lg`}
+    >
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
         className="flex items-center gap-2 w-full text-left hover:bg-zinc-800/50 p-3 rounded-t-lg"
@@ -87,10 +89,7 @@ export default function EpicStakeholdersSection({
       <div className="space-y-3">
         {epic.stakeholders.length > 0 ? (
           epic.stakeholders.map((stakeholder: any) => (
-            <div
-              key={stakeholder.id}
-              className="p-3 bg-zinc-800 rounded-lg"
-            >
+            <div key={stakeholder.id} className="p-3 bg-zinc-800 rounded-lg">
               <div className="font-medium text-white">
                 {stakeholder.user?.name || stakeholder.user?.email}
               </div>

@@ -93,55 +93,7 @@ export default function EpicContent({
 
       {/* Center area (1/2 width) */}
       <div className="col-span-6">
-        <CollapsibleSection
-          title="Subtasks"
-          icon="📋"
-          defaultCollapsed={true}
-          storageKey={`epic:${params.id}:section:subtasks`}
-        >
-          <div className="space-y-2">
-            {epic.subtasks.length > 0 ? (
-              epic.subtasks.map((subtask: any) => (
-                <div
-                  key={subtask.id}
-                  className="flex items-center justify-between p-3 bg-zinc-800 rounded-lg"
-                >
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="checkbox"
-                      checked={subtask.status === "DONE"}
-                      readOnly
-                      className="w-4 h-4"
-                    />
-                    <span
-                      className={`${subtask.status === "DONE" ? "line-through text-zinc-500" : "text-white"}`}
-                    >
-                      {subtask.title}
-                    </span>
-                    {subtask.isBlocked && (
-                      <span className="text-red-400 text-xs flex items-center gap-1">
-                        <IconAlertTriangle size={14} />
-                        Blocked
-                      </span>
-                    )}
-                  </div>
-
-                  {subtask.assignedUser && (
-                    <span className="text-zinc-400 text-sm">
-                      {subtask.assignedUser.name}
-                    </span>
-                  )}
-                </div>
-              ))
-            ) : (
-              <div className="text-zinc-500 text-center py-8">
-                No subtasks yet
-              </div>
-            )}
-
-            {/* Files used to be rendered inside the Subtasks section — moved to its own collapsible below */}
-          </div>
-        </CollapsibleSection>
+        {/* Subtasks moved to green zone in page.tsx */}
       </div>
 
       {/* Right Widget Column (Stakeholders / Team Members) */}

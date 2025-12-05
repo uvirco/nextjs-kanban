@@ -98,6 +98,8 @@ export interface Task {
   parentTaskId: string | null;
   acceptanceCriteria: string | null;
   readinessScore: number;
+  epicId: string | null;
+  assignedUserId: string | null;
 }
 
 export interface Activity {
@@ -368,6 +370,8 @@ export type TaskCreationData = {
   description?: Task["description"];
   boardId: Board["id"];
   columnId: Column["id"];
+  parentTaskId?: Task["parentTaskId"];
+  assignedUserId?: string;
 };
 
 export type TaskEditData = {
