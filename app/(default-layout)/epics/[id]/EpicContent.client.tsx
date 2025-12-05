@@ -4,21 +4,13 @@ import {
   IconChevronDown,
   IconChevronRight,
   IconAlertTriangle,
-  IconPaperclip,
-  IconPlus,
-  IconTrash,
 } from "@tabler/icons-react";
-import {
-  handleCreateLinkAttachment,
-  handleDeleteAttachment,
-} from "@/server-actions/AttachmentServerActions";
 import TeamMembers from "@/ui/TeamMembers/TeamMembers.client";
 import EpicAddChecklist from "./EpicAddChecklist";
 import ChecklistTitleForm from "@/ui/TaskDetail/TaskDetailView/Checklist/ChecklistTitleForm.client";
 import DeleteChecklistButton from "@/ui/TaskDetail/TaskDetailView/Checklist/DeleteChecklistButton.client";
 import ChecklistItemForm from "@/ui/TaskDetail/TaskDetailView/Checklist/ChecklistItemForm.client";
 import ChecklistCheckboxGroup from "@/ui/TaskDetail/TaskDetailView/Checklist/ChecklistCheckboxGroup.client";
-import EpicFilesSection from "./EpicFilesSection.client";
 
 function CollapsibleSection({
   title,
@@ -98,29 +90,6 @@ export default function EpicContent({
   raciUsers,
   params,
 }: EpicContentProps) {
-  const [linkUrl, setLinkUrl] = useState("");
-  const [linkName, setLinkName] = useState("");
-  const [error, setError] = useState("");
-
-  const handleAddLink = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError("");
-
-    const data = new FormData();
-    data.append("url", linkUrl);
-    data.append("name", linkName || linkUrl);
-    data.append("taskId", params.id);
-
-    const res = await handleCreateLinkAttachment(data);
-    if (!res.success) {
-      setError(res.message || "Failed to add link");
-    } else {
-      setLinkUrl("");
-      setLinkName("");
-      // refresh to show new link
-      window.location.reload();
-    }
-  };
   return (
     <div className="grid grid-cols-12 gap-6">
       {/* Left widget column (quarter) */}
@@ -177,114 +146,6 @@ export default function EpicContent({
             )}
 
             {/* Files used to be rendered inside the Subtasks section — moved to its own collapsible below */}
-          </div>
-        </CollapsibleSection>
-
-        <CollapsibleSection
-          title="Links"
-          icon="🔗"
-          defaultCollapsed={true}
-          storageKey={`epic:${params.id}:section:links`}
-        >
-          <div className="space-y-4">
-            <div className="flex gap-4">
-              <form
-                onSubmit={handleAddLink}
-                className="flex items-center gap-2"
-              >
-                <input
-                  type="text"
-                  name="linkUrl"
-                  placeholder="https://example.com"
-                  value={linkUrl}
-                  onChange={(e) => setLinkUrl(e.target.value)}
-                  className="px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-white text-sm"
-                />
-                <input
-                  type="text"
-                  name="linkName"
-                  placeholder="Friendly name (optional)"
-                  value={linkName}
-                  onChange={(e) => setLinkName(e.target.value)}
-                  className="px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-white text-sm"
-                />
-                <button
-                  type="submit"
-                  className="px-3 py-1 bg-zinc-700 hover:bg-zinc-600 rounded text-sm text-white"
-                >
-                  Add link
-                </button>
-              </form>
-            </div>
-
-            {error && <div className="text-red-400 text-sm">{error}</div>}
-
-            <div className="space-y-2">
-              {epic.attachments?.filter((a: any) => a.mimeType === "link")
-                .length ? (
-                epic.attachments
-                  .filter((a: any) => a.mimeType === "link")
-                  .map((att: any) => (
-                    <div
-                      key={att.id}
-                      className="flex items-center justify-between p-3 bg-zinc-800 rounded-lg"
-                    >
-                      <div className="flex items-center gap-3">
-                        <IconPaperclip className="text-zinc-400" />
-                        <div className="flex flex-col">
-                          <div className="flex items-center gap-2">
-                            <a
-                              href={att.url}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="text-sm font-semibold text-white hover:underline"
-                            >
-                              {att.filename}
-                            </a>
-                            <span className="text-xs text-zinc-400">
-                              (link)
-                            </span>
-                          </div>
-                          {att.url && (
-                            <div className="text-xs text-zinc-500 mt-1">
-                              {att.url}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <a
-                          href={att.url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-zinc-400 hover:text-white text-sm flex items-center gap-1"
-                        >
-                          <IconPlus size={14} /> Open
-                        </a>
-                        <button
-                          onClick={async () => {
-                            const ok = confirm("Delete this attachment?");
-                            if (!ok) return;
-                            const res = await handleDeleteAttachment({
-                              id: att.id,
-                              taskId: params.id,
-                            });
-                            if (res.success) window.location.reload();
-                            else setError(res.message || "Delete failed");
-                          }}
-                          className="text-red-400 hover:text-red-500 text-sm flex items-center gap-1"
-                        >
-                          <IconTrash size={14} /> Remove
-                        </button>
-                      </div>
-                    </div>
-                  ))
-              ) : (
-                <div className="text-zinc-500 text-center py-4">
-                  No links yet
-                </div>
-              )}
-            </div>
           </div>
         </CollapsibleSection>
 

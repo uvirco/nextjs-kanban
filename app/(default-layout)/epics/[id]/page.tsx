@@ -1,11 +1,17 @@
 import { supabaseAdmin } from "@/lib/supabase";
 import Link from "next/link";
-import { IconUsers, IconClock, IconBuilding } from "@tabler/icons-react";
+import {
+  IconUsers,
+  IconClock,
+  IconBuilding,
+  IconArrowLeft,
+} from "@tabler/icons-react";
 import { notFound } from "next/navigation";
 import EpicContent from "./EpicContent.client";
 import RaciMatrixSection from "./RaciMatrixSection";
 import TeamMembers from "@/ui/TeamMembers/TeamMembers.client";
 import EpicFilesSection from "./EpicFilesSection.client";
+import EpicLinksSection from "./EpicLinksSection.client";
 
 async function getEpicDetails(epicId: string) {
   const supabase = supabaseAdmin;
@@ -139,6 +145,16 @@ export default async function EpicDetailPage(props: {
             {/* Dashboard header layout: large grid for title + wide metrics and actions */}
             <div className="grid grid-cols-12 gap-6 items-start">
               <div className="col-span-7">
+                <div className="flex items-center gap-3 mb-3">
+                  <Link
+                    href="/epics"
+                    className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+                  >
+                    <IconArrowLeft size={16} />
+                    Back to epics
+                  </Link>
+                </div>
+
                 <h1 className="text-4xl font-bold text-white mb-3">
                   {epic.title}
                 </h1>
@@ -264,7 +280,7 @@ export default async function EpicDetailPage(props: {
         <div className="w-full mb-6">
           <div className="grid grid-cols-12 gap-4 px-6">
             <div className="col-span-3 bg-red-600/30 border border-red-600 rounded-lg p-6 text-sm text-red-300">
-              <EpicFilesSection epic={epic} params={params} />
+              {/* Left 1/4 - Empty for now */}
             </div>
             <div className="col-span-6 bg-green-600/30 border border-green-600 rounded-lg p-6 text-sm text-green-300">
               {/* Center 1/2 - RACI matrix */}
@@ -278,8 +294,17 @@ export default async function EpicDetailPage(props: {
             </div>
             <div className="col-span-3 bg-blue-600/30 border border-blue-600 rounded-lg p-6 text-sm text-blue-300">
               {/* Right 1/4 - Team members widget (client) */}
-              <div className="w-full h-full">
+              <div className="w-full">
                 <TeamMembers epicId={epic.id} />
+              </div>
+              {/* Files and Links sections below team members */}
+              <div className="mt-6 space-y-6">
+                <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
+                  <EpicFilesSection epic={epic} params={params} />
+                </div>
+                <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
+                  <EpicLinksSection epic={epic} params={params} />
+                </div>
               </div>
             </div>
           </div>
