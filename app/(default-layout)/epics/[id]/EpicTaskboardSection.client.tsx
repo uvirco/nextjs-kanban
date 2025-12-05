@@ -1,5 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { IconChevronDown, IconChevronRight } from "@tabler/icons-react";
+import Board from "@/ui/Board/Board.client";
+import { supabase } from "@/lib/supabase";
 
 interface EpicTaskboardSectionProps {
   epic: any;
@@ -11,122 +14,123 @@ export default function EpicTaskboardSection({
   params,
 }: EpicTaskboardSectionProps) {
   const [isCollapsed, setIsCollapsed] = useState(true);
+  const [boardId, setBoardId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Group subtasks by their column
-  const tasksByColumn =
-    epic.subtasks?.reduce((acc: any, task: any) => {
-      const columnId = task.columnId || "unassigned";
-      const columnTitle = task.column?.title || "Unassigned";
+  // Load collapsed state from localStorage on mount
+  useEffect(() => {
+    const storageKey = `epic-${epic.id}-taskboard-collapsed`;
+    const savedState = localStorage.getItem(storageKey);
+    if (savedState !== null) {
+      setIsCollapsed(JSON.parse(savedState));
+    }
+  }, [epic.id]);
 
-      if (!acc[columnId]) {
-        acc[columnId] = {
-          id: columnId,
-          title: columnTitle,
-          tasks: [],
-        };
+  // Function to toggle collapsed state and save to localStorage
+  const toggleCollapsed = () => {
+    const newState = !isCollapsed;
+    setIsCollapsed(newState);
+    const storageKey = `epic-${epic.id}-taskboard-collapsed`;
+    localStorage.setItem(storageKey, JSON.stringify(newState));
+  };
+
+  useEffect(() => {
+    const fetchBoardId = async () => {
+      // First try to get boardId from epic's column
+      if (epic.columnId) {
+        try {
+          const { data: column, error } = await supabase
+            .from("Column")
+            .select("boardId")
+            .eq("id", epic.columnId)
+            .single();
+
+          if (!error && column) {
+            setBoardId(column.boardId);
+            setLoading(false);
+            return;
+          }
+        } catch (error) {
+          console.error("Error fetching column:", error);
+        }
       }
 
-      acc[columnId].tasks.push(task);
-      return acc;
-    }, {}) || {};
+      // If epic doesn't have a column, try to find a board from its subtasks
+      try {
+        const { data: subtasks, error } = await supabase
+          .from("Task")
+          .select(
+            `
+            columnId,
+            column:Column(boardId)
+          `
+          )
+          .eq("parentTaskId", epic.id)
+          .limit(1);
 
-  const columns = Object.values(tasksByColumn);
+        if (!error && subtasks && subtasks.length > 0 && subtasks[0].column) {
+          setBoardId(subtasks[0].column.boardId);
+        }
+      } catch (error) {
+        console.error("Error fetching subtasks:", error);
+      }
+
+      setLoading(false);
+    };
+
+    fetchBoardId();
+  }, [epic.columnId, epic.id]);
+
+  if (loading) {
+    return (
+      <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
+        <div className="text-zinc-400">Loading task board...</div>
+      </div>
+    );
+  }
+
+  if (!boardId) {
+    return (
+      <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
+        <button
+          onClick={toggleCollapsed}
+          className="flex items-center gap-2 w-full text-left hover:bg-zinc-800/50 -m-2 p-2 rounded transition-colors"
+        >
+          {isCollapsed ? (
+            <IconChevronRight size={20} className="text-zinc-400" />
+          ) : (
+            <IconChevronDown size={20} className="text-zinc-400" />
+          )}
+          <h2 className="text-xl font-bold text-white">📋 Task Board</h2>
+        </button>
+
+        {!isCollapsed && (
+          <div className="mt-4 text-zinc-400">
+            No task board available. Create some tasks within this epic to see
+            the board.
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
-    <div>
+    <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
       <button
-        onClick={() => setIsCollapsed(!isCollapsed)}
-        className="flex items-center gap-2 w-full text-left p-3 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
+        onClick={toggleCollapsed}
+        className="flex items-center gap-2 w-full text-left hover:bg-zinc-800/50 -m-2 p-2 rounded transition-colors"
       >
-        <span className="text-lg">📋</span>
-        <span className="text-white font-medium flex-1">Task Board</span>
         {isCollapsed ? (
-          <span className="text-zinc-400 text-sm">▶</span>
+          <IconChevronRight size={20} className="text-zinc-400" />
         ) : (
-          <span className="text-zinc-400 text-sm">▼</span>
+          <IconChevronDown size={20} className="text-zinc-400" />
         )}
+        <h2 className="text-xl font-bold text-white">📋 Task Board</h2>
       </button>
 
       {!isCollapsed && (
-        <div className="mt-2 p-4 bg-zinc-900 border border-zinc-800 rounded-lg">
-          <div className="space-y-4">
-            {columns.length === 0 ? (
-              <div className="text-zinc-500 text-center py-8">
-                No tasks to display on the board
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {columns.map((column: any) => (
-                  <div
-                    key={column.id}
-                    className="bg-zinc-800 rounded-lg p-4 min-h-[200px] border border-zinc-700"
-                  >
-                    <div className="flex items-center gap-2 mb-3 pb-2 border-b border-zinc-600">
-                      <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                      <h3 className="text-white font-medium">{column.title}</h3>
-                      <span className="text-zinc-400 text-sm ml-auto">
-                        ({column.tasks.length})
-                      </span>
-                    </div>
-
-                    <div className="space-y-2 max-h-96 overflow-y-auto">
-                      {column.tasks.map((task: any) => (
-                        <div
-                          key={task.id}
-                          className="bg-zinc-700 rounded p-3 hover:bg-zinc-600 transition-colors border border-zinc-600"
-                        >
-                          <div className="flex items-start justify-between gap-2 mb-2">
-                            <h4 className="text-white text-sm font-medium flex-1 leading-tight">
-                              {task.title}
-                            </h4>
-
-                            {task.status === "DONE" && (
-                              <div className="flex-shrink-0 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
-                                <span className="text-white text-xs">✓</span>
-                              </div>
-                            )}
-                          </div>
-
-                          {task.description && (
-                            <p className="text-zinc-400 text-xs mb-2 line-clamp-2">
-                              {task.description}
-                            </p>
-                          )}
-
-                          {task.assignments && task.assignments.length > 0 && (
-                            <div className="flex items-center gap-2">
-                              <div className="flex -space-x-1">
-                                {task.assignments
-                                  .slice(0, 3)
-                                  .map((assignment: any, index: number) => (
-                                    <div
-                                      key={assignment.user.id}
-                                      className="w-6 h-6 bg-zinc-600 rounded-full flex items-center justify-center border border-zinc-500"
-                                      title={assignment.user.name}
-                                    >
-                                      <span className="text-zinc-300 text-xs font-medium">
-                                        {assignment.user.name
-                                          .charAt(0)
-                                          .toUpperCase()}
-                                      </span>
-                                    </div>
-                                  ))}
-                              </div>
-                              {task.assignments.length > 3 && (
-                                <span className="text-zinc-400 text-xs">
-                                  +{task.assignments.length - 3}
-                                </span>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+        <div className="mt-4">
+          <Board boardId={boardId} epicId={epic.id} />
         </div>
       )}
     </div>

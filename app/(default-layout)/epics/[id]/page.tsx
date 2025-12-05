@@ -23,7 +23,9 @@ async function getEpicDetails(epicId: string) {
   // Fetch epic
   const { data: epic, error: epicError } = await supabase
     .from("Task")
-    .select("*, department:Department(id, name, description)")
+    .select(
+      "*, department:Department(id, name, description), column:Column(id, title, boardId)"
+    )
     .eq("id", epicId)
     .single();
 
