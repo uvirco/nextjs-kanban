@@ -695,7 +695,11 @@ export default function EditEpicForm({
       </div>
 
       {/* RACI Matrix (read-only for edit view) */}
-      <RaciMatrixSection epicId={epic.id} defaultCollapsed={false} storageKey={`epic:${epic.id}:section:raci:edit`} />
+      <RaciMatrixSection
+        epicId={epic.id}
+        defaultCollapsed={false}
+        storageKey={`epic:${epic.id}:section:raci:edit`}
+      />
 
       {/* Submit */}
       <div className="flex gap-4 pt-6">

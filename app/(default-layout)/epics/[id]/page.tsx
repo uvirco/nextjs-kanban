@@ -1,14 +1,11 @@
 import { supabaseAdmin } from "@/lib/supabase";
 import Link from "next/link";
-import {
-  IconUsers,
-  IconClock,
-  IconBuilding,
-} from "@tabler/icons-react";
+import { IconUsers, IconClock, IconBuilding } from "@tabler/icons-react";
 import { notFound } from "next/navigation";
 import EpicContent from "./EpicContent.client";
 import RaciMatrixSection from "./RaciMatrixSection";
 import TeamMembers from "@/ui/TeamMembers/TeamMembers.client";
+import EpicFilesSection from "./EpicFilesSection.client";
 
 async function getEpicDetails(epicId: string) {
   const supabase = supabaseAdmin;
@@ -266,8 +263,8 @@ export default async function EpicDetailPage(props: {
         {/* full-bleed visual debug row (edge-to-edge) */}
         <div className="w-full mb-6">
           <div className="grid grid-cols-12 gap-4 px-6">
-            <div className="col-span-3 bg-red-600/30 border border-red-600 rounded-lg p-6 text-sm text-red-300 flex items-center justify-center">
-              Left 1/4
+            <div className="col-span-3 bg-red-600/30 border border-red-600 rounded-lg p-6 text-sm text-red-300">
+              <EpicFilesSection epic={epic} params={params} />
             </div>
             <div className="col-span-6 bg-green-600/30 border border-green-600 rounded-lg p-6 text-sm text-green-300">
               {/* Center 1/2 - RACI matrix */}

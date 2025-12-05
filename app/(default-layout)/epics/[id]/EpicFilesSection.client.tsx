@@ -109,7 +109,9 @@ export default function EpicFilesSection({
         </form>
       )}
 
-      {showUploadForm && error && <div className="text-red-400 text-xs">{error}</div>}
+      {showUploadForm && error && (
+        <div className="text-red-400 text-xs">{error}</div>
+      )}
 
       <div className="space-y-1 max-h-48 overflow-y-auto">
         {epic.attachments?.filter((a: any) => a.mimeType !== "link").length ? (
@@ -134,7 +136,8 @@ export default function EpicFilesSection({
                     {att.storage_path && (
                       <div className="text-xs text-zinc-500 truncate">
                         {(() => {
-                          const parts = String(att.storage_path).split("/").pop() || "";
+                          const parts =
+                            String(att.storage_path).split("/").pop() || "";
                           const idx = parts.lastIndexOf("-");
                           return idx >= 0 ? parts.substring(idx + 1) : parts;
                         })()}

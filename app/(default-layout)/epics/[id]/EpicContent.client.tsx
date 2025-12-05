@@ -6,14 +6,11 @@ import {
   IconAlertTriangle,
   IconPaperclip,
   IconPlus,
-  IconDownload,
   IconTrash,
 } from "@tabler/icons-react";
 import {
-  handleUploadAttachment,
   handleCreateLinkAttachment,
   handleDeleteAttachment,
-  handleGetSignedUrl,
 } from "@/server-actions/AttachmentServerActions";
 import TeamMembers from "@/ui/TeamMembers/TeamMembers.client";
 import EpicAddChecklist from "./EpicAddChecklist";
@@ -21,6 +18,7 @@ import ChecklistTitleForm from "@/ui/TaskDetail/TaskDetailView/Checklist/Checkli
 import DeleteChecklistButton from "@/ui/TaskDetail/TaskDetailView/Checklist/DeleteChecklistButton.client";
 import ChecklistItemForm from "@/ui/TaskDetail/TaskDetailView/Checklist/ChecklistItemForm.client";
 import ChecklistCheckboxGroup from "@/ui/TaskDetail/TaskDetailView/Checklist/ChecklistCheckboxGroup.client";
+import EpicFilesSection from "./EpicFilesSection.client";
 
 function CollapsibleSection({
   title,
@@ -100,39 +98,9 @@ export default function EpicContent({
   raciUsers,
   params,
 }: EpicContentProps) {
-  const [uploading, setUploading] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
   const [linkName, setLinkName] = useState("");
   const [error, setError] = useState("");
-  const [downloadingId, setDownloadingId] = useState<string | null>(null);
-
-  const handleFileSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setUploading(true);
-    setError("");
-
-    const data = new FormData(e.currentTarget as HTMLFormElement);
-    data.append("taskId", params.id);
-
-    const res = await handleUploadAttachment(data);
-
-    if (!res.success) {
-      setError(res.message || "Upload failed");
-    } else {
-      // simple client-side refresh: reload page
-      window.location.reload();
-    }
-
-    setUploading(false);
-  };
-
-  const handleDelete = async (id: string) => {
-    const ok = confirm("Delete this attachment?");
-    if (!ok) return;
-    const res = await handleDeleteAttachment({ id, taskId: params.id });
-    if (res.success) window.location.reload();
-    else setError(res.message || "Delete failed");
-  };
 
   const handleAddLink = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -211,101 +179,6 @@ export default function EpicContent({
             {/* Files used to be rendered inside the Subtasks section — moved to its own collapsible below */}
           </div>
         </CollapsibleSection>
-
-            {/* Files / Attachments (non-links) */}
-            <CollapsibleSection
-              title="Files"
-              icon="📎"
-              defaultCollapsed={true}
-              storageKey={`epic:${params.id}:section:files`}
-            >
-              <div className="space-y-4">
-                <form onSubmit={handleFileSubmit} className="flex items-center gap-2">
-                  <input
-                    type="file"
-                    name="file"
-                    className="px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-white text-sm"
-                  />
-                  <button
-                    type="submit"
-                    disabled={uploading}
-                    className="px-3 py-1 bg-zinc-700 hover:bg-zinc-600 rounded text-sm text-white"
-                  >
-                    {uploading ? "Uploading..." : "Upload file"}
-                  </button>
-                </form>
-
-                {error && <div className="text-red-400 text-sm">{error}</div>}
-
-                <div className="space-y-2">
-                  {epic.attachments?.filter((a: any) => a.mimeType !== "link")
-                    .length ? (
-                    epic.attachments
-                      .filter((a: any) => a.mimeType !== "link")
-                      .map((att: any) => (
-                        <div
-                          key={att.id}
-                          className="flex items-center justify-between p-3 bg-zinc-800 rounded-lg"
-                        >
-                          <div className="flex items-center gap-3">
-                            <IconPaperclip className="text-zinc-400" />
-                            <div className="flex flex-col">
-                              <div className="flex items-center gap-2">
-                                <span className="text-sm font-semibold text-white">
-                                  {att.filename}
-                                </span>
-                                <span className="text-xs text-zinc-400">(file)</span>
-                              </div>
-                              {att.storage_path && (
-                                <div className="text-xs text-zinc-500 mt-1">
-                                  {(() => {
-                                    const parts =
-                                      String(att.storage_path).split("/").pop() ||
-                                      "";
-                                    const idx = parts.lastIndexOf("-");
-                                    return idx >= 0
-                                      ? parts.substring(idx + 1)
-                                      : parts;
-                                  })()}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={async () => {
-                                setError("");
-                                setDownloadingId(att.id);
-                                const res = await handleGetSignedUrl({
-                                  attachmentId: att.id,
-                                });
-                                setDownloadingId(null);
-                                if (res.success && res.url) {
-                                  window.open(res.url, "_blank");
-                                } else {
-                                  setError(res.message || "Failed to get download url");
-                                }
-                              }}
-                              className="text-zinc-400 hover:text-white text-sm flex items-center gap-1"
-                            >
-                              <IconDownload size={14} />{' '}
-                              {downloadingId === att.id ? "Starting..." : "Download"}
-                            </button>
-                            <button
-                              onClick={() => handleDelete(att.id)}
-                              className="text-red-400 hover:text-red-500 text-sm flex items-center gap-1"
-                            >
-                              <IconTrash size={14} /> Remove
-                            </button>
-                          </div>
-                        </div>
-                      ))
-                  ) : (
-                    <div className="text-zinc-500 text-center py-4">No files yet</div>
-                  )}
-                </div>
-              </div>
-            </CollapsibleSection>
 
         <CollapsibleSection
           title="Links"
@@ -389,7 +262,16 @@ export default function EpicContent({
                           <IconPlus size={14} /> Open
                         </a>
                         <button
-                          onClick={() => handleDelete(att.id)}
+                          onClick={async () => {
+                            const ok = confirm("Delete this attachment?");
+                            if (!ok) return;
+                            const res = await handleDeleteAttachment({
+                              id: att.id,
+                              taskId: params.id,
+                            });
+                            if (res.success) window.location.reload();
+                            else setError(res.message || "Delete failed");
+                          }}
                           className="text-red-400 hover:text-red-500 text-sm flex items-center gap-1"
                         >
                           <IconTrash size={14} /> Remove
