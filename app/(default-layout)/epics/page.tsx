@@ -1,4 +1,4 @@
-﻿import { auth } from "@/auth";
+import { auth } from "@/auth";
 import { supabaseAdmin } from "@/lib/supabase";
 import { redirect } from "next/navigation";
 import EpicPortfolioClient from "./components/EpicPortfolioClient";
@@ -165,8 +165,8 @@ export default async function EpicPortfolioPage() {
   }
 
   return (
-    <main className="min-h-screen bg-zinc-950 text-white">
-      <div className="w-full px-6 py-8">
+    <main className="min-h-screen bg-zinc-950 text-white min-w-0 w-full">
+      <div className="w-full min-w-0 px-6 py-8">
         <EpicPortfolioClient
           epics={epicsWithMetrics || []}
           epicBoard={epicBoard || null}

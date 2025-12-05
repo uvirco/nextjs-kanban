@@ -18,7 +18,7 @@ type BoardWithDetails = {
   board: {
     id: string;
     title: string;
-    backgroundUrl?: string;
+    backgroundUrl: string | null;
   };
 };
 
@@ -81,7 +81,7 @@ export default function SidebarMenuContent({
       <div className="flex-1 overflow-y-auto">
         <Menu>
           <MenuItem
-            path="/"
+            path="/board"
             title={isCollapsed ? "" : "Boards"}
             icon={<IconLayoutKanban stroke={1.5} size={20} />}
             showTitle={!isCollapsed}

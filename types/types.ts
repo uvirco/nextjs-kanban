@@ -272,6 +272,13 @@ export interface DetailedTask {
   updatedAt: Date;
   order: number;
   columnId: string;
+  createdByUserId: string;
+  parentTaskId: string | null;
+  taskType?: string | null;
+  parentEpic?: {
+    id: string;
+    title: string;
+  } | null;
   // Advanced project fields
   projectName?: string | null;
   departmentId?: string | null;
@@ -376,9 +383,11 @@ export type TaskCreationData = {
 
 export type TaskEditData = {
   id: Task["id"];
-  title: Task["title"];
+  title?: Task["title"];
   description?: Task["description"];
-  boardId: Board["id"];
+  boardId?: Board["id"];
+  order?: Task["order"];
+  columnId?: Column["id"];
   // Advanced project fields
   projectName?: string;
   departmentId?: string;

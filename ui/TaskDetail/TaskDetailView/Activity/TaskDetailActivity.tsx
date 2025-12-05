@@ -67,19 +67,19 @@ export default function TaskDetailActivity({
   return (
     <>
       <TaskDetailItemHeading
-        title="Activity"
+        title="Comments"
         icon={<IconActivity size={32} />}
       />
 
       <TaskDetailItemContent indented>
         <div className="flex items-start mb-5 mt-4">
           <div className="w-[40px]">
-            <Avatar className="w-8 h-8">
+            <Avatar className="w-8 h-8 border border-zinc-600">
               <AvatarImage
                 src={userImage ?? undefined}
                 alt={userName ?? "Unknown"}
               />
-              <AvatarFallback className="text-xs">
+              <AvatarFallback className="text-xs bg-zinc-700 text-zinc-300">
                 {(userName ?? "?").charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
@@ -89,7 +89,7 @@ export default function TaskDetailActivity({
               <div className="flex items-center h-[32px]">
                 <p
                   onClick={handleToggleForm}
-                  className="cursor-pointer text-primary hover:text-primary/80 pl-4 dark:text-blue-400 dark:hover:text-blue-300"
+                  className="cursor-pointer text-zinc-400 hover:text-zinc-300 pl-4"
                 >
                   Add a comment
                 </p>
@@ -123,16 +123,53 @@ export default function TaskDetailActivity({
           </div>
         </div>
 
-        <ul className="space-y-3">
+        <ul className="space-y-2">
           {activities &&
-            activities.map((activity: any) => (
-              <TaskDetailActivityItem
-                key={activity.id}
-                activity={activity}
-                columnTitle={columnTitle}
-                boardId={boardId}
-              />
-            ))}
+            activities
+              .filter((activity: any) => activity.type === "COMMENT_ADDED")
+              .map((activity: any) => (
+                <TaskDetailActivityItem
+                  key={activity.id}
+                  activity={activity}
+                  columnTitle={columnTitle}
+                  boardId={boardId}
+                />
+              ))}
+        </ul>
+      </TaskDetailItemContent>
+    </>
+  );
+}
+
+export function TaskDetailActivityEntries({
+  activities,
+  columnTitle,
+  boardId,
+}: {
+  activities: ActivityWithRelations[];
+  columnTitle: string;
+  boardId: string;
+}) {
+  return (
+    <>
+      <TaskDetailItemHeading
+        title="Activity"
+        icon={<IconActivity size={32} />}
+      />
+
+      <TaskDetailItemContent indented>
+        <ul className="space-y-2">
+          {activities &&
+            activities
+              .filter((activity: any) => activity.type !== "COMMENT_ADDED")
+              .map((activity: any) => (
+                <TaskDetailActivityItem
+                  key={activity.id}
+                  activity={activity}
+                  columnTitle={columnTitle}
+                  boardId={boardId}
+                />
+              ))}
         </ul>
       </TaskDetailItemContent>
     </>

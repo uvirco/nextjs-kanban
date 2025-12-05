@@ -12,9 +12,11 @@ export default function DashboardLayout({
       <Navbar>
         <NavbarAvatar />
       </Navbar>
-      <div className="flex grow">
+      <div className="flex grow min-w-0">
         <AppSidebar />
-        {children}
+        <div className="flex-1 min-w-0">
+          {children}
+        </div>
       </div>
     </div>
   );

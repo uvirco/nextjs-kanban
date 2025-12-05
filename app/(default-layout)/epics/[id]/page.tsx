@@ -143,202 +143,198 @@ export default async function EpicDetailPage(props: {
   });
 
   return (
-    <div className="min-h-screen bg-zinc-950 p-6">
-      <div className="w-full">
-        {/* Full-width header that spans the page; inner content is full-width with padded edges */}
-        <div className="w-full bg-zinc-900 border-t border-b border-zinc-800 mb-6">
-          <div className="max-w-7xl mx-auto px-6 py-8 min-h-[36vh]">
-            {/* Dashboard header layout: large grid for title + wide metrics and actions */}
-            <div className="grid grid-cols-12 gap-6 items-start">
-              <div className="col-span-7">
-                <div className="flex items-center gap-3 mb-3">
-                  <Link
-                    href="/epics"
-                    className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
-                  >
-                    <IconArrowLeft size={16} />
-                    Back to epics
-                  </Link>
-                </div>
-
-                <h1 className="text-4xl font-bold text-white mb-3">
-                  {epic.title}
-                </h1>
-                {epic.description && (
-                  <p className="text-zinc-400 max-w-3xl">{epic.description}</p>
-                )}
-                {epic.column?.title === "📋 Backlog" && (
-                  <div className="mt-4 inline-flex items-center gap-2 px-3 py-1 bg-blue-900/30 text-blue-400 text-sm rounded">
-                    📋 In Planning Phase
-                  </div>
-                )}
+    <>
+      {/* Full-width header that spans the page; inner content is full-width with padded edges */}
+      <div className="bg-zinc-900 border-t border-b border-zinc-800 mb-6">
+        <div className="max-w-7xl mx-auto px-6 py-8 min-h-[36vh]">
+          {/* Dashboard header layout: large grid for title + wide metrics and actions */}
+          <div className="grid grid-cols-12 gap-6 items-start">
+            <div className="col-span-7">
+              <div className="flex items-center gap-3 mb-3">
+                <Link
+                  href="/epics"
+                  className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+                >
+                  <IconArrowLeft size={16} />
+                  Back to epics
+                </Link>
               </div>
 
-              <div className="col-span-5 flex items-start justify-end gap-4">
-                {/* top-right spacer: (currently unused) */}
-
-                <div className="flex gap-2 items-center">
-                  <Link
-                    href={`/epics/${epic.id}/edit`}
-                    className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg transition-colors"
-                  >
-                    Edit
-                  </Link>
-                  {epic.businessValue && (
-                    <span className="px-3 py-1 text-sm font-medium bg-blue-900/30 text-blue-400 rounded">
-                      {epic.businessValue} Value
-                    </span>
-                  )}
-                  {epic.riskLevel && (
-                    <span
-                      className={`px-3 py-1 text-sm font-medium rounded ${
-                        epic.riskLevel.toUpperCase() === "HIGH"
-                          ? "bg-red-900/30 text-red-400"
-                          : epic.riskLevel.toUpperCase() === "MEDIUM"
-                            ? "bg-yellow-900/30 text-yellow-400"
-                            : "bg-green-900/30 text-green-400"
-                      }`}
-                    >
-                      {epic.riskLevel} Risk
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Dashboard metrics — spread full width */}
-            <div className="grid grid-cols-12 gap-4 mt-6">
-              <div className="col-span-3 bg-zinc-800 p-5 rounded-lg">
-                <div className="text-zinc-400 text-sm mb-1">Progress</div>
-                <div className="text-2xl font-bold text-white">
-                  {epic.metrics.progress}%
-                </div>
-                <div className="w-full bg-zinc-700 rounded-full h-2 mt-3">
-                  <div
-                    className="bg-blue-600 h-2 rounded-full"
-                    style={{ width: `${epic.metrics.progress}%` }}
-                  />
-                </div>
-              </div>
-
-              <div className="col-span-3 bg-zinc-800 p-5 rounded-lg">
-                <div className="text-zinc-400 text-sm mb-1">Readiness</div>
-                <div className="text-2xl font-bold text-white">
-                  {epic.readinessScore || 0}%
-                </div>
-                <div className="w-full bg-zinc-700 rounded-full h-2 mt-3">
-                  <div
-                    className={`h-2 rounded-full ${(epic.readinessScore || 0) >= 80 ? "bg-green-600" : (epic.readinessScore || 0) >= 50 ? "bg-yellow-600" : "bg-red-600"}`}
-                    style={{ width: `${epic.readinessScore || 0}%` }}
-                  />
-                </div>
-              </div>
-
-              <div className="col-span-2 bg-zinc-800 p-5 rounded-lg">
-                <div className="text-zinc-400 text-sm mb-1">Total Tasks</div>
-                <div className="text-2xl font-bold text-white">
-                  {epic.metrics.totalTasks}
-                </div>
-              </div>
-
-              <div className="col-span-2 bg-zinc-800 p-5 rounded-lg">
-                <div className="text-zinc-400 text-sm mb-1">Completed</div>
-                <div className="text-2xl font-bold text-green-400">
-                  {epic.metrics.completedTasks}
-                </div>
-              </div>
-
-              <div className="col-span-2 bg-zinc-800 p-5 rounded-lg">
-                <div className="text-zinc-400 text-sm mb-1">Blocked</div>
-                <div className="text-2xl font-bold text-red-400">
-                  {epic.metrics.blockedTasks}
-                </div>
-              </div>
-            </div>
-
-            {/* Owner / Due / Department row */}
-            <div className="flex items-center gap-6 mt-4 text-zinc-400">
-              {epic.owner && (
-                <div className="flex items-center gap-2">
-                  <IconUsers size={18} />
-                  <span>Owner: {epic.owner.name}</span>
+              <h1 className="text-4xl font-bold text-white mb-3">
+                {epic.title}
+              </h1>
+              {epic.description && (
+                <p className="text-zinc-400 max-w-3xl">{epic.description}</p>
+              )}
+              {epic.column?.title === "📋 Backlog" && (
+                <div className="mt-4 inline-flex items-center gap-2 px-3 py-1 bg-blue-900/30 text-blue-400 text-sm rounded">
+                  📋 In Planning Phase
                 </div>
               )}
-              {epic.dueDate && (
-                <div className="flex items-center gap-2">
-                  <IconClock size={18} />
-                  <span>
-                    Due: {new Date(epic.dueDate).toLocaleDateString()}
+            </div>
+
+            <div className="col-span-5 flex items-start justify-end gap-4">
+              {/* top-right spacer: (currently unused) */}
+
+              <div className="flex gap-2 items-center">
+                <Link
+                  href={`/epics/${epic.id}/edit`}
+                  className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg transition-colors"
+                >
+                  Edit
+                </Link>
+                {epic.businessValue && (
+                  <span className="px-3 py-1 text-sm font-medium bg-blue-900/30 text-blue-400 rounded">
+                    {epic.businessValue} Value
                   </span>
-                </div>
-              )}
-              {epic.department && (
-                <div className="flex items-center gap-2">
-                  <IconBuilding size={18} />
-                  <span>Department: {epic.department.name}</span>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* full-bleed visual debug row (edge-to-edge) */}
-        <div className="w-full mb-6">
-          <div className="grid grid-cols-12 gap-4 px-6">
-            <div className="col-span-9 bg-green-600/30 border border-green-600 rounded-lg p-6 text-sm text-green-300">
-              {/* Checklists section above RACI matrix */}
-              <div className="mb-6">
-                <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
-                  <EpicChecklistsSection epic={epic} params={params} />
-                </div>
-              </div>
-              {/* Subtasks section between Checklist and RACI */}
-              <div className="mb-6">
-                <EpicSubtasksSection
-                  epic={epic}
-                  params={params}
-                  raciUsers={raciUsers}
-                />
-              </div>
-              {/* Taskboard section between Subtasks and RACI */}
-              <div className="mb-6">
-                <EpicTaskboardSection epic={epic} params={params} />
-              </div>
-              {/* Center 3/4 - RACI matrix */}
-              <div className="w-full h-full">
-                <RaciMatrixSection
-                  raciUsers={raciUsers}
-                  storageKey={`epic:${epic.id}:section:raci:fullbleed`}
-                  defaultCollapsed={true}
-                />
-              </div>
-            </div>
-            <div className="col-span-3 bg-blue-600/30 border border-blue-600 rounded-lg p-6 text-sm text-blue-300">
-              {/* Right 1/4 - Team members widget (client) */}
-              <div className="w-full">
-                <TeamMembers epicId={epic.id} />
-              </div>
-              {/* Stakeholders section below team members */}
-              <div className="mt-6">
-                <EpicStakeholdersSection epic={epic} params={params} />
-              </div>
-              {/* Files and Links sections below stakeholders */}
-              <div className="mt-6 space-y-6">
-                <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
-                  <EpicFilesSection epic={epic} params={params} />
-                </div>
-                <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
-                  <EpicLinksSection epic={epic} params={params} />
-                </div>
+                )}
+                {epic.riskLevel && (
+                  <span
+                    className={`px-3 py-1 text-sm font-medium rounded ${
+                      epic.riskLevel.toUpperCase() === "HIGH"
+                        ? "bg-red-900/30 text-red-400"
+                        : epic.riskLevel.toUpperCase() === "MEDIUM"
+                          ? "bg-yellow-900/30 text-yellow-400"
+                          : "bg-green-900/30 text-green-400"
+                    }`}
+                  >
+                    {epic.riskLevel} Risk
+                  </span>
+                )}
               </div>
             </div>
           </div>
-        </div>
 
-        <div className="max-w-7xl mx-auto">
-          <EpicContent epic={epic} raciUsers={raciUsers} params={params} />
+          {/* Dashboard metrics — spread full width */}
+          <div className="grid grid-cols-12 gap-4 mt-6">
+            <div className="col-span-3 bg-zinc-800 p-5 rounded-lg">
+              <div className="text-zinc-400 text-sm mb-1">Progress</div>
+              <div className="text-2xl font-bold text-white">
+                {epic.metrics.progress}%
+              </div>
+              <div className="w-full bg-zinc-700 rounded-full h-2 mt-3">
+                <div
+                  className="bg-blue-600 h-2 rounded-full"
+                  style={{ width: `${epic.metrics.progress}%` }}
+                />
+              </div>
+            </div>
+
+            <div className="col-span-3 bg-zinc-800 p-5 rounded-lg">
+              <div className="text-zinc-400 text-sm mb-1">Readiness</div>
+              <div className="text-2xl font-bold text-white">
+                {epic.readinessScore || 0}%
+              </div>
+              <div className="w-full bg-zinc-700 rounded-full h-2 mt-3">
+                <div
+                  className={`h-2 rounded-full ${(epic.readinessScore || 0) >= 80 ? "bg-green-600" : (epic.readinessScore || 0) >= 50 ? "bg-yellow-600" : "bg-red-600"}`}
+                  style={{ width: `${epic.readinessScore || 0}%` }}
+                />
+              </div>
+            </div>
+
+            <div className="col-span-2 bg-zinc-800 p-5 rounded-lg">
+              <div className="text-zinc-400 text-sm mb-1">Total Tasks</div>
+              <div className="text-2xl font-bold text-white">
+                {epic.metrics.totalTasks}
+              </div>
+            </div>
+
+            <div className="col-span-2 bg-zinc-800 p-5 rounded-lg">
+              <div className="text-zinc-400 text-sm mb-1">Completed</div>
+              <div className="text-2xl font-bold text-green-400">
+                {epic.metrics.completedTasks}
+              </div>
+            </div>
+
+            <div className="col-span-2 bg-zinc-800 p-5 rounded-lg">
+              <div className="text-zinc-400 text-sm mb-1">Blocked</div>
+              <div className="text-2xl font-bold text-red-400">
+                {epic.metrics.blockedTasks}
+              </div>
+            </div>
+          </div>
+
+          {/* Owner / Due / Department row */}
+          <div className="flex items-center gap-6 mt-4 text-zinc-400">
+            {epic.owner && (
+              <div className="flex items-center gap-2">
+                <IconUsers size={18} />
+                <span>Owner: {epic.owner.name}</span>
+              </div>
+            )}
+            {epic.dueDate && (
+              <div className="flex items-center gap-2">
+                <IconClock size={18} />
+                <span>Due: {new Date(epic.dueDate).toLocaleDateString()}</span>
+              </div>
+            )}
+            {epic.department && (
+              <div className="flex items-center gap-2">
+                <IconBuilding size={18} />
+                <span>Department: {epic.department.name}</span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* full-bleed visual debug row (edge-to-edge) */}
+      <div className="mb-6 overflow-hidden">
+        <div className="grid grid-cols-12 gap-4 px-6">
+          <div className="col-span-9 bg-green-600/30 border border-green-600 rounded-lg p-6 text-sm text-green-300">
+            {/* Checklists section above RACI matrix */}
+            <div className="mb-6">
+              <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
+                <EpicChecklistsSection epic={epic} params={params} />
+              </div>
+            </div>
+            {/* Subtasks section between Checklist and RACI */}
+            <div className="mb-6">
+              <EpicSubtasksSection
+                epic={epic}
+                params={params}
+                raciUsers={raciUsers}
+              />
+            </div>
+            {/* Taskboard section between Subtasks and RACI */}
+            <div className="mb-6">
+              <EpicTaskboardSection epic={epic} params={params} />
+            </div>
+            {/* Center 3/4 - RACI matrix */}
+            <div className="w-full h-full">
+              <RaciMatrixSection
+                raciUsers={raciUsers}
+                storageKey={`epic:${epic.id}:section:raci:fullbleed`}
+                defaultCollapsed={true}
+              />
+            </div>
+          </div>
+          <div className="col-span-3 bg-blue-600/30 border border-blue-600 rounded-lg p-6 text-sm text-blue-300">
+            {/* Right 1/4 - Team members widget (client) */}
+            <div className="w-full">
+              <TeamMembers epicId={epic.id} />
+            </div>
+            {/* Stakeholders section below team members */}
+            <div className="mt-6">
+              <EpicStakeholdersSection epic={epic} params={params} />
+            </div>
+            {/* Files and Links sections below stakeholders */}
+            <div className="mt-6 space-y-6">
+              <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
+                <EpicFilesSection epic={epic} params={params} />
+              </div>
+              <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
+                <EpicLinksSection epic={epic} params={params} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto">
+        <EpicContent epic={epic} raciUsers={raciUsers} params={params} />
+      </div>
+    </>
   );
 }

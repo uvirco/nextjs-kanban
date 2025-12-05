@@ -76,45 +76,58 @@ export default function TaskDetailActivityItem({
   return (
     <li className="flex items-start">
       <div className="w-[40px]">
-        <Avatar className="w-8 h-8">
+        <Avatar className="w-8 h-8 border border-zinc-600">
           <AvatarImage
             src={activity.user.image ?? undefined}
             alt={activity.user.name ?? "Unknown"}
           />
-          <AvatarFallback className="text-xs">
+          <AvatarFallback className="text-xs bg-zinc-700 text-zinc-300">
             {(activity.user.name ?? "?").charAt(0).toUpperCase()}
           </AvatarFallback>
         </Avatar>
       </div>
-      <div>
+      <div className="flex-1 min-w-0">
         {activity.type === "COMMENT_ADDED" ? (
-          <div className="bg-muted px-3 py-1 rounded-xl">
-            <span className="font-semibold">{activity.user.name} </span>
-            <span className="text-muted-foreground text-xs">
-              {formattedDate}
-            </span>
-            <div className="text-sm">{activity.content}</div>
+          <div className="bg-zinc-800 border border-zinc-700 px-3 py-1 rounded-xl w-full">
+            <div className="flex items-center justify-between">
+              <span className="font-semibold text-zinc-100">
+                {activity.user.name}
+              </span>
+              <span className="text-zinc-400 text-xs">{formattedDate}</span>
+            </div>
+            <div className="text-zinc-200 text-sm">{activity.content}</div>
             <div className="flex gap-2">
               <button onClick={handleReaction}>
-                <IconMoodPlus className="text-muted-foreground" size={16} />
+                <IconMoodPlus
+                  className="text-zinc-400 hover:text-zinc-300"
+                  size={16}
+                />
               </button>
               <button onClick={handleEdit}>
-                <IconEdit className="text-muted-foreground" size={16} />
+                <IconEdit
+                  className="text-zinc-400 hover:text-zinc-300"
+                  size={16}
+                />
               </button>
               <button onClick={handleDelete}>
-                <IconTrash className="text-destructive" size={16} />
+                <IconTrash
+                  className="text-red-400 hover:text-red-300"
+                  size={16}
+                />
               </button>
             </div>
           </div>
         ) : (
-          <div className="bg-card border border-border px-4 py-3 rounded-md">
-            <div>
-              <span className="font-semibold text-sm">
-                {activity.user.name}{" "}
+          <div className="bg-zinc-800 border border-zinc-700 px-4 py-2 rounded-md w-full">
+            <div className="text-zinc-200 flex items-center gap-2">
+              <span className="font-semibold text-sm text-zinc-100">
+                {activity.user.name}
               </span>
-              {getActivityMessage(activity)}
+              <span className="text-xs text-zinc-400">{formattedDate}</span>
+              <span className="text-sm text-zinc-200">
+                {getActivityMessage(activity)}
+              </span>
             </div>
-            <div className="text-xs text-muted-foreground">{formattedDate}</div>
           </div>
         )}
       </div>

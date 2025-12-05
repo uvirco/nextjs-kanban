@@ -184,8 +184,21 @@ export default async function FetchTask({
     .select("*")
     .eq("parentTaskId", taskId);
 
+  // Fetch parent epic if task has parentTaskId
+  let parentEpic = null;
+  if (task.parentTaskId) {
+    const { data: epic, error } = await supabaseAdmin
+      .from("Task")
+      .select("id, title, taskType")
+      .eq("id", task.parentTaskId)
+      .eq("taskType", "EPIC")
+      .single();
+    parentEpic = epic;
+  }
+
   const detailedTask: DetailedTask = {
     ...task,
+    parentEpic,
     column: {
       title: column?.title || "",
       boardId: column?.boardId || "",

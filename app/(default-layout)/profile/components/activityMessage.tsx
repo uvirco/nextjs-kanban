@@ -14,7 +14,7 @@ export const generateActivityMessage = (activity: ActivityWithRelations) => {
   const newColumnTitle = activity.newColumn?.title ?? "Next Column";
   const originalColumnTitle =
     activity.originalColumn?.title ?? "Original Column";
-  const targetUserName = activity.targetUser?.name ?? "a user"; // Get the target user's name
+  const targetUserName = "a user"; // Placeholder since targetUserId is available but user object is not
 
   switch (activity.type) {
     case ActivityType.TASK_MOVED:

@@ -123,7 +123,7 @@ export default async function BoardPage({
     };
 
     return (
-      <main className="flex flex-col grow min-w-0 bg-cover bg-center bg-zinc-900 relative">
+      <main className="flex flex-col grow min-w-0 bg-cover bg-center bg-zinc-900 relative min-h-screen">
         {board.backgroundUrl && (
           <Image
             className="object-cover object-center z-0"

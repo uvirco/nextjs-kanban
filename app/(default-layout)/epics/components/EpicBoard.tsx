@@ -157,8 +157,8 @@ export default function EpicBoard({
 
   if (!mounted) {
     return (
-      <div className="z-10 flex flex-col grow">
-        <div className="grow flex overflow-x-scroll px-2">
+      <div className="z-10 flex flex-col w-full overflow-hidden">
+        <div className="flex overflow-x-auto px-2">
           {currentBoard.columns.map((column) => (
             <div
               key={column.id}
@@ -221,7 +221,7 @@ export default function EpicBoard({
   }
 
   return (
-    <div className="z-10 flex flex-col grow">
+    <div className="z-10 flex flex-col w-full overflow-hidden">
       <DragDropContext onDragStart={onDragStart} onDragEnd={onDragEnd}>
         <Droppable
           droppableId="all-columns"
@@ -230,7 +230,7 @@ export default function EpicBoard({
         >
           {(provided) => (
             <div
-              className="grow flex overflow-x-scroll px-2"
+              className="flex overflow-x-auto px-2"
               ref={provided.innerRef}
               {...provided.droppableProps}
             >

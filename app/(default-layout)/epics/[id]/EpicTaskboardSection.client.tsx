@@ -115,7 +115,7 @@ export default function EpicTaskboardSection({
   }
 
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
+    <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 overflow-hidden">
       <button
         onClick={toggleCollapsed}
         className="flex items-center gap-2 w-full text-left hover:bg-zinc-800/50 -m-2 p-2 rounded transition-colors"

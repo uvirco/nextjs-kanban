@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useState, useEffect } from "react";
 import {
   IconLayoutGrid,
@@ -215,7 +215,7 @@ export default function EpicPortfolioClient({
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 min-w-0 w-full">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -435,7 +435,9 @@ export default function EpicPortfolioClient({
       {view === "priority" && <EpicPriorityView epics={filteredEpics} />}
       {view === "table" && <EpicTableView epics={filteredEpics} />}
       {view === "board" && epicBoard && (
-        <EpicBoard board={epicBoard} epics={filteredEpics} />
+        <div className="min-w-0 w-full">
+          <EpicBoard board={epicBoard} epics={filteredEpics} />
+        </div>
       )}
       {view === "board" && !epicBoard && (
         <div className="text-zinc-400">

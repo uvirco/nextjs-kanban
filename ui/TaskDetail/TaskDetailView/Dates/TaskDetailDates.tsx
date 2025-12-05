@@ -6,11 +6,22 @@ import TaskDetailItemContent from "../ui/TaskDetailItemContent";
 interface TaskDetailDatesProps {
   startDate: Date | null;
   dueDate: Date | null;
+  parentEpic?: {
+    id: string;
+    title: string;
+  } | null;
+  columnTitle: string;
+  taskType?: string | null;
+  taskTitle?: string;
 }
 
 export default function TaskDetailDates({
   startDate,
   dueDate,
+  parentEpic,
+  columnTitle,
+  taskType,
+  taskTitle,
 }: TaskDetailDatesProps) {
   if (!startDate && !dueDate) {
     return null;
@@ -18,7 +29,7 @@ export default function TaskDetailDates({
 
   function formatDateDisplay(
     startDate: Date | null,
-    dueDate: Date | null,
+    dueDate: Date | null
   ): string {
     if (!startDate && !dueDate) return "";
 
@@ -39,9 +50,22 @@ export default function TaskDetailDates({
     <>
       <TaskDetailItemHeading title="Dates" icon={<IconCalendar />} />
       <TaskDetailItemContent indented>
-        {(startDate || dueDate) && (
-          <p>{formatDateDisplay(startDate, dueDate)}</p>
-        )}
+        <div className="flex items-center gap-6">
+          {(startDate || dueDate) && (
+            <p className="text-sm text-zinc-400">
+              {formatDateDisplay(startDate, dueDate)}
+            </p>
+          )}
+          <div className="text-sm text-zinc-400">
+            Epic:{" "}
+            <span className="text-zinc-200">
+              {parentEpic ? parentEpic.title : taskType === "EPIC" ? taskTitle : "No Epic selected"}
+            </span>
+          </div>
+          <div className="text-sm text-zinc-400">
+            Column: <span className="text-zinc-200">{columnTitle}</span>
+          </div>
+        </div>
       </TaskDetailItemContent>
     </>
   );

@@ -295,9 +295,9 @@ export default function Board({ boardId, epicId }: BoardProps) {
   }
 
   return (
-    <div className="w-full">
+    <div className="overflow-x-auto max-w-full">
       <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="flex gap-6 overflow-x-auto pb-4 min-h-[400px]">
+        <div className="flex gap-6 pb-4 min-h-[400px]">
           {board.columns.map((column) => (
             <div
               key={column.id}
