@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import { supabaseAdmin } from "@/lib/supabase";
-import { ActivityWithUser } from "@/types/types";
+import { ActivityWithRelations } from "@/types/types";
 import { generateActivityMessage } from "./activityMessage";
 
 export default async function ProfileActivity() {
@@ -9,6 +9,15 @@ export default async function ProfileActivity() {
 
   if (!userId) {
     throw new Error("User not authenticated");
+  }
+
+  if (!supabaseAdmin) {
+    console.error("Supabase admin client not available");
+    return (
+      <li className="border-b-1 last:border-b-0 border-zinc-700 py-1">
+        Unable to load activities
+      </li>
+    );
   }
 
   // Query activities with complex joins
@@ -20,11 +29,11 @@ export default async function ProfileActivity() {
       user:User (*),
       task:Task (title),
       board:Board (*),
-      oldColumn:Column!oldColumnId (*),
-      newColumn:Column!newColumnId (*),
-      originalColumn:Column!originalColumnId (*),
-      targetUser:User!targetUserId (id, name)
-    `
+      oldColumn:Column (*),
+      newColumn:Column (*),
+      originalColumn:Column (*),
+      targetUser:User (id, name)
+      `
     )
     .eq("userId", userId)
     .order("createdAt", { ascending: false })
@@ -41,7 +50,7 @@ export default async function ProfileActivity() {
 
   return (
     <>
-      {activities.map((activity: ActivityWithUser) => (
+      {activities.map((activity: ActivityWithRelations) => (
         <li
           key={activity.id}
           className="border-b-1 last:border-b-0 border-zinc-700 py-1 text-sm"

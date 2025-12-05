@@ -18,6 +18,7 @@ interface MenuItemProps {
   title: string;
   active?: boolean;
   badgeContent?: number;
+  showTitle?: boolean;
   submenuItems?: Array<{
     id: string;
     title: string;
@@ -48,6 +49,7 @@ export function MenuItem({
   path,
   icon,
   badgeContent,
+  showTitle = true,
   submenuItems,
 }: MenuItemProps) {
   const pathname = usePathname();
@@ -61,7 +63,7 @@ export function MenuItem({
       })}
     >
       {icon}
-      {title}
+      {showTitle && title}
     </Link>
   );
 

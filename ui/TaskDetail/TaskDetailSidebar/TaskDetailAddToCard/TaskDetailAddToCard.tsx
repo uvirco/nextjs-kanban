@@ -46,28 +46,26 @@ export default async function TaskDetailAddToCard({
   }
 
   return (
-    <div className="mb-5">
-      <div className="flex flex-col gap-2">
-        <AddToCardMembers
-          boardMembers={boardMembers}
-          cardMembers={task.assignedUsers}
-          taskId={task.id}
-          boardId={task.column.boardId}
-        />
-        <AddToCardLabels
-          labels={labels || []}
-          taskId={task.id}
-          activeLabels={task.labels}
-          boardId={task.column.boardId}
-        />
-        <AddChecklist taskId={task.id} boardId={task.column.boardId} />
-        <AddToCardDates
-          taskId={task.id}
-          boardId={task.column.boardId}
-          startDate={task.startDate}
-          dueDate={task.dueDate}
-        />
-      </div>
+    <div className="flex items-center gap-2 flex-wrap">
+      <AddToCardMembers
+        boardMembers={boardMembers}
+        cardMembers={task.assignedUsers}
+        taskId={task.id}
+        boardId={task.column.boardId}
+      />
+      <AddToCardLabels
+        labels={labels || []}
+        taskId={task.id}
+        activeLabels={task.labels}
+        boardId={task.column.boardId}
+      />
+      <AddChecklist taskId={task.id} boardId={task.column.boardId} />
+      <AddToCardDates
+        taskId={task.id}
+        boardId={task.column.boardId}
+        startDate={task.startDate}
+        dueDate={task.dueDate}
+      />
     </div>
   );
 }

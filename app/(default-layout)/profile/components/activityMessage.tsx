@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { ActivityWithUser } from "@/types/types";
+import { ActivityWithRelations } from "@/types/types";
 import { ActivityType } from "@/types/types";
 
 const bold = (text: string) => <span className="font-semibold">{text}</span>;
@@ -8,7 +8,7 @@ const formatDate = (date: Date | null) => {
   return date ? format(new Date(date), "dd/MM/yyyy") : "N/A";
 };
 
-export const generateActivityMessage = (activity: ActivityWithUser) => {
+export const generateActivityMessage = (activity: ActivityWithRelations) => {
   const taskTitle = activity.task?.title ?? "Unnamed Task";
   const oldColumnTitle = activity.oldColumn?.title ?? "Previous Column";
   const newColumnTitle = activity.newColumn?.title ?? "Next Column";

@@ -40,22 +40,17 @@ export default function DeleteTaskForm({
   };
 
   return (
-    <>
-      <button
-        onClick={onClickDelete}
-        className="flex items-center gap-2 w-full"
-        disabled={isDeleting}
-      >
-        {isDeleting ? (
-          <>
-            <IconLoader2 size={14} className="animate-spin" /> Deleting
-          </>
-        ) : (
-          <>
-            <IconTrash size={14} /> Delete Task
-          </>
-        )}
-      </button>
-    </>
+    <button
+      onClick={onClickDelete}
+      className="flex items-center justify-center p-2 rounded-md hover:bg-zinc-800 text-zinc-400 hover:text-red-400 transition-colors"
+      disabled={isDeleting}
+      title="Delete Task"
+    >
+      {isDeleting ? (
+        <IconLoader2 size={20} className="animate-spin" />
+      ) : (
+        <IconTrash size={20} />
+      )}
+    </button>
   );
 }

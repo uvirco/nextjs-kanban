@@ -5,7 +5,6 @@ import TaskDetailActivity from "./Activity/TaskDetailActivity";
 import TaskDetailChecklist from "./Checklist/TaskDetailChecklist";
 import TaskDetailDates from "./Dates/TaskDetailDates";
 import TaskDetailLabels from "./Labels/TaskDetailLabels";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Accordion,
   AccordionContent,
@@ -28,25 +27,6 @@ export default async function TaskDetailView({ task }: { task: DetailedTask }) {
 
   return (
     <div className="col-span-3 text-zinc-100">
-      {task.assignedUsers.length > 0 && (
-        <div className="flex -space-x-2 mb-4">
-          {task.assignedUsers.map((assignment) => (
-            <Avatar
-              key={assignment.user.id}
-              className="w-8 h-8 border-2 border-zinc-700"
-            >
-              <AvatarImage
-                src={assignment.user.image || undefined}
-                alt={assignment.user.name || "Unknown"}
-              />
-              <AvatarFallback className="text-xs bg-zinc-700 text-zinc-100">
-                {(assignment.user.name || "?").charAt(0).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-          ))}
-        </div>
-      )}
-
       <TaskDetailLabels labels={task.labels} />
       <TaskDetailDates startDate={task.startDate} dueDate={task.dueDate} />
       <TaskDetailDescription
