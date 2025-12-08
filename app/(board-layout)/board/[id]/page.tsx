@@ -1,10 +1,19 @@
 import { auth } from "@/auth";
 import { supabaseAdmin } from "@/lib/supabase";
-import Board from "./components/Board";
-import BoardNavbar from "./components/Navbar/BoardNavbar";
+import BoardPageClient from "./components/BoardPageClient";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 import { BoardWithColumns } from "@/types/types";
+
+interface EpicFilters {
+  priority?: string | null;
+  assigneeId?: string | null;
+  columnId?: string | null;
+  dueDateFilter?: string | null;
+  departmentId?: string | null;
+  businessValue?: string | null;
+  riskLevel?: string | null;
+}
 
 export default async function BoardPage({
   params,
@@ -117,24 +126,53 @@ export default async function BoardPage({
       });
     }
 
+    // Check if board is favorited by current user
+    const { data: favoriteData } = await supabaseAdmin
+      .from("UserFavoriteBoard")
+      .select("userId")
+      .eq("boardId", id)
+      .eq("userId", userId)
+      .single();
+
+    const isFavorite = !!favoriteData;
+
+    // Fetch labels for the board
+    const { data: boardLabels } = await supabaseAdmin
+      .from("Label")
+      .select("*")
+      .eq("boardId", id);
+
+    // Fetch board members
+    const { data: boardMembersData } = await supabaseAdmin
+      .from("BoardMember")
+      .select(
+        `
+      *,
+      user:User (*)
+    `
+      )
+      .eq("boardId", id);
+
+    const boardMembers = (boardMembersData || []);
+    const owner = boardMembers.find((member: any) => member.role === "owner")?.user ?? null;
+    const isOwner = owner?.id === userId;
+    const members = boardMembers.filter((member: any) => member.role === "member");
+
     const board: BoardWithColumns = {
       ...boardBasic,
       columns: columnsWithTasks,
     };
 
     return (
-      <main className="flex flex-col grow min-w-0 bg-cover bg-center bg-zinc-900 relative min-h-screen">
-        {board.backgroundUrl && (
-          <Image
-            className="object-cover object-center z-0"
-            src={board.backgroundUrl}
-            alt="Board Wallpaper"
-            fill
-          />
-        )}
-        <BoardNavbar boardId={board.id} boardTitle={board.title} />
-        <Board board={board} />
-      </main>
+      <BoardPageClient 
+        board={board} 
+        isFavorite={isFavorite} 
+        boardLabels={boardLabels || []} 
+        owner={owner}
+        members={members}
+        isOwner={isOwner}
+        loggedInUserId={userId}
+      />
     );
   } catch (error) {
     console.error("Error loading board:", error);
