@@ -122,6 +122,11 @@ export default async function BoardPage({
       tasks: enrichedTasks.filter((task: any) => task.columnId === column.id),
     }));
 
+    // Filter out EPIC tasks from board display
+    columnsWithTasks.forEach((column: any) => {
+      column.tasks = column.tasks.filter((task: any) => task.taskType !== 'EPIC');
+    });
+
     // Apply label filter if needed
     if (labelFilter.length > 0) {
       columnsWithTasks.forEach((column: any) => {

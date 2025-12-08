@@ -304,17 +304,6 @@ export default function EpicPortfolioClient({
             <IconLayoutGrid size={18} />
             Priority View
           </button>
-          <button
-            onClick={() => setView("burndown")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-              view === "burndown"
-                ? "bg-zinc-800 text-white"
-                : "bg-zinc-900 text-zinc-400 hover:bg-zinc-800"
-            }`}
-          >
-            <IconChartLine size={18} />
-            Burndown
-          </button>
         </div>
 
         <div className="flex gap-2">
