@@ -23,7 +23,7 @@ export default async function BoardPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ labels?: string; epicId?: string }>;
+  searchParams: Promise<{ labels?: string; epicId?: string; departmentId?: string }>;
 }) {
   const session = await auth();
   const userId = session?.user?.id;
@@ -34,7 +34,7 @@ export default async function BoardPage({
   }
 
   const { id } = await params;
-  const { labels, epicId } = await searchParams;
+  const { labels, epicId, departmentId } = await searchParams;
 
   try {
     // Admins can access all boards
@@ -56,6 +56,7 @@ export default async function BoardPage({
     // Parse filters from searchParams
     const labelFilter = labels?.split(",") || [];
     const selectedEpicId = epicId || null;
+    const selectedDepartmentId = departmentId || null;
 
     // Fetch the board
     const { data: boardBasic, error: boardBasicError } = await supabaseAdmin
@@ -139,13 +140,32 @@ export default async function BoardPage({
       });
     }
 
+    // Apply department filter if needed
+    if (selectedDepartmentId) {
+      columnsWithTasks.forEach((column: any) => {
+        column.tasks = column.tasks.filter((task: any) => task.departmentId === selectedDepartmentId);
+      });
+    }
+
     // Fetch all epic tasks (taskType = 'EPIC') for the filter dropdown
-    const { data: epicTasks } = await supabaseAdmin
+    let epicQuery = supabaseAdmin
       .from("Task")
       .select("id, title")
       .in("columnId", columnIds)
-      .eq("taskType", "EPIC")
+      .eq("taskType", "EPIC");
+
+    if (selectedDepartmentId) {
+      epicQuery = epicQuery.eq("departmentId", selectedDepartmentId);
+    }
+
+    const { data: epicTasks } = await epicQuery
       .order("title", { ascending: true });
+
+    // Fetch departments for the filter dropdown
+    const { data: departments } = await supabaseAdmin
+      .from("Department")
+      .select("id, name")
+      .order("name", { ascending: true });
 
     // Check if board is favorited by current user
     const { data: favoriteData } = await supabaseAdmin
@@ -195,6 +215,8 @@ export default async function BoardPage({
         loggedInUserId={userId}
         epicTasks={epicTasks || []}
         selectedEpicId={selectedEpicId}
+        departments={departments || []}
+        selectedDepartmentId={selectedDepartmentId}
       />
     );
   } catch (error) {

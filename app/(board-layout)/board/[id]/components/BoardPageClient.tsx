@@ -14,6 +14,8 @@ interface BoardPageClientProps {
   loggedInUserId: string;
   epicTasks: Array<{ id: string; title: string }>;
   selectedEpicId: string | null;
+  departments: Array<{ id: string; name: string }>;
+  selectedDepartmentId: string | null;
 }
 
 export default function BoardPageClient({ 
@@ -25,7 +27,9 @@ export default function BoardPageClient({
   isOwner,
   loggedInUserId,
   epicTasks,
-  selectedEpicId
+  selectedEpicId,
+  departments,
+  selectedDepartmentId
 }: BoardPageClientProps) {
   // Don't use useState - use the prop directly so it updates when filtering changes
   const board = initialBoard;
@@ -51,6 +55,8 @@ export default function BoardPageClient({
         loggedInUserId={loggedInUserId}
         epicTasks={epicTasks}
         selectedEpicId={selectedEpicId}
+        departments={departments}
+        selectedDepartmentId={selectedDepartmentId}
       />
       <div className="flex flex-1 min-h-0">
         <Board board={board} />
