@@ -2,6 +2,35 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { supabaseAdmin } from "@/lib/supabase";
 
+export async function GET(request: NextRequest) {
+  try {
+    const session = await auth();
+
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const epics = await supabaseAdmin
+      .from("Task")
+      .select(`
+        id,
+        title,
+        createdAt,
+        updatedAt
+      `)
+      .eq("taskType", "EPIC")
+      .order("updatedAt", { ascending: false });
+
+    return NextResponse.json(epics.data || []);
+  } catch (error) {
+    console.error("Failed to fetch epics:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const session = await auth();

@@ -81,6 +81,12 @@ export default function SidebarMenuContent({
       <div className="flex-1 overflow-y-auto">
         <Menu>
           <MenuItem
+            path="/dashboard"
+            title={isCollapsed ? "" : "Dashboard"}
+            icon={<IconLayoutKanban stroke={1.5} size={20} />}
+            showTitle={!isCollapsed}
+          />
+          <MenuItem
             path="/epics"
             title={isCollapsed ? "" : "Epics"}
             icon={<IconTarget stroke={1.5} size={20} />}
