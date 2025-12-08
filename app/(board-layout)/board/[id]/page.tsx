@@ -5,6 +5,9 @@ import Image from "next/image";
 import { redirect } from "next/navigation";
 import { BoardWithColumns } from "@/types/types";
 
+// Force dynamic rendering to ensure filters work on URL changes
+export const dynamic = 'force-dynamic';
+
 interface EpicFilters {
   priority?: string | null;
   assigneeId?: string | null;
@@ -20,7 +23,7 @@ export default async function BoardPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ labels?: string }>;
+  searchParams: Promise<{ labels?: string; epicId?: string }>;
 }) {
   const session = await auth();
   const userId = session?.user?.id;
@@ -31,7 +34,7 @@ export default async function BoardPage({
   }
 
   const { id } = await params;
-  const { labels } = await searchParams;
+  const { labels, epicId } = await searchParams;
 
   try {
     // Admins can access all boards
@@ -50,8 +53,9 @@ export default async function BoardPage({
       }
     }
 
-    // Parse labels from searchParams
+    // Parse filters from searchParams
     const labelFilter = labels?.split(",") || [];
+    const selectedEpicId = epicId || null;
 
     // Fetch the board
     const { data: boardBasic, error: boardBasicError } = await supabaseAdmin
@@ -126,6 +130,23 @@ export default async function BoardPage({
       });
     }
 
+    // Apply epic filter if needed
+    if (selectedEpicId) {
+      columnsWithTasks.forEach((column: any) => {
+        column.tasks = column.tasks.filter((task: any) => {
+          return task.parentTaskId === selectedEpicId || task.id === selectedEpicId;
+        });
+      });
+    }
+
+    // Fetch all epic tasks (taskType = 'EPIC') for the filter dropdown
+    const { data: epicTasks } = await supabaseAdmin
+      .from("Task")
+      .select("id, title")
+      .in("columnId", columnIds)
+      .eq("taskType", "EPIC")
+      .order("title", { ascending: true });
+
     // Check if board is favorited by current user
     const { data: favoriteData } = await supabaseAdmin
       .from("UserFavoriteBoard")
@@ -172,6 +193,8 @@ export default async function BoardPage({
         members={members}
         isOwner={isOwner}
         loggedInUserId={userId}
+        epicTasks={epicTasks || []}
+        selectedEpicId={selectedEpicId}
       />
     );
   } catch (error) {

@@ -1,5 +1,4 @@
 "use client";
-import { useState } from "react";
 import { BoardWithColumns } from "@/types/types";
 import Board from "./Board";
 import BoardNavbar from "./Navbar/BoardNavbar";
@@ -13,6 +12,8 @@ interface BoardPageClientProps {
   members: any[];
   isOwner: boolean;
   loggedInUserId: string;
+  epicTasks: Array<{ id: string; title: string }>;
+  selectedEpicId: string | null;
 }
 
 export default function BoardPageClient({ 
@@ -22,9 +23,12 @@ export default function BoardPageClient({
   owner,
   members,
   isOwner,
-  loggedInUserId
+  loggedInUserId,
+  epicTasks,
+  selectedEpicId
 }: BoardPageClientProps) {
-  const [board] = useState<BoardWithColumns>(initialBoard);
+  // Don't use useState - use the prop directly so it updates when filtering changes
+  const board = initialBoard;
 
   return (
     <main className="flex flex-col grow min-w-0 bg-cover bg-center bg-zinc-900 relative min-h-screen">
@@ -45,6 +49,8 @@ export default function BoardPageClient({
         members={members}
         isOwner={isOwner}
         loggedInUserId={loggedInUserId}
+        epicTasks={epicTasks}
+        selectedEpicId={selectedEpicId}
       />
       <div className="flex flex-1 min-h-0">
         <Board board={board} />

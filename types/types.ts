@@ -328,6 +328,7 @@ export interface CardMemberWithUser {
 export interface BoardTask extends Task {
   labels: Label[];
   assignedUsers: TaskAssignmentWithUser[];
+  taskType?: string | null;
 }
 
 // Extend Column to include the nested tasks
