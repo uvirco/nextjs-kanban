@@ -1,11 +1,12 @@
 "use client";
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import {
   IconBuilding,
   IconChevronDown,
   IconX,
+  IconLoader2,
 } from "@tabler/icons-react";
 import { createPortal } from "react-dom";
 
@@ -16,22 +17,25 @@ interface DepartmentFilterProps {
 
 export default function DepartmentFilter({ departments, selectedDepartmentId }: DepartmentFilterProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
   const handleDepartmentSelect = (departmentId: string | null) => {
-    const params = new URLSearchParams(searchParams.toString());
-    
-    if (departmentId) {
-      params.set("departmentId", departmentId);
-    } else {
-      params.delete("departmentId");
-    }
-    
-    const newUrl = `${pathname}?${params.toString()}`;
-    router.push(newUrl);
-    router.refresh(); // Force a server component refresh
+    startTransition(() => {
+      const params = new URLSearchParams(searchParams.toString());
+      
+      if (departmentId) {
+        params.set("departmentId", departmentId);
+      } else {
+        params.delete("departmentId");
+      }
+      
+      const newUrl = `${pathname}?${params.toString()}`;
+      router.push(newUrl);
+      router.refresh(); // Force a server component refresh
+    });
     setIsOpen(false);
   };
 
@@ -57,11 +61,12 @@ export default function DepartmentFilter({ departments, selectedDepartmentId }: 
           
           <button
             onClick={() => handleDepartmentSelect(null)}
+            disabled={isPending}
             className={`w-full text-left px-4 py-3 rounded-md text-sm font-medium transition-colors mb-2 ${
               !selectedDepartmentId
                 ? "bg-green-600 text-white"
                 : "text-zinc-300 hover:bg-zinc-700"
-            }`}
+            } ${isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             Show All Departments
           </button>
@@ -72,11 +77,12 @@ export default function DepartmentFilter({ departments, selectedDepartmentId }: 
                 <button
                   key={department.id}
                   onClick={() => handleDepartmentSelect(department.id)}
+                  disabled={isPending}
                   className={`w-full text-left px-4 py-3 rounded-md text-sm font-medium transition-colors ${
                     selectedDepartmentId === department.id
                       ? "bg-green-600 text-white"
                       : "text-zinc-300 hover:bg-zinc-700"
-                  }`}
+                  } ${isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   {department.name}
                 </button>
@@ -95,14 +101,19 @@ export default function DepartmentFilter({ departments, selectedDepartmentId }: 
   return (
     <>
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => !isPending && setIsOpen(!isOpen)}
+        disabled={isPending}
         className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
           selectedDepartmentId
             ? "bg-green-600 text-white"
             : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
-        }`}
+        } ${isPending ? 'opacity-75 cursor-not-allowed' : ''}`}
       >
-        <IconBuilding size={16} />
+        {isPending ? (
+          <IconLoader2 size={16} className="animate-spin" />
+        ) : (
+          <IconBuilding size={16} />
+        )}
         {selectedDepartment ? (
           <>
             <span className="max-w-[150px] truncate">{selectedDepartment.name}</span>
@@ -118,8 +129,8 @@ export default function DepartmentFilter({ departments, selectedDepartmentId }: 
           </>
         ) : (
           <>
-            <span>Filter by Department</span>
-            <IconChevronDown size={14} />
+            <span>{isPending ? 'Loading...' : 'Filter by Department'}</span>
+            {!isPending && <IconChevronDown size={14} />}
           </>
         )}
       </button>

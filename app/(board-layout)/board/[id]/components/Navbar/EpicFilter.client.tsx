@@ -1,11 +1,12 @@
 "use client";
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import {
   IconFilter,
   IconChevronDown,
   IconX,
+  IconLoader2,
 } from "@tabler/icons-react";
 import { createPortal } from "react-dom";
 
@@ -16,22 +17,25 @@ interface EpicFilterProps {
 
 export default function EpicFilter({ epicTasks, selectedEpicId }: EpicFilterProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
   const handleEpicSelect = (epicId: string | null) => {
-    const params = new URLSearchParams(searchParams.toString());
-    
-    if (epicId) {
-      params.set("epicId", epicId);
-    } else {
-      params.delete("epicId");
-    }
-    
-    const newUrl = `${pathname}?${params.toString()}`;
-    router.push(newUrl);
-    router.refresh(); // Force a server component refresh
+    startTransition(() => {
+      const params = new URLSearchParams(searchParams.toString());
+      
+      if (epicId) {
+        params.set("epicId", epicId);
+      } else {
+        params.delete("epicId");
+      }
+      
+      const newUrl = `${pathname}?${params.toString()}`;
+      router.push(newUrl);
+      router.refresh(); // Force a server component refresh
+    });
     setIsOpen(false);
   };
 
@@ -57,11 +61,12 @@ export default function EpicFilter({ epicTasks, selectedEpicId }: EpicFilterProp
           
           <button
             onClick={() => handleEpicSelect(null)}
+            disabled={isPending}
             className={`w-full text-left px-4 py-3 rounded-md text-sm font-medium transition-colors mb-2 ${
               !selectedEpicId
                 ? "bg-blue-600 text-white"
                 : "text-zinc-300 hover:bg-zinc-700"
-            }`}
+            } ${isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             Show All Tasks
           </button>
@@ -72,11 +77,12 @@ export default function EpicFilter({ epicTasks, selectedEpicId }: EpicFilterProp
                 <button
                   key={epic.id}
                   onClick={() => handleEpicSelect(epic.id)}
+                  disabled={isPending}
                   className={`w-full text-left px-4 py-3 rounded-md text-sm font-medium transition-colors ${
                     selectedEpicId === epic.id
                       ? "bg-blue-600 text-white"
                       : "text-zinc-300 hover:bg-zinc-700"
-                  }`}
+                  } ${isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   {epic.title}
                 </button>
@@ -95,14 +101,19 @@ export default function EpicFilter({ epicTasks, selectedEpicId }: EpicFilterProp
   return (
     <>
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => !isPending && setIsOpen(!isOpen)}
+        disabled={isPending}
         className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
           selectedEpicId
             ? "bg-blue-600 text-white"
             : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
-        }`}
+        } ${isPending ? 'opacity-75 cursor-not-allowed' : ''}`}
       >
-        <IconFilter size={16} />
+        {isPending ? (
+          <IconLoader2 size={16} className="animate-spin" />
+        ) : (
+          <IconFilter size={16} />
+        )}
         {selectedEpic ? (
           <>
             <span className="max-w-[150px] truncate">{selectedEpic.title}</span>
@@ -118,8 +129,8 @@ export default function EpicFilter({ epicTasks, selectedEpicId }: EpicFilterProp
           </>
         ) : (
           <>
-            <span>Filter by Epic</span>
-            <IconChevronDown size={14} />
+            <span>{isPending ? 'Loading...' : 'Filter by Epic'}</span>
+            {!isPending && <IconChevronDown size={14} />}
           </>
         )}
       </button>

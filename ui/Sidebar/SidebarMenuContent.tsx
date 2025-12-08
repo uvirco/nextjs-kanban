@@ -81,17 +81,40 @@ export default function SidebarMenuContent({
       <div className="flex-1 overflow-y-auto">
         <Menu>
           <MenuItem
-            path="/board"
-            title={isCollapsed ? "" : "Boards"}
-            icon={<IconLayoutKanban stroke={1.5} size={20} />}
-            showTitle={!isCollapsed}
-          />
-          <MenuItem
             path="/epics"
             title={isCollapsed ? "" : "Epics"}
             icon={<IconTarget stroke={1.5} size={20} />}
             showTitle={!isCollapsed}
           />
+
+          <hr className="border-zinc-900 my-3" />
+
+          <li className="menu-item group">
+            <div className="flex items-center gap-2 text-sm text-zinc-400 font-medium px-2 py-1">
+              <IconLayoutKanban stroke={1.5} size={20} />
+              {isCollapsed ? "" : "Boards"}
+            </div>
+          </li>
+
+          {boardMembers.map((boardMember) => (
+            <MenuItem
+              key={boardMember.boardId}
+              path={`/board/${boardMember.boardId}`}
+              title={isCollapsed ? "" : boardMember.board.title}
+              icon={<IconLayoutKanban stroke={1.5} size={20} />}
+              showTitle={!isCollapsed}
+            />
+          ))}
+
+          <hr className="border-zinc-900 my-3" />
+
+          <li className="menu-item group">
+            <div className="flex items-center gap-2 text-sm text-zinc-400 font-medium px-2 py-1">
+              <IconMessage stroke={1.5} size={20} />
+              {isCollapsed ? "" : "Communications"}
+            </div>
+          </li>
+
           <MenuItem
             path="/inbox"
             title={isCollapsed ? "" : "Inbox"}
@@ -107,25 +130,6 @@ export default function SidebarMenuContent({
           />
 
           <hr className="border-zinc-900 my-3" />
-
-          {boardMembers.map((boardMember) => (
-            <MenuItem
-              key={boardMember.boardId}
-              path={`/board/${boardMember.boardId}`}
-              title={isCollapsed ? "" : boardMember.board.title}
-              icon={<IconCircle stroke={1.5} size={20} />}
-              showTitle={!isCollapsed}
-            />
-          ))}
-
-          <hr className="border-zinc-900 my-3" />
-
-          <MenuItem
-            path="/profile"
-            title={isCollapsed ? "" : "Profile"}
-            icon={<IconUser stroke={1.5} size={20} />}
-            showTitle={!isCollapsed}
-          />
         </Menu>
       </div>
 
