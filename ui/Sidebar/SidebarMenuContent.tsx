@@ -7,6 +7,7 @@ import {
   IconMessage,
   IconCircle,
   IconTarget,
+  IconChartBar,
 } from "@tabler/icons-react";
 import SidebarHeader from "./SidebarHeader";
 import SidebarSearch from "./SidebarSearch";
@@ -83,7 +84,7 @@ export default function SidebarMenuContent({
           <MenuItem
             path="/dashboard"
             title={isCollapsed ? "" : "Dashboard"}
-            icon={<IconLayoutKanban stroke={1.5} size={20} />}
+            icon={<IconChartBar stroke={1.5} size={20} />}
             showTitle={!isCollapsed}
           />
           <MenuItem

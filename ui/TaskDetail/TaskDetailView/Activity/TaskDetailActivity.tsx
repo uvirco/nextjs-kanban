@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { IconActivity, IconX } from "@tabler/icons-react";
+import { IconActivity, IconX, IconChevronDown, IconChevronRight } from "@tabler/icons-react";
 import TaskDetailActivityItem from "./TaskDetailActivityItem";
 import { handleCreateActivity } from "@/server-actions/ActivityServerActions";
 import TaskDetailItemHeading from "../ui/TaskDetailItemHeading";
@@ -150,28 +150,50 @@ export function TaskDetailActivityEntries({
   columnTitle: string;
   boardId: string;
 }) {
+  const [isCollapsed, setIsCollapsed] = useState(true);
+
+  const toggleCollapsed = () => {
+    setIsCollapsed(!isCollapsed);
+  };
+
+  const activityEntries = activities?.filter(
+    (activity: any) => activity.type !== "COMMENT_ADDED"
+  ) || [];
+
+  if (activityEntries.length === 0) {
+    return null;
+  }
+
   return (
     <>
-      <TaskDetailItemHeading
-        title="Activity"
-        icon={<IconActivity size={32} />}
-      />
+      <div className="flex items-center justify-between cursor-pointer" onClick={toggleCollapsed}>
+        <TaskDetailItemHeading
+          title={`Activity (${activityEntries.length})`}
+          icon={<IconActivity size={32} />}
+        />
+        <Button variant="ghost" size="sm" className="p-1 h-auto">
+          {isCollapsed ? (
+            <IconChevronRight size={16} className="text-zinc-400" />
+          ) : (
+            <IconChevronDown size={16} className="text-zinc-400" />
+          )}
+        </Button>
+      </div>
 
-      <TaskDetailItemContent indented>
-        <ul className="space-y-2">
-          {activities &&
-            activities
-              .filter((activity: any) => activity.type !== "COMMENT_ADDED")
-              .map((activity: any) => (
-                <TaskDetailActivityItem
-                  key={activity.id}
-                  activity={activity}
-                  columnTitle={columnTitle}
-                  boardId={boardId}
-                />
-              ))}
-        </ul>
-      </TaskDetailItemContent>
+      {!isCollapsed && (
+        <TaskDetailItemContent indented>
+          <ul className="space-y-2">
+            {activityEntries.map((activity: any) => (
+              <TaskDetailActivityItem
+                key={activity.id}
+                activity={activity}
+                columnTitle={columnTitle}
+                boardId={boardId}
+              />
+            ))}
+          </ul>
+        </TaskDetailItemContent>
+      )}
     </>
   );
 }

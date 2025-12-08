@@ -14,6 +14,10 @@ export async function GET(
     }
 
     const { id: epicId } = await params;
+    const { searchParams } = new URL(request.url);
+    const startDate = searchParams.get('start');
+    const endDate = searchParams.get('end');
+    const timeScale = searchParams.get('timeScale') || 'daily';
 
     // Get all tasks under this epic (including subtasks)
     const { data: tasks, error: tasksError } = await supabaseAdmin
@@ -31,12 +35,21 @@ export async function GET(
 
     const taskIds = tasks?.map((task: any) => task.id) || [];
 
-    // Get all activities for these tasks
-    const { data: activities, error: activitiesError } = await supabaseAdmin
+    // Build query for activities
+    let query = supabaseAdmin
       .from("Activity")
       .select("*")
       .in("taskId", taskIds)
       .order("createdAt", { ascending: true });
+
+    // Add date filtering if provided
+    if (startDate && endDate) {
+      query = query
+        .gte("createdAt", startDate)
+        .lte("createdAt", endDate);
+    }
+
+    const { data: activities, error: activitiesError } = await query;
 
     if (activitiesError) {
       console.error("Error fetching activities:", activitiesError);
