@@ -59,7 +59,11 @@ export default function TaskDetailDates({
           <div className="text-sm text-zinc-400">
             Epic:{" "}
             <span className="text-zinc-200">
-              {parentEpic ? parentEpic.title : taskType === "EPIC" ? taskTitle : "No Epic selected"}
+              {parentEpic
+                ? parentEpic.title
+                : taskType === "EPIC"
+                  ? taskTitle
+                  : "No Epic selected"}
             </span>
           </div>
           <div className="text-sm text-zinc-400">

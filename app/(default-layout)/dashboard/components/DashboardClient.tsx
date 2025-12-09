@@ -1,7 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { IconActivity, IconTrendingUp, IconChartBar, IconClock } from "@tabler/icons-react";
+import {
+  IconActivity,
+  IconTrendingUp,
+  IconChartBar,
+  IconClock,
+} from "@tabler/icons-react";
 import ActivityTrendsSection from "./ActivityTrendsSection";
 import ProgressOverviewSection from "./ProgressOverviewSection";
 import SummarySection from "./SummarySection";
@@ -17,14 +22,16 @@ interface Epic {
   updatedAt: string;
 }
 
-type TimePeriod = '7d' | '30d' | '90d' | '1y';
+type TimePeriod = "7d" | "30d" | "90d" | "1y";
 
 export default function DashboardClient({ userId }: DashboardClientProps) {
   const [epics, setEpics] = useState<Epic[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("activities");
-  const [dateRange, setDateRange] = useState<{ start: Date; end: Date } | null>(null);
-  const [timePeriod, setTimePeriod] = useState<TimePeriod>('90d');
+  const [dateRange, setDateRange] = useState<{ start: Date; end: Date } | null>(
+    null
+  );
+  const [timePeriod, setTimePeriod] = useState<TimePeriod>("90d");
 
   useEffect(() => {
     fetchEpics();
@@ -48,16 +55,16 @@ export default function DashboardClient({ userId }: DashboardClientProps) {
     const startDate = new Date();
 
     switch (period) {
-      case '7d':
+      case "7d":
         startDate.setDate(endDate.getDate() - 7);
         break;
-      case '30d':
+      case "30d":
         startDate.setDate(endDate.getDate() - 30);
         break;
-      case '90d':
+      case "90d":
         startDate.setDate(endDate.getDate() - 90);
         break;
-      case '1y':
+      case "1y":
         startDate.setFullYear(endDate.getFullYear() - 1);
         break;
     }
@@ -85,20 +92,19 @@ export default function DashboardClient({ userId }: DashboardClientProps) {
           {/* Time Period Selector */}
           <div className="flex gap-2 mt-4">
             <button
-              onClick={() => setTimePeriod('7d')}
+              onClick={() => setTimePeriod("7d")}
               className={`flex items-center gap-2 px-3 py-1 rounded-md transition-colors text-sm ${
-                timePeriod === '7d'
+                timePeriod === "7d"
                   ? "bg-blue-600 text-white"
                   : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white"
               }`}
             >
-              <IconClock size={14} />
-              7 Days
+              <IconClock size={14} />7 Days
             </button>
             <button
-              onClick={() => setTimePeriod('30d')}
+              onClick={() => setTimePeriod("30d")}
               className={`flex items-center gap-2 px-3 py-1 rounded-md transition-colors text-sm ${
-                timePeriod === '30d'
+                timePeriod === "30d"
                   ? "bg-blue-600 text-white"
                   : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white"
               }`}
@@ -107,9 +113,9 @@ export default function DashboardClient({ userId }: DashboardClientProps) {
               30 Days
             </button>
             <button
-              onClick={() => setTimePeriod('90d')}
+              onClick={() => setTimePeriod("90d")}
               className={`flex items-center gap-2 px-3 py-1 rounded-md transition-colors text-sm ${
-                timePeriod === '90d'
+                timePeriod === "90d"
                   ? "bg-blue-600 text-white"
                   : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white"
               }`}
@@ -118,15 +124,14 @@ export default function DashboardClient({ userId }: DashboardClientProps) {
               90 Days
             </button>
             <button
-              onClick={() => setTimePeriod('1y')}
+              onClick={() => setTimePeriod("1y")}
               className={`flex items-center gap-2 px-3 py-1 rounded-md transition-colors text-sm ${
-                timePeriod === '1y'
+                timePeriod === "1y"
                   ? "bg-blue-600 text-white"
                   : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white"
               }`}
             >
-              <IconClock size={14} />
-              1 Year
+              <IconClock size={14} />1 Year
             </button>
           </div>
         </div>
@@ -173,13 +178,9 @@ export default function DashboardClient({ userId }: DashboardClientProps) {
           <ActivityTrendsSection epics={epics} dateRange={dateRange} />
         )}
 
-        {activeTab === "progress" && (
-          <ProgressOverviewSection />
-        )}
+        {activeTab === "progress" && <ProgressOverviewSection />}
 
-        {activeTab === "summary" && (
-          <SummarySection />
-        )}
+        {activeTab === "summary" && <SummarySection />}
       </div>
     </div>
   );

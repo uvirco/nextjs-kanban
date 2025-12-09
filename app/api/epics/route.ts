@@ -12,12 +12,14 @@ export async function GET(request: NextRequest) {
 
     const epics = await supabaseAdmin
       .from("Task")
-      .select(`
+      .select(
+        `
         id,
         title,
         createdAt,
         updatedAt
-      `)
+      `
+      )
       .eq("taskType", "EPIC")
       .order("updatedAt", { ascending: false });
 
@@ -99,10 +101,10 @@ export async function POST(request: NextRequest) {
     let estimatedEffortValue = null;
     if (estimatedEffort) {
       const effortMapping: Record<string, number> = {
-        'SMALL': 2,    // 1-2 weeks
-        'MEDIUM': 8,   // 1-3 months (average ~8 weeks)
-        'LARGE': 20,   // 3-6 months (average ~20 weeks)
-        'XLARGE': 30,  // 6+ months (minimum 30 weeks)
+        SMALL: 2, // 1-2 weeks
+        MEDIUM: 8, // 1-3 months (average ~8 weeks)
+        LARGE: 20, // 3-6 months (average ~20 weeks)
+        XLARGE: 30, // 6+ months (minimum 30 weeks)
       };
       estimatedEffortValue = effortMapping[estimatedEffort] || null;
     }

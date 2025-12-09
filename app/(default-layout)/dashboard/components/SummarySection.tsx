@@ -2,7 +2,19 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+} from "recharts";
 
 interface StatusDistribution extends Record<string, any> {
   status: string;
@@ -95,7 +107,9 @@ export default function SummarySection() {
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={({ percent }) => percent ? `${(percent * 100).toFixed(0)}%` : ''}
+                label={({ percent }) =>
+                  percent ? `${(percent * 100).toFixed(0)}%` : ""
+                }
                 outerRadius={80}
                 fill="#8884d8"
                 dataKey="count"
@@ -107,10 +121,10 @@ export default function SummarySection() {
               </Pie>
               <Tooltip
                 contentStyle={{
-                  backgroundColor: '#1f2937',
-                  border: '1px solid #374151',
-                  borderRadius: '6px',
-                  color: '#f9fafb'
+                  backgroundColor: "#1f2937",
+                  border: "1px solid #374151",
+                  borderRadius: "6px",
+                  color: "#f9fafb",
                 }}
               />
             </PieChart>
@@ -125,26 +139,34 @@ export default function SummarySection() {
         <CardContent>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={data.teamActivity}>
-              <CartesianGrid strokeDasharray="3 3" className="opacity-30" stroke="#374151" />
+              <CartesianGrid
+                strokeDasharray="3 3"
+                className="opacity-30"
+                stroke="#374151"
+              />
               <XAxis
                 dataKey="user"
-                tick={{ fontSize: 12, fill: '#9ca3af' }}
+                tick={{ fontSize: 12, fill: "#9ca3af" }}
                 stroke="#6b7280"
               />
               <YAxis
-                tick={{ fontSize: 12, fill: '#9ca3af' }}
+                tick={{ fontSize: 12, fill: "#9ca3af" }}
                 stroke="#6b7280"
               />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: '#1f2937',
-                  border: '1px solid #374151',
-                  borderRadius: '6px',
-                  color: '#f9fafb'
+                  backgroundColor: "#1f2937",
+                  border: "1px solid #374151",
+                  borderRadius: "6px",
+                  color: "#f9fafb",
                 }}
               />
               <Legend />
-              <Bar dataKey="tasksCompleted" fill="#3b82f6" name="Tasks Completed" />
+              <Bar
+                dataKey="tasksCompleted"
+                fill="#3b82f6"
+                name="Tasks Completed"
+              />
               <Bar dataKey="tasksCreated" fill="#10b981" name="Tasks Created" />
             </BarChart>
           </ResponsiveContainer>

@@ -52,8 +52,14 @@ export default function BoardNavbar({
             <BoardFavouriteClient isFavorite={isFavorite} boardId={boardId} />
           </Suspense>
           <BoardFilterClient labels={boardLabels} />
-          <DepartmentFilterClient departments={departments} selectedDepartmentId={selectedDepartmentId} />
-          <EpicFilterClient epicTasks={epicTasks} selectedEpicId={selectedEpicId} />
+          <DepartmentFilterClient
+            departments={departments}
+            selectedDepartmentId={selectedDepartmentId}
+          />
+          <EpicFilterClient
+            epicTasks={epicTasks}
+            selectedEpicId={selectedEpicId}
+          />
           <BoardBackgroundImageButton />
         </div>
         <div className="flex gap-2 items-center">

@@ -121,7 +121,9 @@ export default function FilterSidebar({
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
         {/* Quick Filters */}
         <div>
-          <h4 className="text-sm font-medium text-zinc-300 mb-3">Quick Filters</h4>
+          <h4 className="text-sm font-medium text-zinc-300 mb-3">
+            Quick Filters
+          </h4>
           <div className="space-y-2">
             <button
               onClick={() => updateFilter("dueDateFilter", "overdue")}
@@ -219,7 +221,9 @@ export default function FilterSidebar({
           </label>
           <select
             value={filters.departmentId || ""}
-            onChange={(e) => updateFilter("departmentId", e.target.value || null)}
+            onChange={(e) =>
+              updateFilter("departmentId", e.target.value || null)
+            }
             className="w-full bg-zinc-700 border border-zinc-600 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">All Departments</option>
@@ -238,7 +242,9 @@ export default function FilterSidebar({
           </label>
           <select
             value={filters.businessValue || ""}
-            onChange={(e) => updateFilter("businessValue", e.target.value || null)}
+            onChange={(e) =>
+              updateFilter("businessValue", e.target.value || null)
+            }
             className="w-full bg-zinc-700 border border-zinc-600 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">All Values</option>

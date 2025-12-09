@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { BoardWithColumns } from "@/types/types";
 
 // Force dynamic rendering to ensure filters work on URL changes
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 interface EpicFilters {
   priority?: string | null;
@@ -23,7 +23,11 @@ export default async function BoardPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ labels?: string; epicId?: string; departmentId?: string }>;
+  searchParams: Promise<{
+    labels?: string;
+    epicId?: string;
+    departmentId?: string;
+  }>;
 }) {
   const session = await auth();
   const userId = session?.user?.id;
@@ -124,7 +128,9 @@ export default async function BoardPage({
 
     // Filter out EPIC tasks from board display
     columnsWithTasks.forEach((column: any) => {
-      column.tasks = column.tasks.filter((task: any) => task.taskType !== 'EPIC');
+      column.tasks = column.tasks.filter(
+        (task: any) => task.taskType !== "EPIC"
+      );
     });
 
     // Apply label filter if needed
@@ -140,7 +146,9 @@ export default async function BoardPage({
     if (selectedEpicId) {
       columnsWithTasks.forEach((column: any) => {
         column.tasks = column.tasks.filter((task: any) => {
-          return task.parentTaskId === selectedEpicId || task.id === selectedEpicId;
+          return (
+            task.parentTaskId === selectedEpicId || task.id === selectedEpicId
+          );
         });
       });
     }
@@ -148,7 +156,9 @@ export default async function BoardPage({
     // Apply department filter if needed
     if (selectedDepartmentId) {
       columnsWithTasks.forEach((column: any) => {
-        column.tasks = column.tasks.filter((task: any) => task.departmentId === selectedDepartmentId);
+        column.tasks = column.tasks.filter(
+          (task: any) => task.departmentId === selectedDepartmentId
+        );
       });
     }
 
@@ -163,8 +173,9 @@ export default async function BoardPage({
       epicQuery = epicQuery.eq("departmentId", selectedDepartmentId);
     }
 
-    const { data: epicTasks } = await epicQuery
-      .order("title", { ascending: true });
+    const { data: epicTasks } = await epicQuery.order("title", {
+      ascending: true,
+    });
 
     // Fetch departments for the filter dropdown
     const { data: departments } = await supabaseAdmin
@@ -199,10 +210,13 @@ export default async function BoardPage({
       )
       .eq("boardId", id);
 
-    const boardMembers = (boardMembersData || []);
-    const owner = boardMembers.find((member: any) => member.role === "owner")?.user ?? null;
+    const boardMembers = boardMembersData || [];
+    const owner =
+      boardMembers.find((member: any) => member.role === "owner")?.user ?? null;
     const isOwner = owner?.id === userId;
-    const members = boardMembers.filter((member: any) => member.role === "member");
+    const members = boardMembers.filter(
+      (member: any) => member.role === "member"
+    );
 
     const board: BoardWithColumns = {
       ...boardBasic,
@@ -210,10 +224,10 @@ export default async function BoardPage({
     };
 
     return (
-      <BoardPageClient 
-        board={board} 
-        isFavorite={isFavorite} 
-        boardLabels={boardLabels || []} 
+      <BoardPageClient
+        board={board}
+        isFavorite={isFavorite}
+        boardLabels={boardLabels || []}
         owner={owner}
         members={members}
         isOwner={isOwner}

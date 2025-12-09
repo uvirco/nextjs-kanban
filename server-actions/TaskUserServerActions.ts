@@ -170,7 +170,7 @@ export async function handleRemoveUserFromTask(
 
       if (epicTasks && epicTasks.length > 0) {
         const taskIds = epicTasks.map((t: { id: string }) => t.id);
-        
+
         // Check if user has other assignments in this epic (excluding current task)
         const { data: otherAssignments } = await supabaseAdmin
           .from("TaskAssignment")

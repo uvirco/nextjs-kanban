@@ -18,9 +18,9 @@ interface BoardPageClientProps {
   selectedDepartmentId: string | null;
 }
 
-export default function BoardPageClient({ 
-  board: initialBoard, 
-  isFavorite, 
+export default function BoardPageClient({
+  board: initialBoard,
+  isFavorite,
   boardLabels,
   owner,
   members,
@@ -29,7 +29,7 @@ export default function BoardPageClient({
   epicTasks,
   selectedEpicId,
   departments,
-  selectedDepartmentId
+  selectedDepartmentId,
 }: BoardPageClientProps) {
   // Don't use useState - use the prop directly so it updates when filtering changes
   const board = initialBoard;
@@ -44,10 +44,10 @@ export default function BoardPageClient({
           fill
         />
       )}
-      <BoardNavbar 
-        boardId={board.id} 
-        boardTitle={board.title} 
-        isFavorite={isFavorite} 
+      <BoardNavbar
+        boardId={board.id}
+        boardTitle={board.title}
+        isFavorite={isFavorite}
         boardLabels={boardLabels}
         owner={owner}
         members={members}

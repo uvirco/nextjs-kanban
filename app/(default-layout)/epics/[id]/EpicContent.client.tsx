@@ -1,9 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import {
-  IconChevronDown,
-  IconChevronRight,
-} from "@tabler/icons-react";
+import { IconChevronDown, IconChevronRight } from "@tabler/icons-react";
 import { EpicTasksGanttTimeline } from "@/ui/EpicTasksGanttTimeline";
 
 interface Subtask {
@@ -90,7 +87,7 @@ export default function EpicContent({
   params,
 }: EpicContentProps) {
   const subtasks: Subtask[] = epic.subtasks || [];
-  
+
   return (
     <div className="space-y-6">
       {/* Task Flow Timeline - Full Width */}

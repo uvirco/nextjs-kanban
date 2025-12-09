@@ -15,7 +15,10 @@ interface EpicFilterProps {
   selectedEpicId: string | null;
 }
 
-export default function EpicFilter({ epicTasks, selectedEpicId }: EpicFilterProps) {
+export default function EpicFilter({
+  epicTasks,
+  selectedEpicId,
+}: EpicFilterProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
@@ -25,13 +28,13 @@ export default function EpicFilter({ epicTasks, selectedEpicId }: EpicFilterProp
   const handleEpicSelect = (epicId: string | null) => {
     startTransition(() => {
       const params = new URLSearchParams(searchParams.toString());
-      
+
       if (epicId) {
         params.set("epicId", epicId);
       } else {
         params.delete("epicId");
       }
-      
+
       const newUrl = `${pathname}?${params.toString()}`;
       router.push(newUrl);
       router.refresh(); // Force a server component refresh
@@ -39,7 +42,7 @@ export default function EpicFilter({ epicTasks, selectedEpicId }: EpicFilterProp
     setIsOpen(false);
   };
 
-  const selectedEpic = epicTasks.find(epic => epic.id === selectedEpicId);
+  const selectedEpic = epicTasks.find((epic) => epic.id === selectedEpicId);
 
   const dropdown = isOpen ? (
     <>
@@ -58,7 +61,7 @@ export default function EpicFilter({ epicTasks, selectedEpicId }: EpicFilterProp
               <IconX size={20} />
             </button>
           </div>
-          
+
           <button
             onClick={() => handleEpicSelect(null)}
             disabled={isPending}
@@ -66,11 +69,11 @@ export default function EpicFilter({ epicTasks, selectedEpicId }: EpicFilterProp
               !selectedEpicId
                 ? "bg-blue-600 text-white"
                 : "text-zinc-300 hover:bg-zinc-700"
-            } ${isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
+            } ${isPending ? "opacity-50 cursor-not-allowed" : ""}`}
           >
             Show All Tasks
           </button>
-          
+
           {epicTasks.length > 0 ? (
             <div className="space-y-2">
               {epicTasks.map((epic) => (
@@ -82,7 +85,7 @@ export default function EpicFilter({ epicTasks, selectedEpicId }: EpicFilterProp
                     selectedEpicId === epic.id
                       ? "bg-blue-600 text-white"
                       : "text-zinc-300 hover:bg-zinc-700"
-                  } ${isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  } ${isPending ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
                   {epic.title}
                 </button>
@@ -107,7 +110,7 @@ export default function EpicFilter({ epicTasks, selectedEpicId }: EpicFilterProp
           selectedEpicId
             ? "bg-blue-600 text-white"
             : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
-        } ${isPending ? 'opacity-75 cursor-not-allowed' : ''}`}
+        } ${isPending ? "opacity-75 cursor-not-allowed" : ""}`}
       >
         {isPending ? (
           <IconLoader2 size={16} className="animate-spin" />
@@ -129,13 +132,15 @@ export default function EpicFilter({ epicTasks, selectedEpicId }: EpicFilterProp
           </>
         ) : (
           <>
-            <span>{isPending ? 'Loading...' : 'Filter by Epic'}</span>
+            <span>{isPending ? "Loading..." : "Filter by Epic"}</span>
             {!isPending && <IconChevronDown size={14} />}
           </>
         )}
       </button>
-      
-      {typeof window !== 'undefined' && dropdown && createPortal(dropdown, document.body)}
+
+      {typeof window !== "undefined" &&
+        dropdown &&
+        createPortal(dropdown, document.body)}
     </>
   );
 }

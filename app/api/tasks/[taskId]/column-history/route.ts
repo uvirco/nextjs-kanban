@@ -36,8 +36,10 @@ export async function GET(
 
     // Get column names for all referenced columns
     const columnIds = [
-      ...((activities || []).flatMap((a: any) => [a.oldColumnId, a.newColumnId]).filter(Boolean)),
-      task.columnId
+      ...(activities || [])
+        .flatMap((a: any) => [a.oldColumnId, a.newColumnId])
+        .filter(Boolean),
+      task.columnId,
     ].filter(Boolean);
 
     const { data: columns } = await supabaseAdmin
@@ -45,7 +47,9 @@ export async function GET(
       .select("id, title")
       .in("id", [...new Set(columnIds)]);
 
-    const columnMap = Object.fromEntries((columns || []).map((c: any) => [c.id, c.title]));
+    const columnMap = Object.fromEntries(
+      (columns || []).map((c: any) => [c.id, c.title])
+    );
 
     // Build column history
     const events: Array<{
@@ -59,17 +63,20 @@ export async function GET(
     // Add initial creation event
     events.push({
       date: previousDate,
-      columnName: columnMap[task.columnId] || 'Unknown',
+      columnName: columnMap[task.columnId] || "Unknown",
       duration: 0, // Will be calculated
-      isCurrent: (activities || []).length === 0 // If no moves, this is current
+      isCurrent: (activities || []).length === 0, // If no moves, this is current
     });
 
     // Add movement events
     (activities || []).forEach((activity: any, index: number) => {
-      const toColumn = columnMap[activity.newColumnId] || 'Unknown';
+      const toColumn = columnMap[activity.newColumnId] || "Unknown";
 
       // Update duration for previous event
-      const duration = Math.ceil((new Date(activity.createdAt).getTime() - previousDate.getTime()) / (1000 * 60 * 60 * 24));
+      const duration = Math.ceil(
+        (new Date(activity.createdAt).getTime() - previousDate.getTime()) /
+          (1000 * 60 * 60 * 24)
+      );
       events[events.length - 1].duration = duration;
 
       // Add new column event
@@ -77,7 +84,7 @@ export async function GET(
         date: new Date(activity.createdAt),
         columnName: toColumn,
         duration: 0, // Will be calculated for next event
-        isCurrent: index === (activities || []).length - 1 // Last move is current
+        isCurrent: index === (activities || []).length - 1, // Last move is current
       });
 
       previousDate = new Date(activity.createdAt);
@@ -87,7 +94,9 @@ export async function GET(
     if (events.length > 0) {
       const lastEvent = events[events.length - 1];
       const now = new Date();
-      const duration = Math.ceil((now.getTime() - lastEvent.date.getTime()) / (1000 * 60 * 60 * 24));
+      const duration = Math.ceil(
+        (now.getTime() - lastEvent.date.getTime()) / (1000 * 60 * 60 * 24)
+      );
       lastEvent.duration = duration;
       lastEvent.isCurrent = true;
     }

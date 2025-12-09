@@ -4,7 +4,12 @@ import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { IconActivity, IconX, IconChevronDown, IconChevronRight } from "@tabler/icons-react";
+import {
+  IconActivity,
+  IconX,
+  IconChevronDown,
+  IconChevronRight,
+} from "@tabler/icons-react";
 import TaskDetailActivityItem from "./TaskDetailActivityItem";
 import { handleCreateActivity } from "@/server-actions/ActivityServerActions";
 import TaskDetailItemHeading from "../ui/TaskDetailItemHeading";
@@ -156,9 +161,9 @@ export function TaskDetailActivityEntries({
     setIsCollapsed(!isCollapsed);
   };
 
-  const activityEntries = activities?.filter(
-    (activity: any) => activity.type !== "COMMENT_ADDED"
-  ) || [];
+  const activityEntries =
+    activities?.filter((activity: any) => activity.type !== "COMMENT_ADDED") ||
+    [];
 
   if (activityEntries.length === 0) {
     return null;
@@ -166,7 +171,10 @@ export function TaskDetailActivityEntries({
 
   return (
     <>
-      <div className="flex items-center justify-between cursor-pointer" onClick={toggleCollapsed}>
+      <div
+        className="flex items-center justify-between cursor-pointer"
+        onClick={toggleCollapsed}
+      >
         <TaskDetailItemHeading
           title={`Activity (${activityEntries.length})`}
           icon={<IconActivity size={32} />}

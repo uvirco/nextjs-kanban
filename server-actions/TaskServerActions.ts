@@ -268,3 +268,88 @@ export async function handleDeleteTask(data: TaskDeletionData) {
     return { success: false, message: MESSAGES.TASK.DELETE_FAILURE };
   }
 }
+
+// Update Task Position (for drag and drop)
+export async function handleUpdateTaskPosition(data: {
+  id: string;
+  columnId?: string;
+  order?: number;
+  boardId?: string;
+}) {
+  const session = await auth();
+  const userId = session?.user?.id;
+
+  if (!userId) {
+    return { success: false, message: MESSAGES.AUTH.REQUIRED };
+  }
+
+  const UpdatePositionSchema = z.object({
+    id: z.string().min(1, MESSAGES.COMMON.TASK_ID_REQUIRED),
+    columnId: z.string().optional(),
+    order: z.number().optional(),
+    boardId: z.string().optional(),
+  });
+
+  const parse = UpdatePositionSchema.safeParse(data);
+
+  if (!parse.success) {
+    return {
+      success: false,
+      message: parse.error.errors.map((e) => e.message).join(", "),
+    };
+  }
+
+  try {
+    // Get the current task data
+    const { data: currentTask, error: fetchError } = await supabaseAdmin
+      .from("Task")
+      .select("columnId, order")
+      .eq("id", parse.data.id)
+      .single();
+
+    if (fetchError || !currentTask) {
+      console.error("Error fetching task:", fetchError);
+      return { success: false, message: "Task not found" };
+    }
+
+    const updateData: any = {};
+    if (parse.data.columnId !== undefined) {
+      updateData.columnId = parse.data.columnId;
+    }
+    if (parse.data.order !== undefined) {
+      updateData.order = parse.data.order;
+    }
+
+    // Update the task position
+    const { error } = await supabaseAdmin
+      .from("Task")
+      .update(updateData)
+      .eq("id", parse.data.id);
+
+    if (error) {
+      console.error("Error updating task position:", error);
+      return { success: false, message: "Failed to update task position" };
+    }
+
+    // If boardId is provided, revalidate the board path
+    if (parse.data.boardId) {
+      revalidatePath(`/board/${parse.data.boardId}`);
+    }
+
+    // If column changed, create activity
+    if (parse.data.columnId && parse.data.columnId !== currentTask.columnId) {
+      await supabaseAdmin.from("Activity").insert({
+        type: ActivityType.TASK_MOVED,
+        userId: userId,
+        taskId: parse.data.id,
+        originalColumnId: currentTask.columnId,
+        newColumnId: parse.data.columnId,
+      });
+    }
+
+    return { success: true, message: "Task position updated" };
+  } catch (e) {
+    console.error("Error in handleUpdateTaskPosition:", e);
+    return { success: false, message: "Failed to update task position" };
+  }
+}

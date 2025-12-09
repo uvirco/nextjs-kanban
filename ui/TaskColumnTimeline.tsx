@@ -1,7 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Cell,
+} from "recharts";
 
 interface ColumnEvent {
   date: string;
@@ -20,8 +29,8 @@ export function TaskColumnTimeline({ taskId }: TaskColumnTimelineProps) {
 
   useEffect(() => {
     fetch(`/api/tasks/${taskId}/column-history`)
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         setEvents(data.events || []);
         setLoading(false);
       })
@@ -37,7 +46,7 @@ export function TaskColumnTimeline({ taskId }: TaskColumnTimelineProps) {
     duration: event.duration,
     startDate: new Date(event.date).toLocaleDateString(),
     isCurrent: event.isCurrent,
-    color: getColumnColor(event.columnName)
+    color: getColumnColor(event.columnName),
   }));
 
   return (
@@ -52,19 +61,15 @@ export function TaskColumnTimeline({ taskId }: TaskColumnTimelineProps) {
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis
             type="number"
-            label={{ value: 'Days', position: 'insideBottom', offset: -5 }}
+            label={{ value: "Days", position: "insideBottom", offset: -5 }}
           />
-          <YAxis
-            type="category"
-            dataKey="name"
-            width={90}
-          />
+          <YAxis type="category" dataKey="name" width={90} />
           <Tooltip
             formatter={(value: number, name: string, props: any) => [
               `${value} days`,
-              `${props.payload.startDate}${props.payload.isCurrent ? ' (current)' : ''}`
+              `${props.payload.startDate}${props.payload.isCurrent ? " (current)" : ""}`,
             ]}
-            labelFormatter={() => ''}
+            labelFormatter={() => ""}
           />
           <Bar dataKey="duration" radius={[0, 4, 4, 0]}>
             {chartData.map((entry, index) => (
@@ -80,13 +85,13 @@ export function TaskColumnTimeline({ taskId }: TaskColumnTimelineProps) {
 // Color mapping for different columns
 function getColumnColor(columnName: string): string {
   const colors: Record<string, string> = {
-    'To Do': '#ef4444',      // red
-    'In Progress': '#f59e0b', // amber
-    'Review': '#3b82f6',     // blue
-    'Done': '#10b981',       // green
-    'Testing': '#8b5cf6',    // purple
-    'Blocked': '#6b7280',    // gray
+    "To Do": "#ef4444", // red
+    "In Progress": "#f59e0b", // amber
+    Review: "#3b82f6", // blue
+    Done: "#10b981", // green
+    Testing: "#8b5cf6", // purple
+    Blocked: "#6b7280", // gray
   };
 
-  return colors[columnName] || '#6b7280'; // default gray
+  return colors[columnName] || "#6b7280"; // default gray
 }

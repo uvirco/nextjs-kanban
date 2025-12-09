@@ -14,7 +14,6 @@ import EpicFilesSection from "./EpicFilesSection.client";
 import EpicLinksSection from "./EpicLinksSection.client";
 import EpicChecklistsSection from "./EpicChecklistsSection.client";
 import EpicStakeholdersSection from "./EpicStakeholdersSection.client";
-import EpicSubtasksSection from "./EpicSubtasksSection.client";
 import EpicTaskboardSection from "./EpicTaskboardSection.client";
 
 async function getEpicDetails(epicId: string) {
@@ -90,10 +89,12 @@ async function getEpicDetails(epicId: string) {
         t.column?.title?.toLowerCase().includes("done") ||
         t.column?.title?.toLowerCase().includes("complete")
     ).length || 0;
-  const blockedTasks =
+  const inProgressTasks =
     subtasks?.filter(
       (t: any) =>
-        t.isBlocked || t.column?.title?.toLowerCase().includes("blocked")
+        t.column?.title?.toLowerCase().includes("active") ||
+        t.column?.title?.toLowerCase().includes("in progress") ||
+        t.column?.title?.toLowerCase().includes("doing")
     ).length || 0;
   const progress =
     totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
@@ -112,7 +113,7 @@ async function getEpicDetails(epicId: string) {
     stakeholders: stakeholders || [],
     subtasks: subtasks || [],
     checklists: checklists || [],
-    metrics: { totalTasks, completedTasks, blockedTasks, progress },
+    metrics: { totalTasks, completedTasks, inProgressTasks, progress },
     attachments: attachments || [],
   };
 }
@@ -146,14 +147,14 @@ export default async function EpicDetailPage(props: {
     <>
       {/* Full-width header that spans the page; inner content is full-width with padded edges */}
       <div className="bg-zinc-900 border-t border-b border-zinc-800 mb-6">
-        <div className="max-w-7xl mx-auto px-6 py-8 min-h-[36vh]">
+        <div className="px-6 py-8 min-h-[36vh]">
           {/* Dashboard header layout: large grid for title + wide metrics and actions */}
           <div className="grid grid-cols-12 gap-6 items-start">
             <div className="col-span-7">
               <div className="flex items-center gap-3 mb-3">
                 <Link
                   href="/epics"
-                  className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+                  className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-zinc-400 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
                 >
                   <IconArrowLeft size={16} />
                   Back to epics
@@ -248,9 +249,9 @@ export default async function EpicDetailPage(props: {
             </div>
 
             <div className="col-span-2 bg-zinc-800 p-5 rounded-lg">
-              <div className="text-zinc-400 text-sm mb-1">Blocked</div>
-              <div className="text-2xl font-bold text-red-400">
-                {epic.metrics.blockedTasks}
+              <div className="text-zinc-400 text-sm mb-1">In Progress</div>
+              <div className="text-2xl font-bold text-blue-400">
+                {epic.metrics.inProgressTasks}
               </div>
             </div>
           </div>
@@ -282,22 +283,14 @@ export default async function EpicDetailPage(props: {
       {/* full-bleed visual debug row (edge-to-edge) */}
       <div className="mb-6 overflow-hidden">
         <div className="grid grid-cols-12 gap-4 px-6">
-          <div className="col-span-9 bg-green-600/30 border border-green-600 rounded-lg p-6 text-sm text-green-300">
+          <div className="col-span-9">
             {/* Checklists section above RACI matrix */}
             <div className="mb-6">
               <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
                 <EpicChecklistsSection epic={epic} params={params} />
               </div>
             </div>
-            {/* Subtasks section between Checklist and RACI */}
-            <div className="mb-6">
-              <EpicSubtasksSection
-                epic={epic}
-                params={params}
-                raciUsers={raciUsers}
-              />
-            </div>
-            {/* Taskboard section between Subtasks and RACI */}
+            {/* Taskboard section between Checklists and RACI */}
             <div className="mb-6">
               <EpicTaskboardSection epic={epic} params={params} />
             </div>
@@ -310,7 +303,7 @@ export default async function EpicDetailPage(props: {
               />
             </div>
           </div>
-          <div className="col-span-3 bg-blue-600/30 border border-blue-600 rounded-lg p-6 text-sm text-blue-300">
+          <div className="col-span-3">
             {/* Right 1/4 - Team members widget (client) */}
             <div className="w-full">
               <TeamMembers epicId={epic.id} />
