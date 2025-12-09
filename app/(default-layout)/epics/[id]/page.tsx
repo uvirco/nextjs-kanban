@@ -332,7 +332,7 @@ export default async function EpicDetailPage(props: {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto">
+      <div className="w-full px-6">
         <EpicContent epic={epic} raciUsers={raciUsers} params={params} />
       </div>
     </>

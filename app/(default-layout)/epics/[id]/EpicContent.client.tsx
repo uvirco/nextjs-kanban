@@ -3,8 +3,16 @@ import { useState, useEffect } from "react";
 import {
   IconChevronDown,
   IconChevronRight,
-  IconAlertTriangle,
 } from "@tabler/icons-react";
+import { EpicTasksGanttTimeline } from "@/ui/EpicTasksGanttTimeline";
+
+interface Subtask {
+  id: string;
+  title: string;
+  createdAt: string;
+  columnId: string;
+  column?: { id: string; title: string } | null;
+}
 
 function CollapsibleSection({
   title,
@@ -23,14 +31,12 @@ function CollapsibleSection({
 }) {
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
 
-  // After mount, hydrate collapse state from localStorage if storageKey was provided.
-  // This runs only on client (useEffect) so avoids SSR hydration mismatch.
   useEffect(() => {
     try {
       if (!storageKey) return;
       if (typeof window === "undefined") return;
       const raw = localStorage.getItem(storageKey);
-      if (raw === null) return; // no saved preference
+      if (raw === null) return;
       const parsed = raw === "true";
       setIsCollapsed(parsed);
     } catch (e) {
@@ -38,7 +44,6 @@ function CollapsibleSection({
     }
   }, [storageKey]);
 
-  // Persist collapse state to localStorage when changed
   useEffect(() => {
     try {
       if (!storageKey) return;
@@ -84,24 +89,12 @@ export default function EpicContent({
   raciUsers,
   params,
 }: EpicContentProps) {
+  const subtasks: Subtask[] = epic.subtasks || [];
+  
   return (
-    <div className="grid grid-cols-12 gap-6">
-      {/* Left widget column (quarter) */}
-      <div className="col-span-3">
-        {/* reserved for left widgets (timeline, quick actions, etc) */}
-      </div>
-
-      {/* Center area (1/2 width) */}
-      <div className="col-span-6">
-        {/* Subtasks moved to green zone in page.tsx */}
-      </div>
-
-      {/* Right Widget Column (Stakeholders / Team Members) */}
-      <div className="col-span-3">
-        <div className="space-y-4">
-          {/* Team Members moved to page.tsx blue block */}
-        </div>
-      </div>
+    <div className="space-y-6">
+      {/* Task Flow Timeline - Full Width */}
+      <EpicTasksGanttTimeline epicId={params.id} subtasks={subtasks} />
     </div>
   );
 }
