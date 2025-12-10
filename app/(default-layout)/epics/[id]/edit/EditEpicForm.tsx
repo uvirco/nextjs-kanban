@@ -20,6 +20,7 @@ interface Epic {
   stageGate: string | null;
   dueDate: string | null;
   startDate: string | null;
+  acceptanceCriteria?: string | null;
   departmentId: string | null;
 }
 
@@ -91,7 +92,10 @@ export default function EditEpicForm({
     startDate: epic.startDate
       ? new Date(epic.startDate).toISOString().split("T")[0]
       : "",
+    acceptanceCriteria: (epic as any).acceptanceCriteria || "",
   });
+
+  // (We use acceptanceCriteria as simple DoD text for now)
 
   const functionalRoles = [
     "Product Manager",
@@ -265,6 +269,8 @@ export default function EditEpicForm({
         startDate: formData.startDate
           ? new Date(formData.startDate).toISOString()
           : null,
+        dodText: (formData as any).dodText || null,
+        dodChecklist: (formData as any).dodChecklist || null,
         updatedAt: new Date().toISOString(),
       };
 
@@ -507,6 +513,26 @@ export default function EditEpicForm({
               className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
+        </div>
+      </div>
+
+      {/* Definition of Done (uses acceptanceCriteria field) */}
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold text-white">Definition of Done</h2>
+
+        <div>
+          <label className="block text-sm font-medium text-zinc-300 mb-2">
+            Definition of Done / Acceptance Criteria
+          </label>
+          <textarea
+            value={(formData as any).acceptanceCriteria}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, acceptanceCriteria: e.target.value }))
+            }
+            rows={4}
+            className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder={`Enter acceptance criteria or a Definition of Done for this epic.\n\nExample:\n- Code reviewed\n- Unit tests added\n- Integration tests pass in CI`}
+          />
         </div>
       </div>
 

@@ -30,6 +30,7 @@ export async function PUT(
       stageGate,
       dueDate,
       startDate,
+      acceptanceCriteria,
     } = body;
 
     // Validate required fields
@@ -55,6 +56,7 @@ export async function PUT(
       stageGate: stageGate || null,
       dueDate: dueDate || null,
       startDate: startDate || null,
+      acceptanceCriteria: acceptanceCriteria || null,
       updatedAt: new Date().toISOString(),
     };
 
