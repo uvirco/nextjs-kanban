@@ -17,7 +17,7 @@ async function getEpic(epicId: string) {
 
   const { data: epic, error } = await supabaseAdmin
     .from("Task")
-    .select("*")
+    .select("*, column:Column(id, title, boardId)")
     .eq("id", epicId)
     .eq("taskType", "EPIC")
     .single();
@@ -45,9 +45,17 @@ async function getEpic(epicId: string) {
     .eq("epicId", epicId)
     .order("createdAt", { ascending: true });
 
+  // Fetch goals
+  const { data: goals } = await supabaseAdmin
+    .from("Goal")
+    .select("*")
+    .eq("taskId", epicId)
+    .order("order", { ascending: true });
+
   return {
     ...epic,
     members: members || [],
+    goals: goals || [],
   };
 }
 
@@ -96,7 +104,11 @@ export default async function EditEpicPage(
             </div>
           </div>
 
-          <EditEpicForm epic={epic} initialMembers={epic.members} />
+          <EditEpicForm 
+            epic={epic} 
+            initialMembers={epic.members}
+            initialGoals={epic.goals}
+          />
         </div>
       </div>
     </div>

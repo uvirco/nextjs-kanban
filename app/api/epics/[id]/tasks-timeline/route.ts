@@ -31,7 +31,7 @@ export async function GET(
       return NextResponse.json({ timelines: [] });
     }
 
-    const taskIds = subtasks.map((t) => t.id);
+    const taskIds = subtasks.map((t: any) => t.id);
 
     // Get all TASK_MOVED activities for these tasks in one query
     const { data: activities } = await supabaseAdmin
@@ -43,7 +43,7 @@ export async function GET(
 
     // Collect all column IDs we need to look up
     const allColumnIds = new Set<string>();
-    subtasks.forEach((t) => {
+    subtasks.forEach((t: any) => {
       if (t.columnId) allColumnIds.add(t.columnId);
     });
     (activities || []).forEach((a: any) => {
@@ -72,7 +72,7 @@ export async function GET(
     });
 
     // Build timeline for each task
-    const timelines = subtasks.map((task) => {
+    const timelines = subtasks.map((task: any) => {
       const taskActivities = activitiesByTask[task.id] || [];
       const segments: Array<{
         columnName: string;

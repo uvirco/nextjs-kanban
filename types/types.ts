@@ -141,6 +141,18 @@ export interface ChecklistItem {
   createdAt: Date;
 }
 
+export interface Goal {
+  id: string;
+  taskId: string;
+  title: string;
+  description: string | null;
+  achieved: boolean;
+  achievedAt: Date | null;
+  achievedByUserId: string | null;
+  order: number;
+  createdAt: Date;
+}
+
 export interface BoardMember {
   userId: string;
   boardId: string;

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { IconLoader, IconPlus, IconX, IconUser } from "@tabler/icons-react";
 import RaciMatrixSection from "../RaciMatrixSection";
+import GoalSection from "@/ui/GoalSection";
 import { Department, FunctionalRole } from "@/types/types";
 
 interface Epic {
@@ -22,6 +23,11 @@ interface Epic {
   startDate: string | null;
   acceptanceCriteria?: string | null;
   departmentId: string | null;
+  column?: {
+    id: string;
+    title: string;
+    boardId: string;
+  };
 }
 
 interface EpicMember {
@@ -57,12 +63,16 @@ interface Role {
 interface EditEpicFormProps {
   epic: Epic;
   initialMembers?: EpicMember[];
+  initialGoals?: any[];
 }
 
 export default function EditEpicForm({
   epic,
   initialMembers = [],
+  initialGoals = [],
 }: EditEpicFormProps) {
+  console.log("EditEpicForm epic.id:", epic.id);
+  console.log("EditEpicForm initialGoals:", initialGoals);
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [members, setMembers] = useState<EpicMember[]>(initialMembers);
@@ -535,6 +545,13 @@ export default function EditEpicForm({
           />
         </div>
       </div>
+
+      {/* Goals Section */}
+      <GoalSection 
+        taskId={epic.id} 
+        boardId={epic.column?.boardId || ""} 
+        initialGoals={initialGoals}
+      />
 
       {/* Team Members */}
       <div className="space-y-4">

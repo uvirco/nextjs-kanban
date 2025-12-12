@@ -112,7 +112,7 @@ export default function TaskDetailActivity({
                 />
 
                 <div className="flex items-center gap-2">
-                  <Button size="sm" type="submit" disabled={isSubmitting}>
+                  <Button size="sm" type="submit" disabled={isSubmitting} variant="secondary">
                     Save
                   </Button>
                   <Button

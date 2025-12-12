@@ -15,6 +15,7 @@ import EpicLinksSection from "./EpicLinksSection.client";
 import EpicChecklistsSection from "./EpicChecklistsSection.client";
 import EpicStakeholdersSection from "./EpicStakeholdersSection.client";
 import EpicTaskboardSection from "./EpicTaskboardSection.client";
+import GoalSection from "@/ui/GoalSection";
 
 async function getEpicDetails(epicId: string) {
   const supabase = supabaseAdmin;
@@ -308,7 +309,13 @@ export default async function EpicDetailPage(props: {
             <div className="w-full">
               <TeamMembers epicId={epic.id} />
             </div>
-            {/* Stakeholders section below team members */}
+            {/* Goals section below team members */}
+            <div className="mt-6">
+              <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
+                <GoalSection taskId={epic.id} boardId={epic.column?.boardId || ""} />
+              </div>
+            </div>
+            {/* Stakeholders section below goals */}
             <div className="mt-6">
               <EpicStakeholdersSection epic={epic} params={params} />
             </div>
