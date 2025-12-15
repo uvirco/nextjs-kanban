@@ -7,6 +7,7 @@ import {
   IconPlus,
   IconList,
   IconChartLine,
+  IconSettings,
 } from "@tabler/icons-react";
 import EpicPriorityView from "./EpicPriorityView";
 import EpicTableView from "./EpicTableView";
@@ -57,6 +58,8 @@ interface SavedState {
   riskFilter: string;
   businessValueFilter: string;
   dueDateFilter: string;
+  showColumnSettings: boolean;
+  columnVisibility: Record<string, boolean>;
 }
 
 export default function EpicPortfolioClient({
@@ -72,6 +75,20 @@ export default function EpicPortfolioClient({
     riskFilter: "all",
     businessValueFilter: "all",
     dueDateFilter: "all",
+    showColumnSettings: false,
+    columnVisibility: {
+      title: true,
+      status: true,
+      readinessScore: true,
+      priority: true,
+      department: true,
+      businessValue: true,
+      riskLevel: true,
+      progress: true,
+      totalTasks: true,
+      dueDate: true,
+      owner: true,
+    },
   };
 
   const [view, setView] = useState<
@@ -92,6 +109,12 @@ export default function EpicPortfolioClient({
   const [dueDateFilter, setDueDateFilter] = useState<string>(
     DEFAULT_SAVED_STATE.dueDateFilter
   );
+  const [showColumnSettings, setShowColumnSettings] = useState<boolean>(
+    DEFAULT_SAVED_STATE.showColumnSettings
+  );
+  const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>(
+    DEFAULT_SAVED_STATE.columnVisibility
+  );
 
   // After mount, load saved state from localStorage and apply client-side only
   useEffect(() => {
@@ -109,6 +132,8 @@ export default function EpicPortfolioClient({
       if (parsed.businessValueFilter)
         setBusinessValueFilter(parsed.businessValueFilter);
       if (parsed.dueDateFilter) setDueDateFilter(parsed.dueDateFilter);
+      if (parsed.showColumnSettings !== undefined) setShowColumnSettings(parsed.showColumnSettings);
+      if (parsed.columnVisibility) setColumnVisibility(parsed.columnVisibility);
     } catch (error) {
       console.error("Error loading saved state:", error);
     }
@@ -123,6 +148,8 @@ export default function EpicPortfolioClient({
       riskFilter,
       businessValueFilter,
       dueDateFilter,
+      showColumnSettings,
+      columnVisibility,
     };
 
     try {
@@ -137,6 +164,8 @@ export default function EpicPortfolioClient({
     riskFilter,
     businessValueFilter,
     dueDateFilter,
+    showColumnSettings,
+    columnVisibility,
   ]);
 
   // Get unique departments for filter dropdown
@@ -418,11 +447,62 @@ export default function EpicPortfolioClient({
             Clear Filters
           </button>
         )}
+
+        {/* Columns Button */}
+        <div className="ml-auto">
+          <div className="relative">
+            <button
+              onClick={() => setShowColumnSettings(!showColumnSettings)}
+              className="flex items-center gap-2 px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors text-sm"
+            >
+              <IconSettings size={16} />
+              Columns
+            </button>
+            {showColumnSettings && (
+              <div className="absolute right-0 mt-2 w-56 bg-zinc-800 border border-zinc-700 rounded-lg shadow-lg z-10">
+                <div className="p-2 space-y-1">
+                  {Object.entries(columnVisibility).map(([key, visible]) => {
+                    const columnLabels: Record<string, string> = {
+                      title: "Title",
+                      status: "Status",
+                      readinessScore: "Readiness",
+                      priority: "Priority",
+                      department: "Department",
+                      businessValue: "Business Value",
+                      riskLevel: "Risk",
+                      progress: "Progress",
+                      totalTasks: "Tasks",
+                      dueDate: "Due Date",
+                      owner: "Owner",
+                    };
+                    return (
+                      <label
+                        key={key}
+                        className="flex items-center gap-2 px-2 py-1.5 hover:bg-zinc-700 rounded cursor-pointer"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={visible}
+                          onChange={() => setColumnVisibility(prev => ({
+                            ...prev,
+                            [key]: !prev[key]
+                          }))}
+                          className="w-4 h-4"
+                        />
+                        <span className="text-sm text-white">{columnLabels[key] || key}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* View Content */}
       {view === "priority" && <EpicPriorityView epics={filteredEpics} />}
-      {view === "table" && <EpicTableView epics={filteredEpics} />}
+      {view === "table" && <EpicTableView epics={filteredEpics} columnVisibility={columnVisibility} />}
       {view === "board" && epicBoard && (
         <div className="min-w-0 w-full">
           <EpicBoard board={epicBoard} epics={filteredEpics} />

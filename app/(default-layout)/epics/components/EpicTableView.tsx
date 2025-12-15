@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import {
   IconChevronUp,
   IconChevronDown,
-  IconSettings,
   IconExternalLink,
   IconEdit,
 } from "@tabler/icons-react";
@@ -45,6 +44,7 @@ interface Epic {
 
 interface EpicTableViewProps {
   epics: Epic[];
+  columnVisibility?: Record<string, boolean>;
 }
 
 type SortField =
@@ -68,12 +68,13 @@ interface ColumnConfig {
   sortable: boolean;
 }
 
-export default function EpicTableView({ epics }: EpicTableViewProps) {
+export default function EpicTableView({ epics, columnVisibility = {} }: EpicTableViewProps) {
   const router = useRouter();
   const [sortField, setSortField] = useState<SortField>("title");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
-  const [showColumnSettings, setShowColumnSettings] = useState(false);
-  const [columns, setColumns] = useState<ColumnConfig[]>([
+
+  // Use default column configuration if none provided
+  const defaultColumns: ColumnConfig[] = [
     { key: "title", label: "Title", visible: true, sortable: true },
     { key: "status", label: "Status", visible: true, sortable: true },
     {
@@ -95,7 +96,13 @@ export default function EpicTableView({ epics }: EpicTableViewProps) {
     { key: "totalTasks", label: "Tasks", visible: true, sortable: true },
     { key: "dueDate", label: "Due Date", visible: true, sortable: true },
     { key: "owner", label: "Owner", visible: true, sortable: false },
-  ]);
+  ];
+
+  // Merge provided visibility with default columns
+  const columns = defaultColumns.map(col => ({
+    ...col,
+    visible: columnVisibility[col.key] ?? col.visible
+  }));
 
   const handleRowClick = (epicId: string, event: React.MouseEvent) => {
     // Don't navigate if clicking on action buttons or links
@@ -103,14 +110,6 @@ export default function EpicTableView({ epics }: EpicTableViewProps) {
       return;
     }
     router.push(`/epics/${epicId}`);
-  };
-
-  const toggleColumn = (key: string) => {
-    setColumns((prev) =>
-      prev.map((col) =>
-        col.key === key ? { ...col, visible: !col.visible } : col
-      )
-    );
   };
 
   const handleSort = (field: SortField) => {
@@ -255,39 +254,6 @@ export default function EpicTableView({ epics }: EpicTableViewProps) {
 
   return (
     <div className="space-y-4">
-      {/* Column Settings */}
-      <div className="flex justify-end">
-        <div className="relative">
-          <button
-            onClick={() => setShowColumnSettings(!showColumnSettings)}
-            className="flex items-center gap-2 px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors text-sm"
-          >
-            <IconSettings size={16} />
-            Columns
-          </button>
-          {showColumnSettings && (
-            <div className="absolute right-0 mt-2 w-56 bg-zinc-800 border border-zinc-700 rounded-lg shadow-lg z-10">
-              <div className="p-2 space-y-1">
-                {columns.map((col) => (
-                  <label
-                    key={col.key}
-                    className="flex items-center gap-2 px-2 py-1.5 hover:bg-zinc-700 rounded cursor-pointer"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={col.visible}
-                      onChange={() => toggleColumn(col.key)}
-                      className="w-4 h-4"
-                    />
-                    <span className="text-sm text-white">{col.label}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
       {/* Table */}
       <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
