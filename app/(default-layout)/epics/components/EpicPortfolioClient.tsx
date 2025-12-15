@@ -60,7 +60,17 @@ interface SavedState {
   dueDateFilter: string;
   showColumnSettings: boolean;
   columnVisibility: Record<string, boolean>;
-  sortField: "title" | "status" | "priority" | "readinessScore" | "progress" | "dueDate" | "department" | "businessValue" | "riskLevel" | "totalTasks";
+  sortField:
+    | "title"
+    | "status"
+    | "priority"
+    | "readinessScore"
+    | "progress"
+    | "dueDate"
+    | "department"
+    | "businessValue"
+    | "riskLevel"
+    | "totalTasks";
   sortDirection: "asc" | "desc";
 }
 
@@ -123,20 +133,35 @@ export default function EpicPortfolioClient({
     getInitialState("riskFilter", DEFAULT_SAVED_STATE.riskFilter)
   );
   const [businessValueFilter, setBusinessValueFilter] = useState<string>(
-    getInitialState("businessValueFilter", DEFAULT_SAVED_STATE.businessValueFilter)
+    getInitialState(
+      "businessValueFilter",
+      DEFAULT_SAVED_STATE.businessValueFilter
+    )
   );
   const [dueDateFilter, setDueDateFilter] = useState<string>(
     getInitialState("dueDateFilter", DEFAULT_SAVED_STATE.dueDateFilter)
   );
   const [showColumnSettings, setShowColumnSettings] = useState<boolean>(
-    getInitialState("showColumnSettings", DEFAULT_SAVED_STATE.showColumnSettings)
+    getInitialState(
+      "showColumnSettings",
+      DEFAULT_SAVED_STATE.showColumnSettings
+    )
   );
-  const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>(
-    getInitialState("columnVisibility", DEFAULT_SAVED_STATE.columnVisibility)
-  );
-  const [sortField, setSortField] = useState<"title" | "status" | "priority" | "readinessScore" | "progress" | "dueDate" | "department" | "businessValue" | "riskLevel" | "totalTasks">(
-    getInitialState("sortField", DEFAULT_SAVED_STATE.sortField)
-  );
+  const [columnVisibility, setColumnVisibility] = useState<
+    Record<string, boolean>
+  >(getInitialState("columnVisibility", DEFAULT_SAVED_STATE.columnVisibility));
+  const [sortField, setSortField] = useState<
+    | "title"
+    | "status"
+    | "priority"
+    | "readinessScore"
+    | "progress"
+    | "dueDate"
+    | "department"
+    | "businessValue"
+    | "riskLevel"
+    | "totalTasks"
+  >(getInitialState("sortField", DEFAULT_SAVED_STATE.sortField));
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">(
     getInitialState("sortDirection", DEFAULT_SAVED_STATE.sortDirection)
   );
@@ -489,13 +514,17 @@ export default function EpicPortfolioClient({
                         <input
                           type="checkbox"
                           checked={visible}
-                          onChange={() => setColumnVisibility(prev => ({
-                            ...prev,
-                            [key]: !prev[key]
-                          }))}
+                          onChange={() =>
+                            setColumnVisibility((prev) => ({
+                              ...prev,
+                              [key]: !prev[key],
+                            }))
+                          }
                           className="w-4 h-4"
                         />
-                        <span className="text-sm text-white">{columnLabels[key] || key}</span>
+                        <span className="text-sm text-white">
+                          {columnLabels[key] || key}
+                        </span>
                       </label>
                     );
                   })}
@@ -508,7 +537,18 @@ export default function EpicPortfolioClient({
 
       {/* View Content */}
       {view === "priority" && <EpicPriorityView epics={filteredEpics} />}
-      {view === "table" && <EpicTableView epics={filteredEpics} columnVisibility={columnVisibility} sortField={sortField} sortDirection={sortDirection} onSortChange={(field, direction) => { setSortField(field); setSortDirection(direction); }} />}
+      {view === "table" && (
+        <EpicTableView
+          epics={filteredEpics}
+          columnVisibility={columnVisibility}
+          sortField={sortField}
+          sortDirection={sortDirection}
+          onSortChange={(field, direction) => {
+            setSortField(field);
+            setSortDirection(direction);
+          }}
+        />
+      )}
       {view === "board" && epicBoard && (
         <div className="min-w-0 w-full">
           <EpicBoard board={epicBoard} epics={filteredEpics} />

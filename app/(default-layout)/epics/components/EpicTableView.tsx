@@ -71,15 +71,15 @@ interface ColumnConfig {
   sortable: boolean;
 }
 
-export default function EpicTableView({ 
-  epics, 
-  columnVisibility = {}, 
+export default function EpicTableView({
+  epics,
+  columnVisibility = {},
   sortField: externalSortField,
   sortDirection: externalSortDirection,
-  onSortChange
+  onSortChange,
 }: EpicTableViewProps) {
   const router = useRouter();
-  
+
   // Use external sort state if provided, otherwise use defaults
   const sortField = externalSortField || "title";
   const sortDirection = externalSortDirection || "asc";
@@ -110,9 +110,9 @@ export default function EpicTableView({
   ];
 
   // Merge provided visibility with default columns
-  const columns = defaultColumns.map(col => ({
+  const columns = defaultColumns.map((col) => ({
     ...col,
-    visible: columnVisibility[col.key] ?? col.visible
+    visible: columnVisibility[col.key] ?? col.visible,
   }));
 
   const handleRowClick = (epicId: string, event: React.MouseEvent) => {

@@ -106,8 +106,10 @@ export default function CreateRoleModal({ trigger }: CreateRoleModalProps) {
                   className="dark"
                   classNames={{
                     label: "text-zinc-300",
-                    input: "bg-zinc-800 border-zinc-600 text-white placeholder-zinc-400",
-                    inputWrapper: "bg-zinc-800 border-zinc-600 hover:bg-zinc-700 focus-within:bg-zinc-700"
+                    input:
+                      "bg-zinc-800 border-zinc-600 text-white placeholder-zinc-400",
+                    inputWrapper:
+                      "bg-zinc-800 border-zinc-600 hover:bg-zinc-700 focus-within:bg-zinc-700",
                   }}
                 />
 
@@ -119,8 +121,10 @@ export default function CreateRoleModal({ trigger }: CreateRoleModalProps) {
                   className="dark"
                   classNames={{
                     label: "text-zinc-300",
-                    input: "bg-zinc-800 border-zinc-600 text-white placeholder-zinc-400",
-                    inputWrapper: "bg-zinc-800 border-zinc-600 hover:bg-zinc-700 focus-within:bg-zinc-700"
+                    input:
+                      "bg-zinc-800 border-zinc-600 text-white placeholder-zinc-400",
+                    inputWrapper:
+                      "bg-zinc-800 border-zinc-600 hover:bg-zinc-700 focus-within:bg-zinc-700",
                   }}
                 />
 
@@ -133,14 +137,19 @@ export default function CreateRoleModal({ trigger }: CreateRoleModalProps) {
                   className="dark"
                   classNames={{
                     label: "text-zinc-300",
-                    trigger: "bg-zinc-800 border-zinc-600 text-white hover:bg-zinc-700 data-[open=true]:bg-zinc-700",
+                    trigger:
+                      "bg-zinc-800 border-zinc-600 text-white hover:bg-zinc-700 data-[open=true]:bg-zinc-700",
                     listbox: "bg-zinc-800 border-zinc-600",
                     popoverContent: "bg-zinc-800 border-zinc-600",
-                    listboxWrapper: "bg-zinc-800"
+                    listboxWrapper: "bg-zinc-800",
                   }}
                 >
                   {categories.map((category) => (
-                    <SelectItem key={category.value} value={category.value} className="text-white hover:bg-zinc-700">
+                    <SelectItem
+                      key={category.value}
+                      value={category.value}
+                      className="text-white hover:bg-zinc-700"
+                    >
                       {category.label}
                     </SelectItem>
                   ))}
@@ -156,8 +165,10 @@ export default function CreateRoleModal({ trigger }: CreateRoleModalProps) {
                   className="dark"
                   classNames={{
                     label: "text-zinc-300",
-                    input: "bg-zinc-800 border-zinc-600 text-white placeholder-zinc-400",
-                    inputWrapper: "bg-zinc-800 border-zinc-600 hover:bg-zinc-700 focus-within:bg-zinc-700"
+                    input:
+                      "bg-zinc-800 border-zinc-600 text-white placeholder-zinc-400",
+                    inputWrapper:
+                      "bg-zinc-800 border-zinc-600 hover:bg-zinc-700 focus-within:bg-zinc-700",
                   }}
                 />
               </div>
@@ -171,7 +182,12 @@ export default function CreateRoleModal({ trigger }: CreateRoleModalProps) {
               >
                 Cancel
               </Button>
-              <Button color="primary" type="submit" isLoading={isSubmitting} className="bg-blue-600 hover:bg-blue-700">
+              <Button
+                color="primary"
+                type="submit"
+                isLoading={isSubmitting}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
                 {isSubmitting ? "Creating..." : "Create Role"}
               </Button>
             </ModalFooter>
