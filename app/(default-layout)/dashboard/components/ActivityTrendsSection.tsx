@@ -14,30 +14,29 @@ export default function ActivityTrendsSection({
   dateRange,
 }: ActivityTrendsSectionProps) {
   return (
-    <div className="space-y-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {epics.map((epic) => (
         <Card
           key={epic.id}
           className="bg-zinc-900 border-zinc-800 hover:bg-zinc-800 transition-colors"
         >
-          <CardHeader className="pb-3">
+          <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-xl font-semibold text-white">
+              <CardTitle className="text-sm font-semibold text-white truncate pr-2">
                 {epic.title}
               </CardTitle>
-              <div className="text-right">
-                <div className="text-2xl font-bold text-blue-400">
+              <div className="text-right flex-shrink-0">
+                <div className="text-lg font-bold text-blue-400">
                   <EpicMonthlyTotal epicId={epic.id} />
                 </div>
-                <div className="text-sm text-zinc-400">This Month</div>
               </div>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0">
             <EpicActivityChart
               epicId={epic.id}
               dateRange={dateRange}
-              height={250}
+              height={100}
             />
           </CardContent>
         </Card>
