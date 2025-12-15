@@ -21,7 +21,11 @@ import GoalSection from "@/ui/GoalSection";
 import EpicCommentsOverview from "@/ui/EpicCommentsOverview";
 import EpicDetailsSidebar from "@/ui/EpicDetailsSidebar";
 
-function EpicDetailPageClient({ epic, raciUsers, params }: {
+function EpicDetailPageClient({
+  epic,
+  raciUsers,
+  params,
+}: {
   epic: any;
   raciUsers: any[];
   params: { id: string };
@@ -30,7 +34,7 @@ function EpicDetailPageClient({ epic, raciUsers, params }: {
 
   useEffect(() => {
     // Load sidebar preference from localStorage
-    const saved = localStorage.getItem('epic-sidebar-collapsed');
+    const saved = localStorage.getItem("epic-sidebar-collapsed");
     if (saved !== null) {
       setSidebarCollapsed(JSON.parse(saved));
     }
@@ -39,7 +43,7 @@ function EpicDetailPageClient({ epic, raciUsers, params }: {
   const toggleSidebar = () => {
     const newState = !sidebarCollapsed;
     setSidebarCollapsed(newState);
-    localStorage.setItem('epic-sidebar-collapsed', JSON.stringify(newState));
+    localStorage.setItem("epic-sidebar-collapsed", JSON.stringify(newState));
   };
 
   return (
@@ -87,25 +91,36 @@ function EpicDetailPageClient({ epic, raciUsers, params }: {
           <div className="flex items-center gap-6 mt-4">
             {epic.column && (
               <span className="px-3 py-1 text-sm font-medium bg-indigo-900/30 text-indigo-400 rounded">
-                {epic.column.title.replace(/[\uD83C-\uDBFF\uDC00-\uDFFF]+/g, "").trim()}
+                {epic.column.title
+                  .replace(/[\uD83C-\uDBFF\uDC00-\uDFFF]+/g, "")
+                  .trim()}
               </span>
             )}
             {epic.priority && (
-              <span className={`px-3 py-1 text-sm font-medium rounded ${
-                epic.priority.toLowerCase() === "critical" ? "bg-red-900/30 text-red-400" :
-                epic.priority.toLowerCase() === "high" ? "bg-orange-900/30 text-orange-400" :
-                epic.priority.toLowerCase() === "medium" ? "bg-yellow-900/30 text-yellow-400" :
-                "bg-green-900/30 text-green-400"
-              }`}>
+              <span
+                className={`px-3 py-1 text-sm font-medium rounded ${
+                  epic.priority.toLowerCase() === "critical"
+                    ? "bg-red-900/30 text-red-400"
+                    : epic.priority.toLowerCase() === "high"
+                      ? "bg-orange-900/30 text-orange-400"
+                      : epic.priority.toLowerCase() === "medium"
+                        ? "bg-yellow-900/30 text-yellow-400"
+                        : "bg-green-900/30 text-green-400"
+                }`}
+              >
                 {epic.priority} Priority
               </span>
             )}
             {epic.riskLevel && (
-              <span className={`px-3 py-1 text-sm font-medium rounded ${
-                epic.riskLevel.toLowerCase() === "high" ? "bg-red-900/30 text-red-400" :
-                epic.riskLevel.toLowerCase() === "medium" ? "bg-yellow-900/30 text-yellow-400" :
-                "bg-green-900/30 text-green-400"
-              }`}>
+              <span
+                className={`px-3 py-1 text-sm font-medium rounded ${
+                  epic.riskLevel.toLowerCase() === "high"
+                    ? "bg-red-900/30 text-red-400"
+                    : epic.riskLevel.toLowerCase() === "medium"
+                      ? "bg-yellow-900/30 text-yellow-400"
+                      : "bg-green-900/30 text-green-400"
+                }`}
+              >
                 {epic.riskLevel} Risk
               </span>
             )}
@@ -191,7 +206,9 @@ function EpicDetailPageClient({ epic, raciUsers, params }: {
       <div className="overflow-hidden">
         <div className="grid grid-cols-12 gap-4 px-6">
           {/* Main Content */}
-          <div className={`${sidebarCollapsed ? 'col-span-12' : 'col-span-9'} transition-all duration-300`}>
+          <div
+            className={`${sidebarCollapsed ? "col-span-12" : "col-span-9"} transition-all duration-300`}
+          >
             {/* Task Flow Timeline - Full Width - Moved to top */}
             <div className="w-full mb-6">
               <EpicContent epic={epic} raciUsers={raciUsers} params={params} />
@@ -227,7 +244,10 @@ function EpicDetailPageClient({ epic, raciUsers, params }: {
               {/* Goals section below team members */}
               <div className="mt-6">
                 <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
-                  <GoalSection taskId={epic.id} boardId={epic.column?.boardId || ""} />
+                  <GoalSection
+                    taskId={epic.id}
+                    boardId={epic.column?.boardId || ""}
+                  />
                 </div>
               </div>
               {/* Stakeholders section below goals */}

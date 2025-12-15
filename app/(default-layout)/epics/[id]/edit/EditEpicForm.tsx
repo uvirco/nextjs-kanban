@@ -190,21 +190,31 @@ export default function EditEpicForm({
   }, []);
 
   // Get unique categories from roles
-  const roleCategories = ['all', ...new Set(roles.map(role => role.category).filter(Boolean))];
+  const roleCategories = [
+    "all",
+    ...new Set(roles.map((role) => role.category).filter(Boolean)),
+  ];
 
   // Filter roles by selected category
-  const filteredRoles = selectedRoleCategory === 'all'
-    ? roles
-    : roles.filter(role => role.category === selectedRoleCategory);
+  const filteredRoles =
+    selectedRoleCategory === "all"
+      ? roles
+      : roles.filter((role) => role.category === selectedRoleCategory);
 
   // Check for unsaved changes
   const hasUnsavedChanges = useCallback(() => {
     // Check form data changes
-    const formDataChanged = JSON.stringify(formData) !== JSON.stringify(initialFormDataState);
+    const formDataChanged =
+      JSON.stringify(formData) !== JSON.stringify(initialFormDataState);
 
     // Check members changes
-    const membersChanged = JSON.stringify(members.map(m => ({ userId: m.user.id, role: m.role }))) !==
-                          JSON.stringify(initialMembersState.map(m => ({ userId: m.user.id, role: m.role })));
+    const membersChanged =
+      JSON.stringify(
+        members.map((m) => ({ userId: m.user.id, role: m.role }))
+      ) !==
+      JSON.stringify(
+        initialMembersState.map((m) => ({ userId: m.user.id, role: m.role }))
+      );
 
     return formDataChanged || membersChanged;
   }, [formData, initialFormDataState, members, initialMembersState]);
@@ -214,7 +224,8 @@ export default function EditEpicForm({
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (hasUnsavedChanges()) {
         e.preventDefault();
-        e.returnValue = "You have unsaved changes. Are you sure you want to leave?";
+        e.returnValue =
+          "You have unsaved changes. Are you sure you want to leave?";
         return e.returnValue;
       }
     };
@@ -224,16 +235,21 @@ export default function EditEpicForm({
   }, [hasUnsavedChanges]);
 
   // Handle navigation away from the page (for internal navigation)
-  const handleNavigation = useCallback((href: string) => {
-    if (hasUnsavedChanges()) {
-      const confirmed = window.confirm("You have unsaved changes. Are you sure you want to leave?");
-      if (!confirmed) {
-        return false; // Prevent navigation
+  const handleNavigation = useCallback(
+    (href: string) => {
+      if (hasUnsavedChanges()) {
+        const confirmed = window.confirm(
+          "You have unsaved changes. Are you sure you want to leave?"
+        );
+        if (!confirmed) {
+          return false; // Prevent navigation
+        }
       }
-    }
-    router.push(href);
-    return true;
-  }, [hasUnsavedChanges, router]);
+      router.push(href);
+      return true;
+    },
+    [hasUnsavedChanges, router]
+  );
 
   const addMember = async () => {
     if (!selectedUserId || !selectedRole) return;
@@ -609,7 +625,10 @@ export default function EditEpicForm({
           <textarea
             value={(formData as any).acceptanceCriteria}
             onChange={(e) =>
-              setFormData((prev) => ({ ...prev, acceptanceCriteria: e.target.value }))
+              setFormData((prev) => ({
+                ...prev,
+                acceptanceCriteria: e.target.value,
+              }))
             }
             rows={4}
             className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -619,9 +638,9 @@ export default function EditEpicForm({
       </div>
 
       {/* Goals Section */}
-      <GoalSection 
-        taskId={epic.id} 
-        boardId={epic.column?.boardId || ""} 
+      <GoalSection
+        taskId={epic.id}
+        boardId={epic.column?.boardId || ""}
         initialGoals={initialGoals}
       />
 
@@ -671,7 +690,9 @@ export default function EditEpicForm({
               </div>
 
               <div>
-                <label className="block text-sm text-zinc-400 mb-1">Role Category</label>
+                <label className="block text-sm text-zinc-400 mb-1">
+                  Role Category
+                </label>
                 <select
                   value={selectedRoleCategory}
                   onChange={(e) => {
@@ -681,11 +702,13 @@ export default function EditEpicForm({
                   className="w-full px-3 py-2 bg-zinc-700 border border-zinc-600 rounded text-white"
                 >
                   <option value="all">All Categories</option>
-                  {roleCategories.filter(cat => cat !== 'all').map((category) => (
-                    <option key={category} value={category}>
-                      {category.charAt(0).toUpperCase() + category.slice(1)}
-                    </option>
-                  ))}
+                  {roleCategories
+                    .filter((cat) => cat !== "all")
+                    .map((category) => (
+                      <option key={category} value={category}>
+                        {category.charAt(0).toUpperCase() + category.slice(1)}
+                      </option>
+                    ))}
                 </select>
               </div>
 

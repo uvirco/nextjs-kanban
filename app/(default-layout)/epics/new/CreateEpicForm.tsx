@@ -233,6 +233,7 @@ export default function CreateEpicForm({
             >
               <option value="">Select effort...</option>
               <option value="SMALL">Small (1-2 weeks)</option>
+              <option value="MEDIUM">Medium (2-4 weeks)</option>
               <option value="MEDIUM">Medium (1-3 months)</option>
               <option value="LARGE">Large (3-6 months)</option>
               <option value="XLARGE">Extra Large (6+ months)</option>

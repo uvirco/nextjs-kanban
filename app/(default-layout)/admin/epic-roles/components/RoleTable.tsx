@@ -42,20 +42,25 @@ export default function RoleTable({ roles }: RoleTableProps) {
 
   // Get unique categories for filter dropdown
   const categories = useMemo(() => {
-    const uniqueCategories = Array.from(new Set(roles.map(role => role.category)));
+    const uniqueCategories = Array.from(
+      new Set(roles.map((role) => role.category))
+    );
     return ["all", ...uniqueCategories.sort()];
   }, [roles]);
 
   // Filter and sort roles
   const filteredAndSortedRoles = useMemo(() => {
-    let filtered = roles.filter(role => {
-      const matchesSearch = searchTerm === "" ||
+    let filtered = roles.filter((role) => {
+      const matchesSearch =
+        searchTerm === "" ||
         role.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         role.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         role.category.toLowerCase().includes(searchTerm.toLowerCase());
 
-      const matchesCategory = categoryFilter === "all" || role.category === categoryFilter;
-      const matchesStatus = statusFilter === "all" ||
+      const matchesCategory =
+        categoryFilter === "all" || role.category === categoryFilter;
+      const matchesStatus =
+        statusFilter === "all" ||
         (statusFilter === "active" && role.isActive) ||
         (statusFilter === "inactive" && !role.isActive);
 
@@ -79,7 +84,14 @@ export default function RoleTable({ roles }: RoleTableProps) {
     });
 
     return filtered;
-  }, [roles, searchTerm, categoryFilter, statusFilter, sortField, sortDirection]);
+  }, [
+    roles,
+    searchTerm,
+    categoryFilter,
+    statusFilter,
+    sortField,
+    sortDirection,
+  ]);
 
   // Handle sorting
   const handleSort = (field: string) => {
@@ -172,7 +184,10 @@ export default function RoleTable({ roles }: RoleTableProps) {
           {/* Search */}
           <div className="flex-1">
             <div className="relative">
-              <IconSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400" size={16} />
+              <IconSearch
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400"
+                size={16}
+              />
               <input
                 type="text"
                 placeholder="Search roles..."
@@ -191,11 +206,13 @@ export default function RoleTable({ roles }: RoleTableProps) {
               className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">All Categories</option>
-              {categories.filter(cat => cat !== "all").map(category => (
-                <option key={category} value={category}>
-                  {category.charAt(0).toUpperCase() + category.slice(1)}
-                </option>
-              ))}
+              {categories
+                .filter((cat) => cat !== "all")
+                .map((category) => (
+                  <option key={category} value={category}>
+                    {category.charAt(0).toUpperCase() + category.slice(1)}
+                  </option>
+                ))}
             </select>
           </div>
 
@@ -229,9 +246,12 @@ export default function RoleTable({ roles }: RoleTableProps) {
               >
                 <div className="flex items-center gap-1">
                   Role
-                  {sortField === "name" && (
-                    sortDirection === "asc" ? <IconChevronUp size={14} /> : <IconChevronDown size={14} />
-                  )}
+                  {sortField === "name" &&
+                    (sortDirection === "asc" ? (
+                      <IconChevronUp size={14} />
+                    ) : (
+                      <IconChevronDown size={14} />
+                    ))}
                 </div>
               </th>
               <th
@@ -240,9 +260,12 @@ export default function RoleTable({ roles }: RoleTableProps) {
               >
                 <div className="flex items-center gap-1">
                   Category
-                  {sortField === "category" && (
-                    sortDirection === "asc" ? <IconChevronUp size={14} /> : <IconChevronDown size={14} />
-                  )}
+                  {sortField === "category" &&
+                    (sortDirection === "asc" ? (
+                      <IconChevronUp size={14} />
+                    ) : (
+                      <IconChevronDown size={14} />
+                    ))}
                 </div>
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-zinc-300 uppercase tracking-wider">
@@ -254,9 +277,12 @@ export default function RoleTable({ roles }: RoleTableProps) {
               >
                 <div className="flex items-center gap-1">
                   Order
-                  {sortField === "sortOrder" && (
-                    sortDirection === "asc" ? <IconChevronUp size={14} /> : <IconChevronDown size={14} />
-                  )}
+                  {sortField === "sortOrder" &&
+                    (sortDirection === "asc" ? (
+                      <IconChevronUp size={14} />
+                    ) : (
+                      <IconChevronDown size={14} />
+                    ))}
                 </div>
               </th>
               <th
@@ -265,9 +291,12 @@ export default function RoleTable({ roles }: RoleTableProps) {
               >
                 <div className="flex items-center gap-1">
                   Status
-                  {sortField === "isActive" && (
-                    sortDirection === "asc" ? <IconChevronUp size={14} /> : <IconChevronDown size={14} />
-                  )}
+                  {sortField === "isActive" &&
+                    (sortDirection === "asc" ? (
+                      <IconChevronUp size={14} />
+                    ) : (
+                      <IconChevronDown size={14} />
+                    ))}
                 </div>
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-zinc-300 uppercase tracking-wider">

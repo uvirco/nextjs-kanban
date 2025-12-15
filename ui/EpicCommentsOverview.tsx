@@ -1,6 +1,10 @@
 "use client";
 import { useState, useEffect } from "react";
-import { IconMessage, IconChevronDown, IconChevronRight } from "@tabler/icons-react";
+import {
+  IconMessage,
+  IconChevronDown,
+  IconChevronRight,
+} from "@tabler/icons-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import TaskDetailItemHeading from "@/ui/TaskDetail/TaskDetailView/ui/TaskDetailItemHeading";
 import TaskDetailItemContent from "@/ui/TaskDetail/TaskDetailView/ui/TaskDetailItemContent";
@@ -24,7 +28,9 @@ interface CommentWithTask {
   };
 }
 
-export default function EpicCommentsOverview({ epicId }: EpicCommentsOverviewProps) {
+export default function EpicCommentsOverview({
+  epicId,
+}: EpicCommentsOverviewProps) {
   const [comments, setComments] = useState<CommentWithTask[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedTasks, setExpandedTasks] = useState<Set<string>>(new Set());
@@ -58,23 +64,32 @@ export default function EpicCommentsOverview({ epicId }: EpicCommentsOverviewPro
   };
 
   // Group comments by task
-  const commentsByTask = comments.reduce((acc, comment) => {
-    if (!acc[comment.task.id]) {
-      acc[comment.task.id] = {
-        task: comment.task,
-        comments: []
-      };
-    }
-    acc[comment.task.id].comments.push(comment);
-    return acc;
-  }, {} as Record<string, { task: CommentWithTask['task'], comments: CommentWithTask[] }>);
+  const commentsByTask = comments.reduce(
+    (acc, comment) => {
+      if (!acc[comment.task.id]) {
+        acc[comment.task.id] = {
+          task: comment.task,
+          comments: [],
+        };
+      }
+      acc[comment.task.id].comments.push(comment);
+      return acc;
+    },
+    {} as Record<
+      string,
+      { task: CommentWithTask["task"]; comments: CommentWithTask[] }
+    >
+  );
 
   const taskEntries = Object.values(commentsByTask);
 
   if (loading) {
     return (
       <div className="mt-6">
-        <TaskDetailItemHeading title="Comments Overview" icon={<IconMessage size={32} />} />
+        <TaskDetailItemHeading
+          title="Comments Overview"
+          icon={<IconMessage size={32} />}
+        />
         <TaskDetailItemContent indented>
           <div className="text-center py-8 text-zinc-500">
             Loading comments...
@@ -87,7 +102,10 @@ export default function EpicCommentsOverview({ epicId }: EpicCommentsOverviewPro
   if (taskEntries.length === 0) {
     return (
       <div className="mt-6">
-        <TaskDetailItemHeading title="Comments Overview" icon={<IconMessage size={32} />} />
+        <TaskDetailItemHeading
+          title="Comments Overview"
+          icon={<IconMessage size={32} />}
+        />
         <TaskDetailItemContent indented>
           <div className="text-center py-8 text-zinc-500">
             No comments found across epic tasks
@@ -99,11 +117,17 @@ export default function EpicCommentsOverview({ epicId }: EpicCommentsOverviewPro
 
   return (
     <div className="mt-6">
-      <TaskDetailItemHeading title="Comments Overview" icon={<IconMessage size={32} />} />
+      <TaskDetailItemHeading
+        title="Comments Overview"
+        icon={<IconMessage size={32} />}
+      />
       <TaskDetailItemContent indented>
         <div className="space-y-4">
           {taskEntries.map(({ task, comments: taskComments }) => (
-            <div key={task.id} className="border border-zinc-700 rounded-lg bg-zinc-800/50">
+            <div
+              key={task.id}
+              className="border border-zinc-700 rounded-lg bg-zinc-800/50"
+            >
               <button
                 onClick={() => toggleTaskExpansion(task.id)}
                 className="w-full flex items-center justify-between p-4 hover:bg-zinc-800/70 transition-colors"
@@ -116,7 +140,8 @@ export default function EpicCommentsOverview({ epicId }: EpicCommentsOverviewPro
                   )}
                   <span className="font-medium text-white">{task.title}</span>
                   <span className="text-sm text-zinc-400">
-                    ({taskComments.length} comment{taskComments.length !== 1 ? 's' : ''})
+                    ({taskComments.length} comment
+                    {taskComments.length !== 1 ? "s" : ""})
                   </span>
                 </div>
               </button>

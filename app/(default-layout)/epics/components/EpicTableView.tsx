@@ -99,7 +99,7 @@ export default function EpicTableView({ epics }: EpicTableViewProps) {
 
   const handleRowClick = (epicId: string, event: React.MouseEvent) => {
     // Don't navigate if clicking on action buttons or links
-    if ((event.target as HTMLElement).closest('a, button')) {
+    if ((event.target as HTMLElement).closest("a, button")) {
       return;
     }
     router.push(`/epics/${epicId}`);

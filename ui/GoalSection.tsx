@@ -1,6 +1,12 @@
 "use client";
 import { useState, useEffect } from "react";
-import { IconPlus, IconX, IconCheck, IconTarget, IconLoader } from "@tabler/icons-react";
+import {
+  IconPlus,
+  IconX,
+  IconCheck,
+  IconTarget,
+  IconLoader,
+} from "@tabler/icons-react";
 import {
   handleCreateGoal,
   handleUpdateGoal,
@@ -51,7 +57,11 @@ export default function GoalSection({
         console.log("Fetched goals:", data);
         setGoals(data);
       } else {
-        console.error("Failed to fetch goals:", response.status, response.statusText);
+        console.error(
+          "Failed to fetch goals:",
+          response.status,
+          response.statusText
+        );
       }
     } catch (error) {
       console.error("Error fetching goals:", error);
@@ -174,7 +184,8 @@ export default function GoalSection({
 
   const achievedCount = goals.filter((g) => g.achieved).length;
   const totalCount = goals.length;
-  const progressPercent = totalCount > 0 ? (achievedCount / totalCount) * 100 : 0;
+  const progressPercent =
+    totalCount > 0 ? (achievedCount / totalCount) * 100 : 0;
 
   return (
     <div className="space-y-4">
@@ -245,7 +256,9 @@ export default function GoalSection({
               disabled={isSubmitting || !newGoalTitle.trim()}
               className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-zinc-600 text-white rounded transition-colors"
             >
-              {isSubmitting && <IconLoader size={16} className="animate-spin" />}
+              {isSubmitting && (
+                <IconLoader size={16} className="animate-spin" />
+              )}
               Add Goal
             </button>
             <button
@@ -320,7 +333,9 @@ export default function GoalSection({
                         : "border-zinc-500 hover:border-green-500"
                     }`}
                   >
-                    {goal.achieved && <IconCheck size={14} className="text-white" />}
+                    {goal.achieved && (
+                      <IconCheck size={14} className="text-white" />
+                    )}
                   </button>
 
                   <div className="flex-1">
@@ -340,7 +355,8 @@ export default function GoalSection({
                     )}
                     {goal.achieved && goal.achievedAt && (
                       <div className="text-xs text-green-400 mt-1">
-                        ✓ Achieved {new Date(goal.achievedAt).toLocaleDateString()}
+                        ✓ Achieved{" "}
+                        {new Date(goal.achievedAt).toLocaleDateString()}
                       </div>
                     )}
                   </div>

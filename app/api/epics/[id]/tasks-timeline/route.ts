@@ -24,7 +24,10 @@ export async function GET(
 
     if (subtasksError) {
       console.error("Error fetching subtasks:", subtasksError);
-      return NextResponse.json({ error: "Failed to fetch subtasks" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Failed to fetch subtasks" },
+        { status: 500 }
+      );
     }
 
     if (!subtasks || subtasks.length === 0) {
@@ -86,8 +89,11 @@ export async function GET(
         // No moves - task has been in initial column since creation
         const now = new Date();
         const created = new Date(task.createdAt);
-        const days = Math.max(1, Math.ceil((now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24)));
-        
+        const days = Math.max(
+          1,
+          Math.ceil((now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24))
+        );
+
         segments.push({
           columnName: columnMap[task.columnId] || "Unknown",
           startDate: task.createdAt,
@@ -98,13 +104,19 @@ export async function GET(
       } else {
         // Build segments from activity history
         let currentDate = new Date(task.createdAt);
-        
+
         // First segment: from creation to first move
         const firstActivity = taskActivities[0];
         const firstColumnId = firstActivity.oldColumnId;
         const firstMoveDate = new Date(firstActivity.createdAt);
-        const firstDays = Math.max(1, Math.ceil((firstMoveDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24)));
-        
+        const firstDays = Math.max(
+          1,
+          Math.ceil(
+            (firstMoveDate.getTime() - currentDate.getTime()) /
+              (1000 * 60 * 60 * 24)
+          )
+        );
+
         segments.push({
           columnName: columnMap[firstColumnId] || "Unknown",
           startDate: task.createdAt,
@@ -117,12 +129,18 @@ export async function GET(
         for (let i = 0; i < taskActivities.length; i++) {
           const activity = taskActivities[i];
           const startDate = new Date(activity.createdAt);
-          const endDate = i < taskActivities.length - 1 
-            ? new Date(taskActivities[i + 1].createdAt)
-            : new Date(); // current time for last segment
-          
-          const days = Math.max(1, Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)));
-          
+          const endDate =
+            i < taskActivities.length - 1
+              ? new Date(taskActivities[i + 1].createdAt)
+              : new Date(); // current time for last segment
+
+          const days = Math.max(
+            1,
+            Math.ceil(
+              (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+            )
+          );
+
           segments.push({
             columnName: columnMap[activity.newColumnId] || "Unknown",
             startDate: activity.createdAt,
@@ -144,6 +162,9 @@ export async function GET(
     return NextResponse.json({ timelines });
   } catch (error) {
     console.error("Failed to fetch task timelines:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }

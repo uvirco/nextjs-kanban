@@ -25,13 +25,26 @@ export async function handleCreateGoal({
   }
 
   const CreateGoalSchema = z.object({
-    title: z.string().trim().min(1, "Goal title is required").max(200, "Goal title too long"),
-    description: z.string().trim().max(1000, "Goal description too long").optional(),
+    title: z
+      .string()
+      .trim()
+      .min(1, "Goal title is required")
+      .max(200, "Goal title too long"),
+    description: z
+      .string()
+      .trim()
+      .max(1000, "Goal description too long")
+      .optional(),
     taskId: z.string().min(1, MESSAGES.COMMON.TASK_ID_REQUIRED),
     boardId: z.string().min(1, MESSAGES.COMMON.BOARD_ID_REQUIRED),
   });
 
-  const parse = CreateGoalSchema.safeParse({ title, description, taskId, boardId });
+  const parse = CreateGoalSchema.safeParse({
+    title,
+    description,
+    taskId,
+    boardId,
+  });
 
   if (!parse.success) {
     return {
@@ -49,7 +62,10 @@ export async function handleCreateGoal({
       .order("order", { ascending: false })
       .limit(1);
 
-    const newOrder = existingGoals && existingGoals.length > 0 ? existingGoals[0].order + 1 : 0;
+    const newOrder =
+      existingGoals && existingGoals.length > 0
+        ? existingGoals[0].order + 1
+        : 0;
 
     const { error } = await supabaseAdmin.from("Goal").insert({
       title: parse.data.title,
@@ -96,13 +112,29 @@ export async function handleUpdateGoal({
 
   const UpdateGoalSchema = z.object({
     goalId: z.string().min(1, "Goal ID required"),
-    title: z.string().trim().min(1, "Goal title is required").max(200, "Goal title too long").optional(),
-    description: z.string().trim().max(1000, "Goal description too long").optional().nullable(),
+    title: z
+      .string()
+      .trim()
+      .min(1, "Goal title is required")
+      .max(200, "Goal title too long")
+      .optional(),
+    description: z
+      .string()
+      .trim()
+      .max(1000, "Goal description too long")
+      .optional()
+      .nullable(),
     taskId: z.string().min(1, MESSAGES.COMMON.TASK_ID_REQUIRED),
     boardId: z.string().min(1, MESSAGES.COMMON.BOARD_ID_REQUIRED),
   });
 
-  const parse = UpdateGoalSchema.safeParse({ goalId, title, description, taskId, boardId });
+  const parse = UpdateGoalSchema.safeParse({
+    goalId,
+    title,
+    description,
+    taskId,
+    boardId,
+  });
 
   if (!parse.success) {
     return {
@@ -114,7 +146,8 @@ export async function handleUpdateGoal({
   try {
     const updateData: any = {};
     if (parse.data.title !== undefined) updateData.title = parse.data.title;
-    if (parse.data.description !== undefined) updateData.description = parse.data.description;
+    if (parse.data.description !== undefined)
+      updateData.description = parse.data.description;
 
     const { error } = await supabaseAdmin
       .from("Goal")
@@ -175,9 +208,11 @@ export async function handleMarkGoalAchieved({
     revalidatePath(`/board/${boardId}`);
     revalidatePath(`/task/${taskId}`);
 
-    return { 
-      success: true, 
-      message: achieved ? "🎉 GOAL ACHIEVED!!! 🎉" : "Goal unmarked as achieved" 
+    return {
+      success: true,
+      message: achieved
+        ? "🎉 GOAL ACHIEVED!!! 🎉"
+        : "Goal unmarked as achieved",
     };
   } catch (e) {
     console.error(e);

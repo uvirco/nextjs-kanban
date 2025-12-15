@@ -23,7 +23,10 @@ export async function GET(
 
     if (subtasksError) {
       console.error("Error fetching subtasks:", subtasksError);
-      return NextResponse.json({ error: "Failed to fetch subtasks" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Failed to fetch subtasks" },
+        { status: 500 }
+      );
     }
 
     if (!subtasks || subtasks.length === 0) {
@@ -35,23 +38,31 @@ export async function GET(
     // Get all comments for these tasks
     const { data: comments, error: commentsError } = await supabaseAdmin
       .from("Activity")
-      .select(`
+      .select(
+        `
         *,
         user:User!Activity_userId_fkey(id, name, image),
         task:Task(id, title)
-      `)
+      `
+      )
       .eq("type", "COMMENT_ADDED")
       .in("taskId", subtaskIds)
       .order("createdAt", { ascending: false });
 
     if (commentsError) {
       console.error("Error fetching comments:", commentsError);
-      return NextResponse.json({ error: "Failed to fetch comments" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Failed to fetch comments" },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({ comments: comments || [] });
   } catch (error) {
     console.error("Unexpected error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }

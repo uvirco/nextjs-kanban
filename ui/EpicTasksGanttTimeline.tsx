@@ -1,7 +1,14 @@
 "use client";
 
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { IconFilter, IconZoomIn, IconZoomOut, IconEye, IconEyeOff, IconSortAscending } from "@tabler/icons-react";
+import {
+  IconFilter,
+  IconZoomIn,
+  IconZoomOut,
+  IconEye,
+  IconEyeOff,
+  IconSortAscending,
+} from "@tabler/icons-react";
 
 interface Subtask {
   id: string;
@@ -35,28 +42,36 @@ const DONE_COLUMNS = ["Done", "✅ Done", "Complete", "Completed", "Closed"];
 
 const COLUMN_COLORS: Record<string, string> = {
   "📋 Backlog": "#64748b",
-  "Backlog": "#64748b",
+  Backlog: "#64748b",
   "To Do": "#f43f5e",
   "🚧 In Progress": "#f97316",
   "In Progress": "#f97316",
-  "Review": "#0ea5e9",
+  Review: "#0ea5e9",
   "🔍 Review": "#0ea5e9",
-  "Testing": "#a855f7",
-  "QA": "#a855f7",
+  Testing: "#a855f7",
+  QA: "#a855f7",
   "✅ Done": "#22c55e",
-  "Done": "#22c55e",
-  "Complete": "#22c55e",
-  "Blocked": "#ef4444",
+  Done: "#22c55e",
+  Complete: "#22c55e",
+  Blocked: "#ef4444",
   "🚫 Blocked": "#ef4444",
   "On Hold": "#eab308",
-  "Planning": "#06b6d4",
-  "Design": "#ec4899",
-  "Development": "#3b82f6",
+  Planning: "#06b6d4",
+  Design: "#ec4899",
+  Development: "#3b82f6",
 };
 
 const FALLBACK_COLORS = [
-  "#f43f5e", "#f97316", "#eab308", "#22c55e", "#14b8a6", 
-  "#0ea5e9", "#3b82f6", "#8b5cf6", "#a855f7", "#ec4899",
+  "#f43f5e",
+  "#f97316",
+  "#eab308",
+  "#22c55e",
+  "#14b8a6",
+  "#0ea5e9",
+  "#3b82f6",
+  "#8b5cf6",
+  "#a855f7",
+  "#ec4899",
 ];
 
 const dynamicColorMap = new Map<string, string>();
@@ -65,11 +80,11 @@ function getColumnColor(columnName: string): string {
   if (COLUMN_COLORS[columnName]) {
     return COLUMN_COLORS[columnName];
   }
-  
+
   if (dynamicColorMap.has(columnName)) {
     return dynamicColorMap.get(columnName)!;
   }
-  
+
   const colorIndex = dynamicColorMap.size % FALLBACK_COLORS.length;
   const color = FALLBACK_COLORS[colorIndex];
   dynamicColorMap.set(columnName, color);
@@ -78,24 +93,31 @@ function getColumnColor(columnName: string): string {
 
 function isCompleted(timeline: TaskTimeline): boolean {
   const lastSegment = timeline.segments[timeline.segments.length - 1];
-  return lastSegment ? DONE_COLUMNS.some(d => 
-    lastSegment.columnName.toLowerCase().includes(d.toLowerCase())
-  ) : false;
+  return lastSegment
+    ? DONE_COLUMNS.some((d) =>
+        lastSegment.columnName.toLowerCase().includes(d.toLowerCase())
+      )
+    : false;
 }
 
 type SortOption = "name" | "created" | "duration";
 type TimeRange = "all" | "7d" | "30d" | "90d";
 
-export function EpicTasksGanttTimeline({ epicId, subtasks }: EpicTasksGanttTimelineProps) {
+export function EpicTasksGanttTimeline({
+  epicId,
+  subtasks,
+}: EpicTasksGanttTimelineProps) {
   const [timelines, setTimelines] = useState<TaskTimeline[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Filter & control states
   const [hideCompleted, setHideCompleted] = useState(false);
   const [timeRange, setTimeRange] = useState<TimeRange>("all");
   const [sortBy, setSortBy] = useState<SortOption>("created");
-  const [selectedColumns, setSelectedColumns] = useState<Set<string>>(new Set());
+  const [selectedColumns, setSelectedColumns] = useState<Set<string>>(
+    new Set()
+  );
   const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
@@ -105,11 +127,11 @@ export function EpicTasksGanttTimeline({ epicId, subtasks }: EpicTasksGanttTimel
     }
 
     fetch(`/api/epics/${epicId}/tasks-timeline`)
-      .then(res => {
+      .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch timeline data");
         return res.json();
       })
-      .then(data => {
+      .then((data) => {
         const parsed = (data.timelines || []).map((t: any) => ({
           ...t,
           createdAt: new Date(t.createdAt),
@@ -122,24 +144,31 @@ export function EpicTasksGanttTimeline({ epicId, subtasks }: EpicTasksGanttTimel
         setTimelines(parsed);
         setLoading(false);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error("Timeline fetch error:", err);
-        const fallbackTimelines = subtasks.map(task => {
+        const fallbackTimelines = subtasks.map((task) => {
           const created = new Date(task.createdAt);
           const now = new Date();
-          const days = Math.max(1, Math.ceil((now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24)));
-          
+          const days = Math.max(
+            1,
+            Math.ceil(
+              (now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24)
+            )
+          );
+
           return {
             taskId: task.id,
             taskTitle: task.title,
             createdAt: created,
-            segments: [{
-              columnName: task.column?.title || "Unknown",
-              startDate: created,
-              endDate: now,
-              durationDays: days,
-              isCurrent: true,
-            }],
+            segments: [
+              {
+                columnName: task.column?.title || "Unknown",
+                startDate: created,
+                endDate: now,
+                durationDays: days,
+                isCurrent: true,
+              },
+            ],
           };
         });
         setTimelines(fallbackTimelines);
@@ -150,7 +179,7 @@ export function EpicTasksGanttTimeline({ epicId, subtasks }: EpicTasksGanttTimel
   // Get all unique columns
   const allColumns = useMemo(() => {
     const cols = new Set<string>();
-    timelines.forEach(t => t.segments.forEach(s => cols.add(s.columnName)));
+    timelines.forEach((t) => t.segments.forEach((s) => cols.add(s.columnName)));
     return Array.from(cols);
   }, [timelines]);
 
@@ -167,15 +196,22 @@ export function EpicTasksGanttTimeline({ epicId, subtasks }: EpicTasksGanttTimel
 
     // Hide completed
     if (hideCompleted) {
-      filtered = filtered.filter(t => !isCompleted(t));
+      filtered = filtered.filter((t) => !isCompleted(t));
     }
 
     // Time range filter
     if (timeRange !== "all") {
       const now = new Date();
-      const daysMap: Record<TimeRange, number> = { "all": 0, "7d": 7, "30d": 30, "90d": 90 };
-      const cutoff = new Date(now.getTime() - daysMap[timeRange] * 24 * 60 * 60 * 1000);
-      filtered = filtered.filter(t => {
+      const daysMap: Record<TimeRange, number> = {
+        all: 0,
+        "7d": 7,
+        "30d": 30,
+        "90d": 90,
+      };
+      const cutoff = new Date(
+        now.getTime() - daysMap[timeRange] * 24 * 60 * 60 * 1000
+      );
+      filtered = filtered.filter((t) => {
         const lastSegment = t.segments[t.segments.length - 1];
         return lastSegment && lastSegment.endDate >= cutoff;
       });
@@ -208,44 +244,56 @@ export function EpicTasksGanttTimeline({ epicId, subtasks }: EpicTasksGanttTimel
     let min = new Date();
     let max = new Date();
 
-    filteredTimelines.forEach(t => {
-      t.segments.forEach(s => {
+    filteredTimelines.forEach((t) => {
+      t.segments.forEach((s) => {
         if (s.startDate < min) min = new Date(s.startDate);
         if (s.endDate > max) max = new Date(s.endDate);
       });
     });
 
-    const days = Math.max(1, Math.ceil((max.getTime() - min.getTime()) / (1000 * 60 * 60 * 24)));
+    const days = Math.max(
+      1,
+      Math.ceil((max.getTime() - min.getTime()) / (1000 * 60 * 60 * 24))
+    );
     return { minDate: min, maxDate: max, totalDays: days };
   }, [filteredTimelines]);
 
   const uniqueColumns = useMemo(() => {
     const cols = new Set<string>();
-    filteredTimelines.forEach(t => t.segments.forEach(s => cols.add(s.columnName)));
+    filteredTimelines.forEach((t) =>
+      t.segments.forEach((s) => cols.add(s.columnName))
+    );
     return Array.from(cols);
   }, [filteredTimelines]);
 
-  const getPosition = useCallback((date: Date) => {
-    const daysSinceStart = (date.getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24);
-    return (daysSinceStart / totalDays) * 100;
-  }, [minDate, totalDays]);
+  const getPosition = useCallback(
+    (date: Date) => {
+      const daysSinceStart =
+        (date.getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24);
+      return (daysSinceStart / totalDays) * 100;
+    },
+    [minDate, totalDays]
+  );
 
-  const getWidth = useCallback((start: Date, end: Date) => {
-    const days = (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24);
-    return Math.max(0.5, (days / totalDays) * 100);
-  }, [totalDays]);
+  const getWidth = useCallback(
+    (start: Date, end: Date) => {
+      const days = (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24);
+      return Math.max(0.5, (days / totalDays) * 100);
+    },
+    [totalDays]
+  );
 
   const timeMarkers = useMemo(() => {
     const markers: { date: Date; label: string }[] = [];
     const interval = totalDays <= 14 ? 1 : totalDays <= 60 ? 7 : 30;
-    
+
     const current = new Date(minDate);
     while (current <= maxDate) {
       markers.push({
         date: new Date(current),
-        label: current.toLocaleDateString("en-US", { 
-          month: "short", 
-          day: "numeric" 
+        label: current.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
         }),
       });
       current.setDate(current.getDate() + interval);
@@ -255,12 +303,18 @@ export function EpicTasksGanttTimeline({ epicId, subtasks }: EpicTasksGanttTimel
 
   // Stats
   const stats = useMemo(() => {
-    const completed = timelines.filter(t => isCompleted(t)).length;
+    const completed = timelines.filter((t) => isCompleted(t)).length;
     const active = timelines.length - completed;
-    const avgDuration = filteredTimelines.length > 0
-      ? Math.round(filteredTimelines.reduce((sum, t) => 
-          sum + t.segments.reduce((s, seg) => s + seg.durationDays, 0), 0) / filteredTimelines.length)
-      : 0;
+    const avgDuration =
+      filteredTimelines.length > 0
+        ? Math.round(
+            filteredTimelines.reduce(
+              (sum, t) =>
+                sum + t.segments.reduce((s, seg) => s + seg.durationDays, 0),
+              0
+            ) / filteredTimelines.length
+          )
+        : 0;
     return { completed, active, avgDuration };
   }, [timelines, filteredTimelines]);
 
@@ -286,9 +340,12 @@ export function EpicTasksGanttTimeline({ epicId, subtasks }: EpicTasksGanttTimel
   if (!subtasks.length) {
     return (
       <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-white mb-2">📊 Task Flow Timeline</h3>
+        <h3 className="text-lg font-semibold text-white mb-2">
+          📊 Task Flow Timeline
+        </h3>
         <div className="text-zinc-500">
-          No subtasks to display yet. Create some tasks within this epic to see the timeline.
+          No subtasks to display yet. Create some tasks within this epic to see
+          the timeline.
         </div>
       </div>
     );
@@ -306,8 +363,10 @@ export function EpicTasksGanttTimeline({ epicId, subtasks }: EpicTasksGanttTimel
     <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
       {/* Header with controls */}
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-white">📊 Task Flow Timeline</h3>
-        
+        <h3 className="text-lg font-semibold text-white">
+          📊 Task Flow Timeline
+        </h3>
+
         <div className="flex items-center gap-2">
           {/* Time range selector */}
           <select
@@ -336,11 +395,13 @@ export function EpicTasksGanttTimeline({ epicId, subtasks }: EpicTasksGanttTimel
           <button
             onClick={() => setHideCompleted(!hideCompleted)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-sm transition-colors ${
-              hideCompleted 
-                ? "bg-blue-600 text-white" 
+              hideCompleted
+                ? "bg-blue-600 text-white"
                 : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700"
             }`}
-            title={hideCompleted ? "Show completed tasks" : "Hide completed tasks"}
+            title={
+              hideCompleted ? "Show completed tasks" : "Hide completed tasks"
+            }
           >
             {hideCompleted ? <IconEyeOff size={16} /> : <IconEye size={16} />}
             {hideCompleted ? "Hidden" : "Completed"}
@@ -350,8 +411,8 @@ export function EpicTasksGanttTimeline({ epicId, subtasks }: EpicTasksGanttTimel
           <button
             onClick={() => setShowFilters(!showFilters)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-sm transition-colors ${
-              showFilters 
-                ? "bg-zinc-700 text-white" 
+              showFilters
+                ? "bg-zinc-700 text-white"
                 : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700"
             }`}
           >
@@ -366,7 +427,7 @@ export function EpicTasksGanttTimeline({ epicId, subtasks }: EpicTasksGanttTimel
         <div className="mb-4 p-4 bg-zinc-800/50 rounded-lg border border-zinc-700">
           <div className="text-sm text-zinc-400 mb-2">Filter by column:</div>
           <div className="flex flex-wrap gap-2">
-            {allColumns.map(col => (
+            {allColumns.map((col) => (
               <button
                 key={col}
                 onClick={() => {
@@ -384,8 +445,8 @@ export function EpicTasksGanttTimeline({ epicId, subtasks }: EpicTasksGanttTimel
                     : "bg-zinc-800 text-zinc-500"
                 }`}
               >
-                <div 
-                  className="w-2 h-2 rounded-sm" 
+                <div
+                  className="w-2 h-2 rounded-sm"
                   style={{ backgroundColor: getColumnColor(col) }}
                 />
                 {col}
@@ -399,7 +460,9 @@ export function EpicTasksGanttTimeline({ epicId, subtasks }: EpicTasksGanttTimel
       <div className="flex gap-6 mb-4 text-sm">
         <div className="flex items-center gap-2">
           <span className="text-zinc-500">Showing:</span>
-          <span className="text-white font-medium">{filteredTimelines.length}</span>
+          <span className="text-white font-medium">
+            {filteredTimelines.length}
+          </span>
           <span className="text-zinc-500">of {timelines.length} tasks</span>
         </div>
         <div className="flex items-center gap-2">
@@ -411,16 +474,17 @@ export function EpicTasksGanttTimeline({ epicId, subtasks }: EpicTasksGanttTimel
           <span className="text-zinc-400">{stats.active} active</span>
         </div>
         <div className="text-zinc-400">
-          <span className="text-zinc-500">Avg duration:</span> {stats.avgDuration} days
+          <span className="text-zinc-500">Avg duration:</span>{" "}
+          {stats.avgDuration} days
         </div>
       </div>
-      
+
       {/* Legend */}
       <div className="flex flex-wrap gap-3 mb-6">
-        {uniqueColumns.map(col => (
+        {uniqueColumns.map((col) => (
           <div key={col} className="flex items-center gap-2">
-            <div 
-              className="w-3 h-3 rounded-sm" 
+            <div
+              className="w-3 h-3 rounded-sm"
               style={{ backgroundColor: getColumnColor(col) }}
             />
             <span className="text-xs text-zinc-400">{col}</span>
@@ -454,8 +518,8 @@ export function EpicTasksGanttTimeline({ epicId, subtasks }: EpicTasksGanttTimel
             </div>
           ) : (
             filteredTimelines.map((timeline, idx) => (
-              <div 
-                key={timeline.taskId} 
+              <div
+                key={timeline.taskId}
                 className={`flex items-center py-2 ${idx % 2 === 0 ? "bg-zinc-800/30" : ""}`}
               >
                 {/* Task name */}
@@ -463,7 +527,7 @@ export function EpicTasksGanttTimeline({ epicId, subtasks }: EpicTasksGanttTimel
                   {isCompleted(timeline) && (
                     <span className="text-green-500 text-xs">✓</span>
                   )}
-                  <span 
+                  <span
                     className={`text-sm truncate block ${isCompleted(timeline) ? "text-zinc-500" : "text-zinc-300"}`}
                     title={timeline.taskTitle}
                   >
@@ -476,7 +540,7 @@ export function EpicTasksGanttTimeline({ epicId, subtasks }: EpicTasksGanttTimel
                   {timeline.segments.map((segment, segIdx) => {
                     const left = getPosition(segment.startDate);
                     const width = getWidth(segment.startDate, segment.endDate);
-                    
+
                     return (
                       <div
                         key={segIdx}
@@ -524,10 +588,12 @@ export function EpicTasksGanttTimeline({ epicId, subtasks }: EpicTasksGanttTimel
           <span className="text-zinc-500">Timeline:</span> {totalDays} days
         </div>
         <div className="text-zinc-400">
-          <span className="text-zinc-500">From:</span> {minDate.toLocaleDateString()}
+          <span className="text-zinc-500">From:</span>{" "}
+          {minDate.toLocaleDateString()}
         </div>
         <div className="text-zinc-400">
-          <span className="text-zinc-500">To:</span> {maxDate.toLocaleDateString()}
+          <span className="text-zinc-500">To:</span>{" "}
+          {maxDate.toLocaleDateString()}
         </div>
       </div>
     </div>

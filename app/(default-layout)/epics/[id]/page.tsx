@@ -129,5 +129,7 @@ export default async function EpicDetailPage(props: {
     return { ...user, roles: userRoles };
   });
 
-  return <EpicDetailPageClient epic={epic} raciUsers={raciUsers} params={params} />;
+  return (
+    <EpicDetailPageClient epic={epic} raciUsers={raciUsers} params={params} />
+  );
 }

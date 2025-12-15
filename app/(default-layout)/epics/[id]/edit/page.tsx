@@ -59,11 +59,9 @@ async function getEpic(epicId: string) {
   };
 }
 
-export default async function EditEpicPage(
-  props: {
-    params: Promise<{ id: string }>;
-  }
-) {
+export default async function EditEpicPage(props: {
+  params: Promise<{ id: string }>;
+}) {
   const params = await props.params;
   const session = await auth();
   const userId = session?.user?.id;
@@ -104,8 +102,8 @@ export default async function EditEpicPage(
             </div>
           </div>
 
-          <EditEpicForm 
-            epic={epic} 
+          <EditEpicForm
+            epic={epic}
             initialMembers={epic.members}
             initialGoals={epic.goals}
           />
