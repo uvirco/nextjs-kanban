@@ -125,17 +125,16 @@ export default function EpicChecklistsSection({
             {/* Checklist items */}
             <ChecklistCheckboxGroup
               taskId={params.id}
-              checkedItemIds={checklist.items
-                ?.filter((item: any) => item.isChecked)
-                .map((item: any) => item.id) || []}
+              checkedItemIds={
+                checklist.items
+                  ?.filter((item: any) => item.isChecked)
+                  .map((item: any) => item.id) || []
+              }
               checklist={checklist}
             />
 
             {/* Add new item */}
-            <ChecklistItemForm
-              checklistId={checklist.id}
-              taskId={params.id}
-            />
+            <ChecklistItemForm checklistId={checklist.id} taskId={params.id} />
           </div>
         ) : (
           <div className="py-4"></div>

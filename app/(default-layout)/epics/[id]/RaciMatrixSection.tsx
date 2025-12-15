@@ -106,9 +106,7 @@ export default function RaciMatrixSection({
         className="flex items-center gap-2 w-full text-left hover:bg-zinc-800/50 p-3 rounded-t-lg"
         aria-expanded={!isCollapsed}
         aria-controls="raci-table"
-        aria-label={
-          isCollapsed ? "Expand RACI matrix" : "Collapse RACI matrix"
-        }
+        aria-label={isCollapsed ? "Expand RACI matrix" : "Collapse RACI matrix"}
       >
         {isCollapsed ? (
           <IconChevronRight size={20} className="text-zinc-400" />
