@@ -107,11 +107,11 @@ export default function EditRoleModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onOpenChange={onClose}>
-      <ModalContent>
+    <Modal isOpen={isOpen} onOpenChange={onClose} className="dark">
+      <ModalContent className="bg-zinc-900 border border-zinc-700">
         <form onSubmit={handleSubmit}>
-          <ModalHeader className="flex flex-col gap-1">Edit Role</ModalHeader>
-          <ModalBody>
+          <ModalHeader className="flex flex-col gap-1 bg-zinc-900 text-white border-b border-zinc-700">Edit Role</ModalHeader>
+          <ModalBody className="bg-zinc-900">
             <div className="space-y-4">
               <Input
                 label="Role Name"
@@ -119,6 +119,12 @@ export default function EditRoleModal({
                 value={formData.name}
                 onChange={(e) => handleChange("name", e.target.value)}
                 required
+                className="dark"
+                classNames={{
+                  label: "text-zinc-300",
+                  input: "bg-zinc-800 border-zinc-600 text-white placeholder-zinc-400",
+                  inputWrapper: "bg-zinc-800 border-zinc-600 hover:bg-zinc-700 focus-within:bg-zinc-700"
+                }}
               />
 
               <Input
@@ -126,6 +132,12 @@ export default function EditRoleModal({
                 placeholder="Enter role description (optional)"
                 value={formData.description}
                 onChange={(e) => handleChange("description", e.target.value)}
+                className="dark"
+                classNames={{
+                  label: "text-zinc-300",
+                  input: "bg-zinc-800 border-zinc-600 text-white placeholder-zinc-400",
+                  inputWrapper: "bg-zinc-800 border-zinc-600 hover:bg-zinc-700 focus-within:bg-zinc-700"
+                }}
               />
 
               <Select
@@ -134,9 +146,17 @@ export default function EditRoleModal({
                 value={formData.category}
                 onChange={(e) => handleChange("category", e.target.value)}
                 required
+                className="dark"
+                classNames={{
+                  label: "text-zinc-300",
+                  trigger: "bg-zinc-800 border-zinc-600 text-white hover:bg-zinc-700 data-[open=true]:bg-zinc-700",
+                  listbox: "bg-zinc-800 border-zinc-600",
+                  popoverContent: "bg-zinc-800 border-zinc-600",
+                  listboxWrapper: "bg-zinc-800"
+                }}
               >
                 {categories.map((category) => (
-                  <SelectItem key={category.value} value={category.value}>
+                  <SelectItem key={category.value} value={category.value} className="text-white hover:bg-zinc-700">
                     {category.label}
                   </SelectItem>
                 ))}
@@ -149,14 +169,20 @@ export default function EditRoleModal({
                 value={formData.sortOrder}
                 onChange={(e) => handleChange("sortOrder", e.target.value)}
                 min="0"
+                className="dark"
+                classNames={{
+                  label: "text-zinc-300",
+                  input: "bg-zinc-800 border-zinc-600 text-white placeholder-zinc-400",
+                  inputWrapper: "bg-zinc-800 border-zinc-600 hover:bg-zinc-700 focus-within:bg-zinc-700"
+                }}
               />
             </div>
           </ModalBody>
-          <ModalFooter>
-            <Button color="danger" variant="light" onPress={onClose}>
+          <ModalFooter className="bg-zinc-900 border-t border-zinc-700">
+            <Button color="danger" variant="light" onPress={onClose} className="text-zinc-300 hover:bg-zinc-800">
               Cancel
             </Button>
-            <Button color="primary" type="submit" isLoading={isSubmitting}>
+            <Button color="primary" type="submit" isLoading={isSubmitting} className="bg-blue-600 hover:bg-blue-700">
               {isSubmitting ? "Updating..." : "Update Role"}
             </Button>
           </ModalFooter>

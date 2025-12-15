@@ -4,7 +4,7 @@ import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 import SidebarMenuContent from "./SidebarMenuContent";
 
 export default function CollapsibleSidebar() {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
 
   return (
     <div
