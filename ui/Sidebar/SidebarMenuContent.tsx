@@ -82,10 +82,17 @@ export default function SidebarMenuContent({
       {/* Middle section with menu - takes up available space */}
       <div className="flex-1 overflow-y-auto">
         <Menu>
+          {/* Main Items */}
           <MenuItem
             path="/dashboard"
             title={isCollapsed ? "" : "Dashboard"}
             icon={<IconChartBar stroke={1.5} size={20} />}
+            showTitle={!isCollapsed}
+          />
+          <MenuItem
+            path="/admin/settings"
+            title={isCollapsed ? "" : "Settings"}
+            icon={<IconSettings stroke={1.5} size={20} />}
             showTitle={!isCollapsed}
           />
           <MenuItem
@@ -94,15 +101,6 @@ export default function SidebarMenuContent({
             icon={<IconTarget stroke={1.5} size={20} />}
             showTitle={!isCollapsed}
           />
-
-          <hr className="border-zinc-900 my-3" />
-
-          <li className="menu-item group">
-            <div className="flex items-center gap-2 text-sm text-zinc-400 font-medium px-2 py-1">
-              <IconLayoutKanban stroke={1.5} size={20} />
-              {isCollapsed ? "" : "Boards"}
-            </div>
-          </li>
 
           {boardMembers.map((boardMember) => (
             <MenuItem
@@ -116,6 +114,7 @@ export default function SidebarMenuContent({
 
           <hr className="border-zinc-900 my-3" />
 
+          {/* Communications */}
           <li className="menu-item group">
             <div className="flex items-center gap-2 text-sm text-zinc-400 font-medium px-2 py-1">
               <IconMessage stroke={1.5} size={20} />
@@ -136,19 +135,10 @@ export default function SidebarMenuContent({
             icon={<IconMessage stroke={1.5} size={20} />}
             showTitle={!isCollapsed}
           />
-
-          <hr className="border-zinc-900 my-3" />
-
-          <MenuItem
-            path="/admin/settings"
-            title={isCollapsed ? "" : "Settings"}
-            icon={<IconSettings stroke={1.5} size={20} />}
-            showTitle={!isCollapsed}
-          />
         </Menu>
       </div>
 
-      {/* Bottom section with user */}
+      {/* User section at the bottom */}
       <div className="mt-auto">
         <hr className="border-zinc-900 my-3" />
         <SidebarHeader isCollapsed={isCollapsed} />
