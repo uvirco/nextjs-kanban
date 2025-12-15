@@ -11,7 +11,6 @@ import {
   IconSettings,
 } from "@tabler/icons-react";
 import SidebarHeader from "./SidebarHeader";
-import SidebarSearch from "./SidebarSearch";
 import { useEffect, useState } from "react";
 import { getSidebarBoards } from "@/server-actions/SidebarServerActions";
 
@@ -52,10 +51,6 @@ export default function SidebarMenuContent({
   if (loading) {
     return (
       <div className="flex flex-col h-full">
-        <div>
-          <SidebarSearch />
-          <hr className="border-zinc-900 my-3" />
-        </div>
         <div className="flex-1 px-5 py-3">
           <div className="animate-pulse">
             <div className="h-4 bg-zinc-800 rounded mb-2"></div>
@@ -73,12 +68,6 @@ export default function SidebarMenuContent({
 
   return (
     <div className="flex flex-col h-full">
-      {/* Top section with search */}
-      <div>
-        <SidebarSearch />
-        <hr className="border-zinc-900 my-3" />
-      </div>
-
       {/* Middle section with menu - takes up available space */}
       <div className="flex-1 overflow-y-auto">
         <Menu>
@@ -87,12 +76,6 @@ export default function SidebarMenuContent({
             path="/dashboard"
             title={isCollapsed ? "" : "Dashboard"}
             icon={<IconChartBar stroke={1.5} size={20} />}
-            showTitle={!isCollapsed}
-          />
-          <MenuItem
-            path="/admin/settings"
-            title={isCollapsed ? "" : "Settings"}
-            icon={<IconSettings stroke={1.5} size={20} />}
             showTitle={!isCollapsed}
           />
           <MenuItem
@@ -112,9 +95,16 @@ export default function SidebarMenuContent({
             />
           ))}
 
-          <hr className="border-zinc-900 my-3" />
+          <MenuItem
+            path="/admin/settings"
+            title={isCollapsed ? "" : "Settings"}
+            icon={<IconSettings stroke={1.5} size={20} />}
+            showTitle={!isCollapsed}
+          />
 
-          {/* Communications */}
+          {/* Communications section hidden */}
+          {/* <hr className="border-zinc-900 my-3" />
+
           <li className="menu-item group">
             <div className="flex items-center gap-2 text-sm text-zinc-400 font-medium px-2 py-1">
               <IconMessage stroke={1.5} size={20} />
@@ -134,7 +124,7 @@ export default function SidebarMenuContent({
             title={isCollapsed ? "" : "Chat"}
             icon={<IconMessage stroke={1.5} size={20} />}
             showTitle={!isCollapsed}
-          />
+          /> */}
         </Menu>
       </div>
 

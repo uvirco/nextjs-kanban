@@ -58,12 +58,17 @@ export function MenuItem({
   const linkContent = (
     <Link
       href={path}
-      className={clsx("flex items-center gap-2 text-sm hover:text-primary", {
+      className={clsx("flex items-center gap-2 text-sm hover:text-primary relative group", {
         "text-primary": isActive,
       })}
     >
       {icon}
       {showTitle && title}
+      {!showTitle && (
+        <div className="absolute left-full ml-2 px-2 py-1 bg-zinc-800 text-zinc-200 text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-[9999]">
+          {title}
+        </div>
+      )}
     </Link>
   );
 
