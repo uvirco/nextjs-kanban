@@ -60,6 +60,8 @@ interface SavedState {
   dueDateFilter: string;
   showColumnSettings: boolean;
   columnVisibility: Record<string, boolean>;
+  sortField: "title" | "status" | "priority" | "readinessScore" | "progress" | "dueDate" | "department" | "businessValue" | "riskLevel" | "totalTasks";
+  sortDirection: "asc" | "desc";
 }
 
 export default function EpicPortfolioClient({
@@ -89,55 +91,55 @@ export default function EpicPortfolioClient({
       dueDate: true,
       owner: true,
     },
+    sortField: "title",
+    sortDirection: "asc",
+  };
+
+  // Load initial state from localStorage (client-side only)
+  const getInitialState = <T,>(key: keyof SavedState, defaultValue: T): T => {
+    if (typeof window === "undefined") return defaultValue;
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (!saved) return defaultValue;
+      const parsed = JSON.parse(saved) as Partial<SavedState> | null;
+      if (!parsed || !(key in parsed)) return defaultValue;
+      return parsed[key] as T;
+    } catch (error) {
+      console.error("Error loading initial state for", key, error);
+      return defaultValue;
+    }
   };
 
   const [view, setView] = useState<
     "priority" | "timeline" | "matrix" | "table" | "board" | "burndown"
-  >(DEFAULT_SAVED_STATE.view);
+  >(getInitialState("view", DEFAULT_SAVED_STATE.view));
   const [filter, setFilter] = useState<"all" | "active" | "backlog">(
-    DEFAULT_SAVED_STATE.filter
+    getInitialState("filter", DEFAULT_SAVED_STATE.filter)
   );
   const [departmentFilter, setDepartmentFilter] = useState<string>(
-    DEFAULT_SAVED_STATE.departmentFilter
+    getInitialState("departmentFilter", DEFAULT_SAVED_STATE.departmentFilter)
   );
   const [riskFilter, setRiskFilter] = useState<string>(
-    DEFAULT_SAVED_STATE.riskFilter
+    getInitialState("riskFilter", DEFAULT_SAVED_STATE.riskFilter)
   );
   const [businessValueFilter, setBusinessValueFilter] = useState<string>(
-    DEFAULT_SAVED_STATE.businessValueFilter
+    getInitialState("businessValueFilter", DEFAULT_SAVED_STATE.businessValueFilter)
   );
   const [dueDateFilter, setDueDateFilter] = useState<string>(
-    DEFAULT_SAVED_STATE.dueDateFilter
+    getInitialState("dueDateFilter", DEFAULT_SAVED_STATE.dueDateFilter)
   );
   const [showColumnSettings, setShowColumnSettings] = useState<boolean>(
-    DEFAULT_SAVED_STATE.showColumnSettings
+    getInitialState("showColumnSettings", DEFAULT_SAVED_STATE.showColumnSettings)
   );
   const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>(
-    DEFAULT_SAVED_STATE.columnVisibility
+    getInitialState("columnVisibility", DEFAULT_SAVED_STATE.columnVisibility)
   );
-
-  // After mount, load saved state from localStorage and apply client-side only
-  useEffect(() => {
-    try {
-      if (typeof window === "undefined") return;
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (!saved) return;
-      const parsed = JSON.parse(saved) as Partial<SavedState> | null;
-      if (!parsed) return;
-
-      if (parsed.view) setView(parsed.view);
-      if (parsed.filter) setFilter(parsed.filter);
-      if (parsed.departmentFilter) setDepartmentFilter(parsed.departmentFilter);
-      if (parsed.riskFilter) setRiskFilter(parsed.riskFilter);
-      if (parsed.businessValueFilter)
-        setBusinessValueFilter(parsed.businessValueFilter);
-      if (parsed.dueDateFilter) setDueDateFilter(parsed.dueDateFilter);
-      if (parsed.showColumnSettings !== undefined) setShowColumnSettings(parsed.showColumnSettings);
-      if (parsed.columnVisibility) setColumnVisibility(parsed.columnVisibility);
-    } catch (error) {
-      console.error("Error loading saved state:", error);
-    }
-  }, []);
+  const [sortField, setSortField] = useState<"title" | "status" | "priority" | "readinessScore" | "progress" | "dueDate" | "department" | "businessValue" | "riskLevel" | "totalTasks">(
+    getInitialState("sortField", DEFAULT_SAVED_STATE.sortField)
+  );
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">(
+    getInitialState("sortDirection", DEFAULT_SAVED_STATE.sortDirection)
+  );
 
   // Save state to localStorage whenever it changes
   useEffect(() => {
@@ -150,6 +152,8 @@ export default function EpicPortfolioClient({
       dueDateFilter,
       showColumnSettings,
       columnVisibility,
+      sortField,
+      sortDirection,
     };
 
     try {
@@ -166,6 +170,8 @@ export default function EpicPortfolioClient({
     dueDateFilter,
     showColumnSettings,
     columnVisibility,
+    sortField,
+    sortDirection,
   ]);
 
   // Get unique departments for filter dropdown
@@ -502,7 +508,7 @@ export default function EpicPortfolioClient({
 
       {/* View Content */}
       {view === "priority" && <EpicPriorityView epics={filteredEpics} />}
-      {view === "table" && <EpicTableView epics={filteredEpics} columnVisibility={columnVisibility} />}
+      {view === "table" && <EpicTableView epics={filteredEpics} columnVisibility={columnVisibility} sortField={sortField} sortDirection={sortDirection} onSortChange={(field, direction) => { setSortField(field); setSortDirection(direction); }} />}
       {view === "board" && epicBoard && (
         <div className="min-w-0 w-full">
           <EpicBoard board={epicBoard} epics={filteredEpics} />

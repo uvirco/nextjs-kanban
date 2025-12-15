@@ -45,6 +45,9 @@ interface Epic {
 interface EpicTableViewProps {
   epics: Epic[];
   columnVisibility?: Record<string, boolean>;
+  sortField?: SortField;
+  sortDirection?: SortDirection;
+  onSortChange?: (field: SortField, direction: SortDirection) => void;
 }
 
 type SortField =
@@ -68,10 +71,18 @@ interface ColumnConfig {
   sortable: boolean;
 }
 
-export default function EpicTableView({ epics, columnVisibility = {} }: EpicTableViewProps) {
+export default function EpicTableView({ 
+  epics, 
+  columnVisibility = {}, 
+  sortField: externalSortField,
+  sortDirection: externalSortDirection,
+  onSortChange
+}: EpicTableViewProps) {
   const router = useRouter();
-  const [sortField, setSortField] = useState<SortField>("title");
-  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  
+  // Use external sort state if provided, otherwise use defaults
+  const sortField = externalSortField || "title";
+  const sortDirection = externalSortDirection || "asc";
 
   // Use default column configuration if none provided
   const defaultColumns: ColumnConfig[] = [
@@ -113,11 +124,12 @@ export default function EpicTableView({ epics, columnVisibility = {} }: EpicTabl
   };
 
   const handleSort = (field: SortField) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    } else {
-      setSortField(field);
-      setSortDirection("asc");
+    if (onSortChange) {
+      if (sortField === field) {
+        onSortChange(field, sortDirection === "asc" ? "desc" : "asc");
+      } else {
+        onSortChange(field, "asc");
+      }
     }
   };
 
