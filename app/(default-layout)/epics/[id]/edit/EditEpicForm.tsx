@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { IconLoader, IconPlus, IconX, IconUser } from "@tabler/icons-react";
@@ -84,6 +84,30 @@ export default function EditEpicForm({
   const [selectedRole, setSelectedRole] = useState("");
   const [selectedRaciRoles, setSelectedRaciRoles] = useState<string[]>([]);
 
+  // Track initial state for unsaved changes detection
+  const [initialFormDataState] = useState({
+    title: epic.title,
+    description: epic.description || "",
+    departmentId: epic.departmentId || "",
+    businessValue: epic.businessValue || "",
+    riskLevel: epic.riskLevel || "",
+    priority: epic.priority || "",
+    effort: epic.estimatedEffort?.toString() || "",
+    budgetEstimate: epic.budgetEstimate?.toString() || "",
+    strategicAlignment: epic.strategicAlignment || "",
+    roiEstimate: epic.roiEstimate?.toString() || "",
+    stageGate: epic.stageGate || "",
+    dueDate: epic.dueDate
+      ? new Date(epic.dueDate).toISOString().split("T")[0]
+      : "",
+    startDate: epic.startDate
+      ? new Date(epic.startDate).toISOString().split("T")[0]
+      : "",
+    acceptanceCriteria: (epic as any).acceptanceCriteria || "",
+  });
+  const [initialMembersState] = useState<EpicMember[]>(initialMembers);
+  const [initialGoalsState] = useState<any[]>(initialGoals);
+
   const [formData, setFormData] = useState({
     title: epic.title,
     description: epic.description || "",
@@ -163,6 +187,44 @@ export default function EditEpicForm({
     fetchDepartments();
     fetchRoles();
   }, []);
+
+  // Check for unsaved changes
+  const hasUnsavedChanges = useCallback(() => {
+    // Check form data changes
+    const formDataChanged = JSON.stringify(formData) !== JSON.stringify(initialFormDataState);
+
+    // Check members changes
+    const membersChanged = JSON.stringify(members.map(m => ({ userId: m.user.id, role: m.role }))) !==
+                          JSON.stringify(initialMembersState.map(m => ({ userId: m.user.id, role: m.role })));
+
+    return formDataChanged || membersChanged;
+  }, [formData, initialFormDataState, members, initialMembersState]);
+
+  // Handle beforeunload event for browser back button/close
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges()) {
+        e.preventDefault();
+        e.returnValue = "You have unsaved changes. Are you sure you want to leave?";
+        return e.returnValue;
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [hasUnsavedChanges]);
+
+  // Handle navigation away from the page (for internal navigation)
+  const handleNavigation = useCallback((href: string) => {
+    if (hasUnsavedChanges()) {
+      const confirmed = window.confirm("You have unsaved changes. Are you sure you want to leave?");
+      if (!confirmed) {
+        return false; // Prevent navigation
+      }
+    }
+    router.push(href);
+    return true;
+  }, [hasUnsavedChanges, router]);
 
   const addMember = async () => {
     if (!selectedUserId || !selectedRole) return;
@@ -755,12 +817,13 @@ export default function EditEpicForm({
           {isSubmitting ? "Updating..." : "Update Epic"}
         </button>
 
-        <Link
-          href={`/epics/${epic.id}`}
+        <button
+          type="button"
+          onClick={() => handleNavigation(`/epics/${epic.id}`)}
           className="px-6 py-3 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-white font-medium transition-colors"
         >
           Cancel
-        </Link>
+        </button>
       </div>
     </form>
   );

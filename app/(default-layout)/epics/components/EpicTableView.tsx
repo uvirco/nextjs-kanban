@@ -1,6 +1,7 @@
 "use client";
 import { useState, useMemo } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   IconChevronUp,
   IconChevronDown,
@@ -68,6 +69,7 @@ interface ColumnConfig {
 }
 
 export default function EpicTableView({ epics }: EpicTableViewProps) {
+  const router = useRouter();
   const [sortField, setSortField] = useState<SortField>("title");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [showColumnSettings, setShowColumnSettings] = useState(false);
@@ -94,6 +96,14 @@ export default function EpicTableView({ epics }: EpicTableViewProps) {
     { key: "dueDate", label: "Due Date", visible: true, sortable: true },
     { key: "owner", label: "Owner", visible: true, sortable: false },
   ]);
+
+  const handleRowClick = (epicId: string, event: React.MouseEvent) => {
+    // Don't navigate if clicking on action buttons or links
+    if ((event.target as HTMLElement).closest('a, button')) {
+      return;
+    }
+    router.push(`/epics/${epicId}`);
+  };
 
   const toggleColumn = (key: string) => {
     setColumns((prev) =>
@@ -311,7 +321,8 @@ export default function EpicTableView({ epics }: EpicTableViewProps) {
               {sortedEpics.map((epic) => (
                 <tr
                   key={epic.id}
-                  className="hover:bg-zinc-800/50 transition-colors"
+                  onClick={(event) => handleRowClick(epic.id, event)}
+                  className="hover:bg-zinc-800/50 transition-colors cursor-pointer"
                 >
                   {visibleColumns.map((col) => {
                     switch (col.key) {

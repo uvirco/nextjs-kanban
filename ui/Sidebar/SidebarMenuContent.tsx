@@ -8,6 +8,7 @@ import {
   IconCircle,
   IconTarget,
   IconChartBar,
+  IconSettings,
 } from "@tabler/icons-react";
 import SidebarHeader from "./SidebarHeader";
 import SidebarSearch from "./SidebarSearch";
@@ -137,6 +138,13 @@ export default function SidebarMenuContent({
           />
 
           <hr className="border-zinc-900 my-3" />
+
+          <MenuItem
+            path="/admin/settings"
+            title={isCollapsed ? "" : "Settings"}
+            icon={<IconSettings stroke={1.5} size={20} />}
+            showTitle={!isCollapsed}
+          />
         </Menu>
       </div>
 

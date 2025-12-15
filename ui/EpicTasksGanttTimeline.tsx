@@ -285,8 +285,11 @@ export function EpicTasksGanttTimeline({ epicId, subtasks }: EpicTasksGanttTimel
 
   if (!subtasks.length) {
     return (
-      <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6 text-zinc-500">
-        No subtasks to display
+      <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+        <h3 className="text-lg font-semibold text-white mb-2">📊 Task Flow Timeline</h3>
+        <div className="text-zinc-500">
+          No subtasks to display yet. Create some tasks within this epic to see the timeline.
+        </div>
       </div>
     );
   }
