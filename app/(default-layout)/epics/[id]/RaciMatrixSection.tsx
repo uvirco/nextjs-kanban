@@ -100,45 +100,31 @@ export default function RaciMatrixSection({
     }
   }, [isCollapsed, storageKey]);
   return (
-    <>
-      <div
-        className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 mb-4"
-        role="region"
-        aria-label="RACI matrix"
+    <div className="bg-zinc-900 border border-zinc-800 rounded-lg">
+      <button
+        onClick={() => setIsCollapsed((s) => !s)}
+        className="flex items-center gap-2 w-full text-left hover:bg-zinc-800/50 p-3 rounded-t-lg"
+        aria-expanded={!isCollapsed}
+        aria-controls="raci-table"
+        aria-label={
+          isCollapsed ? "Expand RACI matrix" : "Collapse RACI matrix"
+        }
       >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="text-2xl">👥</div>
-            <div>
-              <div className="font-semibold text-white">RACI Matrix</div>
-              <div className="text-xs text-zinc-400">
-                Who is Responsible / Accountable / Consulted / Informed
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <button
-              onClick={() => setIsCollapsed((s) => !s)}
-              className="p-2 rounded text-sm bg-zinc-800 hover:bg-zinc-700 text-zinc-200 flex items-center"
-              aria-expanded={!isCollapsed}
-              aria-controls="raci-table"
-              aria-label={
-                isCollapsed ? "Expand RACI matrix" : "Collapse RACI matrix"
-              }
-            >
-              {isCollapsed ? (
-                <IconChevronRight size={18} className="text-zinc-400" />
-              ) : (
-                <IconChevronDown size={18} className="text-zinc-400" />
-              )}
-            </button>
-          </div>
-        </div>
-      </div>
+        {isCollapsed ? (
+          <IconChevronRight size={20} className="text-zinc-400" />
+        ) : (
+          <IconChevronDown size={20} className="text-zinc-400" />
+        )}
+        <span className="text-zinc-400">👥</span>
+        <h3 className="text-sm font-semibold text-white">RACI Matrix</h3>
+      </button>
 
       {!isCollapsed && (
-        <>
+        <div className="p-3 pt-0">
+          <div className="text-xs text-zinc-400 mb-4">
+            Who is Responsible / Accountable / Consulted / Informed
+          </div>
+
           {raciUsers.length > 0 ? (
             <div id="raci-table" className="overflow-x-auto">
               <table className="w-full border-collapse">
@@ -289,8 +275,8 @@ export default function RaciMatrixSection({
               </div>
             </div>
           </div>
-        </>
+        </div>
       )}
-    </>
+    </div>
   );
 }

@@ -80,79 +80,69 @@ export default function EpicChecklistsSection({
   epic,
   params,
 }: EpicChecklistsSectionProps) {
+  // Use only the first checklist, or show empty state if none exist
+  const checklist = epic.checklists?.[0];
+
   return (
     <CollapsibleSection
-      title="Checklists"
+      title="Checklist"
       icon="✅"
       defaultCollapsed={true}
-      storageKey={`epic:${params.id}:section:checklists`}
+      storageKey={`epic:${params.id}:section:checklist`}
     >
       <div className="space-y-4">
-        {epic.checklists.length > 0 ? (
-          epic.checklists.map((checklist: any) => {
-            const totalItems = checklist.items?.length || 0;
-            const completedItems =
-              checklist.items?.filter((item: any) => item.isChecked).length ||
-              0;
-            const completionPercentage =
-              totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
+        {checklist ? (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <ChecklistTitleForm
+                checklistTitle={checklist.title}
+                checklistId={checklist.id}
+                taskId={params.id}
+              />
+              <DeleteChecklistButton
+                checklistId={checklist.id}
+                taskId={params.id}
+              />
+            </div>
 
-            return (
-              <CollapsibleSection
-                key={checklist.id}
-                title={`${checklist.title || "Checklist"} (${completedItems}/${totalItems})`}
-                icon="📋"
-                defaultCollapsed={true}
-                isNested={true}
-                storageKey={`epic:${params.id}:checklist:${checklist.id}`}
-              >
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <ChecklistTitleForm
-                      checklistTitle={checklist.title}
-                      checklistId={checklist.id}
-                      taskId={params.id}
-                    />
-                    <DeleteChecklistButton
-                      checklistId={checklist.id}
-                      taskId={params.id}
-                    />
-                  </div>
+            {/* Progress bar */}
+            {checklist.items && checklist.items.length > 0 && (
+              <div className="w-full bg-zinc-700 rounded-full h-2">
+                <div
+                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                  style={{
+                    width: `${
+                      (checklist.items.filter((item: any) => item.isChecked)
+                        .length /
+                        checklist.items.length) *
+                      100
+                    }%`,
+                  }}
+                ></div>
+              </div>
+            )}
 
-                  {/* Progress bar */}
-                  <div className="w-full bg-zinc-700 rounded-full h-2">
-                    <div
-                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${completionPercentage}%` }}
-                    ></div>
-                  </div>
+            {/* Checklist items */}
+            <ChecklistCheckboxGroup
+              taskId={params.id}
+              checkedItemIds={checklist.items
+                ?.filter((item: any) => item.isChecked)
+                .map((item: any) => item.id) || []}
+              checklist={checklist}
+            />
 
-                  {/* Checklist items */}
-                  <ChecklistCheckboxGroup
-                    taskId={params.id}
-                    checkedItemIds={checklist.items
-                      .filter((item: any) => item.isChecked)
-                      .map((item: any) => item.id)}
-                    checklist={checklist}
-                  />
-
-                  {/* Add new item */}
-                  <ChecklistItemForm
-                    checklistId={checklist.id}
-                    taskId={params.id}
-                  />
-                </div>
-              </CollapsibleSection>
-            );
-          })
-        ) : (
-          <div className="text-zinc-500 text-center py-4 text-xs">
-            No checklists yet
+            {/* Add new item */}
+            <ChecklistItemForm
+              checklistId={checklist.id}
+              taskId={params.id}
+            />
           </div>
+        ) : (
+          <div className="py-4"></div>
         )}
 
-        {/* Add Checklist */}
-        <EpicAddChecklist epicId={params.id} />
+        {/* Only show add checklist if no checklist exists */}
+        {!checklist && <EpicAddChecklist epicId={params.id} />}
       </div>
     </CollapsibleSection>
   );

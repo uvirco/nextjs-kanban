@@ -58,9 +58,12 @@ export function MenuItem({
   const linkContent = (
     <Link
       href={path}
-      className={clsx("flex items-center gap-2 text-sm hover:text-primary relative group", {
-        "text-primary": isActive,
-      })}
+      className={clsx(
+        "flex items-center gap-2 text-sm hover:text-primary relative group",
+        {
+          "text-primary": isActive,
+        }
+      )}
     >
       {icon}
       {showTitle && title}
