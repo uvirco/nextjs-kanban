@@ -82,6 +82,7 @@ export default function EditEpicForm({
   const [isAddingMember, setIsAddingMember] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState("");
   const [selectedRole, setSelectedRole] = useState("");
+  const [selectedRoleCategory, setSelectedRoleCategory] = useState("all");
   const [selectedRaciRoles, setSelectedRaciRoles] = useState<string[]>([]);
 
   // Track initial state for unsaved changes detection
@@ -188,6 +189,14 @@ export default function EditEpicForm({
     fetchRoles();
   }, []);
 
+  // Get unique categories from roles
+  const roleCategories = ['all', ...new Set(roles.map(role => role.category).filter(Boolean))];
+
+  // Filter roles by selected category
+  const filteredRoles = selectedRoleCategory === 'all'
+    ? roles
+    : roles.filter(role => role.category === selectedRoleCategory);
+
   // Check for unsaved changes
   const hasUnsavedChanges = useCallback(() => {
     // Check form data changes
@@ -283,6 +292,7 @@ export default function EditEpicForm({
         // Reset form
         setSelectedUserId("");
         setSelectedRole("");
+        setSelectedRoleCategory("all");
         setSelectedRaciRoles([]);
         setIsAddingMember(false);
       } else {
@@ -661,6 +671,25 @@ export default function EditEpicForm({
               </div>
 
               <div>
+                <label className="block text-sm text-zinc-400 mb-1">Role Category</label>
+                <select
+                  value={selectedRoleCategory}
+                  onChange={(e) => {
+                    setSelectedRoleCategory(e.target.value);
+                    setSelectedRole(""); // Reset selected role when category changes
+                  }}
+                  className="w-full px-3 py-2 bg-zinc-700 border border-zinc-600 rounded text-white"
+                >
+                  <option value="all">All Categories</option>
+                  {roleCategories.filter(cat => cat !== 'all').map((category) => (
+                    <option key={category} value={category}>
+                      {category.charAt(0).toUpperCase() + category.slice(1)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
                 <label className="block text-sm text-zinc-400 mb-1">Role</label>
                 <select
                   value={selectedRole}
@@ -668,7 +697,7 @@ export default function EditEpicForm({
                   className="w-full px-3 py-2 bg-zinc-700 border border-zinc-600 rounded text-white"
                 >
                   <option value="">Select a role...</option>
-                  {roles.map((role) => (
+                  {filteredRoles.map((role) => (
                     <option key={role.id} value={role.name}>
                       {role.name}
                       {role.description && ` - ${role.description}`}
@@ -743,6 +772,7 @@ export default function EditEpicForm({
                     setIsAddingMember(false);
                     setSelectedUserId("");
                     setSelectedRole("");
+                    setSelectedRoleCategory("all");
                     setSelectedRaciRoles([]);
                   }}
                   className="px-4 py-2 bg-zinc-600 hover:bg-zinc-700 text-white rounded transition-colors"
