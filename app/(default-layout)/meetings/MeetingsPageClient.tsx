@@ -1,7 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { IconCalendar, IconFilter, IconPlus, IconSearch } from "@tabler/icons-react";
+import {
+  IconCalendar,
+  IconFilter,
+  IconPlus,
+  IconSearch,
+} from "@tabler/icons-react";
 
 interface MeetingNote {
   id: string;
@@ -96,8 +101,12 @@ export default function MeetingsPageClient() {
     let matchesPeriod = true;
 
     if (selectedPeriod !== "all") {
-      const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      
+      const startOfToday = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate()
+      );
+
       switch (selectedPeriod) {
         case "today":
           matchesPeriod = noteDate >= startOfToday;
@@ -117,9 +126,14 @@ export default function MeetingsPageClient() {
           matchesPeriod = noteDate >= startOfMonth;
           break;
         case "lastMonth":
-          const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+          const startOfLastMonth = new Date(
+            now.getFullYear(),
+            now.getMonth() - 1,
+            1
+          );
           const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
-          matchesPeriod = noteDate >= startOfLastMonth && noteDate <= endOfLastMonth;
+          matchesPeriod =
+            noteDate >= startOfLastMonth && noteDate <= endOfLastMonth;
           break;
         case "thisYear":
           const startOfYear = new Date(now.getFullYear(), 0, 1);
@@ -299,7 +313,9 @@ export default function MeetingsPageClient() {
                     <span className="text-sm font-medium text-zinc-400">
                       Decisions:{" "}
                     </span>
-                    <p className="text-sm text-zinc-300 mt-1">{note.decisions}</p>
+                    <p className="text-sm text-zinc-300 mt-1">
+                      {note.decisions}
+                    </p>
                   </div>
                 )}
 
@@ -325,7 +341,9 @@ export default function MeetingsPageClient() {
                           >
                             {item.status}
                           </span>
-                          <span className="text-zinc-300">{item.description}</span>
+                          <span className="text-zinc-300">
+                            {item.description}
+                          </span>
                           {item.assignee_text && (
                             <span className="text-zinc-500 text-xs">
                               → {item.assignee_text}

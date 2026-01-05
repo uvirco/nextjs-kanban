@@ -9,6 +9,7 @@ import {
   IconTarget,
   IconChartBar,
   IconSettings,
+  IconCalendar,
 } from "@tabler/icons-react";
 import SidebarHeader from "./SidebarHeader";
 import { useEffect, useState } from "react";
@@ -82,6 +83,12 @@ export default function SidebarMenuContent({
             path="/epics"
             title={isCollapsed ? "" : "Epics"}
             icon={<IconTarget stroke={1.5} size={20} />}
+            showTitle={!isCollapsed}
+          />
+          <MenuItem
+            path="/meetings"
+            title={isCollapsed ? "" : "Meetings"}
+            icon={<IconCalendar stroke={1.5} size={20} />}
             showTitle={!isCollapsed}
           />
 

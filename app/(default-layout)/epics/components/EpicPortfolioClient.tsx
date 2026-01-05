@@ -107,17 +107,9 @@ export default function EpicPortfolioClient({
 
   // Load initial state from localStorage (client-side only)
   const getInitialState = <T,>(key: keyof SavedState, defaultValue: T): T => {
-    if (typeof window === "undefined") return defaultValue;
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (!saved) return defaultValue;
-      const parsed = JSON.parse(saved) as Partial<SavedState> | null;
-      if (!parsed || !(key in parsed)) return defaultValue;
-      return parsed[key] as T;
-    } catch (error) {
-      console.error("Error loading initial state for", key, error);
-      return defaultValue;
-    }
+    // Always return default value to prevent hydration mismatch
+    // localStorage will be loaded after component mounts
+    return defaultValue;
   };
 
   const [view, setView] = useState<
@@ -198,6 +190,35 @@ export default function EpicPortfolioClient({
     sortField,
     sortDirection,
   ]);
+
+  // Load saved state from localStorage after component mounts (prevents hydration mismatch)
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved) as Partial<SavedState>;
+        if (parsed.view) setView(parsed.view);
+        if (parsed.filter) setFilter(parsed.filter);
+        if (parsed.departmentFilter)
+          setDepartmentFilter(parsed.departmentFilter);
+        if (parsed.riskFilter) setRiskFilter(parsed.riskFilter);
+        if (parsed.businessValueFilter)
+          setBusinessValueFilter(parsed.businessValueFilter);
+        if (parsed.dueDateFilter) setDueDateFilter(parsed.dueDateFilter);
+        if (parsed.showColumnSettings !== undefined)
+          setShowColumnSettings(parsed.showColumnSettings);
+        if (parsed.columnVisibility)
+          setColumnVisibility({
+            ...DEFAULT_SAVED_STATE.columnVisibility,
+            ...parsed.columnVisibility,
+          });
+        if (parsed.sortField) setSortField(parsed.sortField);
+        if (parsed.sortDirection) setSortDirection(parsed.sortDirection);
+      }
+    } catch (error) {
+      console.error("Error loading saved state:", error);
+    }
+  }, []); // Empty dependency array - only run once after mount
 
   // Get unique departments for filter dropdown
   const departments = Array.from(
