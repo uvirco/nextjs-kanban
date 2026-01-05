@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { IconX, IconCalendar, IconUsers } from "@tabler/icons-react";
+import RichTextEditor from "../../../ui/RichTextEditor";
 
 interface EpicAddMeetingNoteProps {
   epicId: string;
@@ -201,11 +202,9 @@ export default function EpicAddMeetingNote({
           <label className="block text-sm font-medium text-zinc-300 mb-2">
             Agenda
           </label>
-          <textarea
-            value={formData.agenda}
-            onChange={(e) => handleChange("agenda", e.target.value)}
-            rows={3}
-            className="w-full px-3 py-2 bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500 resize-vertical"
+          <RichTextEditor
+            content={formData.agenda}
+            onChange={(content) => handleChange("agenda", content)}
             placeholder="What was discussed or planned to be discussed..."
           />
         </div>
@@ -214,11 +213,9 @@ export default function EpicAddMeetingNote({
           <label className="block text-sm font-medium text-zinc-300 mb-2">
             Meeting Notes
           </label>
-          <textarea
-            value={formData.notes}
-            onChange={(e) => handleChange("notes", e.target.value)}
-            rows={4}
-            className="w-full px-3 py-2 bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500 resize-vertical"
+          <RichTextEditor
+            content={formData.notes}
+            onChange={(content) => handleChange("notes", content)}
             placeholder="Detailed notes from the meeting..."
           />
         </div>
@@ -227,11 +224,9 @@ export default function EpicAddMeetingNote({
           <label className="block text-sm font-medium text-zinc-300 mb-2">
             Decisions Made
           </label>
-          <textarea
-            value={formData.decisions}
-            onChange={(e) => handleChange("decisions", e.target.value)}
-            rows={3}
-            className="w-full px-3 py-2 bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500 resize-vertical"
+          <RichTextEditor
+            content={formData.decisions}
+            onChange={(content) => handleChange("decisions", content)}
             placeholder="Key decisions and outcomes..."
           />
         </div>

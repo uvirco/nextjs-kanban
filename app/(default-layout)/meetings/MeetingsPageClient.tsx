@@ -7,6 +7,7 @@ import {
   IconPlus,
   IconSearch,
 } from "@tabler/icons-react";
+import CreateMeetingNoteModal from "../../../ui/CreateMeetingNoteModal";
 
 interface MeetingNote {
   id: string;
@@ -48,6 +49,7 @@ export default function MeetingsPageClient() {
   const [selectedPeriod, setSelectedPeriod] = useState<string>("all");
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   useEffect(() => {
     fetchEpics();
@@ -59,10 +61,16 @@ export default function MeetingsPageClient() {
 
   const fetchEpics = async () => {
     try {
-      const response = await fetch("/api/epics/list");
+      console.log("Fetching epics...");
+      const response = await fetch("/api/epics");
+      console.log("Epics response status:", response.status);
       if (response.ok) {
         const data = await response.json();
+        console.log("Fetched epics:", data);
         setEpics(data);
+      } else {
+        const errorData = await response.json();
+        console.error("Failed to fetch epics:", errorData);
       }
     } catch (error) {
       console.error("Failed to fetch epics:", error);
@@ -86,6 +94,10 @@ export default function MeetingsPageClient() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCreateSuccess = (newMeetingNote: MeetingNote) => {
+    setMeetingNotes((prev) => [newMeetingNote, ...prev]);
   };
 
   const filteredNotes = meetingNotes.filter((note) => {
@@ -166,13 +178,13 @@ export default function MeetingsPageClient() {
               Manage meeting notes and action items across all epics
             </p>
           </div>
-          <a
-            href="/epics"
+          <button
+            onClick={() => setShowCreateModal(true)}
             className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center gap-2"
           >
             <IconPlus size={20} />
             New Meeting Note
-          </a>
+          </button>
         </div>
 
         {/* Filters */}
@@ -252,15 +264,15 @@ export default function MeetingsPageClient() {
               No meeting notes yet
             </h3>
             <p className="text-zinc-400 mb-4">
-              Meeting notes are created within epics. Visit an epic detail page
-              to add your first meeting note.
+              Get started by creating your first meeting note.
             </p>
-            <a
-              href="/epics"
-              className="inline-block px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg transition-colors"
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors inline-flex items-center gap-2"
             >
-              Go to Epics
-            </a>
+              <IconPlus size={20} />
+              Create Meeting Note
+            </button>
           </div>
         ) : (
           <div className="space-y-4">
@@ -279,13 +291,17 @@ export default function MeetingsPageClient() {
                         {note.meeting_type}
                       </span>
                       <span>{formatDate(note.meeting_date)}</span>
-                      <span>•</span>
-                      <a
-                        href={`/epics/${note.epic.id}`}
-                        className="text-blue-400 hover:text-blue-300"
-                      >
-                        {note.epic.title}
-                      </a>
+                      {note.epic && (
+                        <>
+                          <span>•</span>
+                          <a
+                            href={`/epics/${note.epic.id}`}
+                            className="text-blue-400 hover:text-blue-300"
+                          >
+                            {note.epic.title}
+                          </a>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -304,7 +320,9 @@ export default function MeetingsPageClient() {
                     <span className="text-sm font-medium text-zinc-400">
                       Agenda:{" "}
                     </span>
-                    <p className="text-sm text-zinc-300 mt-1">{note.agenda}</p>
+                    <div className="text-sm text-zinc-300 mt-1 prose prose-sm prose-invert max-w-none">
+                      <div dangerouslySetInnerHTML={{ __html: note.agenda }} />
+                    </div>
                   </div>
                 )}
 
@@ -313,9 +331,9 @@ export default function MeetingsPageClient() {
                     <span className="text-sm font-medium text-zinc-400">
                       Decisions:{" "}
                     </span>
-                    <p className="text-sm text-zinc-300 mt-1">
-                      {note.decisions}
-                    </p>
+                    <div className="text-sm text-zinc-300 mt-1 prose prose-sm prose-invert max-w-none">
+                      <div dangerouslySetInnerHTML={{ __html: note.decisions }} />
+                    </div>
                   </div>
                 )}
 
@@ -377,6 +395,14 @@ export default function MeetingsPageClient() {
           </div>
         )}
       </div>
+
+      {showCreateModal && (
+        <CreateMeetingNoteModal
+          epics={epics}
+          onClose={() => setShowCreateModal(false)}
+          onSuccess={handleCreateSuccess}
+        />
+      )}
     </div>
   );
 }

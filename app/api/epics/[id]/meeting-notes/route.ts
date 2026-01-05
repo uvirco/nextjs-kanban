@@ -20,6 +20,7 @@ export async function GET(
       .select(
         `
         *,
+        epic:Task!epic_id(id, title),
         action_items:meeting_action_items(*),
         createdBy:User!created_by(name, email)
       `
@@ -126,6 +127,7 @@ export async function POST(
       .select(
         `
         *,
+        epic:Task!epic_id(id, title),
         action_items:meeting_action_items(*),
         createdBy:User(name, email)
       `

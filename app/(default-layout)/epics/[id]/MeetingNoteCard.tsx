@@ -215,8 +215,8 @@ export default function MeetingNoteCard({
                 <IconTarget size={16} />
                 Agenda
               </h5>
-              <div className="text-zinc-300 text-sm whitespace-pre-wrap bg-zinc-900 p-3 rounded">
-                {meetingNote.agenda}
+              <div className="text-zinc-300 text-sm bg-zinc-900 p-3 rounded prose prose-sm prose-invert max-w-none">
+                <div dangerouslySetInnerHTML={{ __html: meetingNote.agenda }} />
               </div>
             </div>
           )}
@@ -227,8 +227,8 @@ export default function MeetingNoteCard({
                 <IconFileText size={16} />
                 Notes
               </h5>
-              <div className="text-zinc-300 text-sm whitespace-pre-wrap bg-zinc-900 p-3 rounded">
-                {meetingNote.notes}
+              <div className="text-zinc-300 text-sm bg-zinc-900 p-3 rounded prose prose-sm prose-invert max-w-none">
+                <div dangerouslySetInnerHTML={{ __html: meetingNote.notes }} />
               </div>
             </div>
           )}
@@ -239,8 +239,8 @@ export default function MeetingNoteCard({
                 <IconCircleCheck size={16} />
                 Decisions
               </h5>
-              <div className="text-zinc-300 text-sm whitespace-pre-wrap bg-zinc-900 p-3 rounded">
-                {meetingNote.decisions}
+              <div className="text-zinc-300 text-sm bg-zinc-900 p-3 rounded prose prose-sm prose-invert max-w-none">
+                <div dangerouslySetInnerHTML={{ __html: meetingNote.decisions }} />
               </div>
             </div>
           )}

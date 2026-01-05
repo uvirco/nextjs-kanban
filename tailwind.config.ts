@@ -110,7 +110,8 @@ const config: Config = {
         rose: { extend: "dark", colors: { primary: { DEFAULT: "#f43f5e" } } },
       },
     }),
-      require("tailwindcss-animate")
+      require("tailwindcss-animate"),
+      require("@tailwindcss/typography")
 ],
 };
 export default config;
