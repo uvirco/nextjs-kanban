@@ -171,6 +171,44 @@ export async function PUT(
       return NextResponse.json(meetingNote); // Return basic meeting note if fetch fails
     }
 
+    // Fetch user data for attendees
+    if (
+      completeMeetingNote.attendees_text &&
+      completeMeetingNote.attendees_text.length > 0
+    ) {
+      const { data: users } = await supabaseAdmin
+        .from("User")
+        .select("id, name, email")
+        .in("id", completeMeetingNote.attendees_text);
+
+      completeMeetingNote.attendees = users || [];
+    }
+
+    // Fetch user data for action item assignees
+    if (
+      completeMeetingNote.action_items &&
+      completeMeetingNote.action_items.length > 0
+    ) {
+      const assigneeIds = completeMeetingNote.action_items
+        .map((item: any) => item.assignee_text)
+        .filter(Boolean);
+
+      if (assigneeIds.length > 0) {
+        const { data: assignees } = await supabaseAdmin
+          .from("User")
+          .select("id, name, email")
+          .in("id", assigneeIds);
+
+        const assigneeMap = new Map(
+          assignees?.map((u: any) => [u.id, u]) || []
+        );
+
+        completeMeetingNote.action_items.forEach((item: any) => {
+          item.assignee = assigneeMap.get(item.assignee_text);
+        });
+      }
+    }
+
     return NextResponse.json(completeMeetingNote);
   } catch (error) {
     console.error("Failed to update meeting note:", error);

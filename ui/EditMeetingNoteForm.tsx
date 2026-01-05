@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { IconX, IconCalendar, IconUsers } from "@tabler/icons-react";
-import RichTextEditor from "../../../../ui/RichTextEditor";
+import RichTextEditor from "./RichTextEditor";
 
 interface MeetingNote {
   id: string;
@@ -10,7 +10,7 @@ interface MeetingNote {
   meeting_type: string;
   meeting_date: string;
   attendees_text: string[];
-  attendees?: string[];
+  attendees?: Array<{ id: string; name: string; email: string }>;
   agenda?: string;
   notes?: string;
   decisions?: string;
@@ -26,6 +26,10 @@ interface MeetingNote {
   createdBy: {
     name: string;
     email: string;
+  };
+  epic: {
+    id: string;
+    title: string;
   };
   created_at: string;
 }
@@ -61,7 +65,9 @@ export default function EditMeetingNoteForm({
     title: meetingNote.title,
     meetingType: meetingNote.meeting_type,
     meetingDate: new Date(meetingNote.meeting_date).toISOString().split("T")[0],
-    attendees: meetingNote.attendees_text || [],
+    attendees: meetingNote.attendees
+      ? meetingNote.attendees.map((a) => a.id)
+      : meetingNote.attendees_text || [],
     agenda: meetingNote.agenda || "",
     notes: meetingNote.notes || "",
     decisions: meetingNote.decisions || "",

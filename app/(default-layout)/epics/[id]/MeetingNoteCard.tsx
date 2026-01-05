@@ -240,7 +240,9 @@ export default function MeetingNoteCard({
                 Decisions
               </h5>
               <div className="text-zinc-300 text-sm bg-zinc-900 p-3 rounded prose prose-sm prose-invert max-w-none">
-                <div dangerouslySetInnerHTML={{ __html: meetingNote.decisions }} />
+                <div
+                  dangerouslySetInnerHTML={{ __html: meetingNote.decisions }}
+                />
               </div>
             </div>
           )}

@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { IconX, IconCalendar, IconUsers } from "@tabler/icons-react";
-import RichTextEditor from "../../../ui/RichTextEditor";
+import RichTextEditor from "../../../../ui/RichTextEditor";
 
 interface EpicAddMeetingNoteProps {
   epicId: string;
@@ -25,11 +25,15 @@ export default function EpicAddMeetingNote({
   onCancel,
   onSuccess,
 }: EpicAddMeetingNoteProps) {
+  const [epicMembers, setEpicMembers] = useState<
+    Array<{ id: string; name: string; email: string }>
+  >([]);
+  const [membersLoading, setMembersLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     meetingType: "other",
     meetingDate: new Date().toISOString().split("T")[0],
-    attendees: "",
+    attendees: [] as string[],
     agenda: "",
     notes: "",
     decisions: "",
@@ -43,16 +47,35 @@ export default function EpicAddMeetingNote({
   });
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    fetchEpicMembers();
+  }, [epicId]);
+
+  const fetchEpicMembers = async () => {
+    setMembersLoading(true);
+    try {
+      const response = await fetch(`/api/epics/${epicId}/members`);
+      if (response.ok) {
+        const data = await response.json();
+        const members = data.map((m: any) => ({
+          id: m.user.id,
+          name: m.user.name,
+          email: m.user.email,
+        }));
+        setEpicMembers(members);
+      }
+    } catch (error) {
+      console.error("Failed to fetch epic members:", error);
+    } finally {
+      setMembersLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const attendeesArray = formData.attendees
-        .split(",")
-        .map((attendee) => attendee.trim())
-        .filter((attendee) => attendee.length > 0);
-
       const response = await fetch(`/api/epics/${epicId}/meeting-notes`, {
         method: "POST",
         headers: {
@@ -60,7 +83,7 @@ export default function EpicAddMeetingNote({
         },
         body: JSON.stringify({
           ...formData,
-          attendees: attendeesArray,
+          attendees: formData.attendees,
           meetingDate: new Date(formData.meetingDate).toISOString(),
         }),
       });
@@ -79,8 +102,17 @@ export default function EpicAddMeetingNote({
     }
   };
 
-  const handleChange = (field: string, value: string) => {
+  const handleChange = (field: string, value: string | string[]) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const toggleAttendee = (userId: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      attendees: prev.attendees.includes(userId)
+        ? prev.attendees.filter((id) => id !== userId)
+        : [...prev.attendees, userId],
+    }));
   };
 
   const handleActionItemChange = (
@@ -185,16 +217,33 @@ export default function EpicAddMeetingNote({
               <IconUsers size={16} />
               Attendees
             </label>
-            <input
-              type="text"
-              value={formData.attendees}
-              onChange={(e) => handleChange("attendees", e.target.value)}
-              className="w-full px-3 py-2 bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500"
-              placeholder="John Doe, Jane Smith, Mike Johnson"
-            />
-            <p className="text-xs text-zinc-500 mt-1">
-              Separate names with commas
-            </p>
+            {membersLoading ? (
+              <div className="text-sm text-zinc-400">Loading members...</div>
+            ) : epicMembers.length > 0 ? (
+              <div className="space-y-2 max-h-40 overflow-y-auto p-3 bg-zinc-900 border border-zinc-700 rounded-lg">
+                {epicMembers.map((member) => (
+                  <label
+                    key={member.id}
+                    className="flex items-center gap-2 cursor-pointer hover:bg-zinc-800 p-1 rounded"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={formData.attendees.includes(member.id)}
+                      onChange={() => toggleAttendee(member.id)}
+                      className="w-4 h-4"
+                    />
+                    <span className="text-sm text-white">{member.name}</span>
+                    <span className="text-xs text-zinc-500">
+                      ({member.email})
+                    </span>
+                  </label>
+                ))}
+              </div>
+            ) : (
+              <div className="text-sm text-zinc-400 p-3 bg-zinc-900 border border-zinc-700 rounded-lg">
+                No members found for this epic
+              </div>
+            )}
           </div>
         </div>
 
@@ -264,8 +313,7 @@ export default function EpicAddMeetingNote({
                     <label className="block text-xs text-zinc-400 mb-1">
                       Assignee
                     </label>
-                    <input
-                      type="text"
+                    <select
                       value={item.assignee}
                       onChange={(e) =>
                         handleActionItemChange(
@@ -274,9 +322,15 @@ export default function EpicAddMeetingNote({
                           e.target.value
                         )
                       }
-                      className="w-full px-2 py-1 bg-zinc-900 border border-zinc-700 rounded text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500 text-sm"
-                      placeholder="Assignee name"
-                    />
+                      className="w-full px-2 py-1 bg-zinc-900 border border-zinc-700 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
+                    >
+                      <option value="">Select assignee...</option>
+                      {epicMembers.map((member) => (
+                        <option key={member.id} value={member.id}>
+                          {member.name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   <div>
                     <label className="block text-xs text-zinc-400 mb-1">

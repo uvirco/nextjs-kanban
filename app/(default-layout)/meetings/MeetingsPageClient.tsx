@@ -6,8 +6,10 @@ import {
   IconFilter,
   IconPlus,
   IconSearch,
+  IconEdit,
 } from "@tabler/icons-react";
 import CreateMeetingNoteModal from "../../../ui/CreateMeetingNoteModal";
+import EditMeetingNoteForm from "../../../ui/EditMeetingNoteForm";
 
 interface MeetingNote {
   id: string;
@@ -15,6 +17,7 @@ interface MeetingNote {
   meeting_type: string;
   meeting_date: string;
   attendees_text: string[];
+  attendees?: Array<{ id: string; name: string; email: string }>;
   agenda?: string;
   notes?: string;
   decisions?: string;
@@ -22,6 +25,7 @@ interface MeetingNote {
     id: string;
     description: string;
     assignee_text?: string;
+    assignee?: { id: string; name: string; email: string };
     status: string;
     priority: string;
     due_date?: string;
@@ -50,6 +54,7 @@ export default function MeetingsPageClient() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [editingNote, setEditingNote] = useState<MeetingNote | null>(null);
 
   useEffect(() => {
     fetchEpics();
@@ -98,6 +103,21 @@ export default function MeetingsPageClient() {
 
   const handleCreateSuccess = (newMeetingNote: MeetingNote) => {
     setMeetingNotes((prev) => [newMeetingNote, ...prev]);
+  };
+
+  const handleEditNote = (note: MeetingNote) => {
+    setEditingNote(note);
+  };
+
+  const handleEditSuccess = (updatedNote: MeetingNote) => {
+    setMeetingNotes((prev) =>
+      prev.map((note) => (note.id === updatedNote.id ? updatedNote : note))
+    );
+    setEditingNote(null);
+  };
+
+  const handleEditCancel = () => {
+    setEditingNote(null);
   };
 
   const filteredNotes = meetingNotes.filter((note) => {
@@ -283,9 +303,18 @@ export default function MeetingsPageClient() {
               >
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-white mb-1">
-                      {note.title}
-                    </h3>
+                    <div className="flex items-center gap-3 mb-1">
+                      <h3 className="text-lg font-semibold text-white">
+                        {note.title}
+                      </h3>
+                      <button
+                        onClick={() => handleEditNote(note)}
+                        className="p-1 text-zinc-400 hover:text-zinc-300 hover:bg-zinc-700 rounded transition-colors"
+                        title="Edit meeting note"
+                      >
+                        <IconEdit size={16} />
+                      </button>
+                    </div>
                     <div className="flex items-center gap-3 text-sm text-zinc-400">
                       <span className="px-2 py-1 bg-blue-900/30 text-blue-400 rounded">
                         {note.meeting_type}
@@ -306,11 +335,11 @@ export default function MeetingsPageClient() {
                   </div>
                 </div>
 
-                {note.attendees_text && note.attendees_text.length > 0 && (
+                {note.attendees && note.attendees.length > 0 && (
                   <div className="mb-3">
                     <span className="text-sm text-zinc-400">Attendees: </span>
                     <span className="text-sm text-zinc-300">
-                      {note.attendees_text.join(", ")}
+                      {note.attendees.map((a: any) => a.name).join(", ")}
                     </span>
                   </div>
                 )}
@@ -332,7 +361,9 @@ export default function MeetingsPageClient() {
                       Decisions:{" "}
                     </span>
                     <div className="text-sm text-zinc-300 mt-1 prose prose-sm prose-invert max-w-none">
-                      <div dangerouslySetInnerHTML={{ __html: note.decisions }} />
+                      <div
+                        dangerouslySetInnerHTML={{ __html: note.decisions }}
+                      />
                     </div>
                   </div>
                 )}
@@ -362,9 +393,9 @@ export default function MeetingsPageClient() {
                           <span className="text-zinc-300">
                             {item.description}
                           </span>
-                          {item.assignee_text && (
+                          {item.assignee && (
                             <span className="text-zinc-500 text-xs">
-                              → {item.assignee_text}
+                              → {item.assignee.name}
                             </span>
                           )}
                         </div>
@@ -401,6 +432,15 @@ export default function MeetingsPageClient() {
           epics={epics}
           onClose={() => setShowCreateModal(false)}
           onSuccess={handleCreateSuccess}
+        />
+      )}
+
+      {editingNote && (
+        <EditMeetingNoteForm
+          meetingNote={editingNote}
+          epicId={editingNote.epic.id}
+          onCancel={handleEditCancel}
+          onSuccess={handleEditSuccess}
         />
       )}
     </div>

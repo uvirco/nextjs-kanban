@@ -25,7 +25,7 @@ export default function EpicMeetingNotesSection({
         fontWeight: "bold !important",
         display: "block !important",
         width: "100% !important",
-        position: "relative !important",
+        position: "relative" as any,
         zIndex: "9999 !important",
       }}
     >

@@ -39,6 +39,52 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Fetch user data for attendees
+    if (meetingNotes && meetingNotes.length > 0) {
+      const allAttendeeIds = meetingNotes
+        .flatMap((note: any) => note.attendees_text || [])
+        .filter((id: string) => id);
+
+      if (allAttendeeIds.length > 0) {
+        const { data: users } = await supabaseAdmin
+          .from("User")
+          .select("id, name, email")
+          .in("id", allAttendeeIds);
+
+        const userMap = new Map(users?.map((u: any) => [u.id, u]) || []);
+
+        meetingNotes.forEach((note: any) => {
+          note.attendees = (note.attendees_text || [])
+            .map((id: string) => userMap.get(id))
+            .filter(Boolean);
+        });
+      }
+
+      // Fetch user data for action item assignees
+      const allAssigneeIds = meetingNotes
+        .flatMap((note: any) =>
+          (note.action_items || []).map((ai: any) => ai.assignee_text)
+        )
+        .filter((id: string) => id);
+
+      if (allAssigneeIds.length > 0) {
+        const { data: assignees } = await supabaseAdmin
+          .from("User")
+          .select("id, name, email")
+          .in("id", allAssigneeIds);
+
+        const assigneeMap = new Map(
+          assignees?.map((u: any) => [u.id, u]) || []
+        );
+
+        meetingNotes.forEach((note: any) => {
+          (note.action_items || []).forEach((item: any) => {
+            item.assignee = assigneeMap.get(item.assignee_text);
+          });
+        });
+      }
+    }
+
     return NextResponse.json(meetingNotes || []);
   } catch (error) {
     console.error("Failed to fetch meeting notes:", error);
