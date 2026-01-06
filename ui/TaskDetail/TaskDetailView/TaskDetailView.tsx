@@ -22,8 +22,12 @@ export default async function TaskDetailView({ task }: { task: DetailedTask }) {
   const session = await auth();
 
   return (
-    <div className="col-span-3 text-zinc-100">
-      <TaskDetailLabels labels={task.labels} />
+    <div className="col-span-3 text-zinc-100 flex flex-col h-full">
+      <TaskDetailLabels
+        taskId={task.id}
+        boardId={task.column.boardId}
+        initialLabels={task.labels}
+      />
       <TaskDetailDates
         startDate={task.startDate}
         dueDate={task.dueDate}

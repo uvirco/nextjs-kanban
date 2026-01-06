@@ -1,30 +1,83 @@
+"use client";
+import { useState, useEffect } from "react";
 import { IconTag } from "@tabler/icons-react";
 import TaskDetailItemHeading from "../ui/TaskDetailItemHeading";
 import TaskDetailItemContent from "../ui/TaskDetailItemContent";
+import AddToCardLabels from "@/ui/AddToCardLabels";
+import LabelView from "@/ui/LabelView";
+import { supabase } from "@/lib/supabase";
 
 interface TaskDetailLabelsProps {
-  labels: { id: string; color: string; title: string | null }[];
+  taskId: string;
+  boardId: string;
+  initialLabels: { id: string; color: string; title: string | null }[];
 }
 
-export default function TaskDetailLabels({ labels }: TaskDetailLabelsProps) {
-  if (!labels || labels.length === 0) {
-    return null;
-  }
+export default function TaskDetailLabels({
+  taskId,
+  boardId,
+  initialLabels,
+}: TaskDetailLabelsProps) {
+  const [labels, setLabels] = useState(initialLabels);
+  const [availableLabels, setAvailableLabels] = useState<
+    { id: string; color: string; title: string | null }[]
+  >([]);
+
+  useEffect(() => {
+    fetchAvailableLabels();
+  }, [boardId]);
+
+  const fetchAvailableLabels = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("Label")
+        .select("id, color, title")
+        .eq("boardId", boardId);
+
+      if (error) {
+        console.error("Error fetching labels:", error);
+        return;
+      }
+
+      setAvailableLabels(data || []);
+    } catch (error) {
+      console.error("Error fetching labels:", error);
+    }
+  };
+
+  const handleLabelsUpdated = () => {
+    // Refetch task labels
+    window.location.reload(); // Simple refresh for now
+  };
+
+  const handleLabelRemoved = () => {
+    // Refetch task labels
+    window.location.reload(); // Simple refresh for now
+  };
 
   return (
     <>
       <TaskDetailItemHeading title="Labels" icon={<IconTag size={26} />} />
       <TaskDetailItemContent indented>
-        <div className="flex">
+        <div className="flex flex-wrap gap-2 mb-2">
           {labels.map((label) => (
-            <div
+            <LabelView
               key={label.id}
-              className={`bg-${label.color}-500 h-6 min-w-10 rounded-md mr-2 px-2 py-1 text-xs text-white font-semibold`}
-            >
-              {label.title}
-            </div>
+              label={label}
+              taskId={taskId}
+              boardId={boardId}
+              onLabelUpdated={handleLabelsUpdated}
+              onLabelRemoved={handleLabelRemoved}
+            />
           ))}
         </div>
+        <AddToCardLabels
+          taskId={taskId}
+          boardId={boardId}
+          currentLabels={labels}
+          availableLabels={availableLabels}
+          onLabelsUpdated={handleLabelsUpdated}
+        />
       </TaskDetailItemContent>
     </>
   );

@@ -55,10 +55,21 @@ export default async function FetchTask({
     .single();
 
   // Fetch labels for the task
-  const { data: labelAssignments } = await supabaseAdmin
-    .from("LabelOnTask")
-    .select("labelId, label:Label(*)")
-    .eq("taskId", taskId);
+  const { data: labelRelations } = await supabaseAdmin
+    .from("_LabelToTask")
+    .select("A")
+    .eq("B", taskId);
+
+  const labelIds = (labelRelations || []).map((rel: any) => rel.A);
+
+  let labels = [];
+  if (labelIds.length > 0) {
+    const { data: labelData } = await supabaseAdmin
+      .from("Label")
+      .select("*")
+      .in("id", labelIds);
+    labels = labelData || [];
+  }
 
   // Fetch checklists with items
   const { data: checklists } = await supabaseAdmin
@@ -206,7 +217,7 @@ export default async function FetchTask({
         backgroundUrl: (column?.board as any)?.backgroundUrl || null,
       },
     },
-    labels: (labelAssignments || []).map((la: any) => la.label),
+    labels: labels,
     checklists: checklistsWithItems,
     activities: activitiesWithDetails,
     assignedUsers: assignedUsers || [],

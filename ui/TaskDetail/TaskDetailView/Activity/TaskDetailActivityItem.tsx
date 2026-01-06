@@ -1,9 +1,12 @@
 "use client";
+import { useState } from "react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ActivityWithUser } from "@/types/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { IconEdit, IconMoodPlus, IconTrash } from "@tabler/icons-react";
+import { IconEdit, IconMoodPlus, IconTrash, IconX, IconCheck } from "@tabler/icons-react";
+import { Button } from "@/components/ui/button";
+import RichTextEditor from "@/ui/RichTextEditor";
 import { handleDeleteActivity } from "@/server-actions/ActivityServerActions";
 
 interface TaskDetailActivityItemProps {
@@ -16,6 +19,9 @@ export default function TaskDetailActivityItem({
   activity,
   boardId,
 }: TaskDetailActivityItemProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editContent, setEditContent] = useState(activity.content || "");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const formattedDate = format(
     new Date(activity.createdAt),
     "MM/dd/yyyy, HH:mm:ss"
@@ -49,8 +55,45 @@ export default function TaskDetailActivityItem({
   };
 
   const handleEdit = () => {
-    console.log("Edit comment");
-    // Implement edit functionality
+    setIsEditing(true);
+    setEditContent(activity.content || "");
+  };
+
+  const handleSave = async () => {
+    if (!editContent.trim()) return;
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch(`/api/activities/${activity.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          content: editContent.trim(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        toast.success(data.message);
+        setIsEditing(false);
+        // Refresh the page to show updated content
+        window.location.reload();
+      } else {
+        toast.error(data.error || "Failed to update comment");
+      }
+    } catch (error) {
+      toast.error("Failed to update comment");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    setEditContent(activity.content || "");
   };
 
   const handleReaction = () => {
@@ -95,27 +138,61 @@ export default function TaskDetailActivityItem({
               </span>
               <span className="text-zinc-400 text-xs">{formattedDate}</span>
             </div>
-            <div className="text-zinc-200 text-sm">{activity.content}</div>
-            <div className="flex gap-2">
-              <button onClick={handleReaction}>
-                <IconMoodPlus
-                  className="text-zinc-400 hover:text-zinc-300"
-                  size={16}
+            {isEditing ? (
+              <div className="mt-2 space-y-3">
+                <RichTextEditor
+                  content={editContent}
+                  onChange={setEditContent}
+                  placeholder="Edit your comment..."
+                  className="min-h-[100px]"
                 />
-              </button>
-              <button onClick={handleEdit}>
-                <IconEdit
-                  className="text-zinc-400 hover:text-zinc-300"
-                  size={16}
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    onClick={handleSave}
+                    disabled={isSubmitting || !editContent.trim()}
+                    variant="secondary"
+                  >
+                    <IconCheck size={16} />
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={handleCancel}
+                    disabled={isSubmitting}
+                    variant="outline"
+                  >
+                    <IconX size={16} className="text-zinc-600" />
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div
+                  className="text-zinc-200 text-sm prose prose-invert prose-sm max-w-none"
+                  dangerouslySetInnerHTML={{ __html: activity.content || "" }}
                 />
-              </button>
-              <button onClick={handleDelete}>
-                <IconTrash
-                  className="text-red-400 hover:text-red-300"
-                  size={16}
-                />
-              </button>
-            </div>
+                <div className="flex gap-2">
+                  <button onClick={handleReaction}>
+                    <IconMoodPlus
+                      className="text-zinc-400 hover:text-zinc-300"
+                      size={16}
+                    />
+                  </button>
+                  <button onClick={handleEdit}>
+                    <IconEdit
+                      className="text-zinc-400 hover:text-zinc-300"
+                      size={16}
+                    />
+                  </button>
+                  <button onClick={handleDelete}>
+                    <IconTrash
+                      className="text-red-400 hover:text-red-300"
+                      size={16}
+                    />
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         ) : (
           <div className="bg-zinc-800 border border-zinc-700 px-4 py-2 rounded-md w-full">

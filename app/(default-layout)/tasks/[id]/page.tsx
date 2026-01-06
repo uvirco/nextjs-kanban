@@ -27,8 +27,8 @@ export default async function TaskPage({ params }: TaskPageProps) {
   const backText = task.parentTaskId ? "Back to epic" : "Back to board";
 
   return (
-    <main className="flex flex-col grow bg-zinc-950">
-      <div className="p-3 md:p-5 flex flex-col grow relative">
+    <main className="flex flex-col h-screen bg-zinc-950">
+      <div className="p-3 md:p-5 flex flex-col h-full relative">
         <TaskDetailWrapper>
           <div>
             <a

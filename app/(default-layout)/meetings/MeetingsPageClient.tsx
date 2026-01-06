@@ -1,12 +1,19 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import {
   IconCalendar,
   IconFilter,
   IconPlus,
   IconSearch,
   IconEdit,
+  IconChevronDown,
+  IconChevronRight,
+  IconUsers,
+  IconTarget,
+  IconFileText,
+  IconCircleCheck,
 } from "@tabler/icons-react";
 import CreateMeetingNoteModal from "../../../ui/CreateMeetingNoteModal";
 import EditMeetingNoteForm from "../../../ui/EditMeetingNoteForm";
@@ -47,6 +54,9 @@ interface Epic {
 }
 
 export default function MeetingsPageClient() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  
   const [meetingNotes, setMeetingNotes] = useState<MeetingNote[]>([]);
   const [epics, setEpics] = useState<Epic[]>([]);
   const [selectedEpicId, setSelectedEpicId] = useState<string>("all");
@@ -55,14 +65,45 @@ export default function MeetingsPageClient() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingNote, setEditingNote] = useState<MeetingNote | null>(null);
+  const [expandedNotes, setExpandedNotes] = useState<Set<string>>(new Set());
+
+  // Initialize state from URL parameters and localStorage
+  useEffect(() => {
+    const epicParam = searchParams.get("epic") || "all";
+    const periodParam = searchParams.get("period") || "all";
+    const searchParam = searchParams.get("search") || "";
+
+    setSelectedEpicId(epicParam);
+    setSelectedPeriod(periodParam);
+    setSearchTerm(searchParam);
+
+    // Load expanded notes from localStorage
+    const savedExpanded = localStorage.getItem("meetings-expanded-notes");
+    if (savedExpanded) {
+      try {
+        const expandedArray = JSON.parse(savedExpanded);
+        setExpandedNotes(new Set(expandedArray));
+      } catch (error) {
+        console.error("Failed to parse saved expanded notes:", error);
+      }
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     fetchEpics();
   }, []);
 
+  // Debounced search update
   useEffect(() => {
-    fetchMeetingNotes();
-  }, [selectedEpicId]);
+    const timer = setTimeout(() => {
+      const currentSearch = searchParams.get("search") || "";
+      if (searchTerm !== currentSearch) {
+        updateFilters({ search: searchTerm });
+      }
+    }, 300); // 300ms debounce
+
+    return () => clearTimeout(timer);
+  }, [searchTerm, searchParams, router]);
 
   const fetchEpics = async () => {
     try {
@@ -118,6 +159,52 @@ export default function MeetingsPageClient() {
 
   const handleEditCancel = () => {
     setEditingNote(null);
+  };
+
+  const toggleExpand = (id: string) => {
+    setExpandedNotes((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      // Save to localStorage
+      localStorage.setItem("meetings-expanded-notes", JSON.stringify([...newSet]));
+      return newSet;
+    });
+  };
+
+  // Update URL when filters change
+  const updateFilters = (updates: { epic?: string; period?: string; search?: string }) => {
+    const params = new URLSearchParams(searchParams.toString());
+    
+    if (updates.epic !== undefined) {
+      if (updates.epic === "all") {
+        params.delete("epic");
+      } else {
+        params.set("epic", updates.epic);
+      }
+    }
+    
+    if (updates.period !== undefined) {
+      if (updates.period === "all") {
+        params.delete("period");
+      } else {
+        params.set("period", updates.period);
+      }
+    }
+    
+    if (updates.search !== undefined) {
+      if (updates.search.trim() === "") {
+        params.delete("search");
+      } else {
+        params.set("search", updates.search.trim());
+      }
+    }
+
+    const newUrl = params.toString() ? `?${params.toString()}` : "";
+    router.replace(`/meetings${newUrl}`, { scroll: false });
   };
 
   const filteredNotes = meetingNotes.filter((note) => {
@@ -218,7 +305,11 @@ export default function MeetingsPageClient() {
               </label>
               <select
                 value={selectedEpicId}
-                onChange={(e) => setSelectedEpicId(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setSelectedEpicId(value);
+                  updateFilters({ epic: value });
+                }}
                 className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="all">All Epics</option>
@@ -238,7 +329,11 @@ export default function MeetingsPageClient() {
               </label>
               <select
                 value={selectedPeriod}
-                onChange={(e) => setSelectedPeriod(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setSelectedPeriod(value);
+                  updateFilters({ period: value });
+                }}
                 className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="all">All Time</option>
@@ -296,133 +391,189 @@ export default function MeetingsPageClient() {
           </div>
         ) : (
           <div className="space-y-4">
-            {filteredNotes.map((note) => (
-              <div
-                key={note.id}
-                className="bg-zinc-800 border border-zinc-700 rounded-lg p-5 hover:border-zinc-600 transition-colors"
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-1">
-                      <h3 className="text-lg font-semibold text-white">
-                        {note.title}
-                      </h3>
+            {filteredNotes.map((note) => {
+              const isExpanded = expandedNotes.has(note.id);
+              return (
+                <div
+                  key={note.id}
+                  className="bg-zinc-800 border border-zinc-700 rounded-lg overflow-hidden hover:border-zinc-600 transition-colors"
+                >
+                  {/* Collapsed Header */}
+                  <div
+                    className="flex items-center justify-between p-4 cursor-pointer hover:bg-zinc-700/50 transition-colors"
+                    onClick={() => toggleExpand(note.id)}
+                  >
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      {isExpanded ? (
+                        <IconChevronDown size={20} className="text-zinc-400 flex-shrink-0" />
+                      ) : (
+                        <IconChevronRight size={20} className="text-zinc-400 flex-shrink-0" />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-lg font-semibold text-white truncate">
+                          {note.title}
+                        </h3>
+                        <div className="flex items-center gap-3 text-sm text-zinc-400 mt-1">
+                          <span className="px-2 py-0.5 bg-blue-900/30 text-blue-400 rounded text-xs capitalize">
+                            {note.meeting_type}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <IconCalendar size={14} />
+                            {formatDate(note.meeting_date)}
+                          </span>
+                          {note.attendees && note.attendees.length > 0 && (
+                            <span className="flex items-center gap-1">
+                              <IconUsers size={14} />
+                              {note.attendees.length} attendees
+                            </span>
+                          )}
+                          {note.epic && (
+                            <>
+                              <span>•</span>
+                              <a
+                                href={`/epics/${note.epic.id}`}
+                                className="text-blue-400 hover:text-blue-300 truncate"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                {note.epic.title}
+                              </a>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
                       <button
-                        onClick={() => handleEditNote(note)}
-                        className="p-1 text-zinc-400 hover:text-zinc-300 hover:bg-zinc-700 rounded transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditNote(note);
+                        }}
+                        className="p-2 text-zinc-400 hover:text-zinc-300 hover:bg-zinc-700 rounded transition-colors"
                         title="Edit meeting note"
                       >
                         <IconEdit size={16} />
                       </button>
                     </div>
-                    <div className="flex items-center gap-3 text-sm text-zinc-400">
-                      <span className="px-2 py-1 bg-blue-900/30 text-blue-400 rounded">
-                        {note.meeting_type}
-                      </span>
-                      <span>{formatDate(note.meeting_date)}</span>
-                      {note.epic && (
-                        <>
-                          <span>•</span>
-                          <a
-                            href={`/epics/${note.epic.id}`}
-                            className="text-blue-400 hover:text-blue-300"
-                          >
-                            {note.epic.title}
-                          </a>
-                        </>
-                      )}
-                    </div>
                   </div>
-                </div>
 
-                {note.attendees && note.attendees.length > 0 && (
-                  <div className="mb-3">
-                    <span className="text-sm text-zinc-400">Attendees: </span>
-                    <span className="text-sm text-zinc-300">
-                      {note.attendees.map((a: any) => a.name).join(", ")}
-                    </span>
-                  </div>
-                )}
-
-                {note.agenda && (
-                  <div className="mb-3">
-                    <span className="text-sm font-medium text-zinc-400">
-                      Agenda:{" "}
-                    </span>
-                    <div className="text-sm text-zinc-300 mt-1 prose prose-sm prose-invert max-w-none">
-                      <div dangerouslySetInnerHTML={{ __html: note.agenda }} />
-                    </div>
-                  </div>
-                )}
-
-                {note.decisions && (
-                  <div className="mb-3">
-                    <span className="text-sm font-medium text-zinc-400">
-                      Decisions:{" "}
-                    </span>
-                    <div className="text-sm text-zinc-300 mt-1 prose prose-sm prose-invert max-w-none">
-                      <div
-                        dangerouslySetInnerHTML={{ __html: note.decisions }}
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {note.action_items && note.action_items.length > 0 && (
-                  <div className="mt-3 pt-3 border-t border-zinc-700">
-                    <span className="text-sm font-medium text-zinc-400 mb-2 block">
-                      Action Items ({note.action_items.length})
-                    </span>
-                    <div className="space-y-2">
-                      {note.action_items.slice(0, 3).map((item) => (
-                        <div
-                          key={item.id}
-                          className="flex items-center gap-2 text-sm"
-                        >
-                          <span
-                            className={`px-2 py-0.5 rounded text-xs ${
-                              item.status === "completed"
-                                ? "bg-green-900/30 text-green-400"
-                                : item.status === "in_progress"
-                                  ? "bg-blue-900/30 text-blue-400"
-                                  : "bg-zinc-700 text-zinc-300"
-                            }`}
-                          >
-                            {item.status}
-                          </span>
-                          <span className="text-zinc-300">
-                            {item.description}
-                          </span>
-                          {item.assignee && (
-                            <span className="text-zinc-500 text-xs">
-                              → {item.assignee.name}
-                            </span>
-                          )}
+                  {/* Expanded Content */}
+                  {isExpanded && (
+                    <div className="border-t border-zinc-700 p-4 space-y-4">
+                      {note.attendees && note.attendees.length > 0 && (
+                        <div>
+                          <h4 className="text-sm font-medium text-zinc-300 mb-2 flex items-center gap-2">
+                            <IconUsers size={16} />
+                            Attendees
+                          </h4>
+                          <div className="flex flex-wrap gap-2">
+                            {note.attendees.map((attendee) => (
+                              <span
+                                key={attendee.id}
+                                className="px-2 py-1 bg-zinc-700 text-zinc-300 rounded text-sm"
+                              >
+                                {attendee.name}
+                              </span>
+                            ))}
+                          </div>
                         </div>
-                      ))}
-                      {note.action_items.length > 3 && (
-                        <span className="text-xs text-zinc-500">
-                          +{note.action_items.length - 3} more
-                        </span>
                       )}
-                    </div>
-                  </div>
-                )}
 
-                <div className="mt-3 pt-3 border-t border-zinc-700 flex items-center justify-between">
-                  <span className="text-xs text-zinc-500">
-                    Created by {note.createdBy.name} on{" "}
-                    {formatDate(note.created_at)}
-                  </span>
-                  <a
-                    href={`/epics/${note.epic.id}`}
-                    className="text-sm text-blue-400 hover:text-blue-300"
-                  >
-                    View in Epic →
-                  </a>
+                      {note.agenda && (
+                        <div>
+                          <h4 className="text-sm font-medium text-zinc-300 mb-2 flex items-center gap-2">
+                            <IconTarget size={16} />
+                            Agenda
+                          </h4>
+                          <div className="text-zinc-300 text-sm bg-zinc-900 p-3 rounded prose prose-sm prose-invert max-w-none">
+                            <div dangerouslySetInnerHTML={{ __html: note.agenda }} />
+                          </div>
+                        </div>
+                      )}
+
+                      {note.notes && (
+                        <div>
+                          <h4 className="text-sm font-medium text-zinc-300 mb-2 flex items-center gap-2">
+                            <IconFileText size={16} />
+                            Notes
+                          </h4>
+                          <div className="text-zinc-300 text-sm bg-zinc-900 p-3 rounded prose prose-sm prose-invert max-w-none">
+                            <div dangerouslySetInnerHTML={{ __html: note.notes }} />
+                          </div>
+                        </div>
+                      )}
+
+                      {note.decisions && (
+                        <div>
+                          <h4 className="text-sm font-medium text-zinc-300 mb-2 flex items-center gap-2">
+                            <IconCircleCheck size={16} />
+                            Decisions
+                          </h4>
+                          <div className="text-zinc-300 text-sm bg-zinc-900 p-3 rounded prose prose-sm prose-invert max-w-none">
+                            <div dangerouslySetInnerHTML={{ __html: note.decisions }} />
+                          </div>
+                        </div>
+                      )}
+
+                      {note.action_items && note.action_items.length > 0 && (
+                        <div>
+                          <h4 className="text-sm font-medium text-zinc-300 mb-2 flex items-center gap-2">
+                            <IconTarget size={16} />
+                            Action Items ({note.action_items.length})
+                          </h4>
+                          <div className="space-y-2">
+                            {note.action_items.map((item) => (
+                              <div
+                                key={item.id}
+                                className="flex items-start gap-3 p-3 bg-zinc-900 rounded"
+                              >
+                                <span
+                                  className={`px-2 py-1 rounded text-xs flex-shrink-0 mt-0.5 ${
+                                    item.status === "completed"
+                                      ? "bg-green-900/30 text-green-400"
+                                      : item.status === "in_progress"
+                                        ? "bg-blue-900/30 text-blue-400"
+                                        : "bg-zinc-700 text-zinc-300"
+                                  }`}
+                                >
+                                  {item.status.replace("_", " ")}
+                                </span>
+                                <div className="flex-1 min-w-0">
+                                  <div className="text-zinc-300 text-sm">
+                                    {item.description}
+                                  </div>
+                                  {item.assignee && (
+                                    <div className="text-zinc-500 text-xs mt-1">
+                                      Assigned to: {item.assignee.name}
+                                    </div>
+                                  )}
+                                  {item.due_date && (
+                                    <div className="text-zinc-500 text-xs mt-1">
+                                      Due: {new Date(item.due_date).toLocaleDateString()}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between pt-4 border-t border-zinc-700">
+                        <span className="text-xs text-zinc-500">
+                          Created by {note.createdBy.name} on {formatDate(note.created_at)}
+                        </span>
+                        <a
+                          href={`/epics/${note.epic.id}`}
+                          className="text-sm text-blue-400 hover:text-blue-300"
+                        >
+                          View in Epic →
+                        </a>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

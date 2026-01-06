@@ -31,6 +31,7 @@ export default function AddToCardLabels({
   const [editingLabel, setEditingLabel] = useState<Label | null>(null);
   const [tempLabelTitle, setTempLabelTitle] = useState<string>("");
   const [tempLabelColor, setTempLabelColor] = useState<string>("");
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const handleCheckboxChange = async (values: string[]) => {
     const newLabel = values.find(
@@ -51,7 +52,11 @@ export default function AddToCardLabels({
     }
   };
 
-  const closePopover = () => {};
+  const closePopover = () => {
+    setIsOpen(false);
+    setEditMode(false);
+    setEditingLabel(null);
+  };
 
   const enterEditMode = (label: Label) => {
     setEditingLabel(label);
@@ -73,7 +78,7 @@ export default function AddToCardLabels({
   };
 
   return (
-    <Popover>
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <button
           className="w-8 h-8 flex items-center justify-center rounded-md bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 hover:border-zinc-600 transition-colors"
@@ -82,7 +87,7 @@ export default function AddToCardLabels({
           <IconTag size={16} className="text-zinc-400" />
         </button>
       </PopoverTrigger>
-      <PopoverContent className="w-80" align="start">
+      <PopoverContent className="w-80 z-[100] max-h-96 overflow-y-auto" align="start" side="bottom" sideOffset={8}>
         {editMode ? (
           <LabelEditMode
             editingLabel={editingLabel}

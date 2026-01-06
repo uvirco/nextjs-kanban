@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
   IconActivity,
@@ -15,6 +14,7 @@ import { handleCreateActivity } from "@/server-actions/ActivityServerActions";
 import TaskDetailItemHeading from "../ui/TaskDetailItemHeading";
 import TaskDetailItemContent from "../ui/TaskDetailItemContent";
 import { ActivityWithRelations } from "@/types/types";
+import RichTextEditor from "@/ui/RichTextEditor";
 
 interface TaskDetailActivityProps {
   taskId: string;
@@ -44,8 +44,8 @@ export default function TaskDetailActivity({
     setError(null);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setContent(e.target.value);
+  const handleChange = (value: string) => {
+    setContent(value);
   };
 
   const onSubmitForm = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -101,21 +101,20 @@ export default function TaskDetailActivity({
               </div>
             ) : (
               <form onSubmit={onSubmitForm} className="w-full">
-                <Input
-                  autoComplete="off"
-                  className="mb-2"
-                  placeholder="Add a comment..."
-                  name="content"
-                  value={content}
-                  onChange={handleChange}
-                  required
-                />
+                <div className="mb-3">
+                  <RichTextEditor
+                    content={content}
+                    onChange={handleChange}
+                    placeholder="Add a comment..."
+                    className="min-h-[100px]"
+                  />
+                </div>
 
                 <div className="flex items-center gap-2">
                   <Button
                     size="sm"
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || !content.trim()}
                     variant="secondary"
                   >
                     Save
@@ -125,7 +124,7 @@ export default function TaskDetailActivity({
                     onClick={handleToggleForm}
                     variant="outline"
                   >
-                    <IconX size={20} />
+                    <IconX size={20} className="text-zinc-600" />
                   </Button>
                 </div>
               </form>

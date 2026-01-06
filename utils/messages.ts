@@ -89,10 +89,12 @@ export const MESSAGES: Messages = {
   ACTIVITY: {
     CREATE_SUCCESS: "Activity created",
     CREATE_FAILURE: "Failed to create activity",
+    UPDATE_SUCCESS: "Comment updated",
+    UPDATE_FAILURE: "Failed to update comment",
     DELETE_SUCCESS: "Activity deleted",
     DELETE_FAILURE: "Failed to delete activity",
     CONTENT_TOO_SHORT: "Content too short (min 1 chars)",
-    CONTENT_TOO_LONG: "Content too long (max 500 chars)",
+    CONTENT_TOO_LONG: "Content too long (max 10000 chars)",
   },
   CHECKLIST: {
     CREATE_SUCCESS: "Checklist created",

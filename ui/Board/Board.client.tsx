@@ -168,10 +168,27 @@ export default function Board({ boardId, epicId }: BoardProps) {
 
       // Fetch labels for all tasks
       const taskIds = (tasksData || []).map((t: any) => t.id);
-      const { data: labelAssignments } = await supabase
-        .from("_LabelToTask")
-        .select("A, B, label:Label!_LabelToTask_A_fkey(id, title, color)")
-        .in("B", taskIds);
+      let labelAssignments = [];
+      if (taskIds.length > 0) {
+        const { data: relations } = await supabase
+          .from("_LabelToTask")
+          .select("A, B")
+          .in("B", taskIds);
+
+        if (relations && relations.length > 0) {
+          const labelIds = relations.map((rel: any) => rel.A);
+          const { data: labels } = await supabase
+            .from("Label")
+            .select("id, title, color")
+            .in("id", labelIds);
+
+          // Combine relations with label data
+          labelAssignments = (relations || []).map((rel: any) => ({
+            ...rel,
+            label: (labels || []).find((l: any) => l.id === rel.A),
+          })).filter((la: any) => la.label);
+        }
+      }
 
       // Combine the data
       const enrichedTasks = (tasksData || []).map((task: any) => ({

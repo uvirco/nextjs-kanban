@@ -32,7 +32,7 @@ export function LabelView({
         }
         afterContent={
           <button onClick={closePopover}>
-            <IconX size={20} />
+            <IconX size={20} className="text-zinc-400 hover:text-zinc-300" />
           </button>
         }
       />
@@ -47,12 +47,11 @@ export function LabelView({
       <hr className="mb-3 border-zinc-800" />
 
       <Button
-        className="w-full flex items-center gap-1"
-        color="primary"
+        className="w-full flex items-center gap-1 bg-zinc-700 hover:bg-zinc-600 text-zinc-200 border border-zinc-600"
         size="sm"
         onClick={enterCreateMode}
       >
-        <IconPlus size={18} /> Create a new label
+        <IconPlus size={18} className="text-zinc-300" /> Create a new label
       </Button>
     </TaskPopoverWrapper>
   );

@@ -27,7 +27,7 @@ export async function handleSaveLabel({
       return { success: false, message: "Failed to associate label with task" };
     }
 
-    revalidatePath(`/board/${boardId}`);
+    revalidatePath(`/tasks/${taskId}`);
 
     return { success: true, message: "Label added to task" };
   } catch (e) {
@@ -61,7 +61,7 @@ export async function handleRemoveLabel({
       return { success: false, message: "Failed to remove label from task" };
     }
 
-    revalidatePath(`/board/${boardId}`);
+    revalidatePath(`/tasks/${taskId}`);
 
     return { success: true, message: "Label removed from task" };
   } catch (e) {
@@ -159,7 +159,7 @@ export async function handleCreateLabel({
       }
     }
 
-    revalidatePath(`/board/${boardId}`);
+    revalidatePath(`/tasks/${taskId}`);
 
     return {
       success: true,
@@ -175,9 +175,11 @@ export async function handleCreateLabel({
 export async function handleDeleteLabel({
   labelId,
   boardId,
+  taskId,
 }: {
   labelId: string;
   boardId: string;
+  taskId?: string;
 }) {
   if (!labelId) {
     return { success: false, message: "Label ID or Task ID is missing" };
@@ -195,6 +197,11 @@ export async function handleDeleteLabel({
     }
 
     revalidatePath(`/board/${boardId}`);
+    // Also revalidate the current task page if taskId was provided
+    // This ensures the label disappears from the current task view
+    if (taskId) {
+      revalidatePath(`/tasks/${taskId}`);
+    }
 
     return { success: true, message: "Label removed" };
   } catch (e) {

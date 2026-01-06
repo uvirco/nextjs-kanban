@@ -24,7 +24,7 @@ export function LabelCheckboxGroup({
           key={label.id}
           value={label.id}
           classNames={{
-            base: `inline-flex max-w-md w-full bg-content1 m-0 items-center justify-start cursor-pointer rounded-lg gap-1 p-1 data-[selected=true]:border-primary`,
+            base: `inline-flex max-w-md w-full bg-zinc-800 hover:bg-zinc-700 m-0 items-center justify-start cursor-pointer rounded-lg gap-1 p-2 border border-zinc-600 data-[selected=true]:bg-zinc-600 data-[selected=true]:border-zinc-400`,
             label: "w-full flex items-center",
           }}
         >
@@ -37,7 +37,7 @@ export function LabelCheckboxGroup({
           </div>
           <button onClick={() => enterEditMode(label)}>
             <IconEdit
-              className="text-muted-foreground hover:text-primary"
+              className="text-zinc-400 hover:text-zinc-300"
               size={22}
             />
           </button>

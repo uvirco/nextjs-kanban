@@ -28,7 +28,7 @@ export async function handleCreateActivity(
       .string()
       .trim()
       .min(1, MESSAGES.ACTIVITY.CONTENT_TOO_SHORT)
-      .max(2000, "Content too long (max 2000 chars)"),
+      .max(10000, "Content too long (max 10000 chars)"),
   });
 
   const parse = CreateActivitySchema.safeParse(data);

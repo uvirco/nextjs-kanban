@@ -57,7 +57,7 @@ export function LabelEditMode({
       editingLabel &&
       window.confirm("Are you sure you want to delete this label?")
     ) {
-      await deleteLabel(editingLabel.id, boardId);
+      await deleteLabel(editingLabel.id, boardId, taskId);
       exitEditMode();
     }
   };
@@ -68,12 +68,12 @@ export function LabelEditMode({
         title={title}
         beforeContent={
           <button onClick={exitEditMode}>
-            <IconArrowLeft size={20} />
+            <IconArrowLeft size={20} className="text-zinc-400 hover:text-zinc-300" />
           </button>
         }
         afterContent={
           <button onClick={closePopover}>
-            <IconX size={20} />
+            <IconX size={20} className="text-zinc-400 hover:text-zinc-300" />
           </button>
         }
       />

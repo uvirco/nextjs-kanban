@@ -31,8 +31,8 @@ export const removeLabel = async (
   }
 };
 
-export const deleteLabel = async (labelId: string, boardId: string) => {
-  const response = await handleDeleteLabel({ labelId, boardId });
+export const deleteLabel = async (labelId: string, boardId: string, taskId?: string) => {
+  const response = await handleDeleteLabel({ labelId, boardId, taskId });
   if (response.success) {
     toast.success(response.message);
   } else {
