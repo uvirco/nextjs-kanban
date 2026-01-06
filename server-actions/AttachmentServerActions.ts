@@ -104,12 +104,18 @@ export async function handleCreateLinkAttachment(formData: FormData) {
   const name = formData.get("name")?.toString() || url;
   const taskId = formData.get("taskId")?.toString();
 
+  // Ensure URL has protocol
+  let processedUrl = url;
+  if (processedUrl && !processedUrl.match(/^https?:\/\//)) {
+    processedUrl = `https://${processedUrl}`;
+  }
+
   const schema = z.object({
-    url: z.string().url("Invalid URL"),
+    url: z.string().min(1, "URL is required").url("Invalid URL"),
     taskId: z.string().min(1, "Missing task id"),
   });
 
-  const parse = schema.safeParse({ url, taskId });
+  const parse = schema.safeParse({ url: processedUrl, taskId });
   if (!parse.success)
     return {
       success: false,
@@ -121,7 +127,7 @@ export async function handleCreateLinkAttachment(formData: FormData) {
       .from("Attachment")
       .insert({
         filename: name,
-        url: parse.data.url,
+        url: processedUrl,
         storage_path: null,
         parent_type: "task",
         parent_id: parse.data.taskId,

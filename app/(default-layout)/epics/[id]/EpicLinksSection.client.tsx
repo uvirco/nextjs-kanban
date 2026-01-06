@@ -5,6 +5,7 @@ import {
   IconPlus,
   IconTrash,
   IconExternalLink,
+  IconDeviceFloppy,
 } from "@tabler/icons-react";
 import {
   handleCreateLinkAttachment,
@@ -68,21 +69,30 @@ export default function EpicLinksSection({
           </button>
         ) : (
           <form onSubmit={handleAddLink} className="space-y-2">
+            <input
+              type="text"
+              name="name"
+              placeholder="Friendly name (optional)"
+              value={linkName}
+              onChange={(e) => setLinkName(e.target.value)}
+              className="w-full px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-white text-xs placeholder-zinc-500"
+            />
             <div className="flex items-center gap-2">
               <input
                 type="text"
-                name="linkUrl"
+                name="url"
                 placeholder="https://example.com"
                 value={linkUrl}
                 onChange={(e) => setLinkUrl(e.target.value)}
                 className="flex-1 px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-white text-xs"
+                required
               />
               <button
                 type="submit"
                 className="p-1 bg-zinc-700 hover:bg-zinc-600 rounded text-white"
-                title="Add link"
+                title="Save link"
               >
-                <IconPlus size={14} />
+                <IconDeviceFloppy size={14} />
               </button>
               <button
                 type="button"
@@ -93,14 +103,6 @@ export default function EpicLinksSection({
                 ✕
               </button>
             </div>
-            <input
-              type="text"
-              name="linkName"
-              placeholder="Friendly name (optional)"
-              value={linkName}
-              onChange={(e) => setLinkName(e.target.value)}
-              className="w-full px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-white text-xs placeholder-zinc-500"
-            />
           </form>
         )}
 
