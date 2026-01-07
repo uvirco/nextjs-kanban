@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState } from "react";
-import { IconChevronDown, IconChevronRight } from "@tabler/icons-react";
 
 interface RaciUser {
   id: string;
@@ -13,19 +12,12 @@ interface RaciMatrixSectionProps {
   raciUsers?: RaciUser[];
   /** epicId to fetch RACI entries when raciUsers not passed */
   epicId?: string;
-  /** optional key to persist collapsed state in localStorage */
-  storageKey?: string;
-  /** default collapsed when no persisted value found */
-  defaultCollapsed?: boolean;
 }
 
 export default function RaciMatrixSection({
   raciUsers: providedRaciUsers,
   epicId,
-  storageKey,
-  defaultCollapsed = true,
 }: RaciMatrixSectionProps) {
-  const [isCollapsed, setIsCollapsed] = useState<boolean>(defaultCollapsed);
   const [raciUsers, setRaciUsers] = useState<RaciUser[]>(
     providedRaciUsers || []
   );
@@ -73,55 +65,12 @@ export default function RaciMatrixSection({
     };
   }, [epicId, providedRaciUsers]);
 
-  // hydrate from localStorage when mounted
-
-  useEffect(() => {
-    try {
-      if (!storageKey) return;
-      if (typeof window === "undefined") return;
-      const raw = window.localStorage.getItem(storageKey);
-      if (raw === null) return; // no saved pref, keep default
-      setIsCollapsed(raw === "true");
-    } catch (_e) {
-      // ignore
-    }
-    // storageKey intentionally omitted from dependencies so we only run once
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // persist collapse state
-  useEffect(() => {
-    try {
-      if (!storageKey) return;
-      if (typeof window === "undefined") return;
-      window.localStorage.setItem(storageKey, String(isCollapsed));
-    } catch (_e) {
-      // ignore
-    }
-  }, [isCollapsed, storageKey]);
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-lg">
-      <button
-        onClick={() => setIsCollapsed((s) => !s)}
-        className="flex items-center gap-2 w-full text-left hover:bg-zinc-800/50 p-3 rounded-t-lg"
-        aria-expanded={!isCollapsed}
-        aria-controls="raci-table"
-        aria-label={isCollapsed ? "Expand RACI matrix" : "Collapse RACI matrix"}
-      >
-        {isCollapsed ? (
-          <IconChevronRight size={20} className="text-zinc-400" />
-        ) : (
-          <IconChevronDown size={20} className="text-zinc-400" />
-        )}
-        <span className="text-zinc-400">👥</span>
-        <h3 className="text-sm font-semibold text-white">RACI Matrix</h3>
-      </button>
-
-      {!isCollapsed && (
-        <div className="p-3 pt-0">
-          <div className="text-xs text-zinc-400 mb-4">
-            Who is Responsible / Accountable / Consulted / Informed
-          </div>
+    <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
+      <h3 className="text-lg font-semibold text-white mb-4">👥 RACI Matrix</h3>
+      <div className="text-xs text-zinc-400 mb-4">
+        Who is Responsible / Accountable / Consulted / Informed
+      </div>
 
           {raciUsers.length > 0 ? (
             <div id="raci-table" className="overflow-x-auto">
@@ -273,8 +222,6 @@ export default function RaciMatrixSection({
               </div>
             </div>
           </div>
-        </div>
-      )}
     </div>
   );
 }

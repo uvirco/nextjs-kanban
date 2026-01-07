@@ -89,13 +89,9 @@ export default function EpicContent({
   const subtasks: Subtask[] = epic.subtasks || [];
 
   return (
-    <CollapsibleSection
-      title="Task Flow Timeline"
-      icon="📊"
-      storageKey={`epic-${epic.id}-timeline-collapsed`}
-      defaultCollapsed={false}
-    >
+    <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6 mt-6">
+      <h2 className="text-xl font-bold text-white mb-4">📊 Task Flow Timeline</h2>
       <EpicTasksGanttTimeline epicId={params.id} subtasks={subtasks} />
-    </CollapsibleSection>
+    </div>
   );
 }

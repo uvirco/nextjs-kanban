@@ -84,12 +84,8 @@ export default function EpicChecklistsSection({
   const checklist = epic.checklists?.[0];
 
   return (
-    <CollapsibleSection
-      title="Checklist"
-      icon="✅"
-      defaultCollapsed={true}
-      storageKey={`epic:${params.id}:section:checklist`}
-    >
+    <div className="space-y-4">
+      <h2 className="text-xl font-bold text-white">✅ Checklist</h2>
       <div className="space-y-4">
         {checklist ? (
           <div className="space-y-4">
@@ -143,6 +139,6 @@ export default function EpicChecklistsSection({
         {/* Only show add checklist if no checklist exists */}
         {!checklist && <EpicAddChecklist epicId={params.id} />}
       </div>
-    </CollapsibleSection>
+    </div>
   );
 }

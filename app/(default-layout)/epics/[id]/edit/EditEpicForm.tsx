@@ -855,8 +855,6 @@ export default function EditEpicForm({
       {/* RACI Matrix (read-only for edit view) */}
       <RaciMatrixSection
         epicId={epic.id}
-        defaultCollapsed={false}
-        storageKey={`epic:${epic.id}:section:raci:edit`}
       />
 
       {/* Submit */}

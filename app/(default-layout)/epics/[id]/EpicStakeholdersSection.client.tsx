@@ -80,12 +80,8 @@ export default function EpicStakeholdersSection({
   params,
 }: EpicStakeholdersSectionProps) {
   return (
-    <CollapsibleSection
-      title="Stakeholders"
-      icon="👥"
-      defaultCollapsed={true}
-      storageKey={`epic:${params.id}:section:stakeholders`}
-    >
+    <div className="space-y-3">
+      <h2 className="text-xl font-bold text-white">👥 Stakeholders</h2>
       <div className="space-y-3">
         {epic.stakeholders.length > 0 ? (
           epic.stakeholders.map((stakeholder: any) => (
@@ -107,6 +103,6 @@ export default function EpicStakeholdersSection({
           </div>
         )}
       </div>
-    </CollapsibleSection>
+    </div>
   );
 }
