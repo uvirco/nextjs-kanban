@@ -20,7 +20,7 @@ import EpicTaskboardSection from "./EpicTaskboardSection.client";
 import GoalSection from "@/ui/GoalSection";
 import EpicCommentsOverview from "@/ui/EpicCommentsOverview";
 import EpicDetailsSidebar from "@/ui/EpicDetailsSidebar";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import EditMeetingNoteForm from "@/ui/EditMeetingNoteForm";
 
@@ -206,36 +206,102 @@ function EpicDetailPageClient({
         </div>
       </div>
 
-      {/* Main Content Grid */}
+      {/* Main Content with Tabs */}
       <div className="overflow-hidden">
         <div className="grid grid-cols-12 gap-4 px-6">
           {/* Main Content */}
           <div
             className={`${sidebarCollapsed ? "col-span-12" : "col-span-9"} transition-all duration-300`}
           >
-            {/* Task Flow Timeline - Full Width - Moved to top */}
-            <div className="w-full mb-6">
-              <EpicContent epic={epic} raciUsers={raciUsers} params={params} />
-            </div>
+            <Tabs defaultValue="tasks" className="w-full">
+              <TabsList className="grid w-full grid-cols-4 mb-6">
+                <TabsTrigger value="tasks">Tasks</TabsTrigger>
+                <TabsTrigger value="meeting-notes">Meeting Notes</TabsTrigger>
+                <TabsTrigger value="links">Links & Files</TabsTrigger>
+                <TabsTrigger value="activity">Activity</TabsTrigger>
+              </TabsList>
 
-            {/* Checklists section above RACI matrix */}
-            <div className="mb-6">
-              <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
-                <EpicChecklistsSection epic={epic} params={params} />
-              </div>
-            </div>
-            {/* Taskboard section between Checklists and RACI */}
-            <div className="mb-6">
-              <EpicTaskboardSection epic={epic} params={params} />
-            </div>
-            {/* Center 3/4 - RACI matrix */}
-            <div className="w-full h-full mb-6">
-              <RaciMatrixSection
-                raciUsers={raciUsers}
-                storageKey={`epic:${epic.id}:section:raci:fullbleed`}
-                defaultCollapsed={true}
-              />
-            </div>
+              <TabsContent value="tasks" className="space-y-6">
+                {/* Task Flow Timeline */}
+                <div className="w-full">
+                  <EpicContent epic={epic} raciUsers={raciUsers} params={params} />
+                </div>
+
+                {/* Checklists section */}
+                <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
+                  <EpicChecklistsSection epic={epic} params={params} />
+                </div>
+
+                {/* Taskboard section */}
+                <EpicTaskboardSection epic={epic} params={params} />
+
+                {/* RACI matrix */}
+                <div className="w-full">
+                  <RaciMatrixSection
+                    raciUsers={raciUsers}
+                    storageKey={`epic:${epic.id}:section:raci:fullbleed`}
+                    defaultCollapsed={true}
+                  />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="meeting-notes" className="space-y-4">
+                <div className="space-y-4">
+                  {epic.meetingNotes?.map((note: any) => (
+                    <div key={note.id} className="border border-zinc-700 rounded-lg p-4 bg-zinc-800">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <h3 className="font-medium text-white">{note.title}</h3>
+                          <p className="text-sm text-zinc-400">
+                            {note.meeting_type} • {new Date(note.meeting_date).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <Button
+                          onClick={() => setEditingNote(note)}
+                          size="sm"
+                          variant="outline"
+                          className="text-zinc-300 border-zinc-600 hover:bg-zinc-700"
+                        >
+                          Edit
+                        </Button>
+                      </div>
+                      <div className="text-sm text-zinc-300 line-clamp-3">
+                        {note.notes ? (
+                          <div dangerouslySetInnerHTML={{ __html: note.notes }} />
+                        ) : (
+                          <span className="text-zinc-500">No notes content</span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                  {(!epic.meetingNotes || epic.meetingNotes.length === 0) && (
+                    <p className="text-zinc-500 text-center py-4">No meeting notes yet</p>
+                  )}
+                  <Button
+                    onClick={() => setEditingNote({})}
+                    className="w-full bg-zinc-700 hover:bg-zinc-600"
+                  >
+                    Add Meeting Note
+                  </Button>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="links" className="space-y-6">
+                {/* Files section */}
+                <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
+                  <EpicFilesSection epic={epic} params={params} />
+                </div>
+
+                {/* Links section */}
+                <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
+                  <EpicLinksSection epic={epic} params={params} />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="activity">
+                <EpicCommentsOverview epicId={epic.id} />
+              </TabsContent>
+            </Tabs>
           </div>
 
           {/* Sidebar */}
@@ -276,62 +342,6 @@ function EpicDetailPageClient({
             </div>
           )}
         </div>
-      </div>
-
-      {/* Meeting Notes Section */}
-      <div className="w-full px-6 mb-6">
-        <Accordion type="single" collapsible>
-          <AccordionItem value="meeting-notes">
-            <AccordionTrigger className="text-xl font-semibold px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-lg hover:bg-zinc-800 transition-colors">
-              Meeting Notes ({epic.meetingNotes?.length || 0})
-            </AccordionTrigger>
-            <AccordionContent className="px-4 py-4 bg-zinc-900 border border-zinc-800 rounded-lg mt-2">
-              <div className="space-y-4">
-                {epic.meetingNotes?.map((note: any) => (
-                  <div key={note.id} className="border border-zinc-700 rounded-lg p-4 bg-zinc-800">
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <h3 className="font-medium text-white">{note.title}</h3>
-                        <p className="text-sm text-zinc-400">
-                          {note.meeting_type} • {new Date(note.meeting_date).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <Button
-                        onClick={() => setEditingNote(note)}
-                        size="sm"
-                        variant="outline"
-                        className="text-zinc-300 border-zinc-600 hover:bg-zinc-700"
-                      >
-                        Edit
-                      </Button>
-                    </div>
-                    <div className="text-sm text-zinc-300 line-clamp-3">
-                      {note.notes ? (
-                        <div dangerouslySetInnerHTML={{ __html: note.notes }} />
-                      ) : (
-                        <span className="text-zinc-500">No notes content</span>
-                      )}
-                    </div>
-                  </div>
-                ))}
-                {(!epic.meetingNotes || epic.meetingNotes.length === 0) && (
-                  <p className="text-zinc-500 text-center py-4">No meeting notes yet</p>
-                )}
-                <Button
-                  onClick={() => setEditingNote({})}
-                  className="w-full bg-zinc-700 hover:bg-zinc-600"
-                >
-                  Add Meeting Note
-                </Button>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-      </div>
-
-      {/* Comments Overview Section */}
-      <div className="w-full px-6">
-        <EpicCommentsOverview epicId={epic.id} />
       </div>
 
       {/* Edit Meeting Note Modal */}
