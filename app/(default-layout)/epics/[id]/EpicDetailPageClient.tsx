@@ -19,11 +19,12 @@ import EpicStakeholdersSection from "./EpicStakeholdersSection.client";
 import EpicTaskboardSection from "./EpicTaskboardSection.client";
 import GoalSection from "@/ui/GoalSection";
 import EpicCommentsOverview from "@/ui/EpicCommentsOverview";
-import EpicDetailsSidebar from "@/ui/EpicDetailsSidebar";
 import { Button } from "@/components/ui/button";
 import EditMeetingNoteForm from "@/ui/EditMeetingNoteForm";
 import EditEpicForm from "./edit/EditEpicForm";
-import EditOverviewForm from "./edit/EditOverviewForm";
+import EditOverviewForm from "./EditOverviewForm";
+import ManageMembersModal from "./ManageMembersModal";
+import EditTasksForm from "./edit/EditTasksForm";
 
 // Dynamically import tabs to avoid SSR hydration issues
 const Tabs = dynamic(() => import("@/components/ui/tabs").then(mod => mod.Tabs), { ssr: false });
@@ -43,23 +44,34 @@ function EpicDetailPageClient({
   const [editingNote, setEditingNote] = useState<any>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingOverview, setEditingOverview] = useState(false);
+  const [editingTasks, setEditingTasks] = useState(false);
   const [departments, setDepartments] = useState<any[]>([]);
+  const [goals, setGoals] = useState<any[]>([]);
+  const [showMemberModal, setShowMemberModal] = useState(false);
 
-  // Fetch departments for the edit form
+  // Fetch departments and goals for the edit form
   useEffect(() => {
-    const fetchDepartments = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch("/api/departments");
-        if (response.ok) {
-          const data = await response.json();
-          setDepartments(data);
+        // Fetch departments
+        const deptResponse = await fetch("/api/departments");
+        if (deptResponse.ok) {
+          const deptData = await deptResponse.json();
+          setDepartments(deptData);
+        }
+
+        // Fetch goals
+        const goalsResponse = await fetch(`/api/tasks/${epic.id}/goals`);
+        if (goalsResponse.ok) {
+          const goalsData = await goalsResponse.json();
+          setGoals(goalsData);
         }
       } catch (error) {
-        console.error("Failed to fetch departments:", error);
+        console.error("Failed to fetch data:", error);
       }
     };
-    fetchDepartments();
-  }, []);
+    fetchData();
+  }, [epic.id]);
 
   return (
     <>
@@ -88,22 +100,61 @@ function EpicDetailPageClient({
           {/* Main Content */}
           <div className="w-full">
             <Suspense fallback={<div className="flex items-center justify-center p-8"><div className="text-zinc-400">Loading...</div></div>}>
-              <Tabs defaultValue="dashboard" className="w-full" id={`epic-tabs-${epic.id}`}>
+              <Tabs defaultValue="overview" className="w-full" id={`epic-tabs-${epic.id}`}>
               <TabsList className="grid w-full grid-cols-8 mb-6">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
+                <TabsTrigger value="taskboard">Taskboard</TabsTrigger>
                 <TabsTrigger value="tasks">Tasks</TabsTrigger>
                 <TabsTrigger value="checklists">Checklists</TabsTrigger>
-                <TabsTrigger value="taskboard">Taskboard</TabsTrigger>
-                <TabsTrigger value="raci">RACI</TabsTrigger>
                 <TabsTrigger value="meeting-notes">Meeting Notes</TabsTrigger>
                 <TabsTrigger value="links">Links & Files</TabsTrigger>
                 <TabsTrigger value="activity">Activity</TabsTrigger>
+                <TabsTrigger value="raci">RACI</TabsTrigger>
               </TabsList>
 
               <TabsContent value="overview" className="space-y-6">
-                {/* Overview Tab Header with Edit Button */}
+                {/* Overview Tab Header with Title, Member Avatars, and Edit Buttons */}
                 <div className="flex items-center justify-between">
-                  <h2 className="text-2xl font-bold text-white">Epic Overview</h2>
+                  <div className="flex items-center gap-4">
+                    <h2 className="text-2xl font-bold text-white">Epic Overview</h2>
+                    {/* Member Avatars */}
+                    {epic.members && epic.members.length > 0 && (
+                      <div className="flex items-center gap-1">
+                        <div className="flex -space-x-2">
+                          {epic.members.slice(0, 5).map((member: any) => (
+                            <div
+                              key={member.id}
+                              className="w-8 h-8 rounded-full bg-zinc-600 border-2 border-zinc-800 flex items-center justify-center text-xs font-medium text-white"
+                              title={`${member.user.name || member.user.email} (${member.role})`}
+                            >
+                              {member.user.image ? (
+                                <img
+                                  src={member.user.image}
+                                  alt={member.user.name || member.user.email}
+                                  className="w-full h-full rounded-full object-cover"
+                                />
+                              ) : (
+                                (member.user.name || member.user.email || "?")[0].toUpperCase()
+                              )}
+                            </div>
+                          ))}
+                          {epic.members.length > 5 && (
+                            <div className="w-8 h-8 rounded-full bg-zinc-700 border-2 border-zinc-800 flex items-center justify-center text-xs font-medium text-zinc-300">
+                              +{epic.members.length - 5}
+                            </div>
+                          )}
+                        </div>
+                        <Button
+                          onClick={() => setShowMemberModal(true)}
+                          variant="ghost"
+                          size="sm"
+                          className="text-zinc-400 hover:text-zinc-300 hover:bg-zinc-800 ml-2"
+                        >
+                          <IconUsers size={14} />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                   {!editingOverview && (
                     <div className="flex gap-2">
                       <Button
@@ -133,9 +184,13 @@ function EpicDetailPageClient({
                     <EditOverviewForm
                       epic={epic}
                       departments={departments}
+                      stakeholders={epic.stakeholders || []}
                       onSave={(updatedData) => {
                         // Update local epic data and exit edit mode
                         Object.assign(epic, updatedData);
+                        if (updatedData.goals) {
+                          setGoals(updatedData.goals);
+                        }
                         setEditingOverview(false);
                         // Optionally refresh the page or update parent state
                         window.location.reload();
@@ -274,32 +329,54 @@ function EpicDetailPageClient({
                       </div>
                     </div>
 
-                    {/* Team members widget */}
-                    <div className="w-full">
-                      <TeamMembers epicId={epic.id} />
-                    </div>
-                    {/* Goals section */}
-                    <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
-                      <GoalSection
-                        taskId={epic.id}
-                        boardId={epic.column?.boardId || ""}
-                      />
-                    </div>
+                    {/* Goals section (editable) */}
+                    <GoalSection
+                      taskId={epic.id}
+                      boardId={epic.column?.boardId || ""}
+                    />
+
                     {/* Stakeholders section */}
                     <EpicStakeholdersSection epic={epic} params={params} />
-                    {/* Epic Details */}
-                    <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
-                      <EpicDetailsSidebar epic={epic} />
-                    </div>
                   </>
                 )}
               </TabsContent>
 
               <TabsContent value="tasks" className="space-y-6">
-                {/* Task Flow Timeline */}
-                <div className="w-full">
-                  <EpicContent epic={epic} raciUsers={raciUsers} params={params} />
+                {/* Tasks Tab Header with Edit Button */}
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-bold text-white">Tasks</h2>
+                  {!editingTasks && (
+                    <Button
+                      onClick={() => setEditingTasks(true)}
+                      variant="outline"
+                      className="text-zinc-300 border-zinc-600 hover:bg-zinc-700"
+                    >
+                      <IconSettings size={16} className="mr-2" />
+                      Configure Tasks
+                    </Button>
+                  )}
                 </div>
+
+                {editingTasks ? (
+                  /* Edit Mode */
+                  <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+                    <h3 className="text-lg font-semibold text-white mb-4">Task Configuration</h3>
+                    <EditTasksForm
+                      epic={epic}
+                      onSave={(updatedData) => {
+                        Object.assign(epic, updatedData);
+                        setEditingTasks(false);
+                        window.location.reload();
+                      }}
+                      onCancel={() => setEditingTasks(false)}
+                    />
+                  </div>
+                ) : (
+                  /* Display Mode */
+                  <div className="w-full">
+                    <EpicContent epic={epic} raciUsers={raciUsers} params={params} />
+                  </div>
+                )}
               </TabsContent>
 
               <TabsContent value="checklists" className="space-y-6">
@@ -405,6 +482,22 @@ function EpicDetailPageClient({
       {showEditModal && (
         <EditEpicForm
           epic={epic}
+        />
+      )}
+
+      {/* Manage Members Modal */}
+      {showMemberModal && (
+        <ManageMembersModal
+          epicId={epic.id}
+          currentMembers={epic.members || []}
+          onClose={() => setShowMemberModal(false)}
+          onSave={(updatedMembers) => {
+            // Update epic members and close modal
+            epic.members = updatedMembers;
+            setShowMemberModal(false);
+            // Optionally refresh the page or update parent state
+            window.location.reload();
+          }}
         />
       )}
     </>

@@ -31,6 +31,12 @@ export async function PUT(
       dueDate,
       startDate,
       acceptanceCriteria,
+      defaultTaskPriority,
+      autoAssignOwner,
+      requireAcceptanceCriteria,
+      enableTimeTracking,
+      defaultTaskTemplate,
+      workflowAutomation,
     } = body;
 
     // Validate required fields
@@ -57,6 +63,12 @@ export async function PUT(
       dueDate: dueDate || null,
       startDate: startDate || null,
       acceptanceCriteria: acceptanceCriteria || null,
+      defaultTaskPriority: defaultTaskPriority || null,
+      autoAssignOwner: autoAssignOwner || false,
+      requireAcceptanceCriteria: requireAcceptanceCriteria || false,
+      enableTimeTracking: enableTimeTracking || false,
+      defaultTaskTemplate: defaultTaskTemplate || null,
+      workflowAutomation: workflowAutomation || null,
       updatedAt: new Date().toISOString(),
     };
 
