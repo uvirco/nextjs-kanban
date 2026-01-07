@@ -91,6 +91,16 @@ async function getEpicDetails(epicId: string) {
     .select("*")
     .eq("taskId", epicId);
 
+  // Fetch meeting notes for this epic
+  const { data: meetingNotes } = await supabase
+    .from("MeetingNote")
+    .select(`
+      *,
+      action_items:meeting_action_items(*)
+    `)
+    .eq("epic_id", epicId)
+    .order("meeting_date", { ascending: false });
+
   return {
     ...epic,
     owner,
@@ -101,6 +111,7 @@ async function getEpicDetails(epicId: string) {
     checklists: checklists || [],
     metrics: { totalTasks, completedTasks, inProgressTasks, progress },
     attachments: attachments || [],
+    meetingNotes: meetingNotes || [],
   };
 }
 

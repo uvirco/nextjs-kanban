@@ -20,6 +20,9 @@ import EpicTaskboardSection from "./EpicTaskboardSection.client";
 import GoalSection from "@/ui/GoalSection";
 import EpicCommentsOverview from "@/ui/EpicCommentsOverview";
 import EpicDetailsSidebar from "@/ui/EpicDetailsSidebar";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
+import EditMeetingNoteForm from "@/ui/EditMeetingNoteForm";
 
 function EpicDetailPageClient({
   epic,
@@ -31,6 +34,7 @@ function EpicDetailPageClient({
   params: { id: string };
 }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [editingNote, setEditingNote] = useState<any>(null);
 
   useEffect(() => {
     // Load sidebar preference from localStorage
@@ -274,10 +278,75 @@ function EpicDetailPageClient({
         </div>
       </div>
 
+      {/* Meeting Notes Section */}
+      <div className="w-full px-6 mb-6">
+        <Accordion type="single" collapsible>
+          <AccordionItem value="meeting-notes">
+            <AccordionTrigger className="text-xl font-semibold px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-lg hover:bg-zinc-800 transition-colors">
+              Meeting Notes ({epic.meetingNotes?.length || 0})
+            </AccordionTrigger>
+            <AccordionContent className="px-4 py-4 bg-zinc-900 border border-zinc-800 rounded-lg mt-2">
+              <div className="space-y-4">
+                {epic.meetingNotes?.map((note: any) => (
+                  <div key={note.id} className="border border-zinc-700 rounded-lg p-4 bg-zinc-800">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <h3 className="font-medium text-white">{note.title}</h3>
+                        <p className="text-sm text-zinc-400">
+                          {note.meeting_type} • {new Date(note.meeting_date).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <Button
+                        onClick={() => setEditingNote(note)}
+                        size="sm"
+                        variant="outline"
+                        className="text-zinc-300 border-zinc-600 hover:bg-zinc-700"
+                      >
+                        Edit
+                      </Button>
+                    </div>
+                    <div className="text-sm text-zinc-300 line-clamp-3">
+                      {note.notes ? (
+                        <div dangerouslySetInnerHTML={{ __html: note.notes }} />
+                      ) : (
+                        <span className="text-zinc-500">No notes content</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {(!epic.meetingNotes || epic.meetingNotes.length === 0) && (
+                  <p className="text-zinc-500 text-center py-4">No meeting notes yet</p>
+                )}
+                <Button
+                  onClick={() => setEditingNote({})}
+                  className="w-full bg-zinc-700 hover:bg-zinc-600"
+                >
+                  Add Meeting Note
+                </Button>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      </div>
+
       {/* Comments Overview Section */}
       <div className="w-full px-6">
         <EpicCommentsOverview epicId={epic.id} />
       </div>
+
+      {/* Edit Meeting Note Modal */}
+      {editingNote && (
+        <EditMeetingNoteForm
+          meetingNote={editingNote}
+          epicId={epic.id}
+          onCancel={() => setEditingNote(null)}
+          onSuccess={() => {
+            setEditingNote(null);
+            // Trigger page refresh to show updated notes
+            window.location.reload();
+          }}
+        />
+      )}
     </>
   );
 }

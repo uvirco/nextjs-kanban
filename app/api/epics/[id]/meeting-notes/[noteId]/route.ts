@@ -133,7 +133,7 @@ export async function PUT(
             assignee_text: item.assignee,
             status: item.status || "pending",
             priority: item.priority || "medium",
-            due_date: item.dueDate,
+            due_date: item.due_date,
             updated_at: new Date().toISOString(),
           };
 

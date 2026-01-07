@@ -35,7 +35,7 @@ interface MeetingNote {
 }
 
 interface EditMeetingNoteFormProps {
-  meetingNote: MeetingNote;
+  meetingNote?: Partial<MeetingNote>;
   epicId: string;
   onCancel: () => void;
   onSuccess: (updatedNote: MeetingNote) => void;
@@ -52,7 +52,7 @@ const meetingTypes = [
 ];
 
 export default function EditMeetingNoteForm({
-  meetingNote,
+  meetingNote = {},
   epicId,
   onCancel,
   onSuccess,
@@ -61,23 +61,55 @@ export default function EditMeetingNoteForm({
     Array<{ id: string; name: string; email: string }>
   >([]);
   const [membersLoading, setMembersLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    title: meetingNote.title,
-    meetingType: meetingNote.meeting_type,
-    meetingDate: new Date(meetingNote.meeting_date).toISOString().split("T")[0],
-    attendees: meetingNote.attendees
+  const [formData, setFormData] = useState<{
+    title: string;
+    meetingType: string;
+    meetingDate: string;
+    attendees: string[];
+    agenda: string;
+    notes: string;
+    decisions: string;
+    actionItems: Array<{
+      id?: string;
+      description: string;
+      assignee: string;
+      status: string;
+      priority: string;
+      due_date: string;
+    }>;
+  }>({
+    title: meetingNote?.title || "",
+    meetingType: meetingNote?.meeting_type || "planning",
+    meetingDate: meetingNote?.meeting_date
+      ? (() => {
+          try {
+            return new Date(meetingNote.meeting_date).toISOString().split("T")[0];
+          } catch {
+            return new Date().toISOString().split("T")[0];
+          }
+        })()
+      : new Date().toISOString().split("T")[0],
+    attendees: meetingNote?.attendees
       ? meetingNote.attendees.map((a) => a.id)
-      : meetingNote.attendees_text || [],
+      : meetingNote?.attendees_text || [],
     agenda: meetingNote.agenda || "",
     notes: meetingNote.notes || "",
     decisions: meetingNote.decisions || "",
     actionItems: (meetingNote.action_items || []).map((item) => ({
+      id: item.id,
       description: item.description,
       assignee: item.assignee_text || "",
       status: item.status,
       priority: item.priority,
-      due_date: item.due_date || "",
-    })),
+      due_date: item.due_date ? new Date(item.due_date).toISOString().split("T")[0] : "",
+    })) as Array<{
+      id?: string;
+      description: string;
+      assignee: string;
+      status: string;
+      priority: string;
+      due_date: string;
+    }>,
   });
   const [loading, setLoading] = useState(false);
 
@@ -118,31 +150,34 @@ export default function EditMeetingNoteForm({
         due_date: item.due_date ? new Date(item.due_date).toISOString() : null,
       }));
 
-      const response = await fetch(
-        `/api/epics/${epicId}/meeting-notes/${meetingNote.id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            ...formData,
-            attendees: formData.attendees,
-            meetingDate: new Date(formData.meetingDate).toISOString(),
-            actionItems: transformedActionItems,
-          }),
-        }
-      );
+      const isUpdate = meetingNote?.id;
+      const method = isUpdate ? "PUT" : "POST";
+      const url = isUpdate
+        ? `/api/epics/${epicId}/meeting-notes/${meetingNote.id}`
+        : `/api/epics/${epicId}/meeting-notes`;
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...formData,
+          attendees: formData.attendees,
+          meetingDate: new Date(formData.meetingDate).toISOString(),
+          actionItems: transformedActionItems,
+        }),
+      });
 
       if (response.ok) {
         const updatedMeetingNote = await response.json();
         onSuccess(updatedMeetingNote);
       } else {
-        alert("Failed to update meeting note");
+        alert(`Failed to ${isUpdate ? 'update' : 'create'} meeting note`);
       }
     } catch (error) {
-      console.error("Failed to update meeting note:", error);
-      alert("Failed to update meeting note");
+      console.error(`Failed to ${meetingNote?.id ? 'update' : 'create'} meeting note:`, error);
+      alert(`Failed to ${meetingNote?.id ? 'update' : 'create'} meeting note`);
     } finally {
       setLoading(false);
     }
@@ -375,7 +410,7 @@ export default function EditMeetingNoteForm({
                       >
                         <option value="">Select assignee...</option>
                         {epicMembers.map((member) => (
-                          <option key={member.id} value={member.id}>
+                          <option key={member.id} value={member.name}>
                             {member.name}
                           </option>
                         ))}

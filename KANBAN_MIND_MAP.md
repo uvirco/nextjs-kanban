@@ -1,0 +1,101 @@
+### **Kanban Application Mind Map**
+
+#### **🏠 Main Menu Structure**
+- **Dashboard** (Overview page)
+  - **Board View** (Kanban columns: To Do, In Progress, Done)
+    - Task cards with labels, assignees, due dates
+    - Drag-and-drop functionality
+    - Quick actions: Edit, Delete, Move tasks
+  - **Epic Overview** (List of all epics with progress indicators)
+    - Epic cards showing task counts, completion %
+    - Links to individual epic details
+  - **Recent Activity** (Timeline of recent changes)
+    - Task updates, comments, meeting notes
+  - **Quick Stats** (Metrics dashboard)
+    - Total tasks, completed tasks, overdue items
+  - **Relationships**: → Links to Epics (view epic details) → Links to Meeting Notes (view recent notes)
+
+- **📂 Epics** (Project management section)
+  - **Epic List View** (All epics in grid/list)
+    - Epic cards with title, description, status, member count
+    - Filters: Active, Completed, Archived
+    - Search by title/description
+  - **Create/Edit Epic Form** (Modal/form for adding epics)
+    - **Parameters to Add**:
+      - Title (required, string)
+      - Description (optional, rich text)
+      - Status (dropdown: Planning, Active, Completed, Archived)
+      - Priority (dropdown: Low, Medium, High, Urgent)
+      - Start Date (date picker)
+      - Due Date (date picker)
+      - Assigned Members (multi-select from team)
+      - Color/Theme (color picker for visual distinction)
+  - **Epic Detail View** (Individual epic page)
+    - **Header**: Title, status, progress bar, member avatars
+    - **Tasks Section**: Kanban board specific to epic
+      - Add task button → Opens task creation form
+      - Task parameters: Title, Description, Assignee, Labels, Due Date, Priority
+    - **Meeting Notes Section**: List of notes for this epic
+      - Add note button → Opens meeting note form
+      - Note parameters: Title, Type, Date, Attendees, Agenda, Notes, Decisions, Action Items
+    - **Links Section**: External resources/links
+      - Add link button → Opens link form
+      - Link parameters: URL (with auto https://), Friendly Name
+    - **Activity Feed**: Comments, updates, changes
+  - **Relationships**: → Contains Tasks (epic → tasks) → Contains Meeting Notes (epic → notes) → Referenced in Dashboard (epic overview)
+
+- **📝 Meeting Notes** (Documentation section)
+  - **Notes List View** (All meeting notes across epics)
+    - Collapsible cards (default collapsed)
+    - Filters: Epic, Date Range, Type (Planning, Review, etc.), Search
+    - Sort options: Date (newest/oldest), Type, Epic
+    - URL-based persistence (bookmarkable filters)
+  - **Create/Edit Meeting Note Form** (Modal for adding notes)
+    - **Parameters to Add**:
+      - Title (required, string)
+      - Meeting Type (dropdown: Planning, Review, Retrospective, Stakeholder, Demo, Standup, Other)
+      - Meeting Date (date picker, required)
+      - Attendees (multi-select from epic members)
+      - Agenda (rich text editor)
+      - Notes (rich text editor)
+      - Decisions (rich text editor)
+      - Action Items (dynamic list)
+        - Description (string)
+        - Assignee (dropdown from epic members)
+        - Status (dropdown: Pending, In Progress, Completed, Cancelled)
+        - Priority (dropdown: Low, Medium, High, Urgent)
+        - Due Date (date picker)
+  - **Note Detail View** (Expanded individual note)
+    - Full content display with rich text rendering
+    - Edit button → Opens edit form
+    - Delete button
+    - Related epic link
+  - **Relationships**: → Belongs to Epics (notes → epic) → Referenced in Epic Detail View (epic → notes) → Can be filtered in Dashboard activity
+
+- **⚙️ Settings** (Configuration section)
+  - **User Profile Settings**
+    - Avatar upload
+    - Name, Email, Bio
+    - Notification preferences
+  - **Board Settings**
+    - Board name, description
+    - Member management (add/remove team members)
+    - Default labels creation
+  - **App Preferences**
+    - Theme (dark/light mode)
+    - Language selection
+    - Time zone settings
+  - **Relationships**: → Affects all sections (settings → global app behavior)
+
+#### **🔗 Cross-Section Relationships**
+- **Tasks ↔ Epics**: Tasks belong to epics; epics contain task collections
+- **Meeting Notes ↔ Epics**: Notes are scoped to epics; epics display their notes
+- **Labels ↔ Tasks**: Labels are assigned to tasks; task views show label badges
+- **Comments ↔ Tasks**: Rich text comments on tasks; task detail shows activity feed
+- **Dashboard ↔ All Sections**: Provides overview and navigation to epics, notes, tasks
+
+#### **📊 Data Flow & References**
+- **Database Tables**: User, Epic, Task, MeetingNote, Label, _LabelToTask (junction), Activity (comments)
+- **API Routes**: /api/epics, /api/tasks, /api/meeting-notes, /api/labels, /api/activities
+- **Server Actions**: CRUD operations for all entities with validation
+- **UI Components**: Shared components (RichTextEditor, Popovers, Forms) used across sections
