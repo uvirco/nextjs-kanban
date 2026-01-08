@@ -25,6 +25,7 @@ import EditEpicForm from "./edit/EditEpicForm";
 import EditOverviewForm from "./EditOverviewForm";
 import ManageMembersModal from "./ManageMembersModal";
 import EditTasksForm from "./edit/EditTasksForm";
+import QuickNotesTab from "./QuickNotesTab";
 
 // Dynamically import tabs to avoid SSR hydration issues
 const Tabs = dynamic(() => import("@/components/ui/tabs").then(mod => mod.Tabs), { ssr: false });
@@ -101,12 +102,13 @@ function EpicDetailPageClient({
           <div className="w-full">
             <Suspense fallback={<div className="flex items-center justify-center p-8"><div className="text-zinc-400">Loading...</div></div>}>
               <Tabs defaultValue="overview" className="w-full" id={`epic-tabs-${epic.id}`}>
-              <TabsList className="grid w-full grid-cols-8 mb-6">
+              <TabsList className="grid w-full grid-cols-9 mb-6">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="taskboard">Taskboard</TabsTrigger>
                 <TabsTrigger value="tasks">Tasks</TabsTrigger>
                 <TabsTrigger value="checklists">Checklists</TabsTrigger>
                 <TabsTrigger value="meeting-notes">Meeting Notes</TabsTrigger>
+                <TabsTrigger value="quick-notes">Quick Notes</TabsTrigger>
                 <TabsTrigger value="links">Links & Files</TabsTrigger>
                 <TabsTrigger value="activity">Activity</TabsTrigger>
                 <TabsTrigger value="raci">RACI</TabsTrigger>
@@ -117,9 +119,9 @@ function EpicDetailPageClient({
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <h2 className="text-2xl font-bold text-white">Epic Overview</h2>
-                    {/* Member Avatars */}
-                    {epic.members && epic.members.length > 0 && (
-                      <div className="flex items-center gap-1">
+                    {/* Member Avatars and Add Button */}
+                    <div className="flex items-center gap-1">
+                      {epic.members && epic.members.length > 0 && (
                         <div className="flex -space-x-2">
                           {epic.members.slice(0, 5).map((member: any) => (
                             <div
@@ -144,16 +146,16 @@ function EpicDetailPageClient({
                             </div>
                           )}
                         </div>
-                        <Button
-                          onClick={() => setShowMemberModal(true)}
-                          variant="ghost"
-                          size="sm"
-                          className="text-zinc-400 hover:text-zinc-300 hover:bg-zinc-800 ml-2"
-                        >
-                          <IconUsers size={14} />
-                        </Button>
-                      </div>
-                    )}
+                      )}
+                      <Button
+                        onClick={() => setShowMemberModal(true)}
+                        variant="ghost"
+                        size="sm"
+                        className="text-zinc-400 hover:text-zinc-300 hover:bg-zinc-800 ml-2"
+                      >
+                        <IconUsers size={14} />
+                      </Button>
+                    </div>
                   </div>
                   {!editingOverview && (
                     <div className="flex gap-2">
@@ -439,6 +441,13 @@ function EpicDetailPageClient({
                     Add Meeting Note
                   </Button>
                 </div>
+              </TabsContent>
+
+              <TabsContent value="quick-notes" className="space-y-6">
+                <QuickNotesTab epic={epic} onSave={(updatedEpic) => {
+                  // Handle save - you might need to refresh or update state
+                  window.location.reload(); // Simple refresh for now
+                }} />
               </TabsContent>
 
               <TabsContent value="links" className="space-y-6">

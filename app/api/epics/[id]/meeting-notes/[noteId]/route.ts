@@ -62,12 +62,15 @@ export async function PUT(
     const {
       title,
       meetingType,
+      meeting_type,
       meetingDate,
+      meeting_date,
       attendees,
       agenda,
       notes,
       decisions,
       actionItems, // Array of action items with potential ids
+      type,
     } = body;
 
     // Update the meeting note (without action_items field)
@@ -75,12 +78,13 @@ export async function PUT(
       .from("MeetingNote")
       .update({
         title,
-        meeting_type: meetingType,
-        meeting_date: meetingDate,
+        meeting_type: meetingType || meeting_type,
+        meeting_date: meetingDate || meeting_date,
         attendees_text: attendees,
         agenda,
         notes,
         decisions,
+        type: type || "meeting", // Include type field
         updated_at: new Date().toISOString(),
       })
       .eq("id", noteId)

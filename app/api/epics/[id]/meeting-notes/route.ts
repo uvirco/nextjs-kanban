@@ -104,33 +104,45 @@ export async function POST(
 
     const { id: epicId } = await params;
     const body = await request.json();
+    console.log("POST /api/epics/[id]/meeting-notes - Request body:", body);
 
     const {
       title,
       meetingType,
+      meeting_type,
       meetingDate,
+      meeting_date,
       attendees,
       agenda,
       notes,
       decisions,
       actionItems,
+      type,
     } = body;
 
     const { data: meetingNote, error } = await supabaseAdmin
       .from("MeetingNote")
       .insert({
         title,
-        meeting_type: meetingType || "other",
-        meeting_date: meetingDate,
+        meeting_type: meetingType || meeting_type || "other",
+        meeting_date: (meetingDate || meeting_date) || new Date().toISOString(),
         attendees_text: attendees || [],
         agenda,
         notes,
         decisions,
+        type: type || "meeting", // Default to "meeting" for backward compatibility
         epic_id: epicId,
         created_by: session.user.id,
       })
       .select()
       .single();
+
+    console.log("Inserting meeting note with data:", {
+      title,
+      meeting_type: meetingType || meeting_type || "other",
+      meeting_date: meetingDate || meeting_date,
+      type: type || "meeting",
+    });
 
     if (error) {
       console.error("Error creating meeting note:", error);

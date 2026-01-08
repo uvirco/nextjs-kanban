@@ -78,3 +78,76 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Quill Editor Custom Styles for Dark Theme */
+.ql-toolbar {
+  @apply bg-zinc-700 border-zinc-600;
+}
+
+.ql-toolbar .ql-stroke {
+  @apply stroke-zinc-300;
+}
+
+.ql-toolbar .ql-fill {
+  @apply fill-zinc-300;
+}
+
+.ql-toolbar button:hover {
+  @apply bg-zinc-600;
+}
+
+.ql-toolbar button.ql-active {
+  @apply bg-zinc-600;
+}
+
+.ql-container {
+  @apply bg-zinc-800 border-zinc-600 text-white;
+}
+
+.ql-editor {
+  @apply text-white;
+}
+
+.ql-editor.ql-blank::before {
+  @apply text-zinc-500;
+}
+
+.ql-toolbar {
+  @apply bg-zinc-700 border-zinc-600;
+}
+
+.ql-toolbar button {
+  @apply text-zinc-300 hover:bg-zinc-600;
+}
+
+.ql-toolbar button.ql-active {
+  @apply bg-zinc-600 text-white;
+}
+
+.ql-toolbar .ql-picker-label {
+  @apply text-zinc-300;
+}
+
+.ql-toolbar .ql-stroke {
+  @apply stroke-zinc-300;
+}
+
+.ql-toolbar .ql-fill {
+  @apply fill-zinc-300;
+}
+
+.ql-toolbar button:hover .ql-stroke {
+  @apply stroke-white;
+}
+
+.ql-toolbar button:hover .ql-fill {
+  @apply fill-white;
+}
+
+.ql-toolbar button.ql-active .ql-stroke {
+  @apply stroke-white;
+}
+
+.ql-toolbar button.ql-active .ql-fill {
+  @apply fill-white;
+}
