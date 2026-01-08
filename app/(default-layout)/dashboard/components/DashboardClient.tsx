@@ -6,10 +6,12 @@ import {
   IconTrendingUp,
   IconChartBar,
   IconClock,
+  IconTimeline,
 } from "@tabler/icons-react";
 import ActivityTrendsSection from "./ActivityTrendsSection";
 import ProgressOverviewSection from "./ProgressOverviewSection";
 import SummarySection from "./SummarySection";
+import ActivityFeedSection from "./ActivityFeedSection";
 
 interface DashboardClientProps {
   userId: string;
@@ -150,6 +152,17 @@ export default function DashboardClient({ userId }: DashboardClientProps) {
             Activity Trends
           </button>
           <button
+            onClick={() => setActiveTab("feed")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
+              activeTab === "feed"
+                ? "bg-zinc-800 text-white"
+                : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
+            }`}
+          >
+            <IconTimeline size={18} />
+            Activity Feed
+          </button>
+          <button
             onClick={() => setActiveTab("progress")}
             className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
               activeTab === "progress"
@@ -176,6 +189,10 @@ export default function DashboardClient({ userId }: DashboardClientProps) {
         {/* Tab Content */}
         {activeTab === "activities" && (
           <ActivityTrendsSection epics={epics} dateRange={dateRange} />
+        )}
+
+        {activeTab === "feed" && (
+          <ActivityFeedSection dateRange={dateRange} />
         )}
 
         {activeTab === "progress" && <ProgressOverviewSection />}

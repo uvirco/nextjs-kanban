@@ -48,6 +48,8 @@ function EpicDetailPageClient({
   const [editingTasks, setEditingTasks] = useState(false);
   const [departments, setDepartments] = useState<any[]>([]);
   const [goals, setGoals] = useState<any[]>([]);
+  const [meetingNotesSearch, setMeetingNotesSearch] = useState("");
+  const [quickNotesSearch, setQuickNotesSearch] = useState("");
   const [showMemberModal, setShowMemberModal] = useState(false);
 
   // Fetch departments and goals for the edit form
@@ -404,7 +406,21 @@ function EpicDetailPageClient({
 
               <TabsContent value="meeting-notes" className="space-y-4">
                 <div className="space-y-4">
-                  {epic.meetingNotes?.map((note: any) => (
+                  {/* Search Bar */}
+                  <div className="flex items-center gap-4">
+                    <input
+                      type="text"
+                      placeholder="Search meeting notes..."
+                      value={meetingNotesSearch}
+                      onChange={(e) => setMeetingNotesSearch(e.target.value)}
+                      className="flex-1 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-md text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  {epic.meetingNotes?.filter((note: any) => 
+                    meetingNotesSearch === "" || 
+                    note.title.toLowerCase().includes(meetingNotesSearch.toLowerCase()) ||
+                    (note.notes && note.notes.toLowerCase().includes(meetingNotesSearch.toLowerCase()))
+                  ).map((note: any) => (
                     <div key={note.id} className="border border-zinc-700 rounded-lg p-4 bg-zinc-800">
                       <div className="flex justify-between items-start mb-2">
                         <div>
@@ -434,6 +450,13 @@ function EpicDetailPageClient({
                   {(!epic.meetingNotes || epic.meetingNotes.length === 0) && (
                     <p className="text-zinc-500 text-center py-4">No meeting notes yet</p>
                   )}
+                  {epic.meetingNotes && epic.meetingNotes.length > 0 && epic.meetingNotes.filter((note: any) => 
+                    meetingNotesSearch === "" || 
+                    note.title.toLowerCase().includes(meetingNotesSearch.toLowerCase()) ||
+                    (note.notes && note.notes.toLowerCase().includes(meetingNotesSearch.toLowerCase()))
+                  ).length === 0 && meetingNotesSearch !== "" && (
+                    <p className="text-zinc-500 text-center py-4">No meeting notes match your search</p>
+                  )}
                   <Button
                     onClick={() => setEditingNote({})}
                     className="w-full bg-zinc-700 hover:bg-zinc-600"
@@ -444,7 +467,17 @@ function EpicDetailPageClient({
               </TabsContent>
 
               <TabsContent value="quick-notes" className="space-y-6">
-                <QuickNotesTab epic={epic} onSave={(updatedEpic) => {
+                {/* Search Bar */}
+                <div className="flex items-center gap-4">
+                  <input
+                    type="text"
+                    placeholder="Search quick notes..."
+                    value={quickNotesSearch}
+                    onChange={(e) => setQuickNotesSearch(e.target.value)}
+                    className="flex-1 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-md text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <QuickNotesTab epic={epic} searchTerm={quickNotesSearch} onSave={(updatedEpic) => {
                   // Handle save - you might need to refresh or update state
                   window.location.reload(); // Simple refresh for now
                 }} />

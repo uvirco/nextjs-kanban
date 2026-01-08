@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { supabaseAdmin } from "@/lib/supabase";
+import { logActivity, formatActivityContent } from "@/lib/activity-logger";
 
 export async function PUT(
   request: NextRequest,
@@ -95,6 +96,19 @@ export async function PUT(
         { status: 500 }
       );
     }
+
+    // Log activity
+    await logActivity({
+      type: "EPIC_UPDATED",
+      content: formatActivityContent({
+        action: "updated",
+        userName: session.user.name || session.user.email || "User",
+        entityType: "epic",
+        entityName: epic.title,
+      }),
+      userId: session.user.id,
+      taskId: epicId,
+    });
 
     console.log("PUT /api/epics/[id] - Successfully updated epic:", epic.id);
     return NextResponse.json(epic);

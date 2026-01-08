@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { supabaseAdmin } from "@/lib/supabase";
+import { logActivity, formatActivityContent } from "@/lib/activity-logger";
 
 export async function GET(request: NextRequest) {
   try {
@@ -139,6 +140,19 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    // Log activity
+    await logActivity({
+      type: "EPIC_CREATED",
+      content: formatActivityContent({
+        action: "created",
+        userName: session.user.name || session.user.email || "User",
+        entityType: "epic",
+        entityName: epic.title,
+      }),
+      userId: session.user.id,
+      taskId: epic.id,
+    });
 
     return NextResponse.json(epic);
   } catch (error) {

@@ -93,6 +93,14 @@ export default function MeetingsPageClient() {
     fetchEpics();
   }, []);
 
+  useEffect(() => {
+    fetchMeetingNotes();
+  }, []);
+
+  useEffect(() => {
+    fetchMeetingNotes();
+  }, [selectedEpicId]);
+
   // Debounced search update
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -130,10 +138,16 @@ export default function MeetingsPageClient() {
         selectedEpicId === "all"
           ? "/api/meeting-notes"
           : `/api/meeting-notes?epicId=${selectedEpicId}`;
+      console.log("Fetching meeting notes from:", url);
       const response = await fetch(url);
+      console.log("Meeting notes response status:", response.status);
       if (response.ok) {
         const data = await response.json();
+        console.log("Fetched meeting notes:", data);
         setMeetingNotes(data);
+      } else {
+        const errorData = await response.json();
+        console.error("Failed to fetch meeting notes:", errorData);
       }
     } catch (error) {
       console.error("Failed to fetch meeting notes:", error);

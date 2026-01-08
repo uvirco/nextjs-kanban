@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { ActivityType } from "@/types/types";
 import { supabaseAdmin } from "@/lib/supabase";
 import { auth } from "@/auth";
+import { logActivity, formatActivityContent } from "@/lib/activity-logger";
 import {
   TaskCreationData,
   TaskEditData,
@@ -300,10 +301,10 @@ export async function handleUpdateTaskPosition(data: {
   }
 
   try {
-    // Get the current task data
+    // Get the current task data including title and column info
     const { data: currentTask, error: fetchError } = await supabaseAdmin
       .from("Task")
-      .select("columnId, order")
+      .select("columnId, order, title, Column:Column!Task_columnId_fkey(title)")
       .eq("id", parse.data.id)
       .single();
 
@@ -336,14 +337,36 @@ export async function handleUpdateTaskPosition(data: {
       revalidatePath(`/board/${parse.data.boardId}`);
     }
 
-    // If column changed, create activity
+    // If column changed, create activity with proper content
     if (parse.data.columnId && parse.data.columnId !== currentTask.columnId) {
-      await supabaseAdmin.from("Activity").insert({
+      // Fetch new column info
+      const { data: newColumn } = await supabaseAdmin
+        .from("Column")
+        .select("title")
+        .eq("id", parse.data.columnId)
+        .single();
+
+      // Get user info
+      const { data: user } = await supabaseAdmin
+        .from("User")
+        .select("name, email")
+        .eq("id", userId)
+        .single();
+
+      await logActivity({
         type: ActivityType.TASK_MOVED,
+        content: formatActivityContent({
+          action: "moved",
+          userName: user?.name || user?.email || "User",
+          entityType: "task",
+          entityName: currentTask.title,
+          details: `from "${(currentTask as any).Column?.title || 'Unknown'}" to "${newColumn?.title || 'Unknown'}"`,
+        }),
         userId: userId,
         taskId: parse.data.id,
-        originalColumnId: currentTask.columnId,
+        oldColumnId: currentTask.columnId,
         newColumnId: parse.data.columnId,
+        boardId: parse.data.boardId,
       });
     }
 

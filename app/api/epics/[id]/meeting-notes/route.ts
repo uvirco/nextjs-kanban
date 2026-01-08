@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { supabaseAdmin } from "@/lib/supabase";
+import { logActivity, formatActivityContent } from "@/lib/activity-logger";
+import { ActivityType } from "@/types/types";
 
 export async function GET(
   request: NextRequest,
@@ -196,6 +198,20 @@ export async function POST(
       console.error("Error fetching complete meeting note:", fetchError);
       return NextResponse.json(meetingNote); // Return basic meeting note if fetch fails
     }
+
+    // Log activity
+    await logActivity({
+      type: (type === "quick" ? "QUICK_NOTE_ADDED" : "MEETING_NOTE_ADDED") as ActivityType,
+      content: formatActivityContent({
+        action: "added",
+        userName: session.user.name || session.user.email || "User",
+        entityType: type === "quick" ? "quick note" : "meeting note",
+        entityName: title,
+        details: `to epic ${completeMeetingNote.epic?.title || ""}`
+      }),
+      userId: session.user.id,
+      taskId: epicId,
+    });
 
     // Fetch user data for attendees
     if (

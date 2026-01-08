@@ -6,6 +6,7 @@ import { IconPlus, IconEdit, IconTrash } from "@tabler/icons-react";
 interface QuickNotesTabProps {
   epic: any;
   onSave: (data: any) => void;
+  searchTerm?: string;
 }
 
 interface QuickNote {
@@ -17,7 +18,7 @@ interface QuickNote {
   type: string;
 }
 
-export default function QuickNotesTab({ epic, onSave }: QuickNotesTabProps) {
+export default function QuickNotesTab({ epic, onSave, searchTerm = "" }: QuickNotesTabProps) {
   const [quickNotes, setQuickNotes] = useState<QuickNote[]>([]);
   const [isCreating, setIsCreating] = useState(false);
   const [editingNote, setEditingNote] = useState<QuickNote | null>(null);
@@ -179,8 +180,20 @@ export default function QuickNotesTab({ epic, onSave }: QuickNotesTabProps) {
                 Create Your First Quick Note
               </Button>
             </div>
+          ) : quickNotes.filter((note) => 
+            searchTerm === "" || 
+            note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (note.notes && note.notes.toLowerCase().includes(searchTerm.toLowerCase()))
+          ).length === 0 && searchTerm !== "" ? (
+            <div className="text-center py-8">
+              <p className="text-zinc-500">No quick notes match your search</p>
+            </div>
           ) : (
-            quickNotes.map((note) => (
+            quickNotes.filter((note) => 
+              searchTerm === "" || 
+              note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              (note.notes && note.notes.toLowerCase().includes(searchTerm.toLowerCase()))
+            ).map((note) => (
               <div key={note.id} className="border border-zinc-700 rounded-lg p-4 bg-zinc-800">
                 <div className="flex justify-between items-start mb-2">
                   <div>
