@@ -1,0 +1,244 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { CRMContact } from "@/types/crm";
+
+interface LeadFormModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
+  columnId: string;
+  leadToEdit?: any;
+}
+
+export default function LeadFormModal({
+  isOpen,
+  onClose,
+  onSuccess,
+  columnId,
+  leadToEdit,
+}: LeadFormModalProps) {
+  const [loading, setLoading] = useState(false);
+  const [contacts, setContacts] = useState<CRMContact[]>([]);
+  const [formData, setFormData] = useState({
+    title: "",
+    contactId: "",
+    source: "",
+    value: "",
+    notes: "",
+    columnId: columnId,
+    order: 0,
+  });
+
+  useEffect(() => {
+    fetchContacts();
+    if (leadToEdit) {
+      setFormData({
+        title: leadToEdit.title || "",
+        contactId: leadToEdit.contactId || "",
+        source: leadToEdit.source || "",
+        value: leadToEdit.value?.toString() || "",
+        notes: leadToEdit.notes || "",
+        columnId: leadToEdit.columnId || columnId,
+        order: leadToEdit.order || 0,
+      });
+    } else {
+      setFormData((prev) => ({ ...prev, columnId }));
+    }
+  }, [leadToEdit, columnId]);
+
+  const fetchContacts = async () => {
+    try {
+      const response = await fetch("/api/crm/contacts");
+      if (response.ok) {
+        const data = await response.json();
+        setContacts(data.contacts);
+      }
+    } catch (error) {
+      console.error("Error fetching contacts:", error);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const url = leadToEdit
+        ? `/api/crm/leads/${leadToEdit.id}`
+        : "/api/crm/leads";
+      const method = leadToEdit ? "PUT" : "POST";
+
+      const payload = {
+        ...formData,
+        value: formData.value ? parseFloat(formData.value) : null,
+        contactId: formData.contactId || null,
+      };
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        onSuccess();
+        onClose();
+      } else {
+        const error = await response.json();
+        alert(`Error: ${error.error || "Failed to save lead"}`);
+      }
+    } catch (error) {
+      console.error("Error saving lead:", error);
+      alert("Failed to save lead");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="bg-zinc-800 border-zinc-700 text-white max-w-2xl">
+        <DialogHeader>
+          <DialogTitle className="text-white">
+            {leadToEdit ? "Edit Lead" : "Add New Lead"}
+          </DialogTitle>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label htmlFor="title" className="text-white">
+              Title <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              id="title"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              required
+              placeholder="Lead title"
+              className="mt-1 text-white"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="contactId" className="text-white">
+              Contact
+            </Label>
+            <Select
+              value={formData.contactId}
+              onValueChange={(value) =>
+                setFormData({ ...formData, contactId: value })
+              }
+            >
+              <SelectTrigger className="mt-1 text-white">
+                <SelectValue placeholder="Select a contact" />
+              </SelectTrigger>
+              <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
+                <SelectItem value="">None</SelectItem>
+                {contacts.map((contact) => (
+                  <SelectItem key={contact.id} value={contact.id}>
+                    {contact.name} {contact.email && `(${contact.email})`}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="source" className="text-white">
+                Source
+              </Label>
+              <Input
+                id="source"
+                name="source"
+                value={formData.source}
+                onChange={handleChange}
+                placeholder="Website, Referral, etc."
+                className="mt-1 text-white"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="value" className="text-white">
+                Estimated Value ($)
+              </Label>
+              <Input
+                id="value"
+                name="value"
+                type="number"
+                step="0.01"
+                value={formData.value}
+                onChange={handleChange}
+                placeholder="10000"
+                className="mt-1 text-white"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="notes" className="text-white">
+              Notes
+            </Label>
+            <Textarea
+              id="notes"
+              name="notes"
+              value={formData.notes}
+              onChange={handleChange}
+              placeholder="Additional information..."
+              className="mt-1 text-white"
+              rows={3}
+            />
+          </div>
+
+          <div className="flex justify-end space-x-2 pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              disabled={loading}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={loading}>
+              {loading
+                ? "Saving..."
+                : leadToEdit
+                  ? "Update Lead"
+                  : "Create Lead"}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}

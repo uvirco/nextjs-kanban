@@ -3,7 +3,12 @@ import { useState } from "react";
 import NavbarTitle from "./NavbarTitle";
 import ColourPicker from "./ColourPicker";
 import ThemeToggle from "./ThemeToggle";
-import { IconMenu2, IconLayoutKanban, IconUser } from "@tabler/icons-react";
+import {
+  IconMenu2,
+  IconLayoutKanban,
+  IconUser,
+  IconCurrencyDollar,
+} from "@tabler/icons-react";
 import Link from "next/link";
 import React from "react";
 
@@ -24,6 +29,11 @@ const navData: NavItem[] = [
     path: "/board",
     title: "All Boards",
     icon: <IconLayoutKanban stroke={1.5} size={24} />,
+  },
+  {
+    path: "/crm",
+    title: "CRM",
+    icon: <IconCurrencyDollar stroke={1.5} size={24} />,
   },
 ];
 

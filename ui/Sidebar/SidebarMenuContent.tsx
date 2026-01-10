@@ -135,7 +135,7 @@ export default function SidebarMenuContent({
         </Menu>
       </div>
 
-      {/* User section at the bottom */}
+      {/* Footer */}
       <div className="mt-auto">
         <hr className="border-zinc-900 my-3" />
         <SidebarHeader isCollapsed={isCollapsed} />
