@@ -4,7 +4,7 @@ const nextConfig = {
   turbopack: {
     root: __dirname,
   },
-  output: "standalone",
+  // Remove 'output: "standalone"' for Vercel deployment
   images: {
     remotePatterns: [
       {
