@@ -87,7 +87,7 @@ export default function CRMLayout({ children }: { children: React.ReactNode }) {
 
             {/* User Avatar */}
             <Link
-              href="/profile"
+              href="/projects/profile"
               className="flex items-center gap-2 px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 transition-colors"
             >
               <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center">
@@ -127,7 +127,7 @@ export default function CRMLayout({ children }: { children: React.ReactNode }) {
               })}
               <hr className="border-zinc-800 my-2" />
               <Link
-                href="/board"
+                href="/projects/boards"
                 onClick={() => setMobileMenuOpen(false)}
                 className="flex items-center gap-3 px-4 py-3 text-zinc-400 hover:text-white rounded-lg hover:bg-zinc-800"
               >

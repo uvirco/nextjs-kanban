@@ -79,7 +79,12 @@ export default function Board({ boardId, epicId }: BoardProps) {
   const router = useRouter();
 
   const handleTaskClick = (taskId: string) => {
-    router.push(`/task/${taskId}`);
+    // If this board is part of an epic, preserve that context in the URL
+    if (epicId) {
+      router.push(`/projects/tasks/${taskId}`);
+    } else {
+      router.push(`/projects/tasks/${taskId}`);
+    }
   };
 
   const handleAddTask = async (columnId: string) => {
@@ -438,11 +443,7 @@ export default function Board({ boardId, epicId }: BoardProps) {
 
                               <Link
                                 className="flex-grow pr-3 py-2"
-                                href={
-                                  epicId
-                                    ? `/tasks/${task.id}`
-                                    : `/task/${task.id}`
-                                }
+                                href={`/projects/tasks/${task.id}`}
                               >
                                 {/* Labels would go here if available */}
                                 {task.labels && task.labels.length > 0 && (

@@ -9,11 +9,15 @@ import {
 } from "@/components/ui/dialog";
 import { ThemeProvider } from "next-themes";
 
-export default function TaskModal({ children }: { children: React.ReactNode }) {
+export default function TaskModal({ children, boardId }: { children: React.ReactNode; boardId: string }) {
   const router = useRouter();
 
   const handleClose = () => {
-    router.back();
+    if (boardId) {
+      router.push(`/board/${boardId}`);
+    } else {
+      router.back();
+    }
   };
 
   useEffect(() => {

@@ -91,7 +91,7 @@ export default function TeamMembers({ epicId }: TeamMembersProps) {
               No team members assigned yet
             </div>
             <Link
-              href={`/epics/${epicId}/edit`}
+              href={`/projects/epics/${epicId}/edit`}
               className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
             >
               <IconEdit size={16} />

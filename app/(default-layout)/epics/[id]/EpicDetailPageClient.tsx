@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import dynamic from "next/dynamic";
+import { useSearchParams } from "next/navigation";
 import {
   IconUsers,
   IconClock,
@@ -26,12 +26,7 @@ import EditOverviewForm from "./EditOverviewForm";
 import ManageMembersModal from "./ManageMembersModal";
 import EditTasksForm from "./edit/EditTasksForm";
 import QuickNotesTab from "./QuickNotesTab";
-
-// Dynamically import tabs to avoid SSR hydration issues
-const Tabs = dynamic(() => import("@/components/ui/tabs").then(mod => mod.Tabs), { ssr: false });
-const TabsContent = dynamic(() => import("@/components/ui/tabs").then(mod => mod.TabsContent), { ssr: false });
-const TabsList = dynamic(() => import("@/components/ui/tabs").then(mod => mod.TabsList), { ssr: false });
-const TabsTrigger = dynamic(() => import("@/components/ui/tabs").then(mod => mod.TabsTrigger), { ssr: false });
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 function EpicDetailPageClient({
   epic,
@@ -42,6 +37,9 @@ function EpicDetailPageClient({
   raciUsers: any[];
   params: { id: string };
 }) {
+  const searchParams = useSearchParams();
+  const storageKey = `epic-${params.id}-active-tab`;
+  const [activeTab, setActiveTab] = useState('overview');
   const [editingNote, setEditingNote] = useState<any>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingOverview, setEditingOverview] = useState(false);
@@ -51,6 +49,25 @@ function EpicDetailPageClient({
   const [meetingNotesSearch, setMeetingNotesSearch] = useState("");
   const [quickNotesSearch, setQuickNotesSearch] = useState("");
   const [showMemberModal, setShowMemberModal] = useState(false);
+
+  // Load last active tab from localStorage on mount
+  useEffect(() => {
+    const tabFromUrl = searchParams.get('tab');
+    const savedTab = localStorage.getItem(storageKey);
+    
+    if (tabFromUrl) {
+      setActiveTab(tabFromUrl);
+      localStorage.setItem(storageKey, tabFromUrl);
+    } else if (savedTab) {
+      setActiveTab(savedTab);
+    }
+  }, [storageKey, searchParams]);
+
+  // Save tab to localStorage when it changes
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    localStorage.setItem(storageKey, value);
+  };
 
   // Fetch departments and goals for the edit form
   useEffect(() => {
@@ -84,7 +101,7 @@ function EpicDetailPageClient({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Link
-                href="/epics"
+                href="/projects/epics"
                 className="flex items-center gap-2 text-zinc-400 hover:text-zinc-300 transition-colors"
               >
                 <IconArrowLeft size={20} />
@@ -103,7 +120,7 @@ function EpicDetailPageClient({
           {/* Main Content */}
           <div className="w-full">
             <Suspense fallback={<div className="flex items-center justify-center p-8"><div className="text-zinc-400">Loading...</div></div>}>
-              <Tabs defaultValue="overview" className="w-full" id={`epic-tabs-${epic.id}`}>
+              <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full" id={`epic-tabs-${epic.id}`}>
               <TabsList className="grid w-full grid-cols-9 mb-6">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="taskboard">Taskboard</TabsTrigger>

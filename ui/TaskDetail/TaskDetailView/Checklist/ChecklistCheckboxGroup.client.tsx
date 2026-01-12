@@ -64,7 +64,7 @@ export default function ChecklistCheckboxGroup({
     <div className="mb-3 space-y-2">
       {checklist.items.map((item: ChecklistItemSummary) => (
         <div
-          className="flex justify-between gap-5 hover:bg-muted py-1 px-2 rounded-md transition-colors"
+          className="flex justify-between gap-5 hover:bg-zinc-800/50 py-1 px-2 rounded-md transition-colors"
           key={item.id}
         >
           <div className="flex grow items-center">
@@ -79,7 +79,7 @@ export default function ChecklistCheckboxGroup({
             {editingItemId !== item.id && (
               <label
                 htmlFor={item.id}
-                className={`cursor-pointer flex-1 ${checkedItemIds.includes(item.id) ? "line-through text-muted-foreground" : ""}`}
+                className={`cursor-pointer flex-1 ${checkedItemIds.includes(item.id) ? "line-through text-zinc-500" : "text-zinc-100"}`}
               >
                 {item.content}
               </label>

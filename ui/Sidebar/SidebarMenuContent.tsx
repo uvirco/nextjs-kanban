@@ -74,19 +74,19 @@ export default function SidebarMenuContent({
         <Menu>
           {/* Main Items */}
           <MenuItem
-            path="/dashboard"
+            path="/projects/dashboard"
             title={isCollapsed ? "" : "Dashboard"}
             icon={<IconChartBar stroke={1.5} size={20} />}
             showTitle={!isCollapsed}
           />
           <MenuItem
-            path="/epics"
+            path="/projects/epics"
             title={isCollapsed ? "" : "Epics"}
             icon={<IconTarget stroke={1.5} size={20} />}
             showTitle={!isCollapsed}
           />
           <MenuItem
-            path="/meetings"
+            path="/projects/meetings"
             title={isCollapsed ? "" : "Meetings"}
             icon={<IconCalendar stroke={1.5} size={20} />}
             showTitle={!isCollapsed}
@@ -95,7 +95,7 @@ export default function SidebarMenuContent({
           {boardMembers.map((boardMember) => (
             <MenuItem
               key={boardMember.boardId}
-              path={`/board/${boardMember.boardId}`}
+              path={`/projects/boards/${boardMember.boardId}`}
               title={isCollapsed ? "" : boardMember.board.title}
               icon={<IconLayoutKanban stroke={1.5} size={20} />}
               showTitle={!isCollapsed}
@@ -103,7 +103,7 @@ export default function SidebarMenuContent({
           ))}
 
           <MenuItem
-            path="/admin/settings"
+            path="/projects/admin/settings"
             title={isCollapsed ? "" : "Settings"}
             icon={<IconSettings stroke={1.5} size={20} />}
             showTitle={!isCollapsed}
