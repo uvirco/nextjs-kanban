@@ -56,7 +56,7 @@ export default function DealFormModal({
         value: dealToEdit.value?.toString() || "",
         expectedCloseDate: dealToEdit.expectedCloseDate || "",
         notes: dealToEdit.notes || "",
-        columnId: dealToEdit.columnId || columnId,
+        stage: dealToEdit.stage || columnId,
         order: dealToEdit.order || 0,
       });
     } else {

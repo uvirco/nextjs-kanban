@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { supabaseAdmin } from "@/lib/supabase";
 import { logActivity, formatActivityContent } from "@/lib/activity-logger";
+import { ActivityType } from "@/types/types";
 
 export async function GET(request: NextRequest) {
   try {
@@ -143,7 +144,7 @@ export async function POST(request: NextRequest) {
 
     // Log activity
     await logActivity({
-      type: "EPIC_CREATED",
+      type: ActivityType.EPIC_CREATED,
       content: formatActivityContent({
         action: "created",
         userName: session.user.name || session.user.email || "User",

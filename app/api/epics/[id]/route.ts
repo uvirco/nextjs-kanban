@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { supabaseAdmin } from "@/lib/supabase";
 import { logActivity, formatActivityContent } from "@/lib/activity-logger";
+import { ActivityType } from "@/types/types";
 
 export async function PUT(
   request: NextRequest,
@@ -99,7 +100,7 @@ export async function PUT(
 
     // Log activity
     await logActivity({
-      type: "EPIC_UPDATED",
+      type: ActivityType.EPIC_UPDATED,
       content: formatActivityContent({
         action: "updated",
         userName: session.user.name || session.user.email || "User",
