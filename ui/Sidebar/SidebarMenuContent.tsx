@@ -73,12 +73,13 @@ export default function SidebarMenuContent({
       <div className="flex-1 overflow-y-auto">
         <Menu>
           {/* Main Items */}
-          <MenuItem
+          {/* Dashboard hidden for now */}
+          {/* <MenuItem
             path="/projects/epics"
             title={isCollapsed ? "" : "Dashboard"}
             icon={<IconChartBar stroke={1.5} size={20} />}
             showTitle={!isCollapsed}
-          />
+          /> */}
           <MenuItem
             path="/projects/epics"
             title={isCollapsed ? "" : "Epics"}
