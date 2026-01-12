@@ -188,10 +188,12 @@ export default function Board({ boardId, epicId }: BoardProps) {
             .in("id", labelIds);
 
           // Combine relations with label data
-          labelAssignments = (relations || []).map((rel: any) => ({
-            ...rel,
-            label: (labels || []).find((l: any) => l.id === rel.A),
-          })).filter((la: any) => la.label);
+          labelAssignments = (relations || [])
+            .map((rel: any) => ({
+              ...rel,
+              label: (labels || []).find((l: any) => l.id === rel.A),
+            }))
+            .filter((la: any) => la.label);
         }
       }
 

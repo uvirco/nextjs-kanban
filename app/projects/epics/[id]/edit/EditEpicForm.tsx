@@ -853,9 +853,7 @@ export default function EditEpicForm({
       </div>
 
       {/* RACI Matrix (read-only for edit view) */}
-      <RaciMatrixSection
-        epicId={epic.id}
-      />
+      <RaciMatrixSection epicId={epic.id} />
 
       {/* Submit */}
       <div className="flex gap-4 pt-6">

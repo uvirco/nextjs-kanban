@@ -30,7 +30,8 @@ export default function Home() {
               </span>
             </h1>
             <p className="text-lg text-zinc-400 max-w-2xl mx-auto">
-              Choose your workspace to get started with project management and CRM
+              Choose your workspace to get started with project management and
+              CRM
             </p>
           </div>
 
@@ -42,9 +43,13 @@ export default function Home() {
                   <div className="w-16 h-16 bg-purple-600/20 rounded-lg flex items-center justify-center mb-6 group-hover:bg-purple-600/30 transition-colors">
                     <IconBriefcase size={32} className="text-purple-400" />
                   </div>
-                  <h3 className="text-2xl font-bold mb-4 text-white">Projects</h3>
+                  <h3 className="text-2xl font-bold mb-4 text-white">
+                    Projects
+                  </h3>
                   <p className="text-zinc-300 leading-relaxed">
-                    Manage epics, tasks, and kanban boards. Track progress, collaborate with your team, and deliver projects on time with comprehensive project management tools.
+                    Manage epics, tasks, and kanban boards. Track progress,
+                    collaborate with your team, and deliver projects on time
+                    with comprehensive project management tools.
                   </p>
                 </div>
                 <div className="flex items-center gap-2 text-purple-400 font-medium group-hover:text-purple-300 transition-colors">
@@ -63,7 +68,9 @@ export default function Home() {
                   </div>
                   <h3 className="text-2xl font-bold mb-4 text-white">CRM</h3>
                   <p className="text-zinc-300 leading-relaxed">
-                    Manage contacts, deals, and sales pipeline. Track customer relationships, monitor opportunities, and grow your business with powerful CRM features.
+                    Manage contacts, deals, and sales pipeline. Track customer
+                    relationships, monitor opportunities, and grow your business
+                    with powerful CRM features.
                   </p>
                 </div>
                 <div className="flex items-center gap-2 text-indigo-400 font-medium group-hover:text-indigo-300 transition-colors">

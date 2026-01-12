@@ -54,7 +54,14 @@ interface EpicPortfolioClientProps {
 const STORAGE_KEY = "epic-portfolio-state";
 
 interface SavedState {
-  view: "priority" | "timeline" | "matrix" | "table" | "board" | "burndown" | "grid";
+  view:
+    | "priority"
+    | "timeline"
+    | "matrix"
+    | "table"
+    | "board"
+    | "burndown"
+    | "grid";
   filter: "all" | "active" | "backlog";
   departmentFilter: string;
   riskFilter: string;

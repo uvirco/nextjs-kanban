@@ -170,9 +170,11 @@ export default function EpicCommentsOverview({
                                 {new Date(comment.createdAt).toLocaleString()}
                               </span>
                             </div>
-                            <div 
+                            <div
                               className="text-zinc-300 text-sm prose prose-invert prose-sm max-w-none"
-                              dangerouslySetInnerHTML={{ __html: comment.content }}
+                              dangerouslySetInnerHTML={{
+                                __html: comment.content,
+                              }}
                             />
                           </div>
                         </div>

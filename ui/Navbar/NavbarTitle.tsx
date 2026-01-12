@@ -4,7 +4,7 @@ export default function NavbarTitle() {
   return (
     <div className="flex items-center gap-5">
       <Link href="/" className="text-xl tracking-tight font-light">
-        NextBoard <span className="text-primary">Beta</span>
+        Project <span className="text-primary">Board</span>
       </Link>
     </div>
   );

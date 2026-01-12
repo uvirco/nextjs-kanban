@@ -191,9 +191,7 @@ export default function DashboardClient({ userId }: DashboardClientProps) {
           <ActivityTrendsSection epics={epics} dateRange={dateRange} />
         )}
 
-        {activeTab === "feed" && (
-          <ActivityFeedSection dateRange={dateRange} />
-        )}
+        {activeTab === "feed" && <ActivityFeedSection dateRange={dateRange} />}
 
         {activeTab === "progress" && <ProgressOverviewSection />}
 

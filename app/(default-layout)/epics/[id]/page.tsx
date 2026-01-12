@@ -95,10 +95,12 @@ async function getEpicDetails(epicId: string) {
   // Fetch meeting notes for this epic
   const { data: meetingNotes } = await supabase
     .from("MeetingNote")
-    .select(`
+    .select(
+      `
       *,
       action_items:meeting_action_items(*)
-    `)
+    `
+    )
     .eq("epic_id", epicId)
     .order("meeting_date", { ascending: false });
 
@@ -142,7 +144,9 @@ export default async function EpicDetailPage(props: {
   });
 
   return (
-    <Suspense fallback={<div className="p-6 text-zinc-400">Loading epic...</div>}>
+    <Suspense
+      fallback={<div className="p-6 text-zinc-400">Loading epic...</div>}
+    >
       <EpicDetailPageClient epic={epic} raciUsers={raciUsers} params={params} />
     </Suspense>
   );

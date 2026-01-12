@@ -9,7 +9,13 @@ import {
 } from "@/components/ui/dialog";
 import { ThemeProvider } from "next-themes";
 
-export default function TaskModal({ children, boardId }: { children: React.ReactNode; boardId: string }) {
+export default function TaskModal({
+  children,
+  boardId,
+}: {
+  children: React.ReactNode;
+  boardId: string;
+}) {
   const router = useRouter();
 
   const handleClose = () => {

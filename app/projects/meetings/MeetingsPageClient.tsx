@@ -56,7 +56,7 @@ interface Epic {
 export default function MeetingsPageClient() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  
+
   const [meetingNotes, setMeetingNotes] = useState<MeetingNote[]>([]);
   const [epics, setEpics] = useState<Epic[]>([]);
   const [selectedEpicId, setSelectedEpicId] = useState<string>("all");
@@ -184,15 +184,22 @@ export default function MeetingsPageClient() {
         newSet.add(id);
       }
       // Save to localStorage
-      localStorage.setItem("meetings-expanded-notes", JSON.stringify([...newSet]));
+      localStorage.setItem(
+        "meetings-expanded-notes",
+        JSON.stringify([...newSet])
+      );
       return newSet;
     });
   };
 
   // Update URL when filters change
-  const updateFilters = (updates: { epic?: string; period?: string; search?: string }) => {
+  const updateFilters = (updates: {
+    epic?: string;
+    period?: string;
+    search?: string;
+  }) => {
     const params = new URLSearchParams(searchParams.toString());
-    
+
     if (updates.epic !== undefined) {
       if (updates.epic === "all") {
         params.delete("epic");
@@ -200,7 +207,7 @@ export default function MeetingsPageClient() {
         params.set("epic", updates.epic);
       }
     }
-    
+
     if (updates.period !== undefined) {
       if (updates.period === "all") {
         params.delete("period");
@@ -208,7 +215,7 @@ export default function MeetingsPageClient() {
         params.set("period", updates.period);
       }
     }
-    
+
     if (updates.search !== undefined) {
       if (updates.search.trim() === "") {
         params.delete("search");
@@ -419,9 +426,15 @@ export default function MeetingsPageClient() {
                   >
                     <div className="flex items-center gap-3 flex-1 min-w-0">
                       {isExpanded ? (
-                        <IconChevronDown size={20} className="text-zinc-400 flex-shrink-0" />
+                        <IconChevronDown
+                          size={20}
+                          className="text-zinc-400 flex-shrink-0"
+                        />
                       ) : (
-                        <IconChevronRight size={20} className="text-zinc-400 flex-shrink-0" />
+                        <IconChevronRight
+                          size={20}
+                          className="text-zinc-400 flex-shrink-0"
+                        />
                       )}
                       <div className="flex-1 min-w-0">
                         <h3 className="text-lg font-semibold text-white truncate">
@@ -499,7 +512,9 @@ export default function MeetingsPageClient() {
                             Agenda
                           </h4>
                           <div className="text-zinc-300 text-sm bg-zinc-900 p-3 rounded prose prose-sm prose-invert max-w-none">
-                            <div dangerouslySetInnerHTML={{ __html: note.agenda }} />
+                            <div
+                              dangerouslySetInnerHTML={{ __html: note.agenda }}
+                            />
                           </div>
                         </div>
                       )}
@@ -511,7 +526,9 @@ export default function MeetingsPageClient() {
                             Notes
                           </h4>
                           <div className="text-zinc-300 text-sm bg-zinc-900 p-3 rounded prose prose-sm prose-invert max-w-none">
-                            <div dangerouslySetInnerHTML={{ __html: note.notes }} />
+                            <div
+                              dangerouslySetInnerHTML={{ __html: note.notes }}
+                            />
                           </div>
                         </div>
                       )}
@@ -523,7 +540,11 @@ export default function MeetingsPageClient() {
                             Decisions
                           </h4>
                           <div className="text-zinc-300 text-sm bg-zinc-900 p-3 rounded prose prose-sm prose-invert max-w-none">
-                            <div dangerouslySetInnerHTML={{ __html: note.decisions }} />
+                            <div
+                              dangerouslySetInnerHTML={{
+                                __html: note.decisions,
+                              }}
+                            />
                           </div>
                         </div>
                       )}
@@ -562,7 +583,10 @@ export default function MeetingsPageClient() {
                                   )}
                                   {item.due_date && (
                                     <div className="text-zinc-500 text-xs mt-1">
-                                      Due: {new Date(item.due_date).toLocaleDateString()}
+                                      Due:{" "}
+                                      {new Date(
+                                        item.due_date
+                                      ).toLocaleDateString()}
                                     </div>
                                   )}
                                 </div>
@@ -574,7 +598,8 @@ export default function MeetingsPageClient() {
 
                       <div className="flex items-center justify-between pt-4 border-t border-zinc-700">
                         <span className="text-xs text-zinc-500">
-                          Created by {note.createdBy.name} on {formatDate(note.created_at)}
+                          Created by {note.createdBy.name} on{" "}
+                          {formatDate(note.created_at)}
                         </span>
                         <a
                           href={`/epics/${note.epic.id}`}

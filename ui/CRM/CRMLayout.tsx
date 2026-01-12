@@ -4,13 +4,13 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { 
-  IconUsers, 
-  IconCurrencyDollar, 
+import {
+  IconUsers,
+  IconCurrencyDollar,
   IconLayoutKanban,
   IconMenu2,
   IconX,
-  IconUser
+  IconUser,
 } from "@tabler/icons-react";
 
 const crmNavItems = [
