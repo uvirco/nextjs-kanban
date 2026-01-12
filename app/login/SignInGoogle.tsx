@@ -6,7 +6,7 @@ import { IconBrandGoogle } from "@tabler/icons-react";
 const SignInGoogle = () => {
   return (
     <Button
-      onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+      onClick={() => signIn("google", { callbackUrl: "/projects/dashboard" })}
       type="button"
       variant="ghost"
       isDisabled

@@ -74,7 +74,7 @@ export default function SidebarMenuContent({
         <Menu>
           {/* Main Items */}
           <MenuItem
-            path="/projects/dashboard"
+            path="/projects/epics"
             title={isCollapsed ? "" : "Dashboard"}
             icon={<IconChartBar stroke={1.5} size={20} />}
             showTitle={!isCollapsed}

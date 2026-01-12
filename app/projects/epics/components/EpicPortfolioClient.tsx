@@ -8,6 +8,7 @@ import {
   IconList,
   IconChartLine,
   IconSettings,
+  IconGridDots,
 } from "@tabler/icons-react";
 import EpicPriorityView from "./EpicPriorityView";
 import EpicTableView from "./EpicTableView";
@@ -15,6 +16,7 @@ import EpicBoard from "./EpicBoard";
 import EpicBubbleChart from "./EpicBubbleChart";
 import EpicTimeline from "./EpicTimeline";
 import EpicBurndownChart from "./EpicBurndownChart";
+import EpicGridView from "./EpicGridView";
 import Link from "next/link";
 
 interface Epic {
@@ -52,7 +54,7 @@ interface EpicPortfolioClientProps {
 const STORAGE_KEY = "epic-portfolio-state";
 
 interface SavedState {
-  view: "priority" | "timeline" | "matrix" | "table" | "board" | "burndown";
+  view: "priority" | "timeline" | "matrix" | "table" | "board" | "burndown" | "grid";
   filter: "all" | "active" | "backlog";
   departmentFilter: string;
   riskFilter: string;
@@ -80,8 +82,8 @@ export default function EpicPortfolioClient({
 }: EpicPortfolioClientProps) {
   // Server-safe defaults for saved UI state — avoids hydration mismatch
   const DEFAULT_SAVED_STATE: SavedState = {
-    // Default to table view per UX preference; localStorage will override when present
-    view: "table",
+    // Default to priority view (cards) per UX preference; localStorage will override when present
+    view: "grid",
     filter: "all",
     departmentFilter: "all",
     riskFilter: "all",
@@ -113,7 +115,7 @@ export default function EpicPortfolioClient({
   };
 
   const [view, setView] = useState<
-    "priority" | "timeline" | "matrix" | "table" | "board" | "burndown"
+    "priority" | "timeline" | "matrix" | "table" | "board" | "burndown" | "grid"
   >(getInitialState("view", DEFAULT_SAVED_STATE.view));
   const [filter, setFilter] = useState<"all" | "active" | "backlog">(
     getInitialState("filter", DEFAULT_SAVED_STATE.filter)
@@ -319,6 +321,17 @@ export default function EpicPortfolioClient({
       <div className="flex items-center justify-between">
         <div className="flex gap-2">
           <button
+            onClick={() => setView("grid")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+              view === "grid"
+                ? "bg-zinc-800 text-white"
+                : "bg-zinc-900 text-zinc-400 hover:bg-zinc-800"
+            }`}
+          >
+            <IconGridDots size={18} />
+            Grid View
+          </button>
+          <button
             onClick={() => setView("table")}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
               view === "table"
@@ -373,7 +386,6 @@ export default function EpicPortfolioClient({
             <IconChartLine size={18} />
             Burndown
           </button>
-          {/* Moved Priority View to the far right — keeps view focused on other modes first */}
           <button
             onClick={() => setView("priority")}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
@@ -557,6 +569,7 @@ export default function EpicPortfolioClient({
       </div>
 
       {/* View Content */}
+      {view === "grid" && <EpicGridView epics={filteredEpics} />}
       {view === "priority" && <EpicPriorityView epics={filteredEpics} />}
       {view === "table" && (
         <EpicTableView
