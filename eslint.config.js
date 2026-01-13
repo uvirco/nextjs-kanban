@@ -15,6 +15,20 @@ export default [
           jsx: true,
         },
       },
+      globals: {
+        // Node.js globals for server-side code
+        process: "readonly",
+        console: "readonly",
+        Buffer: "readonly",
+        __dirname: "readonly",
+        __filename: "readonly",
+        global: "readonly",
+        // Browser globals
+        window: "readonly",
+        document: "readonly",
+        navigator: "readonly",
+        fetch: "readonly",
+      },
     },
     plugins: {
       "@typescript-eslint": tseslint,

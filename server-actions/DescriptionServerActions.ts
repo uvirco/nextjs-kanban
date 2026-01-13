@@ -21,7 +21,7 @@ export async function handleEditTaskDescription(
   const EditTaskDescriptionSchema = z.object({
     taskId: z.string().min(1, MESSAGES.COMMON.TASK_ID_REQUIRED),
     boardId: z.string().min(1, MESSAGES.COMMON.BOARD_ID_REQUIRED),
-    description: z.string().min(1, MESSAGES.DESCRIPTION.DESCRIPTION_TOO_SHORT),
+    description: z.string(),
   });
 
   const parse = EditTaskDescriptionSchema.safeParse({
@@ -48,7 +48,8 @@ export async function handleEditTaskDescription(
       return { success: false, message: MESSAGES.DESCRIPTION.UPDATE_FAILURE };
     }
 
-    revalidatePath(`/board/${parse.data.boardId}`);
+    revalidatePath(`/projects/boards/${parse.data.boardId}`);
+    revalidatePath(`/projects/tasks/${parse.data.taskId}`);
 
     return { success: true, message: MESSAGES.DESCRIPTION.UPDATE_SUCCESS };
   } catch (e) {
@@ -93,7 +94,8 @@ export async function handleDeleteTaskDescription(
       return { success: false, message: MESSAGES.DESCRIPTION.DELETE_FAILURE };
     }
 
-    revalidatePath(`/board/${parse.data.boardId}`);
+    revalidatePath(`/projects/boards/${parse.data.boardId}`);
+    revalidatePath(`/projects/tasks/${parse.data.taskId}`);
 
     return { success: true, message: MESSAGES.DESCRIPTION.DELETE_SUCCESS };
   } catch (e) {

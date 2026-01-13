@@ -109,7 +109,7 @@ export async function handleCreateTask(data: TaskCreationData) {
       }
     }
 
-    revalidatePath(`/board/${parse.data.boardId}`);
+    revalidatePath(`/projects/boards/${parse.data.boardId}`);
 
     return {
       success: true,
@@ -178,10 +178,16 @@ export async function handleEditTask(data: TaskEditData) {
 
     if (error) {
       console.error("Error updating task:", error);
+      console.error("Update data:", {
+        title: parse.data.title,
+        description: parse.data.description,
+        id: parse.data.id,
+      });
       return { success: false, message: MESSAGES.TASK.UPDATE_FAILURE };
     }
 
-    revalidatePath(`/board/${parse.data.boardId}`);
+    revalidatePath(`/projects/boards/${parse.data.boardId}`);
+    revalidatePath(`/projects/tasks/${parse.data.id}`);
 
     return { success: true, message: MESSAGES.TASK.UPDATE_SUCCESS };
   } catch (e) {
@@ -263,7 +269,7 @@ export async function handleDeleteTask(data: TaskDeletionData) {
       }
     }
 
-    revalidatePath(`/board/${parse.data.boardId}`);
+    revalidatePath(`/projects/boards/${parse.data.boardId}`);
     return { success: true, message: MESSAGES.TASK.DELETE_SUCCESS };
   } catch (e) {
     return { success: false, message: MESSAGES.TASK.DELETE_FAILURE };
@@ -334,7 +340,7 @@ export async function handleUpdateTaskPosition(data: {
 
     // If boardId is provided, revalidate the board path
     if (parse.data.boardId) {
-      revalidatePath(`/board/${parse.data.boardId}`);
+      revalidatePath(`/projects/boards/${parse.data.boardId}`);
     }
 
     // If column changed, create activity with proper content
