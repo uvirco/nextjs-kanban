@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { IconTextPlus } from "@tabler/icons-react";
 import {
@@ -10,6 +9,7 @@ import {
 } from "@/server-actions/DescriptionServerActions";
 import TaskDetailItemHeading from "../ui/TaskDetailItemHeading";
 import TaskDetailItemContent from "../ui/TaskDetailItemContent";
+import RichTextEditor from "@/ui/RichTextEditor";
 
 export default function TaskDetailDescription({
   taskId,
@@ -85,24 +85,28 @@ export default function TaskDetailDescription({
       />
       <TaskDetailItemContent indented>
         {!isEditingDescription ? (
-          <p onClick={toggleEditDescription} className="cursor-pointer text-foreground">
+          <div onClick={toggleEditDescription} className="cursor-pointer">
             {taskDescription ? (
-              taskDescription
+              <div
+                className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-code:text-foreground prose-blockquote:text-foreground prose-ul:text-foreground prose-ol:text-foreground prose-li:text-foreground"
+                dangerouslySetInnerHTML={{ __html: taskDescription }}
+              />
             ) : (
               <span className="text-blue-600 dark:text-blue-400">Add a description</span>
             )}
-          </p>
+          </div>
         ) : (
           <form onSubmit={handleSubmit}>
             <input type="hidden" name="id" value={formData.id} />
             <input type="hidden" name="boardId" value={formData.boardId} />
-            <Textarea
-              placeholder="Enter your description"
-              autoFocus
-              value={formData.description}
-              onChange={(e) => handleValueChange(e.target.value)}
-              className="w-full mb-2 mt-1 border-none focus:outline-none resize-none"
-            />
+            <div className="mb-2 mt-1">
+              <RichTextEditor
+                content={formData.description}
+                onChange={handleValueChange}
+                placeholder="Enter task description..."
+                className="min-h-[200px]"
+              />
+            </div>
             {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
             <div className="flex gap-2">
               <Button
