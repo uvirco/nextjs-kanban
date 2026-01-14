@@ -21,8 +21,8 @@ import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import {
   handleUpdateTaskPosition,
-  handleCreateTask,
 } from "@/server-actions/TaskServerActions";
+import CreateTaskModal from "@/ui/Forms/CreateTaskModal";
 
 interface BoardProps {
   boardId: string;
@@ -71,11 +71,8 @@ interface BoardData {
 export default function Board({ boardId, epicId }: BoardProps) {
   const [board, setBoard] = useState<BoardData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [addingTaskToColumn, setAddingTaskToColumn] = useState<string | null>(
-    null
-  );
-  const [newTaskTitle, setNewTaskTitle] = useState("");
-  const [isCreatingTask, setIsCreatingTask] = useState(false);
+  const [isCreateTaskModalOpen, setIsCreateTaskModalOpen] = useState(false);
+  const [selectedColumnId, setSelectedColumnId] = useState<string | null>(null);
   const router = useRouter();
 
   const handleTaskClick = (taskId: string) => {
@@ -87,35 +84,13 @@ export default function Board({ boardId, epicId }: BoardProps) {
     }
   };
 
-  const handleAddTask = async (columnId: string) => {
-    if (!newTaskTitle.trim()) {
-      toast.error("Task title is required");
-      return;
-    }
+  const handleOpenCreateTaskModal = (columnId: string) => {
+    setSelectedColumnId(columnId);
+    setIsCreateTaskModalOpen(true);
+  };
 
-    setIsCreatingTask(true);
-    try {
-      const response = await handleCreateTask({
-        taskTitle: newTaskTitle,
-        columnId,
-        boardId,
-        parentTaskId: epicId, // If epicId is provided, associate task with epic
-      });
-
-      if (response.success) {
-        toast.success("Task created");
-        setNewTaskTitle("");
-        setAddingTaskToColumn(null);
-        await fetchBoard(); // Refresh board to show new task
-      } else {
-        toast.error(response.message || "Failed to create task");
-      }
-    } catch (error) {
-      console.error("Error creating task:", error);
-      toast.error("Failed to create task");
-    } finally {
-      setIsCreatingTask(false);
-    }
+  const handleCreateTaskSuccess = () => {
+    fetchBoard(); // Refresh board to show new task
   };
 
   useEffect(() => {
@@ -540,59 +515,33 @@ export default function Board({ boardId, epicId }: BoardProps) {
                 )}
               </Droppable>
 
-              {/* Add Task Button/Form */}
-              {addingTaskToColumn === column.id ? (
-                <div className="mt-2 p-2 bg-zinc-700 rounded-lg">
-                  <input
-                    type="text"
-                    placeholder="Enter task title..."
-                    value={newTaskTitle}
-                    onChange={(e) => setNewTaskTitle(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        handleAddTask(column.id);
-                      } else if (e.key === "Escape") {
-                        setAddingTaskToColumn(null);
-                        setNewTaskTitle("");
-                      }
-                    }}
-                    className="w-full bg-zinc-600 text-white px-3 py-2 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    autoFocus
-                    disabled={isCreatingTask}
-                  />
-                  <div className="flex gap-2 mt-2">
-                    <button
-                      onClick={() => handleAddTask(column.id)}
-                      disabled={isCreatingTask}
-                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {isCreatingTask ? "Adding..." : "Add Task"}
-                    </button>
-                    <button
-                      onClick={() => {
-                        setAddingTaskToColumn(null);
-                        setNewTaskTitle("");
-                      }}
-                      disabled={isCreatingTask}
-                      className="bg-zinc-600 hover:bg-zinc-500 text-white px-3 py-1.5 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <IconX size={16} />
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <button
-                  onClick={() => setAddingTaskToColumn(column.id)}
-                  className="mt-2 flex items-center gap-2 text-zinc-400 hover:text-white hover:bg-zinc-700 px-3 py-2 rounded text-sm transition-colors w-full"
-                >
-                  <IconPlus size={16} />
-                  Add Task
-                </button>
-              )}
+              {/* Add Task Button */}
+              <button
+                onClick={() => handleOpenCreateTaskModal(column.id)}
+                className="mt-2 flex items-center gap-2 text-zinc-400 hover:text-white hover:bg-zinc-700 px-3 py-2 rounded text-sm transition-colors w-full"
+              >
+                <IconPlus size={16} />
+                Add Task
+              </button>
             </div>
           ))}
         </div>
       </DragDropContext>
+
+      {/* Create Task Modal */}
+      {selectedColumnId && (
+        <CreateTaskModal
+          boardId={boardId}
+          columnId={selectedColumnId}
+          isOpen={isCreateTaskModalOpen}
+          onClose={() => {
+            setIsCreateTaskModalOpen(false);
+            setSelectedColumnId(null);
+          }}
+          onSuccess={handleCreateTaskSuccess}
+          parentTaskId={epicId}
+        />
+      )}
     </div>
   );
 }

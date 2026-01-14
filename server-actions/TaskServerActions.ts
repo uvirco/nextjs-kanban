@@ -28,6 +28,15 @@ export async function handleCreateTask(data: TaskCreationData) {
     description: z.string().optional(),
     parentTaskId: z.string().optional(),
     assignedUserId: z.string().optional(),
+    // Advanced project fields
+    priority: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]).optional(),
+    dueDate: z.string().optional(),
+    startDate: z.string().optional(),
+    riskLevel: z.enum(["LOW", "MEDIUM", "HIGH"]).optional(),
+    estimatedEffort: z.number().positive().optional(),
+    storyPoints: z.number().int().positive().optional(),
+    departmentId: z.string().optional(),
+    acceptanceCriteria: z.string().optional(),
   });
 
   const parse = CreateTaskSchema.safeParse(data);
@@ -67,6 +76,15 @@ export async function handleCreateTask(data: TaskCreationData) {
         order: newOrder,
         createdByUserId: userId,
         parentTaskId: parse.data.parentTaskId || null,
+        // Advanced project fields
+        priority: parse.data.priority || null,
+        dueDate: parse.data.dueDate ? new Date(parse.data.dueDate) : null,
+        startDate: parse.data.startDate ? new Date(parse.data.startDate) : null,
+        riskLevel: parse.data.riskLevel || null,
+        estimatedEffort: parse.data.estimatedEffort || null,
+        storyPoints: parse.data.storyPoints || null,
+        departmentId: parse.data.departmentId || null,
+        acceptanceCriteria: parse.data.acceptanceCriteria || null,
       })
       .select()
       .single();

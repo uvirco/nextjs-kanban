@@ -396,6 +396,15 @@ export type TaskCreationData = {
   columnId: Column["id"];
   parentTaskId?: Task["parentTaskId"];
   assignedUserId?: string;
+  // Advanced project fields
+  priority?: Priority;
+  dueDate?: string;
+  startDate?: string;
+  riskLevel?: RiskLevel;
+  estimatedEffort?: number;
+  storyPoints?: number;
+  departmentId?: string;
+  acceptanceCriteria?: string;
 };
 
 export type TaskEditData = {
