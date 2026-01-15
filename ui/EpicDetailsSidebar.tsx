@@ -111,7 +111,7 @@ export default function EpicDetailsSidebar({ epic }: EpicDetailsSidebarProps) {
   return (
     <div className="mt-6">
       <TaskDetailItemHeading
-        title="Epic Details"
+        title="Project Details"
         icon={<IconTarget size={20} />}
       />
       <TaskDetailItemContent indented>

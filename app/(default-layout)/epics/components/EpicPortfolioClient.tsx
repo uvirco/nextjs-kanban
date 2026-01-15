@@ -300,9 +300,9 @@ export default function EpicPortfolioClient({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white">Epic Portfolio</h1>
+          <h1 className="text-3xl font-bold text-white">Project Portfolio</h1>
           <p className="text-zinc-400 mt-1">
-            {filteredEpics.length} of {epics.length} epics
+            {filteredEpics.length} of {epics.length} projects
             {filteredEpics.length !== epics.length && " (filtered)"}
           </p>
         </div>

@@ -95,9 +95,9 @@ export default async function EditEpicPage(props: {
               <span className="text-2xl">✏️</span>
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-white">Edit Epic</h1>
+              <h1 className="text-3xl font-bold text-white">Edit Project</h1>
               <p className="text-zinc-400 mt-1">
-                Update epic details, priorities, and planning information.
+                Update project details, priorities, and planning information.
               </p>
             </div>
           </div>

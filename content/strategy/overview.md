@@ -90,7 +90,7 @@ The tool is designed around the Scrum framework with support for:
 
 ### For New Teams
 
-1. **Set Up Your Project**: Create epics and break them into tasks
+1. **Set Up Your Project**: Create projects and break them into tasks
 2. **Plan Your First Sprint**: Estimate and commit to work
 3. **Establish Daily Rhythm**: Set up daily standup meetings
 4. **Track Progress**: Use task boards

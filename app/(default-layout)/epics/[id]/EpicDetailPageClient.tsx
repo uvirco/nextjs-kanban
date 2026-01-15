@@ -194,7 +194,7 @@ function EpicDetailPageClient({
                           className="text-zinc-300 border-zinc-600 hover:bg-zinc-700"
                         >
                           <IconSettings size={16} className="mr-2" />
-                          Edit Epic
+                          Edit Project
                         </Button>
                       </Link>
                     </div>

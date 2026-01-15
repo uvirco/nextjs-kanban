@@ -21,7 +21,7 @@ export default async function NewEpicPage() {
             className="inline-flex items-center gap-2 text-zinc-400 hover:text-white"
           >
             <IconArrowLeft size={20} />
-            Back to Epic Portfolio
+            Back to Project Portfolio
           </Link>
         </div>
 
@@ -31,10 +31,10 @@ export default async function NewEpicPage() {
               <IconPlus size={24} className="text-blue-400" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-white">Create New Epic</h1>
+              <h1 className="text-3xl font-bold text-white">Create New Project</h1>
               <p className="text-zinc-400 mt-1">
                 Start with just a name and description. Add details, RACI roles,
-                and stakeholders as you plan the epic.
+                and stakeholders as you plan the project.
               </p>
             </div>
           </div>

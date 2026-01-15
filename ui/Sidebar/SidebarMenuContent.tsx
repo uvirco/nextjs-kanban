@@ -83,7 +83,7 @@ export default function SidebarMenuContent({
           /> */}
           <MenuItem
             path="/projects/epics"
-            title={isCollapsed ? "" : "Epics"}
+            title={isCollapsed ? "" : "Projects"}
             icon={<IconTarget stroke={1.5} size={20} />}
             showTitle={!isCollapsed}
           />
