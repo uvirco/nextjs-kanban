@@ -5,6 +5,8 @@ import { CRMContact } from "@/types/crm";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
 
 export default function CRMContactsPage() {
@@ -59,33 +61,74 @@ export default function CRMContactsPage() {
         />
       </div>
 
-      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {filteredContacts.map((contact) => (
-          <Card key={contact.id} className="bg-zinc-800 border-zinc-700 hover:border-zinc-600 transition-colors">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base text-white">
-                <Link
-                  href={`/crm/contacts/${contact.id}`}
-                  className="hover:text-blue-400 transition-colors"
-                >
-                  {contact.name}
-                </Link>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0 space-y-1 text-sm">
-              {contact.email && (
-                <p className="text-zinc-300 truncate">{contact.email}</p>
-              )}
-              {contact.company && (
-                <p className="text-zinc-400 truncate">{contact.company}</p>
-              )}
-              {contact.phone && (
-                <p className="text-zinc-400 text-xs">{contact.phone}</p>
-              )}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <Tabs defaultValue="grid" className="w-full">
+        <TabsList className="grid w-full grid-cols-2 max-w-md">
+          <TabsTrigger value="grid">Grid View</TabsTrigger>
+          <TabsTrigger value="table">Table View</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="grid" className="mt-6">
+          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {filteredContacts.map((contact) => (
+              <Card key={contact.id} className="bg-zinc-800 border-zinc-700 hover:border-zinc-600 transition-colors">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base text-white">
+                    <Link
+                      href={`/crm/contacts/${contact.id}`}
+                      className="hover:text-blue-400 transition-colors"
+                    >
+                      {contact.name}
+                    </Link>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0 space-y-1 text-sm">
+                  {contact.email && (
+                    <p className="text-zinc-300 truncate">{contact.email}</p>
+                  )}
+                  {contact.company && (
+                    <p className="text-zinc-400 truncate">{contact.company}</p>
+                  )}
+                  {contact.phone && (
+                    <p className="text-zinc-400 text-xs">{contact.phone}</p>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="table" className="mt-6">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Company</TableHead>
+                <TableHead>Phone</TableHead>
+                <TableHead>Created</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredContacts.map((contact) => (
+                <TableRow key={contact.id}>
+                  <TableCell>
+                    <Link
+                      href={`/crm/contacts/${contact.id}`}
+                      className="text-blue-400 hover:text-blue-300"
+                    >
+                      {contact.name}
+                    </Link>
+                  </TableCell>
+                  <TableCell>{contact.email || "-"}</TableCell>
+                  <TableCell>{contact.company || "-"}</TableCell>
+                  <TableCell>{contact.phone || "-"}</TableCell>
+                  <TableCell>{new Date(contact.createdAt).toLocaleDateString()}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TabsContent>
+      </Tabs>
 
       {filteredContacts.length === 0 && (
         <p className="text-zinc-400 text-center py-8">No contacts found.</p>
