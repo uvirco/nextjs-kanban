@@ -32,7 +32,9 @@ export async function GET(request: NextRequest) {
         createdAt,
         contactId,
         dealId,
-        leadId
+        leadId,
+        isRead,
+        status
       `)
       .order("receivedAt", { ascending: false, nullsFirst: false })
       .order("sentAt", { ascending: false, nullsFirst: false })
