@@ -28,6 +28,21 @@ interface DealFormModalProps {
   dealToEdit?: any;
 }
 
+// Map column IDs to proper CRMDealStage enum values
+const COLUMN_TO_STAGE_MAP: Record<string, string> = {
+  "crm-deal-col-lead-0000-0000-0000-000000": "PROSPECTING",
+  "crm-deal-col-contacted-0000-0000-00000": "QUALIFICATION",
+  "crm-deal-col-qualified-0000-0000-00000": "PROPOSAL",
+  "crm-deal-col-proposal-0000-0000-000000": "NEGOTIATION",
+  "crm-deal-col-negotiation-0000-0000-000": "NEGOTIATION",
+  "crm-deal-col-won-00000-0000-0000-000000": "CLOSED_WON",
+  "crm-deal-col-lost-0000-0000-0000-000000": "CLOSED_LOST",
+};
+
+const getStageFromColumnId = (columnId: string): string => {
+  return COLUMN_TO_STAGE_MAP[columnId] || "PROSPECTING";
+};
+
 export default function DealFormModal({
   isOpen,
   onClose,
@@ -43,7 +58,7 @@ export default function DealFormModal({
     value: "",
     expectedCloseDate: "",
     notes: "",
-    stage: columnId || "",
+    stage: getStageFromColumnId(columnId),
     order: 0,
   });
 
@@ -56,11 +71,11 @@ export default function DealFormModal({
         value: dealToEdit.value?.toString() || "",
         expectedCloseDate: dealToEdit.expectedCloseDate || "",
         notes: dealToEdit.notes || "",
-        stage: dealToEdit.stage || columnId,
+        stage: dealToEdit.stage || getStageFromColumnId(columnId),
         order: dealToEdit.order || 0,
       });
     } else {
-      setFormData((prev) => ({ ...prev, stage: columnId }));
+      setFormData((prev) => ({ ...prev, stage: getStageFromColumnId(columnId) }));
     }
   }, [dealToEdit, columnId]);
 

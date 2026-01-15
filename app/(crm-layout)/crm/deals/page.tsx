@@ -51,6 +51,35 @@ const DEAL_COLUMNS = [
   },
 ];
 
+// Map column IDs to proper CRMDealStage enum values
+const COLUMN_TO_STAGE_MAP: Record<string, string> = {
+  "crm-deal-col-lead-0000-0000-0000-000000": "PROSPECTING",
+  "crm-deal-col-contacted-0000-0000-00000": "QUALIFICATION",
+  "crm-deal-col-qualified-0000-0000-00000": "PROPOSAL",
+  "crm-deal-col-proposal-0000-0000-000000": "NEGOTIATION",
+  "crm-deal-col-negotiation-0000-0000-000": "NEGOTIATION",
+  "crm-deal-col-won-00000-0000-0000-000000": "CLOSED_WON",
+  "crm-deal-col-lost-0000-0000-0000-000000": "CLOSED_LOST",
+};
+
+const getStageFromColumnId = (columnId: string): string => {
+  return COLUMN_TO_STAGE_MAP[columnId] || "PROSPECTING";
+};
+
+// Reverse mapping from stage to column ID for display
+const STAGE_TO_COLUMN_MAP: Record<string, string> = {
+  "PROSPECTING": "crm-deal-col-lead-0000-0000-0000-000000",
+  "QUALIFICATION": "crm-deal-col-contacted-0000-0000-00000",
+  "PROPOSAL": "crm-deal-col-qualified-0000-0000-00000",
+  "NEGOTIATION": "crm-deal-col-negotiation-0000-0000-000",
+  "CLOSED_WON": "crm-deal-col-won-00000-0000-0000-000000",
+  "CLOSED_LOST": "crm-deal-col-lost-0000-0000-0000-000000",
+};
+
+const getColumnIdFromStage = (stage: string): string => {
+  return STAGE_TO_COLUMN_MAP[stage] || "crm-deal-col-lead-0000-0000-0000-000000";
+};
+
 export default function CRMDealsPage() {
   const [deals, setDeals] = useState<CRMDeal[]>([]);
   const [loading, setLoading] = useState(true);
@@ -88,8 +117,9 @@ export default function CRMDealsPage() {
   };
 
   const getDealsByColumn = (columnId: string) => {
+    const stageForColumn = getStageFromColumnId(columnId);
     return deals
-      .filter((deal) => deal.stage === columnId)
+      .filter((deal) => deal.stage === stageForColumn)
       .sort((a, b) => (a.order || 0) - (b.order || 0));
   };
 
@@ -100,7 +130,7 @@ export default function CRMDealsPage() {
   };
 
   const handleEditDeal = (deal: CRMDeal) => {
-    setSelectedColumnId(deal.stage);
+    setSelectedColumnId(getColumnIdFromStage(deal.stage));
     setDealToEdit(deal);
     setIsModalOpen(true);
   };
@@ -139,13 +169,14 @@ export default function CRMDealsPage() {
     }
 
     try {
+      const newStage = getStageFromColumnId(columnId);
       const response = await fetch(`/api/crm/deals/${draggedDeal.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          stage: columnId,
+          stage: newStage,
         }),
       });
 
