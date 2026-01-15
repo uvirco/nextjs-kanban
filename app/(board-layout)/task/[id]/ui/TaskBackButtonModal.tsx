@@ -7,7 +7,9 @@ interface TaskBackButtonModalProps {
   boardId: string;
 }
 
-export default function TaskBackButtonModal({ boardId }: TaskBackButtonModalProps) {
+export default function TaskBackButtonModal({
+  boardId,
+}: TaskBackButtonModalProps) {
   const router = useRouter();
 
   const handleBack = () => {

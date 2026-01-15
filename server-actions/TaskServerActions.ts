@@ -384,7 +384,7 @@ export async function handleUpdateTaskPosition(data: {
           userName: user?.name || user?.email || "User",
           entityType: "task",
           entityName: currentTask.title,
-          details: `from "${(currentTask as any).Column?.title || 'Unknown'}" to "${newColumn?.title || 'Unknown'}"`,
+          details: `from "${(currentTask as any).Column?.title || "Unknown"}" to "${newColumn?.title || "Unknown"}"`,
         }),
         userId: userId,
         taskId: parse.data.id,

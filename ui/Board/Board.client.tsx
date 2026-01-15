@@ -19,9 +19,7 @@ import Link from "next/link";
 import { useMemo } from "react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
-import {
-  handleUpdateTaskPosition,
-} from "@/server-actions/TaskServerActions";
+import { handleUpdateTaskPosition } from "@/server-actions/TaskServerActions";
 import CreateTaskModal from "@/ui/Forms/CreateTaskModal";
 
 interface BoardProps {

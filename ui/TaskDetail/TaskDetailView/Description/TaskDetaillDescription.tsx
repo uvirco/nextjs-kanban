@@ -44,7 +44,7 @@ export default function TaskDetailDescription({
     const response = await handleEditTaskDescription(
       formData.id,
       formData.boardId,
-      formData.description,
+      formData.description
     );
 
     if (response.success) {
@@ -92,7 +92,9 @@ export default function TaskDetailDescription({
                 dangerouslySetInnerHTML={{ __html: taskDescription }}
               />
             ) : (
-              <span className="text-blue-600 dark:text-blue-400">Add a description</span>
+              <span className="text-blue-600 dark:text-blue-400">
+                Add a description
+              </span>
             )}
           </div>
         ) : (
@@ -117,7 +119,12 @@ export default function TaskDetailDescription({
               >
                 {isSubmitting ? "Saving..." : "Save"}
               </Button>
-              <Button size="sm" onClick={toggleEditDescription} type="button" variant="outline">
+              <Button
+                size="sm"
+                onClick={toggleEditDescription}
+                type="button"
+                variant="outline"
+              >
                 Cancel
               </Button>
               {taskDescription && (

@@ -63,24 +63,36 @@ export async function PUT(
     // Only add fields that are explicitly provided in the request
     if (title !== undefined) updateData.title = title;
     if (description !== undefined) updateData.description = description || null;
-    if (departmentId !== undefined) updateData.departmentId = departmentId || null;
-    if (businessValue !== undefined) updateData.businessValue = businessValue || null;
+    if (departmentId !== undefined)
+      updateData.departmentId = departmentId || null;
+    if (businessValue !== undefined)
+      updateData.businessValue = businessValue || null;
     if (riskLevel !== undefined) updateData.riskLevel = riskLevel || null;
     if (priority !== undefined) updateData.priority = priority || null;
-    if (estimatedEffort !== undefined) updateData.estimatedEffort = estimatedEffort || null;
-    if (budgetEstimate !== undefined) updateData.budgetEstimate = budgetEstimate || null;
-    if (strategicAlignment !== undefined) updateData.strategicAlignment = strategicAlignment || null;
+    if (estimatedEffort !== undefined)
+      updateData.estimatedEffort = estimatedEffort || null;
+    if (budgetEstimate !== undefined)
+      updateData.budgetEstimate = budgetEstimate || null;
+    if (strategicAlignment !== undefined)
+      updateData.strategicAlignment = strategicAlignment || null;
     if (roiEstimate !== undefined) updateData.roiEstimate = roiEstimate || null;
     if (stageGate !== undefined) updateData.stageGate = stageGate || null;
     if (dueDate !== undefined) updateData.dueDate = dueDate || null;
     if (startDate !== undefined) updateData.startDate = startDate || null;
-    if (acceptanceCriteria !== undefined) updateData.acceptanceCriteria = acceptanceCriteria || null;
-    if (defaultTaskPriority !== undefined) updateData.defaultTaskPriority = defaultTaskPriority || null;
-    if (autoAssignOwner !== undefined) updateData.autoAssignOwner = autoAssignOwner || false;
-    if (requireAcceptanceCriteria !== undefined) updateData.requireAcceptanceCriteria = requireAcceptanceCriteria || false;
-    if (enableTimeTracking !== undefined) updateData.enableTimeTracking = enableTimeTracking || false;
-    if (defaultTaskTemplate !== undefined) updateData.defaultTaskTemplate = defaultTaskTemplate || null;
-    if (workflowAutomation !== undefined) updateData.workflowAutomation = workflowAutomation || null;
+    if (acceptanceCriteria !== undefined)
+      updateData.acceptanceCriteria = acceptanceCriteria || null;
+    if (defaultTaskPriority !== undefined)
+      updateData.defaultTaskPriority = defaultTaskPriority || null;
+    if (autoAssignOwner !== undefined)
+      updateData.autoAssignOwner = autoAssignOwner || false;
+    if (requireAcceptanceCriteria !== undefined)
+      updateData.requireAcceptanceCriteria = requireAcceptanceCriteria || false;
+    if (enableTimeTracking !== undefined)
+      updateData.enableTimeTracking = enableTimeTracking || false;
+    if (defaultTaskTemplate !== undefined)
+      updateData.defaultTaskTemplate = defaultTaskTemplate || null;
+    if (workflowAutomation !== undefined)
+      updateData.workflowAutomation = workflowAutomation || null;
 
     const { data: epic, error: epicError } = await supabaseAdmin
       .from("Task")

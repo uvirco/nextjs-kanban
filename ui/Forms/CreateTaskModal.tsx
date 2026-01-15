@@ -7,7 +7,13 @@ import { IconPlus } from "@tabler/icons-react";
 import { Input } from "@nextui-org/input";
 import { Button } from "@nextui-org/button";
 import { Select, SelectItem } from "@nextui-org/select";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@nextui-org/modal";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+} from "@nextui-org/modal";
 import RichTextEditor from "@/ui/RichTextEditor";
 
 interface CreateTaskModalProps {
@@ -41,7 +47,10 @@ export default function CreateTaskModal({
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSelectChange = (name: string, value: string | Priority | RiskLevel) => {
+  const handleSelectChange = (
+    name: string,
+    value: string | Priority | RiskLevel
+  ) => {
     if (value === "") {
       setFormData({ ...formData, [name]: undefined });
     } else {
@@ -130,7 +139,9 @@ export default function CreateTaskModal({
           <ModalBody className="space-y-6">
             {/* Basic Information */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-foreground">Basic Information</h3>
+              <h3 className="text-lg font-semibold text-foreground">
+                Basic Information
+              </h3>
 
               <Input
                 label="Task Title"
@@ -159,7 +170,9 @@ export default function CreateTaskModal({
 
             {/* Project Details */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-foreground">Project Details</h3>
+              <h3 className="text-lg font-semibold text-foreground">
+                Project Details
+              </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Select
@@ -167,7 +180,9 @@ export default function CreateTaskModal({
                   placeholder="Select priority"
                   selectedKeys={formData.priority ? [formData.priority] : []}
                   onSelectionChange={(keys) => {
-                    const selected = Array.from(keys)[0] as Priority | undefined;
+                    const selected = Array.from(keys)[0] as
+                      | Priority
+                      | undefined;
                     if (selected) {
                       handleSelectChange("priority", selected);
                     } else {
@@ -181,10 +196,34 @@ export default function CreateTaskModal({
                     popoverContent: "bg-background",
                   }}
                 >
-                  <SelectItem key="LOW" value="LOW" className="bg-popover text-popover-foreground hover:bg-accent hover:text-accent-foreground">Low</SelectItem>
-                  <SelectItem key="MEDIUM" value="MEDIUM" className="bg-popover text-popover-foreground hover:bg-accent hover:text-accent-foreground">Medium</SelectItem>
-                  <SelectItem key="HIGH" value="HIGH" className="bg-popover text-popover-foreground hover:bg-accent hover:text-accent-foreground">High</SelectItem>
-                  <SelectItem key="CRITICAL" value="CRITICAL" className="bg-popover text-popover-foreground hover:bg-accent hover:text-accent-foreground">Critical</SelectItem>
+                  <SelectItem
+                    key="LOW"
+                    value="LOW"
+                    className="bg-popover text-popover-foreground hover:bg-accent hover:text-accent-foreground"
+                  >
+                    Low
+                  </SelectItem>
+                  <SelectItem
+                    key="MEDIUM"
+                    value="MEDIUM"
+                    className="bg-popover text-popover-foreground hover:bg-accent hover:text-accent-foreground"
+                  >
+                    Medium
+                  </SelectItem>
+                  <SelectItem
+                    key="HIGH"
+                    value="HIGH"
+                    className="bg-popover text-popover-foreground hover:bg-accent hover:text-accent-foreground"
+                  >
+                    High
+                  </SelectItem>
+                  <SelectItem
+                    key="CRITICAL"
+                    value="CRITICAL"
+                    className="bg-popover text-popover-foreground hover:bg-accent hover:text-accent-foreground"
+                  >
+                    Critical
+                  </SelectItem>
                 </Select>
 
                 <Select
@@ -192,7 +231,9 @@ export default function CreateTaskModal({
                   placeholder="Select risk level"
                   selectedKeys={formData.riskLevel ? [formData.riskLevel] : []}
                   onSelectionChange={(keys) => {
-                    const selected = Array.from(keys)[0] as RiskLevel | undefined;
+                    const selected = Array.from(keys)[0] as
+                      | RiskLevel
+                      | undefined;
                     if (selected) {
                       handleSelectChange("riskLevel", selected);
                     } else {
@@ -206,9 +247,27 @@ export default function CreateTaskModal({
                     popoverContent: "bg-background",
                   }}
                 >
-                  <SelectItem key="LOW" value="LOW" className="bg-popover text-popover-foreground hover:bg-accent hover:text-accent-foreground">Low</SelectItem>
-                  <SelectItem key="MEDIUM" value="MEDIUM" className="bg-popover text-popover-foreground hover:bg-accent hover:text-accent-foreground">Medium</SelectItem>
-                  <SelectItem key="HIGH" value="HIGH" className="bg-popover text-popover-foreground hover:bg-accent hover:text-accent-foreground">High</SelectItem>
+                  <SelectItem
+                    key="LOW"
+                    value="LOW"
+                    className="bg-popover text-popover-foreground hover:bg-accent hover:text-accent-foreground"
+                  >
+                    Low
+                  </SelectItem>
+                  <SelectItem
+                    key="MEDIUM"
+                    value="MEDIUM"
+                    className="bg-popover text-popover-foreground hover:bg-accent hover:text-accent-foreground"
+                  >
+                    Medium
+                  </SelectItem>
+                  <SelectItem
+                    key="HIGH"
+                    value="HIGH"
+                    className="bg-popover text-popover-foreground hover:bg-accent hover:text-accent-foreground"
+                  >
+                    High
+                  </SelectItem>
                 </Select>
 
                 <Input
@@ -217,7 +276,9 @@ export default function CreateTaskModal({
                   type="number"
                   min="1"
                   value={formData.storyPoints?.toString() || ""}
-                  onChange={(e) => handleNumberChange("storyPoints", e.target.value)}
+                  onChange={(e) =>
+                    handleNumberChange("storyPoints", e.target.value)
+                  }
                 />
 
                 <Input
@@ -227,7 +288,9 @@ export default function CreateTaskModal({
                   min="0"
                   step="0.5"
                   value={formData.estimatedEffort?.toString() || ""}
-                  onChange={(e) => handleNumberChange("estimatedEffort", e.target.value)}
+                  onChange={(e) =>
+                    handleNumberChange("estimatedEffort", e.target.value)
+                  }
                 />
               </div>
 
