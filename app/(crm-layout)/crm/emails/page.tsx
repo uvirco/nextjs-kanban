@@ -111,14 +111,14 @@ export default function EmailInboxPage() {
       </div>
 
       {selectedEmails.size > 0 && (
-        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-          <span className="text-sm font-medium">{selectedEmails.size} selected</span>
+        <div className="mb-4 p-3 bg-blue-900 border border-blue-700 rounded-lg">
+          <span className="text-sm font-medium text-blue-100">{selectedEmails.size} selected</span>
         </div>
       )}
 
-      <div className="bg-white shadow overflow-hidden sm:rounded-md">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+      <div className="bg-gray-900 shadow overflow-hidden sm:rounded-md border border-gray-700">
+        <table className="min-w-full divide-y divide-gray-700">
+          <thead className="bg-gray-800">
             <tr>
               <th className="px-4 py-3">
                 <Checkbox
@@ -126,33 +126,33 @@ export default function EmailInboxPage() {
                   onCheckedChange={handleSelectAll}
                 />
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                 Sender
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                 Subject
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                 Content
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                 Linked Deal
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                 Date
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-gray-900 divide-y divide-gray-700">
             {filteredEmails.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
+                <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
                   No emails found.
                 </td>
               </tr>
             ) : (
               filteredEmails.map((email) => (
-                <tr key={email.id} className="hover:bg-gray-50">
+                <tr key={email.id} className="hover:bg-gray-800">
                   <td className="px-4 py-4 whitespace-nowrap">
                     <Checkbox
                       checked={selectedEmails.has(email.id)}
@@ -160,30 +160,30 @@ export default function EmailInboxPage() {
                     />
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">
+                    <div className="text-sm font-medium text-gray-100">
                       {email.fromEmail}
                     </div>
                   </td>
                   <td className="px-4 py-4">
-                    <div className="text-sm text-gray-900 max-w-xs truncate">
+                    <div className="text-sm text-gray-100 max-w-xs truncate">
                       {email.subject || "(no subject)"}
                     </div>
                   </td>
                   <td className="px-4 py-4">
-                    <div className="text-sm text-gray-500 max-w-md truncate">
+                    <div className="text-sm text-gray-300 max-w-md truncate">
                       {email.body.replace(/<[^>]*>/g, "").substring(0, 100)}...
                     </div>
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap">
                     {email.dealId ? (
-                      <Badge variant="outline" className="text-xs">
+                      <Badge variant="outline" className="text-xs border-gray-600 text-gray-300">
                         Deal #{email.dealId}
                       </Badge>
                     ) : (
-                      <span className="text-sm text-gray-400">-</span>
+                      <span className="text-sm text-gray-500">-</span>
                     )}
                   </td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-400">
                     {new Date(email.receivedAt || email.sentAt || email.createdAt).toLocaleDateString()}
                   </td>
                 </tr>
