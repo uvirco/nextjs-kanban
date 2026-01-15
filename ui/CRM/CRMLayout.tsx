@@ -12,12 +12,14 @@ import {
   IconX,
   IconUser,
   IconBuilding,
+  IconMail,
 } from "@tabler/icons-react";
 
 const crmNavItems = [
   { path: "/crm", label: "Dashboard", icon: IconLayoutKanban },
   { path: "/crm/contacts", label: "Contacts", icon: IconUsers },
   { path: "/crm/organizations", label: "Organizations", icon: IconBuilding },
+  { path: "/crm/emails", label: "Email Inbox", icon: IconMail },
   { path: "/crm/deals", label: "Pipeline", icon: IconCurrencyDollar },
 ];
 

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import imaps from "imap-simple";
 import { simpleParser } from "mailparser";
-import { supabase } from "../../../lib/supabase"; // Adjust path
+import { supabaseAdmin } from "../../../lib/supabase"; // Use admin client
 
 export async function POST(request) {
   try {
@@ -85,7 +85,7 @@ export async function POST(request) {
         body = "Error parsing email";
       }
 
-      const { error } = await supabase.from("CRMEmail").insert([
+      const { error } = await supabaseAdmin.from("CRMEmail").insert([
         {
           fromEmail: fromEmail,
           toEmail: toEmail,
