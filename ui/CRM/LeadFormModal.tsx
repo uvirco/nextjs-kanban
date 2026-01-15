@@ -154,16 +154,16 @@ export default function LeadFormModal({
               Contact
             </Label>
             <Select
-              value={formData.contactId}
+              value={formData.contactId || "none"}
               onValueChange={(value) =>
-                setFormData({ ...formData, contactId: value })
+                setFormData({ ...formData, contactId: value === "none" ? "" : value })
               }
             >
               <SelectTrigger className="mt-1 text-white">
                 <SelectValue placeholder="Select a contact" />
               </SelectTrigger>
               <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
-                <SelectItem value="">None</SelectItem>
+                <SelectItem value="none">None</SelectItem>
                 {contacts.map((contact) => (
                   <SelectItem key={contact.id} value={contact.id}>
                     {contact.name} {contact.email && `(${contact.email})`}

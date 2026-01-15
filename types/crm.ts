@@ -37,6 +37,7 @@ export interface CRMContact {
   email?: string;
   phone?: string;
   company?: string;
+  organizationId?: string;
   position?: string;
   address?: string;
   notes?: string;
