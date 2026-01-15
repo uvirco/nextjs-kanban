@@ -3,9 +3,8 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IconMail, IconRefresh, IconSearch } from "@tabler/icons-react";
 
 interface Email {
@@ -18,16 +17,14 @@ interface Email {
   receivedAt: string;
   sentAt: string;
   createdAt: string;
-  contactId?: string;
   dealId?: string;
-  leadId?: string;
 }
 
 export default function EmailInboxPage() {
   const [emails, setEmails] = useState<Email[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filter, setFilter] = useState<"all" | "inbound" | "outbound">("all");
+  const [selectedEmails, setSelectedEmails] = useState<Set<string>>(new Set());
 
   const fetchEmails = async () => {
     try {
@@ -46,44 +43,27 @@ export default function EmailInboxPage() {
   const fetchNewEmails = async () => {
     try {
       await fetch("/api/fetch-emails", { method: "POST" });
-      await fetchEmails(); // Refresh the list
+      await fetchEmails();
     } catch (error) {
       console.error("Failed to fetch new emails:", error);
     }
   };
 
-  const addTestEmails = async () => {
-    try {
-      const testEmails = [
-        {
-          fromEmail: 'prospect@company.com',
-          toEmail: 'sales@uvircopd.com',
-          subject: 'Interest in your services',
-          body: 'Hi,\n\nI came across your website and I\'m interested in learning more about your CRM solutions. Can we schedule a call?\n\nBest,\nJohn Smith\nCTO at TechCorp',
-          receivedAt: new Date(Date.now() - 600000).toISOString(), // 10 minutes ago
-          direction: 'INBOUND'
-        },
-        {
-          fromEmail: 'sales@uvircopd.com',
-          toEmail: 'prospect@company.com',
-          subject: 'Re: Interest in your services',
-          body: 'Hi John,\n\nThank you for your interest! I\'d be happy to schedule a demo. How does next Tuesday at 2 PM work for you?\n\nBest,\nPierre\nSales Manager',
-          sentAt: new Date(Date.now() - 300000).toISOString(), // 5 minutes ago
-          direction: 'OUTBOUND'
-        }
-      ];
+  const handleSelectEmail = (emailId: string, checked: boolean) => {
+    const newSelected = new Set(selectedEmails);
+    if (checked) {
+      newSelected.add(emailId);
+    } else {
+      newSelected.delete(emailId);
+    }
+    setSelectedEmails(newSelected);
+  };
 
-      for (const email of testEmails) {
-        await fetch("/api/crm/emails", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(email)
-        });
-      }
-
-      await fetchEmails(); // Refresh the list
-    } catch (error) {
-      console.error("Failed to add test emails:", error);
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedEmails(new Set(filteredEmails.map(email => email.id)));
+    } else {
+      setSelectedEmails(new Set());
     }
   };
 
@@ -92,17 +72,13 @@ export default function EmailInboxPage() {
   }, []);
 
   const filteredEmails = emails.filter((email) => {
-    const matchesSearch =
+    if (!searchTerm) return true;
+
+    return (
       email.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
       email.fromEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      email.body.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesFilter =
-      filter === "all" ||
-      (filter === "inbound" && email.direction === "INBOUND") ||
-      (filter === "outbound" && email.direction === "OUTBOUND");
-
-    return matchesSearch && matchesFilter;
+      email.body.toLowerCase().includes(searchTerm.toLowerCase())
+    );
   });
 
   if (loading) {
@@ -116,16 +92,10 @@ export default function EmailInboxPage() {
           <IconMail size={24} />
           Email Inbox
         </h1>
-        <div className="flex gap-2">
-          <Button onClick={addTestEmails} variant="outline" className="flex items-center gap-2">
-            <IconMail size={16} />
-            Add Test Emails
-          </Button>
-          <Button onClick={fetchNewEmails} className="flex items-center gap-2">
-            <IconRefresh size={16} />
-            Fetch New Emails
-          </Button>
-        </div>
+        <Button onClick={fetchNewEmails} className="flex items-center gap-2">
+          <IconRefresh size={16} />
+          Fetch New Emails
+        </Button>
       </div>
 
       <div className="flex gap-4 mb-6">
@@ -138,54 +108,89 @@ export default function EmailInboxPage() {
             className="pl-10"
           />
         </div>
-        <Tabs value={filter} onValueChange={(value) => setFilter(value as any)}>
-          <TabsList>
-            <TabsTrigger value="all">All ({emails.length})</TabsTrigger>
-            <TabsTrigger value="inbound">
-              Inbound ({emails.filter(e => e.direction === "INBOUND").length})
-            </TabsTrigger>
-            <TabsTrigger value="outbound">
-              Outbound ({emails.filter(e => e.direction === "OUTBOUND").length})
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
       </div>
 
-      <div className="space-y-4">
-        {filteredEmails.length === 0 ? (
-          <Card>
-            <CardContent className="p-6 text-center text-gray-500">
-              No emails found.
-            </CardContent>
-          </Card>
-        ) : (
-          filteredEmails.map((email) => (
-            <Card key={email.id} className="hover:shadow-md transition-shadow">
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <CardTitle className="text-lg mb-2">{email.subject}</CardTitle>
-                    <div className="flex items-center gap-4 text-sm text-gray-600">
-                      <span>From: {email.fromEmail}</span>
-                      <span>To: {email.toEmail}</span>
-                      <Badge variant={email.direction === "INBOUND" ? "default" : "secondary"}>
-                        {email.direction}
-                      </Badge>
+      {selectedEmails.size > 0 && (
+        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <span className="text-sm font-medium">{selectedEmails.size} selected</span>
+        </div>
+      )}
+
+      <div className="bg-white shadow overflow-hidden sm:rounded-md">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-4 py-3">
+                <Checkbox
+                  checked={selectedEmails.size === filteredEmails.length && filteredEmails.length > 0}
+                  onCheckedChange={handleSelectAll}
+                />
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Sender
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Subject
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Content
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Linked Deal
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Date
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {filteredEmails.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
+                  No emails found.
+                </td>
+              </tr>
+            ) : (
+              filteredEmails.map((email) => (
+                <tr key={email.id} className="hover:bg-gray-50">
+                  <td className="px-4 py-4 whitespace-nowrap">
+                    <Checkbox
+                      checked={selectedEmails.has(email.id)}
+                      onCheckedChange={(checked) => handleSelectEmail(email.id, checked as boolean)}
+                    />
+                  </td>
+                  <td className="px-4 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-900">
+                      {email.fromEmail}
                     </div>
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    {new Date(email.receivedAt || email.sentAt || email.createdAt).toLocaleString()}
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-gray-700 line-clamp-3">
-                  {email.body.replace(/<[^>]*>/g, "").substring(0, 200)}...
-                </div>
-              </CardContent>
-            </Card>
-          ))
-        )}
+                  </td>
+                  <td className="px-4 py-4">
+                    <div className="text-sm text-gray-900 max-w-xs truncate">
+                      {email.subject || "(no subject)"}
+                    </div>
+                  </td>
+                  <td className="px-4 py-4">
+                    <div className="text-sm text-gray-500 max-w-md truncate">
+                      {email.body.replace(/<[^>]*>/g, "").substring(0, 100)}...
+                    </div>
+                  </td>
+                  <td className="px-4 py-4 whitespace-nowrap">
+                    {email.dealId ? (
+                      <Badge variant="outline" className="text-xs">
+                        Deal #{email.dealId}
+                      </Badge>
+                    ) : (
+                      <span className="text-sm text-gray-400">-</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {new Date(email.receivedAt || email.sentAt || email.createdAt).toLocaleDateString()}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );
