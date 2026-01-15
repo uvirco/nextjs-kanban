@@ -23,7 +23,6 @@ import EpicCommentsOverview from "@/ui/EpicCommentsOverview";
 import { Button } from "@/components/ui/button";
 import EditMeetingNoteForm from "@/ui/EditMeetingNoteForm";
 import EditEpicForm from "./edit/EditEpicForm";
-import EditOverviewForm from "./EditOverviewForm";
 import ManageMembersModal from "./ManageMembersModal";
 import EditTasksForm from "./edit/EditTasksForm";
 import QuickNotesTab from "./QuickNotesTab";
@@ -43,8 +42,6 @@ function EpicDetailPageClient({
   const storageKey = `epic-${params.id}-active-tab`;
   const [activeTab, setActiveTab] = useState("overview");
   const [editingNote, setEditingNote] = useState<any>(null);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [editingOverview, setEditingOverview] = useState(false);
   const [editingTasks, setEditingTasks] = useState(false);
   const [departments, setDepartments] = useState<any[]>([]);
   const [goals, setGoals] = useState<any[]>([]);
@@ -202,66 +199,31 @@ function EpicDetailPageClient({
                         </Button>
                       </div>
                     </div>
-                    {!editingOverview && (
-                      <div className="flex gap-2">
+                    <div className="flex gap-2">
+                      <Link href={`/projects/epics/${epic.id}/edit`}>
                         <Button
-                          onClick={() => setEditingOverview(true)}
-                          variant="outline"
-                          className="text-zinc-300 border-zinc-600 hover:bg-zinc-700"
-                        >
-                          <IconSettings size={16} className="mr-2" />
-                          Edit Details
-                        </Button>
-                        <Button
-                          onClick={() => setShowEditModal(true)}
                           variant="outline"
                           className="text-zinc-300 border-zinc-600 hover:bg-zinc-700"
                         >
                           <IconSettings size={16} className="mr-2" />
                           Edit Epic
                         </Button>
-                      </div>
-                    )}
+                      </Link>
+                    </div>
                   </div>
 
-                  {editingOverview ? (
-                    /* Edit Mode */
+                  {/* Epic Description */}
+                  {epic.description && (
                     <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
-                      <h3 className="text-lg font-semibold text-white mb-4">
-                        Edit Epic Details
+                      <h3 className="text-lg font-semibold text-white mb-2">
+                        Description
                       </h3>
-                      <EditOverviewForm
-                        epic={epic}
-                        departments={departments}
-                        stakeholders={epic.stakeholders || []}
-                        onSave={(updatedData) => {
-                          // Update local epic data and exit edit mode
-                          Object.assign(epic, updatedData);
-                          if (updatedData.goals) {
-                            setGoals(updatedData.goals);
-                          }
-                          setEditingOverview(false);
-                          // Optionally refresh the page or update parent state
-                          window.location.reload();
-                        }}
-                        onCancel={() => setEditingOverview(false)}
-                      />
+                      <p className="text-zinc-400">{epic.description}</p>
                     </div>
-                  ) : (
-                    /* Display Mode */
-                    <>
-                      {/* Epic Description */}
-                      {epic.description && (
-                        <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
-                          <h3 className="text-lg font-semibold text-white mb-2">
-                            Description
-                          </h3>
-                          <p className="text-zinc-400">{epic.description}</p>
-                        </div>
-                      )}
+                  )}
 
-                      {/* Status and Priority Badges */}
-                      <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+                  {/* Status and Priority Badges */}
+                  <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
                         <h3 className="text-lg font-semibold text-white mb-4">
                           Status & Priority
                         </h3>
@@ -409,8 +371,6 @@ function EpicDetailPageClient({
 
                       {/* Stakeholders section */}
                       <EpicStakeholdersSection epic={epic} params={params} />
-                    </>
-                  )}
                 </TabsContent>
 
                 <TabsContent value="tasks" className="space-y-6">
@@ -626,9 +586,6 @@ function EpicDetailPageClient({
           }}
         />
       )}
-
-      {/* Edit Epic Modal */}
-      {showEditModal && <EditEpicForm epic={epic} />}
 
       {/* Manage Members Modal */}
       {showMemberModal && (
