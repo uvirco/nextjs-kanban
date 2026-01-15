@@ -5,19 +5,26 @@ import { supabaseAdmin } from "../../../lib/supabase"; // Use admin client
 
 export async function POST(request) {
   try {
+    let configData = {};
+    try {
+      configData = await request.json();
+    } catch (e) {
+      // No body provided, use defaults
+    }
+
     const {
       host = "imap.gmail.com",
       port = 993,
       user = process.env.GMAIL_USER,
       pass = process.env.GMAIL_PASS,
       tls = true,
-    } = await request.json(); // Use env vars as defaults
+    } = configData;
 
     console.log("IMAP Config:", {
       host,
       port,
-      user: user ? "set" : "not set",
-      pass: pass ? "set" : "not set",
+      user: user ? user : "not set",
+      pass: pass ? "***" : "not set",
       tls,
     });
 
@@ -38,7 +45,29 @@ export async function POST(request) {
     const box = await connection.openBox("INBOX");
     console.log("Opened INBOX");
 
-    const searchCriteria = ["UNSEEN"];
+    // Get the most recent email date from database to only fetch newer emails
+    const { data: lastEmail } = await supabaseAdmin
+      .from("CRMEmail")
+      .select("receivedAt")
+      .order("receivedAt", { ascending: false })
+      .limit(1)
+      .single();
+
+    let searchCriteria;
+    if (lastEmail && lastEmail.receivedAt) {
+      // Fetch emails newer than the last one we have
+      const lastEmailDate = new Date(lastEmail.receivedAt);
+      // Add 1 second to avoid fetching the same email again
+      lastEmailDate.setSeconds(lastEmailDate.getSeconds() + 1);
+      const sinceDate = lastEmailDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+      searchCriteria = ['SINCE', sinceDate];
+      console.log(`Fetching emails since ${sinceDate}`);
+    } else {
+      // No emails in database yet, fetch recent ones
+      searchCriteria = ['SINCE', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]]; // Last 30 days
+      console.log("No existing emails found, fetching from last 30 days");
+    }
+
     const fetchOptions = {
       bodies: [""],
       struct: true,
@@ -47,22 +76,25 @@ export async function POST(request) {
     };
 
     const messages = await connection.search(searchCriteria, fetchOptions);
-    console.log(`Found ${messages.length} unread emails`);
+    console.log(`Found ${messages.length} new emails to process`);
 
     if (messages.length === 0) {
       connection.end();
-      return NextResponse.json({ message: "No new emails" }, { status: 200 });
+      return NextResponse.json({ message: "No new emails found" }, { status: 200 });
     }
 
     let emailsProcessed = 0;
-    for (const message of messages) {
+    // Process all found emails since we're only getting new ones
+    const messagesToProcess = messages;
+
+    for (const message of messagesToProcess) {
       const envelope = message.attributes?.envelope;
       if (!envelope) {
         console.log("Skipping message without envelope");
         continue;
       }
 
-      console.log("Envelope:", JSON.stringify(envelope, null, 2));
+      console.log("Processing email:", envelope.subject);
 
       // Parse the full message
       let fromEmail = "";
@@ -71,9 +103,8 @@ export async function POST(request) {
       let body = "";
 
       try {
-        console.log("Parts:", JSON.stringify(message.parts, null, 2));
         if (message.parts && message.parts.length > 0) {
-          const fullMessage = message.parts[0].body; // Full message body
+          const fullMessage = message.parts[0].body;
           const parsed = await simpleParser(fullMessage);
           fromEmail = parsed.from?.text || "";
           toEmail = parsed.to?.text || "";
@@ -85,14 +116,15 @@ export async function POST(request) {
         body = "Error parsing email";
       }
 
+      // Insert the new email (no duplicate check needed since we're only fetching newer emails)
       const { error } = await supabaseAdmin.from("CRMEmail").insert([
         {
           fromEmail: fromEmail,
           toEmail: toEmail,
           subject: subject,
           body: body,
-          receivedAt: new Date().toISOString(),
-          direction: "inbound",
+          receivedAt: new Date(envelope.date).toISOString(),
+          direction: "INBOUND",
         },
       ]);
 
@@ -105,7 +137,7 @@ export async function POST(request) {
 
     connection.end();
     return NextResponse.json(
-      { message: `${emailsProcessed} emails processed` },
+      { message: `${emailsProcessed} new emails processed from ${messagesToProcess.length} found` },
       { status: 200 }
     );
   } catch (error) {

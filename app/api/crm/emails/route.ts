@@ -30,10 +30,9 @@ export async function GET(request: NextRequest) {
         direction,
         threadId,
         createdAt,
-        contact:CRMContact(id, name, email),
-        deal:CRMDeal(id, title),
-        lead:CRMLead(id, title),
-        attachments:CRMEmailAttachment(id, filename, fileSize, mimeType)
+        contactId,
+        dealId,
+        leadId
       `)
       .order("receivedAt", { ascending: false, nullsFirst: false })
       .order("sentAt", { ascending: false, nullsFirst: false })
@@ -58,6 +57,46 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error in CRM emails API:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const session = await auth();
+    const userId = session?.user?.id;
+
+    if (!session || !userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const emailData = await request.json();
+
+    const { data: email, error } = await supabaseAdmin
+      .from("CRMEmail")
+      .insert({
+        ...emailData,
+        userId: userId,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Error creating CRM email:", error);
+      return NextResponse.json(
+        { error: "Failed to create email" },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      email: email,
+    });
+  } catch (error) {
+    console.error("Error in CRM email creation API:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

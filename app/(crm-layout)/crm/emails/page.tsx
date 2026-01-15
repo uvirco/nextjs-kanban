@@ -16,7 +16,11 @@ interface Email {
   body: string;
   direction: "INBOUND" | "OUTBOUND";
   receivedAt: string;
+  sentAt: string;
   createdAt: string;
+  contactId?: string;
+  dealId?: string;
+  leadId?: string;
 }
 
 export default function EmailInboxPage() {
@@ -45,6 +49,41 @@ export default function EmailInboxPage() {
       await fetchEmails(); // Refresh the list
     } catch (error) {
       console.error("Failed to fetch new emails:", error);
+    }
+  };
+
+  const addTestEmails = async () => {
+    try {
+      const testEmails = [
+        {
+          fromEmail: 'prospect@company.com',
+          toEmail: 'sales@uvircopd.com',
+          subject: 'Interest in your services',
+          body: 'Hi,\n\nI came across your website and I\'m interested in learning more about your CRM solutions. Can we schedule a call?\n\nBest,\nJohn Smith\nCTO at TechCorp',
+          receivedAt: new Date(Date.now() - 600000).toISOString(), // 10 minutes ago
+          direction: 'INBOUND'
+        },
+        {
+          fromEmail: 'sales@uvircopd.com',
+          toEmail: 'prospect@company.com',
+          subject: 'Re: Interest in your services',
+          body: 'Hi John,\n\nThank you for your interest! I\'d be happy to schedule a demo. How does next Tuesday at 2 PM work for you?\n\nBest,\nPierre\nSales Manager',
+          sentAt: new Date(Date.now() - 300000).toISOString(), // 5 minutes ago
+          direction: 'OUTBOUND'
+        }
+      ];
+
+      for (const email of testEmails) {
+        await fetch("/api/crm/emails", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(email)
+        });
+      }
+
+      await fetchEmails(); // Refresh the list
+    } catch (error) {
+      console.error("Failed to add test emails:", error);
     }
   };
 
@@ -77,10 +116,16 @@ export default function EmailInboxPage() {
           <IconMail size={24} />
           Email Inbox
         </h1>
-        <Button onClick={fetchNewEmails} className="flex items-center gap-2">
-          <IconRefresh size={16} />
-          Fetch New Emails
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={addTestEmails} variant="outline" className="flex items-center gap-2">
+            <IconMail size={16} />
+            Add Test Emails
+          </Button>
+          <Button onClick={fetchNewEmails} className="flex items-center gap-2">
+            <IconRefresh size={16} />
+            Fetch New Emails
+          </Button>
+        </div>
       </div>
 
       <div className="flex gap-4 mb-6">
@@ -129,7 +174,7 @@ export default function EmailInboxPage() {
                     </div>
                   </div>
                   <div className="text-sm text-gray-500">
-                    {new Date(email.receivedAt || email.createdAt).toLocaleString()}
+                    {new Date(email.receivedAt || email.sentAt || email.createdAt).toLocaleString()}
                   </div>
                 </div>
               </CardHeader>
