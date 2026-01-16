@@ -94,14 +94,13 @@ export default function CRMDealsPage() {
 
   const fetchDeals = async () => {
     try {
-      console.log("Fetching deals from /api/crm/deals");
       const response = await fetch("/api/crm/deals");
       console.log("Response status:", response.status);
       
       if (response.ok) {
         const data = await response.json();
-        console.log("Deals data:", data);
-        setDeals(data.deals || []);
+        const validDeals = (data.deals || []).filter((deal: CRMDeal) => deal && deal.id);
+        setDeals(validDeals);
       } else {
         const errorText = await response.text();
         console.error("Failed to fetch deals:", response.status, errorText);
@@ -111,7 +110,6 @@ export default function CRMDealsPage() {
       console.error("Error fetching deals:", error);
       setDeals([]);
     } finally {
-      console.log("Setting loading to false");
       setLoading(false);
     }
   };
@@ -225,15 +223,14 @@ export default function CRMDealsPage() {
 
       <div className="flex gap-4 overflow-x-auto pb-4 flex-1">
         {DEAL_COLUMNS.map((column) => {
-          const columnDeals = getDealsByColumn(column.id);
-          const columnValue = columnDeals.reduce(
+          const columnDeals = getDealsByColumn(column.id);          console.log(`Rendering column ${column.id} with ${columnDeals.length} deals`);          const columnValue = columnDeals.reduce(
             (sum, deal) => sum + parseFloat(deal.value?.toString() || "0"),
             0
           );
 
           return (
             <div
-              key={column.id}
+              key={`column-${column.id}`}
               className="flex-shrink-0 w-80 bg-zinc-800 rounded-lg p-4"
               onDragOver={handleDragOver}
               onDrop={() => handleDrop(column.id)}
@@ -264,61 +261,63 @@ export default function CRMDealsPage() {
               </div>
 
               <div className="space-y-3 max-h-[calc(100vh-280px)] overflow-y-auto">
-                {columnDeals.map((deal) => (
-                  <Card
-                    key={deal.id}
-                    draggable
-                    onDragStart={() => handleDragStart(deal)}
-                    className="bg-zinc-700 border-zinc-600 hover:border-zinc-500 cursor-move transition-colors"
-                  >
-                    <CardHeader className="p-4 pb-2">
-                      <CardTitle className="text-sm text-white flex items-start justify-between">
-                        <span className="flex-1">{deal.title}</span>
-                        <div className="flex gap-1 ml-2">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleEditDeal(deal)}
-                            className="h-6 w-6 p-0"
-                          >
-                            <IconEdit size={14} />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleDeleteDeal(deal.id)}
-                            className="h-6 w-6 p-0 text-red-400 hover:text-red-300"
-                          >
-                            <IconTrash size={14} />
-                          </Button>
-                        </div>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-4 pt-0 space-y-1 text-xs">
-                      {deal.contact && (
-                        <p className="text-zinc-300">👤 {deal.contact.name}</p>
-                      )}
-                      {deal.value && (
-                        <p className="text-green-400 font-semibold">
-                          ${parseFloat(deal.value.toString()).toLocaleString()}
-                        </p>
-                      )}
-                      {deal.expectedCloseDate && (
-                        <p className="text-zinc-400 flex items-center gap-1">
-                          <IconCalendar size={12} />
-                          {new Date(
-                            deal.expectedCloseDate
-                          ).toLocaleDateString()}
-                        </p>
-                      )}
-                      {deal.notes && (
-                        <p className="text-zinc-400 truncate">
-                          💬 {deal.notes}
-                        </p>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
+                {columnDeals
+                  .filter((deal) => deal && deal.id)
+                  .map((deal) => (
+                    <Card
+                      key={`deal-${deal.id}`}
+                      draggable
+                      onDragStart={() => handleDragStart(deal)}
+                      className="bg-zinc-700 border-zinc-600 hover:border-zinc-500 cursor-move transition-colors"
+                    >
+                      <CardHeader className="p-4 pb-2">
+                        <CardTitle className="text-sm text-white flex items-start justify-between">
+                          <span className="flex-1">{deal.title}</span>
+                          <div className="flex gap-1 ml-2">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleEditDeal(deal)}
+                              className="h-6 w-6 p-0"
+                            >
+                              <IconEdit size={14} />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleDeleteDeal(deal.id)}
+                              className="h-6 w-6 p-0 text-red-400 hover:text-red-300"
+                            >
+                              <IconTrash size={14} />
+                            </Button>
+                          </div>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="p-4 pt-0 space-y-1 text-xs">
+                        {deal.contact && (
+                          <p className="text-zinc-300">👤 {deal.contact.name}</p>
+                        )}
+                        {deal.value && (
+                          <p className="text-green-400 font-semibold">
+                            ${parseFloat(deal.value.toString()).toLocaleString()}
+                          </p>
+                        )}
+                        {deal.expectedCloseDate && (
+                          <p className="text-zinc-400 flex items-center gap-1">
+                            <IconCalendar size={12} />
+                            {new Date(
+                              deal.expectedCloseDate
+                            ).toLocaleDateString()}
+                          </p>
+                        )}
+                        {deal.notes && (
+                          <p className="text-zinc-400 truncate">
+                            💬 {deal.notes}
+                          </p>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
 
                 {columnDeals.length === 0 && (
                   <div className="text-center py-8 text-zinc-500 text-sm">

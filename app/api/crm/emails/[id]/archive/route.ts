@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { supabaseAdmin } from "@/lib/supabase";
 
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await auth();
     const userId = session?.user?.id;
+    const { id } = await params;
 
     if (!session || !userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -21,7 +22,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     const { error } = await supabaseAdmin
       .from("CRMEmail")
       .update({ status })
-      .eq("id", params.id)
+      .eq("id", id)
       .eq("userId", userId); // Ensure user can only update their own emails
 
     if (error) {
