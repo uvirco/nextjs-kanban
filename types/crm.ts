@@ -70,6 +70,7 @@ export interface CRMLead {
 
 export interface CRMDeal {
   id: string;
+  deal_id: number;
   title: string;
   contactId?: string;
   contact?: CRMContact;
@@ -111,7 +112,7 @@ export interface CRMActivity {
 export interface CRMEmail {
   id: string;
   userId?: string;
-  dealId?: string;
+  dealId?: number;
   deal?: CRMDeal;
   leadId?: string;
   lead?: CRMLead;
@@ -129,6 +130,8 @@ export interface CRMEmail {
   threadId?: string;
   createdAt: Date;
   attachments?: CRMEmailAttachment[];
+  isRead?: boolean;
+  status?: string;
 }
 
 export interface CRMEmailAttachment {

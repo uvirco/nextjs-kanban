@@ -19,21 +19,29 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       return NextResponse.json({ error: "Invalid status" }, { status: 400 });
     }
 
-    const { error } = await supabaseAdmin
+    const { data, error } = await supabaseAdmin
       .from("CRMEmail")
       .update({ status })
       .eq("id", id)
-      .eq("userId", userId); // Ensure user can only update their own emails
+      .select();
 
     if (error) {
       console.error("Error updating email status:", error);
       return NextResponse.json(
-        { error: "Failed to update email status" },
+        { error: "Failed to update email status", details: error.message },
         { status: 500 }
       );
     }
 
-    return NextResponse.json({ success: true });
+    if (!data || data.length === 0) {
+      console.error("No email found with id:", id);
+      return NextResponse.json(
+        { error: "Email not found" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({ success: true, email: data[0] });
   } catch (error) {
     console.error("Error in archive API:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

@@ -93,7 +93,7 @@ export async function GET() {
     }
 
     // Map deal_id to id for consistency
-    const dealsWithId = deals?.map(deal => ({
+    const dealsWithId = deals?.map((deal: any) => ({
       ...deal,
       id: deal.deal_id
     }));

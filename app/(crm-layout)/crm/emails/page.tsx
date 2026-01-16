@@ -7,7 +7,14 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { IconMail, IconRefresh, IconSearch, IconArchive, IconArchiveOff } from "@tabler/icons-react";
+import { IconMail, IconRefresh, IconSearch, IconArchive, IconArchiveOff, IconLink } from "@tabler/icons-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Email {
   id: string;
@@ -24,13 +31,23 @@ interface Email {
   status?: 'ACTIVE' | 'ARCHIVED' | 'DELETED';
 }
 
+interface Deal {
+  deal_id: number;
+  id: string;
+  title: string;
+  stage: string;
+  value?: number;
+}
+
 export default function EmailInboxPage() {
   const router = useRouter();
   const [emails, setEmails] = useState<Email[]>([]);
+  const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedEmails, setSelectedEmails] = useState<Set<string>>(new Set());
   const [view, setView] = useState<'active' | 'archived'>('active');
+  const [selectedDealId, setSelectedDealId] = useState<string>("");
 
   const fetchEmails = async () => {
     try {
@@ -46,12 +63,40 @@ export default function EmailInboxPage() {
     }
   };
 
+  const fetchDeals = async () => {
+    try {
+      const response = await fetch("/api/crm/deals");
+      if (response.ok) {
+        const data = await response.json();
+        setDeals(data.deals || []);
+      }
+    } catch (error) {
+      console.error("Failed to fetch deals:", error);
+    }
+  };
+
   const fetchNewEmails = async () => {
     try {
-      await fetch("/api/fetch-emails", { method: "POST" });
-      await fetchEmails();
+      const response = await fetch("/api/fetch-emails", { method: "POST" });
+      if (response.ok) {
+        const result = await response.json();
+        console.log("Fetch result:", result);
+        
+        // Show detailed feedback
+        if (result.linked !== undefined && result.unlinked !== undefined) {
+          alert(`${result.message}\n\n📊 Auto-linking Results:\n✅ ${result.linked} emails linked to deals\n⚠️ ${result.unlinked} emails need manual linking`);
+        } else {
+          alert(result.message);
+        }
+        
+        await fetchEmails();
+      } else {
+        const error = await response.json();
+        alert(`Error: ${error.error || 'Failed to fetch emails'}`);
+      }
     } catch (error) {
       console.error("Failed to fetch new emails:", error);
+      alert("Failed to fetch new emails");
     }
   };
 
@@ -88,8 +133,64 @@ export default function EmailInboxPage() {
 
   const archiveSelected = async () => {
     const selectedArray = Array.from(selectedEmails);
-    await Promise.all(selectedArray.map(id => archiveEmail(id, view === 'active')));
-    setSelectedEmails(new Set());
+    const newStatus = view === 'active' ? 'ARCHIVED' : 'ACTIVE';
+    
+    console.log('Archiving emails:', selectedArray, 'to status:', newStatus);
+    
+    try {
+      const results = await Promise.all(selectedArray.map(id => 
+        fetch(`/api/crm/emails/${id}/archive`, { 
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus })
+        })
+      ));
+      
+      console.log('Archive results:', results.map(r => ({ ok: r.ok, status: r.status })));
+      
+      // Check if any failed
+      const failed = results.filter(r => !r.ok);
+      if (failed.length > 0) {
+        console.error('Failed to archive some emails:', failed);
+        alert(`Failed to archive ${failed.length} email(s)`);
+      }
+      
+      // Refresh emails to get updated data
+      await fetchEmails();
+      setSelectedEmails(new Set());
+    } catch (error) {
+      console.error("Failed to archive emails:", error);
+      alert("Failed to archive emails");
+    }
+  };
+
+  const linkSelectedToDeal = async () => {
+    if (!selectedDealId) {
+      alert("Please select a deal first");
+      return;
+    }
+
+    const selectedArray = Array.from(selectedEmails);
+    const dealIdValue = selectedDealId === "none" ? null : parseInt(selectedDealId, 10);
+    
+    try {
+      await Promise.all(selectedArray.map(async (emailId) => {
+        await fetch(`/api/crm/emails/${emailId}/link-deal`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ dealId: dealIdValue })
+        });
+      }));
+
+      // Refresh emails to show updated deal links
+      await fetchEmails();
+      setSelectedEmails(new Set());
+      setSelectedDealId("");
+      alert(`${selectedArray.length} email(s) linked to deal successfully!`);
+    } catch (error) {
+      console.error("Failed to link emails to deal:", error);
+      alert("Failed to link emails to deal");
+    }
   };
 
   const handleSelectEmail = (emailId: string, checked: boolean) => {
@@ -112,6 +213,7 @@ export default function EmailInboxPage() {
 
   useEffect(() => {
     fetchEmails();
+    fetchDeals();
   }, []);
 
   const filteredEmails = emails.filter((email) => {
@@ -180,6 +282,31 @@ export default function EmailInboxPage() {
             <IconArchive size={14} className="mr-1" />
             {view === 'active' ? 'Archive' : 'Unarchive'} Selected
           </Button>
+          
+          <div className="flex items-center gap-2">
+            <Select value={selectedDealId} onValueChange={setSelectedDealId}>
+              <SelectTrigger className="w-[200px] h-8 text-xs">
+                <SelectValue placeholder="Select a deal..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">No deal</SelectItem>
+                {deals.map((deal) => (
+                  <SelectItem key={deal.id} value={deal.deal_id.toString()}>
+                    #{deal.deal_id} - {deal.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button 
+              size="sm" 
+              variant="outline" 
+              onClick={linkSelectedToDeal}
+              disabled={!selectedDealId}
+            >
+              <IconLink size={14} className="mr-1" />
+              Link to Deal
+            </Button>
+          </div>
         </div>
       )}
 
@@ -253,8 +380,8 @@ export default function EmailInboxPage() {
                   </td>
                   <td className="px-3 py-2 whitespace-nowrap">
                     {email.dealId ? (
-                      <Badge variant="outline" className="text-[10px] px-1.5 py-0.5 border-gray-600 text-gray-300">
-                        Deal #{email.dealId}
+                      <Badge variant="outline" className="text-[10px] px-1.5 py-0.5 border-green-600 text-green-300">
+                        🔗 Deal #{email.dealId}
                       </Badge>
                     ) : (
                       <span className="text-xs text-gray-500">-</span>

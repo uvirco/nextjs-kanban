@@ -3,6 +3,32 @@ import imaps from "imap-simple";
 import { simpleParser } from "mailparser";
 import { supabaseAdmin } from "../../../lib/supabase"; // Use admin client
 
+// Extract deal ID from email subject line
+// Supports formats: #123, Deal #123, Deal 123, [Deal 123], [#123]
+function extractDealId(subject) {
+  if (!subject) return null;
+  
+  // Pattern 1: #123
+  let match = subject.match(/#(\d+)/);
+  if (match && match[1]) {
+    return parseInt(match[1], 10);
+  }
+  
+  // Pattern 2: Deal #123 or Deal 123
+  match = subject.match(/deal\s*#?(\d+)/i);
+  if (match && match[1]) {
+    return parseInt(match[1], 10);
+  }
+  
+  // Pattern 3: [Deal 123] or [#123]
+  match = subject.match(/\[(?:deal\s*)?#?(\d+)\]/i);
+  if (match && match[1]) {
+    return parseInt(match[1], 10);
+  }
+  
+  return null;
+}
+
 export async function POST(request) {
   try {
     let configData = {};
@@ -59,13 +85,14 @@ export async function POST(request) {
       const lastEmailDate = new Date(lastEmail.receivedAt);
       // Add 1 second to avoid fetching the same email again
       lastEmailDate.setSeconds(lastEmailDate.getSeconds() + 1);
-      const sinceDate = lastEmailDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
-      searchCriteria = ['SINCE', sinceDate];
-      console.log(`Fetching emails since ${sinceDate}`);
+      
+      // Use ALL and filter later - SINCE has syntax issues with imap-simple
+      searchCriteria = ['ALL'];
+      console.log(`Fetching all emails (will filter to those after ${lastEmailDate.toISOString()})`);
     } else {
-      // No emails in database yet, fetch recent ones
-      searchCriteria = ['SINCE', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]]; // Last 30 days
-      console.log("No existing emails found, fetching from last 30 days");
+      // No emails in database yet, fetch all emails
+      searchCriteria = ['ALL'];
+      console.log(`No existing emails found, fetching all emails`);
     }
 
     const fetchOptions = {
@@ -76,16 +103,27 @@ export async function POST(request) {
     };
 
     const messages = await connection.search(searchCriteria, fetchOptions);
-    console.log(`Found ${messages.length} new emails to process`);
+    console.log(`Found ${messages.length} emails from server`);
 
-    if (messages.length === 0) {
+    // Filter messages by date if we have a last email date
+    let messagesToProcess = messages;
+    if (lastEmail) {
+      const lastEmailTime = new Date(lastEmail.receivedAt).getTime();
+      messagesToProcess = messages.filter((message) => {
+        const messageDate = message.attributes?.date;
+        if (!messageDate) return false;
+        return new Date(messageDate).getTime() > lastEmailTime;
+      });
+      console.log(`Filtered to ${messagesToProcess.length} new emails (after ${lastEmail.receivedAt})`);
+    }
+
+    if (messagesToProcess.length === 0) {
       connection.end();
       return NextResponse.json({ message: "No new emails found" }, { status: 200 });
     }
 
     let emailsProcessed = 0;
-    // Process all found emails since we're only getting new ones
-    const messagesToProcess = messages;
+    let emailsLinked = 0;
 
     for (const message of messagesToProcess) {
       const envelope = message.attributes?.envelope;
@@ -117,6 +155,35 @@ export async function POST(request) {
       }
 
       // Insert the new email (no duplicate check needed since we're only fetching newer emails)
+      
+      // Try to auto-link email to deal based on subject line
+      console.log(`Processing email subject: "${subject}"`);
+      const dealNumber = extractDealId(subject);
+      console.log(`Extracted deal number: ${dealNumber}`);
+      let dealId = null;
+      
+      if (dealNumber) {
+        console.log(`Found deal reference #${dealNumber} in subject: "${subject}"`);
+        
+        const { data: deal, error: dealError } = await supabaseAdmin
+          .from("CRMDeal")
+          .select("deal_id")
+          .eq("deal_id", dealNumber)
+          .single();
+        
+        console.log(`Database query result:`, { deal, dealError });
+        
+        if (deal && !dealError) {
+          dealId = deal.deal_id; // CRMEmail.dealId references CRMDeal.deal_id (INTEGER)
+          emailsLinked++;
+          console.log(`✅ Auto-linked email to Deal #${dealNumber} (deal_id: ${dealId})`);
+        } else {
+          console.warn(`⚠️ Deal #${dealNumber} not found in database`, dealError);
+        }
+      } else {
+        console.log(`No deal reference found in subject`);
+      }
+      
       const { error } = await supabaseAdmin.from("CRMEmail").insert([
         {
           fromEmail: fromEmail,
@@ -125,6 +192,9 @@ export async function POST(request) {
           body: body,
           receivedAt: new Date(envelope.date).toISOString(),
           direction: "INBOUND",
+          dealId: dealId, // Auto-linked deal ID if found
+          isRead: false,
+          status: "ACTIVE"
         },
       ]);
 
@@ -136,8 +206,24 @@ export async function POST(request) {
     }
 
     connection.end();
+    
+    // Count how many emails were auto-linked
+    const { data: recentEmails } = await supabaseAdmin
+      .from("CRMEmail")
+      .select("id, dealId")
+      .order("receivedAt", { ascending: false })
+      .limit(emailsProcessed);
+    
+    const linkedCount = recentEmails?.filter(e => e.dealId).length || 0;
+    const unlinkedCount = emailsProcessed - linkedCount;
+    
     return NextResponse.json(
-      { message: `${emailsProcessed} new emails processed from ${messagesToProcess.length} found` },
+      { 
+        message: `${emailsProcessed} new emails processed from ${messagesToProcess.length} found`,
+        linked: linkedCount,
+        unlinked: unlinkedCount,
+        details: `${linkedCount} auto-linked to deals, ${unlinkedCount} require manual linking`
+      },
       { status: 200 }
     );
   } catch (error) {
