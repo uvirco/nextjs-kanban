@@ -12,9 +12,18 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    let isRead = true;
+    try {
+      const body = await request.json();
+      isRead = body.isRead !== undefined ? body.isRead : true;
+    } catch {
+      // No body provided, default to marking as read
+      isRead = true;
+    }
+
     const { error } = await supabaseAdmin
       .from("CRMEmail")
-      .update({ isRead: true })
+      .update({ isRead })
       .eq("id", id)
       .eq("userId", userId); // Ensure user can only update their own emails
 

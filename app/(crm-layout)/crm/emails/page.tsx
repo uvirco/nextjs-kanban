@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -24,6 +25,7 @@ interface Email {
 }
 
 export default function EmailInboxPage() {
+  const router = useRouter();
   const [emails, setEmails] = useState<Email[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -185,28 +187,28 @@ export default function EmailInboxPage() {
         <table className="min-w-full divide-y divide-gray-700">
           <thead className="bg-gray-800">
             <tr>
-              <th className="px-4 py-3">
+              <th className="px-3 py-2">
                 <Checkbox
                   checked={selectedEmails.size === filteredEmails.length && filteredEmails.length > 0}
                   onCheckedChange={handleSelectAll}
                 />
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+              <th className="px-3 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                 Sender
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+              <th className="px-3 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                 Subject
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+              <th className="px-3 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                 Content
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+              <th className="px-3 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                 Linked Deal
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+              <th className="px-3 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                 Date
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+              <th className="px-3 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                 Actions
               </th>
             </tr>
@@ -214,7 +216,7 @@ export default function EmailInboxPage() {
           <tbody className="bg-gray-900 divide-y divide-gray-700">
             {filteredEmails.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-gray-400">
+                <td colSpan={7} className="px-3 py-6 text-center text-gray-400 text-xs">
                   No emails found.
                 </td>
               </tr>
@@ -223,42 +225,45 @@ export default function EmailInboxPage() {
                 <tr 
                   key={email.id} 
                   className={`hover:bg-gray-800 cursor-pointer ${!email.isRead ? 'bg-blue-950 border-l-4 border-blue-500' : ''}`}
-                  onClick={() => markAsRead(email.id)}
+                  onClick={() => {
+                    markAsRead(email.id);
+                    router.push(`/crm/emails/${email.id}`);
+                  }}
                 >
-                  <td className="px-4 py-4 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                  <td className="px-3 py-2 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                     <Checkbox
                       checked={selectedEmails.has(email.id)}
                       onCheckedChange={(checked) => handleSelectEmail(email.id, checked as boolean)}
                     />
                   </td>
-                  <td className="px-4 py-4 whitespace-nowrap">
-                    <div className={`text-sm ${!email.isRead ? 'font-bold' : 'font-medium'} text-gray-100`}>
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    <div className={`text-xs ${!email.isRead ? 'font-bold' : 'font-medium'} text-gray-100`}>
                       {email.fromEmail}
                     </div>
                   </td>
-                  <td className="px-4 py-4">
-                    <div className={`text-sm ${!email.isRead ? 'font-bold' : ''} text-gray-100 max-w-xs truncate`}>
+                  <td className="px-3 py-2">
+                    <div className={`text-xs ${!email.isRead ? 'font-bold' : ''} text-gray-100 max-w-xs truncate`}>
                       {email.subject || "(no subject)"}
                     </div>
                   </td>
-                  <td className="px-4 py-4">
-                    <div className={`text-sm ${!email.isRead ? 'font-semibold' : ''} text-gray-300 max-w-md truncate`}>
+                  <td className="px-3 py-2">
+                    <div className={`text-xs ${!email.isRead ? 'font-semibold' : ''} text-gray-300 max-w-md truncate`}>
                       {email.body.replace(/<[^>]*>/g, "").substring(0, 100)}...
                     </div>
                   </td>
-                  <td className="px-4 py-4 whitespace-nowrap">
+                  <td className="px-3 py-2 whitespace-nowrap">
                     {email.dealId ? (
-                      <Badge variant="outline" className="text-xs border-gray-600 text-gray-300">
+                      <Badge variant="outline" className="text-[10px] px-1.5 py-0.5 border-gray-600 text-gray-300">
                         Deal #{email.dealId}
                       </Badge>
                     ) : (
-                      <span className="text-sm text-gray-500">-</span>
+                      <span className="text-xs text-gray-500">-</span>
                     )}
                   </td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-400">
+                  <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-400">
                     {new Date(email.receivedAt || email.sentAt || email.createdAt).toLocaleDateString()}
                   </td>
-                  <td className="px-4 py-4 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                  <td className="px-3 py-2 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                     <Button 
                       size="sm" 
                       variant="ghost"

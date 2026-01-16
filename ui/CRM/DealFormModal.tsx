@@ -24,30 +24,15 @@ interface DealFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  columnId: string;
+  stage: string;
   dealToEdit?: any;
 }
-
-// Map column IDs to proper CRMDealStage enum values
-const COLUMN_TO_STAGE_MAP: Record<string, string> = {
-  "crm-deal-col-lead-0000-0000-0000-000000": "PROSPECTING",
-  "crm-deal-col-contacted-0000-0000-00000": "QUALIFICATION",
-  "crm-deal-col-qualified-0000-0000-00000": "PROPOSAL",
-  "crm-deal-col-proposal-0000-0000-000000": "NEGOTIATION",
-  "crm-deal-col-negotiation-0000-0000-000": "NEGOTIATION",
-  "crm-deal-col-won-00000-0000-0000-000000": "CLOSED_WON",
-  "crm-deal-col-lost-0000-0000-0000-000000": "CLOSED_LOST",
-};
-
-const getStageFromColumnId = (columnId: string): string => {
-  return COLUMN_TO_STAGE_MAP[columnId] || "PROSPECTING";
-};
 
 export default function DealFormModal({
   isOpen,
   onClose,
   onSuccess,
-  columnId,
+  stage,
   dealToEdit,
 }: DealFormModalProps) {
   const [loading, setLoading] = useState(false);
@@ -58,7 +43,7 @@ export default function DealFormModal({
     value: "",
     expectedCloseDate: "",
     notes: "",
-    stage: getStageFromColumnId(columnId),
+    stage: stage,
     order: 0,
   });
 
@@ -71,13 +56,13 @@ export default function DealFormModal({
         value: dealToEdit.value?.toString() || "",
         expectedCloseDate: dealToEdit.expectedCloseDate || "",
         notes: dealToEdit.notes || "",
-        stage: dealToEdit.stage || getStageFromColumnId(columnId),
+        stage: dealToEdit.stage || stage,
         order: dealToEdit.order || 0,
       });
     } else {
-      setFormData((prev) => ({ ...prev, stage: getStageFromColumnId(columnId) }));
+      setFormData((prev) => ({ ...prev, stage: stage }));
     }
-  }, [dealToEdit, columnId]);
+  }, [dealToEdit, stage]);
 
   const fetchContacts = async () => {
     try {

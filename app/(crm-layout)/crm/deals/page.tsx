@@ -12,94 +12,63 @@ import {
   IconCalendar,
 } from "@tabler/icons-react";
 
-// Map column IDs from database to display info (full pipeline: Lead → Closed)
-const DEAL_COLUMNS = [
-  {
-    id: "crm-deal-col-lead-0000-0000-0000-000000",
-    title: "Lead",
-    color: "bg-slate-500",
-  },
-  {
-    id: "crm-deal-col-contacted-0000-0000-00000",
-    title: "Contacted",
-    color: "bg-blue-500",
-  },
-  {
-    id: "crm-deal-col-qualified-0000-0000-00000",
-    title: "Qualified",
-    color: "bg-purple-500",
-  },
-  {
-    id: "crm-deal-col-proposal-0000-0000-000000",
-    title: "Proposal",
-    color: "bg-yellow-500",
-  },
-  {
-    id: "crm-deal-col-negotiation-0000-0000-000",
-    title: "Negotiation",
-    color: "bg-orange-500",
-  },
-  {
-    id: "crm-deal-col-won-00000-0000-0000-000000",
-    title: "Closed Won",
-    color: "bg-green-500",
-  },
-  {
-    id: "crm-deal-col-lost-0000-0000-0000-000000",
-    title: "Closed Lost",
-    color: "bg-red-500",
-  },
-];
-
-// Map column IDs to proper CRMDealStage enum values
-const COLUMN_TO_STAGE_MAP: Record<string, string> = {
-  "crm-deal-col-lead-0000-0000-0000-000000": "PROSPECTING",
-  "crm-deal-col-contacted-0000-0000-00000": "QUALIFICATION",
-  "crm-deal-col-qualified-0000-0000-00000": "PROPOSAL",
-  "crm-deal-col-proposal-0000-0000-000000": "NEGOTIATION",
-  "crm-deal-col-negotiation-0000-0000-000": "NEGOTIATION",
-  "crm-deal-col-won-00000-0000-0000-000000": "CLOSED_WON",
-  "crm-deal-col-lost-0000-0000-0000-000000": "CLOSED_LOST",
-};
-
-const getStageFromColumnId = (columnId: string): string => {
-  return COLUMN_TO_STAGE_MAP[columnId] || "PROSPECTING";
-};
-
-// Reverse mapping from stage to column ID for display
-const STAGE_TO_COLUMN_MAP: Record<string, string> = {
-  "PROSPECTING": "crm-deal-col-lead-0000-0000-0000-000000",
-  "QUALIFICATION": "crm-deal-col-contacted-0000-0000-00000",
-  "PROPOSAL": "crm-deal-col-qualified-0000-0000-00000",
-  "NEGOTIATION": "crm-deal-col-negotiation-0000-0000-000",
-  "CLOSED_WON": "crm-deal-col-won-00000-0000-0000-000000",
-  "CLOSED_LOST": "crm-deal-col-lost-0000-0000-0000-000000",
-};
-
-const getColumnIdFromStage = (stage: string): string => {
-  return STAGE_TO_COLUMN_MAP[stage] || "crm-deal-col-lead-0000-0000-0000-000000";
-};
+interface DealColumn {
+  id: number;
+  column_id: number;
+  title: string;
+  stage: string;
+  color: string;
+  order: number;
+}
 
 export default function CRMDealsPage() {
   const [deals, setDeals] = useState<CRMDeal[]>([]);
+  const [columns, setColumns] = useState<DealColumn[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedColumnId, setSelectedColumnId] = useState<string>("");
+  const [selectedStage, setSelectedStage] = useState<string>("");
   const [dealToEdit, setDealToEdit] = useState<CRMDeal | null>(null);
   const [draggedDeal, setDraggedDeal] = useState<CRMDeal | null>(null);
 
   useEffect(() => {
+    fetchColumns();
     fetchDeals();
   }, []);
 
+  const fetchColumns = async () => {
+    try {
+      const response = await fetch("/api/crm/deal-columns");
+      if (response.ok) {
+        const data = await response.json();
+        setColumns(data.columns || []);
+      }
+    } catch (error) {
+      console.error("Error fetching columns:", error);
+    }
+  };
+
   const fetchDeals = async () => {
     try {
+      console.log("Fetching deals...");
+      
+      // First check session
+      const sessionResponse = await fetch("/api/auth/session");
+      const session = await sessionResponse.json();
+      console.log("Session:", session);
+      
       const response = await fetch("/api/crm/deals");
       console.log("Response status:", response.status);
+      console.log("Response ok:", response.ok);
       
       if (response.ok) {
         const data = await response.json();
+        console.log("Raw deals data:", data);
+        console.log("Number of deals:", data.deals?.length);
+        console.log("First deal object:", data.deals?.[0]);
+        console.log("Second deal object:", data.deals?.[1]);
         const validDeals = (data.deals || []).filter((deal: CRMDeal) => deal && deal.id);
+        console.log("Valid deals:", validDeals);
+        console.log("Deal stages:", validDeals.map((d: CRMDeal) => ({ id: d.id, stage: d.stage })));
         setDeals(validDeals);
       } else {
         const errorText = await response.text();
@@ -110,25 +79,25 @@ export default function CRMDealsPage() {
       console.error("Error fetching deals:", error);
       setDeals([]);
     } finally {
+      console.log("Setting loading to false");
       setLoading(false);
     }
   };
 
-  const getDealsByColumn = (columnId: string) => {
-    const stageForColumn = getStageFromColumnId(columnId);
+  const getDealsByColumn = (stage: string) => {
     return deals
-      .filter((deal) => deal.stage === stageForColumn)
+      .filter((deal) => deal.stage === stage)
       .sort((a, b) => (a.order || 0) - (b.order || 0));
   };
 
-  const handleAddDeal = (columnId: string) => {
-    setSelectedColumnId(columnId);
+  const handleAddDeal = (stage: string) => {
+    setSelectedStage(stage);
     setDealToEdit(null);
     setIsModalOpen(true);
   };
 
   const handleEditDeal = (deal: CRMDeal) => {
-    setSelectedColumnId(getColumnIdFromStage(deal.stage));
+    setSelectedStage(deal.stage);
     setDealToEdit(deal);
     setIsModalOpen(true);
   };
@@ -160,21 +129,20 @@ export default function CRMDealsPage() {
     e.preventDefault();
   };
 
-  const handleDrop = async (columnId: string) => {
-    if (!draggedDeal || draggedDeal.stage === columnId) {
+  const handleDrop = async (stage: string) => {
+    if (!draggedDeal || draggedDeal.stage === stage) {
       setDraggedDeal(null);
       return;
     }
 
     try {
-      const newStage = getStageFromColumnId(columnId);
       const response = await fetch(`/api/crm/deals/${draggedDeal.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          stage: newStage,
+          stage: stage,
         }),
       });
 
@@ -222,8 +190,10 @@ export default function CRMDealsPage() {
       </div>
 
       <div className="flex gap-4 overflow-x-auto pb-4 flex-1">
-        {DEAL_COLUMNS.map((column) => {
-          const columnDeals = getDealsByColumn(column.id);          console.log(`Rendering column ${column.id} with ${columnDeals.length} deals`);          const columnValue = columnDeals.reduce(
+        {columns.map((column) => {
+          const columnDeals = getDealsByColumn(column.stage);
+          console.log(`Rendering column ${column.id} with ${columnDeals.length} deals`);
+          const columnValue = columnDeals.reduce(
             (sum, deal) => sum + parseFloat(deal.value?.toString() || "0"),
             0
           );
@@ -233,7 +203,7 @@ export default function CRMDealsPage() {
               key={`column-${column.id}`}
               className="flex-shrink-0 w-80 bg-zinc-800 rounded-lg p-4"
               onDragOver={handleDragOver}
-              onDrop={() => handleDrop(column.id)}
+              onDrop={() => handleDrop(column.stage)}
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="flex-1">
@@ -253,7 +223,7 @@ export default function CRMDealsPage() {
                 <Button
                   size="sm"
                   variant="ghost"
-                  onClick={() => handleAddDeal(column.id)}
+                  onClick={() => handleAddDeal(column.stage)}
                   className="h-8 w-8 p-0"
                 >
                   <IconPlus size={16} />
@@ -272,7 +242,10 @@ export default function CRMDealsPage() {
                     >
                       <CardHeader className="p-4 pb-2">
                         <CardTitle className="text-sm text-white flex items-start justify-between">
-                          <span className="flex-1">{deal.title}</span>
+                          <div className="flex-1">
+                            <div className="text-xs text-zinc-500 font-normal mb-1">#{deal.deal_id}</div>
+                            <div>{deal.title}</div>
+                          </div>
                           <div className="flex gap-1 ml-2">
                             <Button
                               size="sm"
@@ -334,7 +307,7 @@ export default function CRMDealsPage() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSuccess={fetchDeals}
-        columnId={selectedColumnId}
+        stage={selectedStage}
         dealToEdit={dealToEdit}
       />
     </div>

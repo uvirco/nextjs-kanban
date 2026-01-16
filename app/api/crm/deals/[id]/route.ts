@@ -26,8 +26,11 @@ export async function GET(
         assignedUser:assignedUserId(id, name, email)
       `
       )
-      .eq("id", id)
+      .eq("deal_id", id)
       .single();
+
+    // Map deal_id to id for consistency
+    const dealWithId = deal ? { ...deal, id: deal.deal_id } : null;
 
     if (error) {
       console.error("Error fetching CRM deal:", error);
@@ -38,7 +41,7 @@ export async function GET(
     }
 
     return NextResponse.json({
-      deal: deal as CRMDeal,
+      deal: dealWithId as CRMDeal,
     });
   } catch (error) {
     console.error("Error in CRM deal API:", error);
@@ -70,7 +73,7 @@ export async function PUT(
         ...body,
         updatedAt: new Date().toISOString(),
       })
-      .eq("id", id)
+      .eq("deal_id", id)
       .select(
         `
         *,
@@ -78,6 +81,9 @@ export async function PUT(
       `
       )
       .single();
+
+    // Map deal_id to id for consistency
+    const dealWithId = deal ? { ...deal, id: deal.deal_id } : null;
 
     if (error) {
       console.error("Error updating CRM deal:", error);
@@ -88,7 +94,7 @@ export async function PUT(
     }
 
     return NextResponse.json({
-      deal: deal as CRMDeal,
+      deal: dealWithId as CRMDeal,
     });
   } catch (error) {
     console.error("Error in CRM deal update API:", error);
@@ -113,7 +119,7 @@ export async function DELETE(
 
     const { id } = await params;
 
-    const { error } = await supabaseAdmin.from("CRMDeal").delete().eq("id", id);
+    const { error } = await supabaseAdmin.from("CRMDeal").delete().eq("deal_id", id);
 
     if (error) {
       console.error("Error deleting CRM deal:", error);

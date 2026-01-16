@@ -66,7 +66,19 @@ export async function GET() {
       .from("CRMDeal")
       .select(
         `
-        *,
+        deal_id,
+        title,
+        contactId,
+        leadId,
+        value,
+        stage,
+        expectedCloseDate,
+        notes,
+        columnId,
+        order,
+        createdAt,
+        updatedAt,
+        createdByUserId,
         contact:contactId(*)
       `
       )
@@ -80,8 +92,14 @@ export async function GET() {
       );
     }
 
+    // Map deal_id to id for consistency
+    const dealsWithId = deals?.map(deal => ({
+      ...deal,
+      id: deal.deal_id
+    }));
+
     return NextResponse.json({
-      deals: deals as CRMDeal[],
+      deals: dealsWithId as CRMDeal[],
     });
   } catch (error) {
     console.error("Error in CRM deals API:", error);
