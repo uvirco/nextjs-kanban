@@ -5,7 +5,7 @@ import { CRMDeal } from "@/types/crm";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const session = await auth();
@@ -24,7 +24,7 @@ export async function GET(
         *,
         contact:CRMContact(*),
         assignedUser:assignedUserId(id, name, email)
-      `
+      `,
       )
       .eq("deal_id", id)
       .single();
@@ -33,7 +33,7 @@ export async function GET(
       console.error("Error fetching CRM deal:", error);
       return NextResponse.json(
         { error: "Failed to fetch deal" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -45,14 +45,14 @@ export async function GET(
     console.error("Error in CRM deal API:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const session = await auth();
@@ -65,7 +65,10 @@ export async function PUT(
     const { id } = await params;
     const body = await request.json();
 
-    console.log("PUT /api/crm/deals/[id] - Received body:", JSON.stringify(body, null, 2));
+    console.log(
+      "PUT /api/crm/deals/[id] - Received body:",
+      JSON.stringify(body, null, 2),
+    );
 
     // Get current deal to track stage change
     const { data: currentDeal } = await supabaseAdmin
@@ -77,17 +80,18 @@ export async function PUT(
     console.log("Current deal:", currentDeal);
 
     let updateData = { ...body, updatedAt: new Date().toISOString() };
-    const isStageChange = body.stage && currentDeal && currentDeal.stage !== body.stage;
+    const isStageChange =
+      body.stage && currentDeal && currentDeal.stage !== body.stage;
 
     console.log("Is stage change:", isStageChange);
     console.log("New stage:", body.stage);
 
     // Check if this is a transition to "won" stage
-    const isWinningDeal = isStageChange && (
-      body.stage.toLowerCase() === 'won' || 
-      body.stage.toLowerCase() === 'closed_won' ||
-      body.stage === 'CLOSED_WON'
-    );
+    const isWinningDeal =
+      isStageChange &&
+      (body.stage.toLowerCase() === "won" ||
+        body.stage.toLowerCase() === "closed_won" ||
+        body.stage === "CLOSED_WON");
 
     console.log("Is winning deal:", isWinningDeal);
 
@@ -97,7 +101,7 @@ export async function PUT(
       const { data: deliveryBoard } = await supabaseAdmin
         .from("CRMBoard")
         .select("id, title")
-        .or('title.ilike.%delivery%,title.ilike.%fulfillment%')
+        .or("title.ilike.%delivery%,title.ilike.%fulfillment%")
         .single();
 
       if (deliveryBoard) {
@@ -116,7 +120,7 @@ export async function PUT(
             ...updateData,
             boardId: deliveryBoard.id,
             stage: firstColumn.stage,
-            outcome: 'won'
+            outcome: "won",
           };
 
           // Create DEAL_WON activity (special activity type)
@@ -145,12 +149,20 @@ export async function PUT(
             changedByUserId: userId,
             changedAt: new Date().toISOString(),
           });
+
+          // Create reference card in original Won column
+          await supabaseAdmin.from("CRMDealReference").insert({
+            dealId: parseInt(id),
+            boardId: currentDeal.boardId,
+            stage: currentDeal.stage,
+            note: `Won on ${new Date().toLocaleDateString()} - Now in ${deliveryBoard.title}`,
+          });
         }
       } else {
         // No delivery pipeline found, just mark as won
         updateData = {
           ...updateData,
-          outcome: 'won'
+          outcome: "won",
         };
 
         // Create DEAL_WON activity
@@ -172,7 +184,7 @@ export async function PUT(
         `
         *,
         contact:contactId(*)
-      `
+      `,
       )
       .single();
 
@@ -180,7 +192,7 @@ export async function PUT(
       console.error("Error updating CRM deal:", error);
       return NextResponse.json(
         { error: "Failed to update deal", details: error.message },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -212,7 +224,7 @@ export async function PUT(
       console.error("Error updating CRM deal:", error);
       return NextResponse.json(
         { error: "Failed to update deal", details: error.message },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -223,14 +235,14 @@ export async function PUT(
     console.error("Error in CRM deal update API:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const session = await auth();
@@ -251,7 +263,7 @@ export async function DELETE(
       console.error("Error deleting CRM deal:", error);
       return NextResponse.json(
         { error: "Failed to delete deal" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -262,7 +274,7 @@ export async function DELETE(
     console.error("Error in CRM deal deletion API:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

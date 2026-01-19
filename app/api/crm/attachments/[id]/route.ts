@@ -6,7 +6,7 @@ import { storage } from "@/lib/storage-service";
 // DELETE /api/crm/attachments/[id]
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const session = await auth();
@@ -48,7 +48,7 @@ export async function DELETE(
     console.error("Error in attachment DELETE API:", error);
     return NextResponse.json(
       { error: "Failed to delete attachment" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

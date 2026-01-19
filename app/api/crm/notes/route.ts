@@ -17,10 +17,12 @@ export async function GET(request: NextRequest) {
 
     let query = supabaseAdmin
       .from("CRMNote")
-      .select(`
+      .select(
+        `
         *,
         createdByUser:User!CRMNote_createdByUserId_fkey(name, email)
-      `)
+      `,
+      )
       .order("isPinned", { ascending: false })
       .order("createdAt", { ascending: false });
 
@@ -46,7 +48,7 @@ export async function GET(request: NextRequest) {
     console.error("Error in notes GET API:", error);
     return NextResponse.json(
       { error: "Failed to fetch notes" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -65,7 +67,7 @@ export async function POST(request: NextRequest) {
     if (!content || !content.trim()) {
       return NextResponse.json(
         { error: "Content is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -90,10 +92,12 @@ export async function POST(request: NextRequest) {
         createdByUserId: user.id,
         isPinned: isPinned || false,
       })
-      .select(`
+      .select(
+        `
         *,
         createdByUser:User!CRMNote_createdByUserId_fkey(name, email)
-      `)
+      `,
+      )
       .single();
 
     if (error) {
@@ -105,10 +109,8 @@ export async function POST(request: NextRequest) {
     if (dealId) {
       // Trim content to 200 characters for preview
       const notePreview =
-        content.length > 200
-          ? content.substring(0, 200) + "..."
-          : content;
-      
+        content.length > 200 ? content.substring(0, 200) + "..." : content;
+
       await supabaseAdmin.from("CRMActivity").insert({
         type: "NOTE",
         content: `Added a note: ${notePreview}`,
@@ -122,7 +124,7 @@ export async function POST(request: NextRequest) {
     console.error("Error in notes POST API:", error);
     return NextResponse.json(
       { error: "Failed to create note" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

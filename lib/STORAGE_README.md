@@ -27,11 +27,9 @@ import { storage } from "@/lib/storage-service";
 
 // Upload file
 const buffer = Buffer.from(await file.arrayBuffer());
-const { path, error } = await storage.upload(
-  "attachments/file.pdf",
-  buffer,
-  { contentType: "application/pdf" }
-);
+const { path, error } = await storage.upload("attachments/file.pdf", buffer, {
+  contentType: "application/pdf",
+});
 
 // Delete file(s)
 await storage.delete(["attachments/file.pdf"]);
@@ -46,12 +44,15 @@ console.log(storage.getType()); // 'supabase' or 'local'
 ## Migration Path
 
 ### Current: Supabase Storage
+
 ```bash
 STORAGE_TYPE=supabase
 ```
+
 Files stored in Supabase Storage bucket.
 
 ### Future: Local Filesystem
+
 ```bash
 STORAGE_TYPE=local
 STORAGE_PATH=/var/app/storage
@@ -64,16 +65,18 @@ Served via `/api/storage/*` route with authentication.
 ### Hybrid Migration
 
 Run both simultaneously:
+
 1. Keep `STORAGE_TYPE=supabase` for existing files
 2. New uploads can go to either backend
 3. Gradually migrate old files:
+
    ```typescript
    // Download from Supabase
    const file = await downloadFromSupabase(path);
-   
+
    // Upload to local
    await storage.upload(path, file);
-   
+
    // Update database record
    await updateAttachmentPath(id, path);
    ```
@@ -81,10 +84,12 @@ Run both simultaneously:
 ## File Serving
 
 ### Supabase
+
 - Public URLs generated via Supabase Storage API
 - CDN-backed, globally distributed
 
 ### Local
+
 - Files served via `/api/storage/[...path]` route
 - Authenticated access required
 - Consider adding nginx/CDN layer for production
@@ -95,7 +100,7 @@ Run both simultaneously:
 ✅ **Easy testing** - Test locally without Supabase  
 ✅ **Cost control** - Move to cheaper storage  
 ✅ **Data sovereignty** - Keep files on-premise  
-✅ **Gradual migration** - No downtime required  
+✅ **Gradual migration** - No downtime required
 
 ## Production Setup
 

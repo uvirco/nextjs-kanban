@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     if (!filename || !storagePath) {
       return NextResponse.json(
         { error: "Filename and storage path are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     if (!parentType || !parentId) {
       return NextResponse.json(
         { error: "Must specify dealId, contactId, or leadId" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -61,10 +61,12 @@ export async function POST(request: NextRequest) {
         parent_id: String(parentId),
         uploadedBy: user.id,
       })
-      .select(`
+      .select(
+        `
         *,
         uploadedByUser:User!Attachment_uploadedBy_fkey(name, email)
-      `)
+      `,
+      )
       .single();
 
     if (error) {
@@ -77,7 +79,7 @@ export async function POST(request: NextRequest) {
     console.error("Error in attachments upload API:", error);
     return NextResponse.json(
       { error: "Failed to create attachment" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

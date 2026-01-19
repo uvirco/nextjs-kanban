@@ -24,7 +24,9 @@ import {
   IconSettings,
   IconColumns,
   IconGripVertical,
+  IconExternalLink,
 } from "@tabler/icons-react";
+import { Badge } from "@/components/ui/badge";
 
 interface DealColumn {
   id: string;
@@ -35,10 +37,21 @@ interface DealColumn {
   boardId?: string;
 }
 
+interface DealReference {
+  id: string;
+  dealId: number;
+  boardId: string;
+  stage: string;
+  note: string;
+  createdAt: string;
+  deal?: CRMDeal; // Joined deal data
+}
+
 export default function CRMDealsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [deals, setDeals] = useState<CRMDeal[]>([]);
+  const [referenceCards, setReferenceCards] = useState<DealReference[]>([]);
   const [columns, setColumns] = useState<DealColumn[]>([]);
   const [boards, setBoards] = useState<CRMBoard[]>([]);
   const [selectedBoardId, setSelectedBoardId] = useState<string>("");
@@ -99,7 +112,7 @@ export default function CRMDealsPage() {
   const fetchColumns = async () => {
     try {
       const response = await fetch(
-        `/api/crm/deal-columns?boardId=${selectedBoardId}`
+        `/api/crm/deal-columns?boardId=${selectedBoardId}`,
       );
       if (response.ok) {
         const data = await response.json();
@@ -130,18 +143,25 @@ export default function CRMDealsPage() {
         console.log("First deal object:", data.deals?.[0]);
         console.log("Second deal object:", data.deals?.[1]);
         const validDeals = (data.deals || []).filter(
-          (deal: CRMDeal) => deal && deal.id
+          (deal: CRMDeal) => deal && deal.id,
         );
         console.log("Valid deals:", validDeals);
         console.log(
           "Deal stages:",
-          validDeals.map((d: CRMDeal) => ({ id: d.id, stage: d.stage }))
+          validDeals.map((d: CRMDeal) => ({ id: d.id, stage: d.stage })),
         );
         setDeals(validDeals);
       } else {
         const errorText = await response.text();
         console.error("Failed to fetch deals:", response.status, errorText);
         setDeals([]);
+      }
+
+      // Fetch reference cards for this board
+      const refResponse = await fetch(`/api/crm/deal-references?boardId=${selectedBoardId}`);
+      if (refResponse.ok) {
+        const refData = await refResponse.json();
+        setReferenceCards(refData.references || []);
       }
     } catch (error) {
       console.error("Error fetching deals:", error);
@@ -156,6 +176,10 @@ export default function CRMDealsPage() {
     return deals
       .filter((deal) => deal.stage === stage)
       .sort((a, b) => (a.order || 0) - (b.order || 0));
+  };
+
+  const getReferencesByColumn = (stage: string) => {
+    return referenceCards.filter((ref) => ref.stage === stage);
   };
 
   const handleAddDeal = (stage: string) => {
@@ -270,8 +294,8 @@ export default function CRMDealsPage() {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ order: col.order }),
-          })
-        )
+          }),
+        ),
       );
     } catch (error) {
       console.error("Error updating column order:", error);
@@ -332,12 +356,14 @@ export default function CRMDealsPage() {
       <div className="flex gap-4 overflow-x-auto pb-4 flex-1">
         {columns.map((column) => {
           const columnDeals = getDealsByColumn(column.stage);
+          const columnRefs = getReferencesByColumn(column.stage);
+          const totalCount = columnDeals.length + columnRefs.length;
           console.log(
-            `Rendering column ${column.id} with ${columnDeals.length} deals`
+            `Rendering column ${column.id} with ${columnDeals.length} deals and ${columnRefs.length} references`,
           );
           const columnValue = columnDeals.reduce(
             (sum, deal) => sum + parseFloat(deal.value?.toString() || "0"),
-            0
+            0,
           );
 
           return (
@@ -347,7 +373,7 @@ export default function CRMDealsPage() {
               onDragOver={handleDragOver}
               onDrop={() => handleDrop(column.stage)}
             >
-              <div 
+              <div
                 className="flex items-center justify-between mb-4 cursor-move"
                 draggable
                 onDragStart={() => handleColumnDragStart(column)}
@@ -363,7 +389,7 @@ export default function CRMDealsPage() {
                     <div className={`w-3 h-3 rounded-full ${column.color}`} />
                     <h3 className="font-semibold text-white">{column.title}</h3>
                     <span className="text-xs text-zinc-400">
-                      ({columnDeals.length})
+                      ({totalCount})
                     </span>
                   </div>
                   {columnValue > 0 && (
@@ -443,7 +469,7 @@ export default function CRMDealsPage() {
                           <p className="text-zinc-400 flex items-center gap-1">
                             <IconCalendar size={12} />
                             {new Date(
-                              deal.expectedCloseDate
+                              deal.expectedCloseDate,
                             ).toLocaleDateString()}
                           </p>
                         )}
@@ -456,7 +482,41 @@ export default function CRMDealsPage() {
                     </Card>
                   ))}
 
-                {columnDeals.length === 0 && (
+                {/* Reference cards (won deals that moved to another pipeline) */}
+                {getReferencesByColumn(column.stage).map((ref) => (
+                  <Card
+                    key={`ref-${ref.id}`}
+                    onClick={() => router.push(`/crm/deals/${ref.dealId}`)}
+                    className="bg-zinc-800/50 border-zinc-700 border-2 border-dashed hover:border-zinc-600 cursor-pointer transition-colors relative opacity-80"
+                  >
+                    <CardHeader className="p-4 pb-2">
+                      <CardTitle className="text-sm text-zinc-300 flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Badge variant="outline" className="text-xs border-green-500 text-green-400 bg-green-500/10">
+                              WON
+                            </Badge>
+                            <span className="text-xs text-zinc-500">#{ref.dealId}</span>
+                          </div>
+                          <div className="text-white">{ref.deal?.title || "Deal"}</div>
+                        </div>
+                        <IconExternalLink size={14} className="text-zinc-500 ml-2 flex-shrink-0" />
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-4 pt-0 space-y-1 text-xs">
+                      {ref.deal?.value && (
+                        <p className="text-green-400 font-semibold">
+                          ${parseFloat(ref.deal.value.toString()).toLocaleString()}
+                        </p>
+                      )}
+                      <p className="text-zinc-400 italic">
+                        {ref.note}
+                      </p>
+                    </CardContent>
+                  </Card>
+                ))}
+
+                {columnDeals.length === 0 && getReferencesByColumn(column.stage).length === 0 && (
                   <div className="text-center py-8 text-zinc-500 text-sm">
                     No deals yet
                   </div>

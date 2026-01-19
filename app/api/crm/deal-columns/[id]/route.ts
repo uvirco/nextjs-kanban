@@ -5,7 +5,7 @@ import { supabaseAdmin } from "@/lib/supabase";
 // PUT /api/crm/deal-columns/[id] - Update a column
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
@@ -38,7 +38,7 @@ export async function PUT(
       console.error("Error updating CRM column:", error);
       return NextResponse.json(
         { error: "Failed to update column", details: error.message },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -47,7 +47,7 @@ export async function PUT(
     console.error("Error in CRM column PUT API:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -55,7 +55,7 @@ export async function PUT(
 // DELETE /api/crm/deal-columns/[id] - Delete a column
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
@@ -75,7 +75,7 @@ export async function DELETE(
     if (deals && deals.length > 0) {
       return NextResponse.json(
         { error: "Cannot delete column with existing deals" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -88,7 +88,7 @@ export async function DELETE(
       console.error("Error deleting CRM column:", error);
       return NextResponse.json(
         { error: "Failed to delete column", details: error.message },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -97,7 +97,7 @@ export async function DELETE(
     console.error("Error in CRM column DELETE API:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

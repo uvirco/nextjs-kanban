@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
     console.error("Error in GET /api/crm/boards:", error);
     return NextResponse.json(
       { error: error.message || "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
     console.error("Error in POST /api/crm/boards:", error);
     return NextResponse.json(
       { error: error.message || "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

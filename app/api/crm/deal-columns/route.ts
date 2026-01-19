@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
       console.error("Error fetching CRM deal columns:", error);
       return NextResponse.json(
         { error: "Failed to fetch columns", details: error.message },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
     console.error("Error in CRM deal columns API:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
     if (!title || !stage || !boardId) {
       return NextResponse.json(
         { error: "Missing required fields: title, stage, boardId" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -77,9 +77,10 @@ export async function POST(request: NextRequest) {
       .order("order", { ascending: false })
       .limit(1);
 
-    const nextOrder = existingColumns && existingColumns.length > 0 
-      ? (existingColumns[0].order || 0) + 1 
-      : 0;
+    const nextOrder =
+      existingColumns && existingColumns.length > 0
+        ? (existingColumns[0].order || 0) + 1
+        : 0;
 
     const { data: column, error } = await supabaseAdmin
       .from("CRMColumn")
@@ -97,7 +98,7 @@ export async function POST(request: NextRequest) {
       console.error("Error creating CRM column:", error);
       return NextResponse.json(
         { error: "Failed to create column", details: error.message },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -106,7 +107,7 @@ export async function POST(request: NextRequest) {
     console.error("Error in CRM columns POST API:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

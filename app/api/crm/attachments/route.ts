@@ -12,26 +12,33 @@ export async function GET(request: NextRequest) {
     }
 
     const searchParams = request.nextUrl.searchParams;
-    const parentId = searchParams.get("dealId") || 
-                      searchParams.get("contactId") || 
-                      searchParams.get("leadId");
-    const parentType = searchParams.get("dealId") ? "crm_deal" :
-                       searchParams.get("contactId") ? "crm_contact" :
-                       searchParams.get("leadId") ? "crm_lead" : null;
+    const parentId =
+      searchParams.get("dealId") ||
+      searchParams.get("contactId") ||
+      searchParams.get("leadId");
+    const parentType = searchParams.get("dealId")
+      ? "crm_deal"
+      : searchParams.get("contactId")
+        ? "crm_contact"
+        : searchParams.get("leadId")
+          ? "crm_lead"
+          : null;
 
     if (!parentId || !parentType) {
       return NextResponse.json(
         { error: "Parent ID and type are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     const { data: attachments, error } = await supabaseAdmin
       .from("Attachment")
-      .select(`
+      .select(
+        `
         *,
         uploadedByUser:User!Attachment_uploadedBy_fkey(name, email)
-      `)
+      `,
+      )
       .eq("parent_type", parentType)
       .eq("parent_id", parentId)
       .order("createdAt", { ascending: false });
@@ -48,7 +55,7 @@ export async function GET(request: NextRequest) {
         if (attachment.storage_path && !attachment.url) {
           try {
             const publicUrl = storage.getPublicUrl(attachment.storage_path);
-            
+
             return {
               ...attachment,
               url: publicUrl,
@@ -59,7 +66,7 @@ export async function GET(request: NextRequest) {
           }
         }
         return attachment;
-      })
+      }),
     );
 
     return NextResponse.json({ attachments: attachmentsWithUrls });
@@ -67,7 +74,7 @@ export async function GET(request: NextRequest) {
     console.error("Error in attachments GET API:", error);
     return NextResponse.json(
       { error: "Failed to fetch attachments" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -86,20 +93,24 @@ export async function POST(request: NextRequest) {
     if (!filename || !url) {
       return NextResponse.json(
         { error: "Filename and URL are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Determine parent type and ID
-    const parentType = dealId ? "crm_deal" : 
-                       contactId ? "crm_contact" : 
-                       leadId ? "crm_lead" : null;
+    const parentType = dealId
+      ? "crm_deal"
+      : contactId
+        ? "crm_contact"
+        : leadId
+          ? "crm_lead"
+          : null;
     const parentId = dealId || contactId || leadId;
 
     if (!parentType || !parentId) {
       return NextResponse.json(
         { error: "Must specify dealId, contactId, or leadId" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -123,10 +134,12 @@ export async function POST(request: NextRequest) {
         parent_id: String(parentId),
         uploadedBy: user.id,
       })
-      .select(`
+      .select(
+        `
         *,
         uploadedByUser:User!Attachment_uploadedBy_fkey(name, email)
-      `)
+      `,
+      )
       .single();
 
     if (error) {
@@ -149,7 +162,7 @@ export async function POST(request: NextRequest) {
     console.error("Error in attachments POST API:", error);
     return NextResponse.json(
       { error: "Failed to create attachment" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

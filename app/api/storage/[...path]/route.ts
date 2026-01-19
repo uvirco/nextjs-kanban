@@ -8,7 +8,7 @@ import { storage } from "@/lib/storage-service";
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ path: string[] }> }
+  { params }: { params: Promise<{ path: string[] }> },
 ) {
   try {
     // Check authentication
@@ -21,7 +21,7 @@ export async function GET(
     if (storage.getType() !== "local") {
       return NextResponse.json(
         { error: "This endpoint is only for local storage" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -69,7 +69,7 @@ export async function GET(
     console.error("Error serving file:", error);
     return NextResponse.json(
       { error: "Failed to serve file" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

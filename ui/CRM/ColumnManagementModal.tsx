@@ -12,7 +12,14 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { IconPlus, IconTrash, IconGripVertical, IconEdit, IconCheck, IconX } from "@tabler/icons-react";
+import {
+  IconPlus,
+  IconTrash,
+  IconGripVertical,
+  IconEdit,
+  IconCheck,
+  IconX,
+} from "@tabler/icons-react";
 
 interface Column {
   id: string;
@@ -110,7 +117,11 @@ export default function ColumnManagementModal({
   };
 
   const handleDeleteColumn = async (columnId: string, columnTitle: string) => {
-    if (!confirm(`Are you sure you want to delete the column "${columnTitle}"?\n\nWarning: All deals in this column will need to be moved to another column first.`)) {
+    if (
+      !confirm(
+        `Are you sure you want to delete the column "${columnTitle}"?\n\nWarning: All deals in this column will need to be moved to another column first.`,
+      )
+    ) {
       return;
     }
 
@@ -193,14 +204,17 @@ export default function ColumnManagementModal({
         <DialogHeader>
           <DialogTitle>Manage Pipeline Columns</DialogTitle>
           <DialogDescription>
-            Add and organize columns for this pipeline. Each column represents a stage in your deal flow.
+            Add and organize columns for this pipeline. Each column represents a
+            stage in your deal flow.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
           {/* Existing Columns */}
           <div>
-            <h3 className="text-sm font-medium mb-3">Current Columns ({columns.length})</h3>
+            <h3 className="text-sm font-medium mb-3">
+              Current Columns ({columns.length})
+            </h3>
             {columns.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground border-2 border-dashed rounded-lg">
                 <p>No columns yet. Add your first column below.</p>
@@ -218,13 +232,23 @@ export default function ColumnManagementModal({
                         <div className="flex-1 grid grid-cols-2 gap-2">
                           <Input
                             value={editedColumn.title || ""}
-                            onChange={(e) => setEditedColumn({ ...editedColumn, title: e.target.value })}
+                            onChange={(e) =>
+                              setEditedColumn({
+                                ...editedColumn,
+                                title: e.target.value,
+                              })
+                            }
                             placeholder="Column title"
                             className="h-8"
                           />
                           <Input
                             value={editedColumn.stage || ""}
-                            onChange={(e) => setEditedColumn({ ...editedColumn, stage: e.target.value })}
+                            onChange={(e) =>
+                              setEditedColumn({
+                                ...editedColumn,
+                                stage: e.target.value,
+                              })
+                            }
                             placeholder="Stage slug"
                             className="h-8"
                           />
@@ -240,7 +264,9 @@ export default function ColumnManagementModal({
                                   : "border-transparent"
                               }`}
                               style={{ backgroundColor: color }}
-                              onClick={() => setEditedColumn({ ...editedColumn, color })}
+                              onClick={() =>
+                                setEditedColumn({ ...editedColumn, color })
+                              }
                             />
                           ))}
                         </div>
@@ -291,7 +317,9 @@ export default function ColumnManagementModal({
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => handleDeleteColumn(column.id, column.title)}
+                          onClick={() =>
+                            handleDeleteColumn(column.id, column.title)
+                          }
                           disabled={loading}
                           className="text-destructive hover:text-destructive hover:bg-destructive/10"
                         >
@@ -361,7 +389,9 @@ export default function ColumnManagementModal({
 
               <Button
                 onClick={handleAddColumn}
-                disabled={loading || !newColumnTitle.trim() || !newColumnStage.trim()}
+                disabled={
+                  loading || !newColumnTitle.trim() || !newColumnStage.trim()
+                }
                 className="w-full"
               >
                 <IconPlus className="h-4 w-4 mr-2" />

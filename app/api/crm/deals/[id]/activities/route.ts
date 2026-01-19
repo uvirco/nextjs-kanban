@@ -4,7 +4,7 @@ import { auth } from "@/auth";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const session = await auth();
@@ -25,7 +25,7 @@ export async function GET(
         createdAt,
         createdByUserId,
         createdByUser:createdByUserId(id, name, email)
-      `
+      `,
       )
       .eq("dealId", parseInt(id))
       .order("createdAt", { ascending: false });
@@ -40,14 +40,14 @@ export async function GET(
     console.error("Error in deal activities API:", error);
     return NextResponse.json(
       { error: "Failed to fetch activities" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const session = await auth();
@@ -62,7 +62,7 @@ export async function POST(
     if (!type || !content) {
       return NextResponse.json(
         { error: "Type and content are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -97,7 +97,7 @@ export async function POST(
     console.error("Error in create activity API:", error);
     return NextResponse.json(
       { error: "Failed to create activity" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

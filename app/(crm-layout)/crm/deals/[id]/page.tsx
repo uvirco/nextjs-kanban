@@ -151,7 +151,7 @@ export default function DealDetailPage({
         // Fetch contact if exists
         if (dealData.contactId) {
           const contactResponse = await fetch(
-            `/api/crm/contacts/${dealData.contactId}`
+            `/api/crm/contacts/${dealData.contactId}`,
           );
           if (contactResponse.ok) {
             const contactData = await contactResponse.json();
@@ -161,7 +161,7 @@ export default function DealDetailPage({
 
         // Fetch related emails
         const emailsResponse = await fetch(
-          `/api/crm/emails?dealId=${dealData.deal_id}`
+          `/api/crm/emails?dealId=${dealData.deal_id}`,
         );
         if (emailsResponse.ok) {
           const emailsData = await emailsResponse.json();
@@ -177,7 +177,7 @@ export default function DealDetailPage({
 
         // Fetch activities
         const activitiesResponse = await fetch(
-          `/api/crm/deals/${id}/activities`
+          `/api/crm/deals/${id}/activities`,
         );
         if (activitiesResponse.ok) {
           const activitiesData = await activitiesResponse.json();
@@ -304,7 +304,9 @@ export default function DealDetailPage({
   const fetchAttachments = async () => {
     if (!deal) return;
     try {
-      const response = await fetch(`/api/crm/attachments?dealId=${deal.deal_id}`);
+      const response = await fetch(
+        `/api/crm/attachments?dealId=${deal.deal_id}`,
+      );
       if (response.ok) {
         const data = await response.json();
         setAttachments(data.attachments || []);
@@ -807,7 +809,9 @@ export default function DealDetailPage({
                                 className={`absolute left-2.5 w-3 h-3 ${iconColor} rounded-full ring-4 ring-gray-950`}
                               ></div>
 
-                              <Card className={`bg-gray-800 border-gray-700 ${activity.type === "DEAL_WON" ? "border-green-500/50" : ""}`}>
+                              <Card
+                                className={`bg-gray-800 border-gray-700 ${activity.type === "DEAL_WON" ? "border-green-500/50" : ""}`}
+                              >
                                 <CardContent className="p-4">
                                   <div className="flex items-start justify-between mb-2">
                                     {activity.type === "DEAL_WON" ? (
@@ -827,7 +831,7 @@ export default function DealDetailPage({
                                     )}
                                     <span className="text-xs text-gray-500">
                                       {new Date(
-                                        activity.createdAt
+                                        activity.createdAt,
                                       ).toLocaleString()}
                                     </span>
                                   </div>
@@ -837,12 +841,14 @@ export default function DealDetailPage({
                                       dangerouslySetInnerHTML={{
                                         __html: activity.content.replace(
                                           "Added a note: ",
-                                          ""
+                                          "",
                                         ),
                                       }}
                                     />
                                   ) : (
-                                    <p className={`text-sm mb-2 ${activity.type === "DEAL_WON" ? "text-green-300 font-semibold" : "text-gray-300"}`}>
+                                    <p
+                                      className={`text-sm mb-2 ${activity.type === "DEAL_WON" ? "text-green-300 font-semibold" : "text-gray-300"}`}
+                                    >
                                       {activity.content}
                                     </p>
                                   )}
@@ -1023,7 +1029,9 @@ export default function DealDetailPage({
                             />
                           </div>
                           {uploadError && (
-                            <div className="text-sm text-red-400">{uploadError}</div>
+                            <div className="text-sm text-red-400">
+                              {uploadError}
+                            </div>
                           )}
                           <div className="flex gap-2">
                             <Button
@@ -1077,7 +1085,9 @@ export default function DealDetailPage({
                             />
                           </div>
                           {uploadError && (
-                            <div className="text-sm text-red-400">{uploadError}</div>
+                            <div className="text-sm text-red-400">
+                              {uploadError}
+                            </div>
                           )}
                           <div className="flex gap-2">
                             <Button
@@ -1120,10 +1130,17 @@ export default function DealDetailPage({
                             <CardContent className="p-4">
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                                  {attachment.url && !attachment.storage_path ? (
-                                    <IconLink size={20} className="text-blue-400 flex-shrink-0" />
+                                  {attachment.url &&
+                                  !attachment.storage_path ? (
+                                    <IconLink
+                                      size={20}
+                                      className="text-blue-400 flex-shrink-0"
+                                    />
                                   ) : (
-                                    <IconPaperclip size={20} className="text-gray-400 flex-shrink-0" />
+                                    <IconPaperclip
+                                      size={20}
+                                      className="text-gray-400 flex-shrink-0"
+                                    />
                                   )}
                                   <div className="flex-1 min-w-0">
                                     <p className="text-sm font-medium text-gray-100 truncate">
@@ -1132,13 +1149,16 @@ export default function DealDetailPage({
                                     <div className="flex items-center gap-2 text-xs text-gray-400">
                                       {attachment.size && (
                                         <span>
-                                          {(attachment.size / 1024).toFixed(1)} KB
+                                          {(attachment.size / 1024).toFixed(1)}{" "}
+                                          KB
                                         </span>
                                       )}
                                       {attachment.uploadedByUser && (
                                         <>
                                           <span>•</span>
-                                          <span>{attachment.uploadedByUser.name}</span>
+                                          <span>
+                                            {attachment.uploadedByUser.name}
+                                          </span>
                                         </>
                                       )}
                                       {attachment.createdAt && (
@@ -1146,7 +1166,7 @@ export default function DealDetailPage({
                                           <span>•</span>
                                           <span>
                                             {new Date(
-                                              attachment.createdAt
+                                              attachment.createdAt,
                                             ).toLocaleDateString()}
                                           </span>
                                         </>
@@ -1159,7 +1179,9 @@ export default function DealDetailPage({
                                     <Button
                                       size="sm"
                                       variant="ghost"
-                                      onClick={() => window.open(attachment.url, "_blank")}
+                                      onClick={() =>
+                                        window.open(attachment.url, "_blank")
+                                      }
                                       className="h-8 w-8 p-0 text-gray-400 hover:text-blue-500"
                                       title="Open"
                                     >
@@ -1169,7 +1191,9 @@ export default function DealDetailPage({
                                   <Button
                                     size="sm"
                                     variant="ghost"
-                                    onClick={() => handleDeleteAttachment(attachment.id)}
+                                    onClick={() =>
+                                      handleDeleteAttachment(attachment.id)
+                                    }
                                     className="h-8 w-8 p-0 text-gray-400 hover:text-red-500"
                                     title="Delete"
                                   >

@@ -27,13 +27,13 @@ export interface StorageAdapter {
   upload(
     filePath: string,
     file: Buffer,
-    options?: StorageUploadOptions
+    options?: StorageUploadOptions,
   ): Promise<StorageUploadResult>;
-  
+
   delete(paths: string[]): Promise<StorageDeleteResult>;
-  
+
   getPublicUrl(filePath: string): string;
-  
+
   getBucket(): string;
 }
 
@@ -50,7 +50,7 @@ class SupabaseStorageAdapter implements StorageAdapter {
   async upload(
     filePath: string,
     file: Buffer,
-    options?: StorageUploadOptions
+    options?: StorageUploadOptions,
   ): Promise<StorageUploadResult> {
     const { error } = await supabaseAdmin.storage
       .from(this.bucket)
@@ -85,7 +85,7 @@ class SupabaseStorageAdapter implements StorageAdapter {
     const { data } = supabaseAdmin.storage
       .from(this.bucket)
       .getPublicUrl(filePath);
-    
+
     return data.publicUrl;
   }
 
@@ -109,7 +109,7 @@ class LocalStorageAdapter implements StorageAdapter {
   async upload(
     filePath: string,
     file: Buffer,
-    options?: StorageUploadOptions
+    options?: StorageUploadOptions,
   ): Promise<StorageUploadResult> {
     try {
       const fullPath = path.join(this.basePath, filePath);
@@ -140,7 +140,7 @@ class LocalStorageAdapter implements StorageAdapter {
               throw err;
             }
           }
-        })
+        }),
       );
       return {};
     } catch (error) {
@@ -181,7 +181,7 @@ class StorageService {
 
   constructor() {
     this.type = process.env.STORAGE_TYPE || "supabase";
-    
+
     if (this.type === "local") {
       this.adapter = new LocalStorageAdapter();
       console.log("📁 Storage: Local Filesystem");
@@ -194,7 +194,7 @@ class StorageService {
   async upload(
     filePath: string,
     file: Buffer,
-    options?: StorageUploadOptions
+    options?: StorageUploadOptions,
   ): Promise<StorageUploadResult> {
     return this.adapter.upload(filePath, file, options);
   }

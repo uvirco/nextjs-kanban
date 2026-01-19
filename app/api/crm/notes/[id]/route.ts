@@ -5,7 +5,7 @@ import { supabaseAdmin } from "@/lib/supabase";
 // DELETE /api/crm/notes/[id]
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const session = await auth();
@@ -15,10 +15,7 @@ export async function DELETE(
 
     const { id } = await params;
 
-    const { error } = await supabaseAdmin
-      .from("CRMNote")
-      .delete()
-      .eq("id", id);
+    const { error } = await supabaseAdmin.from("CRMNote").delete().eq("id", id);
 
     if (error) {
       console.error("Error deleting note:", error);
@@ -30,7 +27,7 @@ export async function DELETE(
     console.error("Error in note DELETE API:", error);
     return NextResponse.json(
       { error: "Failed to delete note" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -38,7 +35,7 @@ export async function DELETE(
 // PUT /api/crm/notes/[id]
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const session = await auth();
@@ -58,10 +55,12 @@ export async function PUT(
       .from("CRMNote")
       .update(updateData)
       .eq("id", id)
-      .select(`
+      .select(
+        `
         *,
         createdByUser:User!CRMNote_createdByUserId_fkey(name, email)
-      `)
+      `,
+      )
       .single();
 
     if (error) {
@@ -74,7 +73,7 @@ export async function PUT(
     console.error("Error in note PUT API:", error);
     return NextResponse.json(
       { error: "Failed to update note" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
