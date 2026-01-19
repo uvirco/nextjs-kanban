@@ -154,7 +154,7 @@ export async function PUT(
           await supabaseAdmin.from("CRMDealReference").insert({
             dealId: parseInt(id),
             boardId: currentDeal.boardId,
-            stage: currentDeal.stage,
+            stage: body.stage, // Use the won stage, not the previous stage
             note: `Won on ${new Date().toLocaleDateString()} - Now in ${deliveryBoard.title}`,
           });
         }
