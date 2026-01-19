@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { IconPlus, IconTrash, IconGripVertical } from "@tabler/icons-react";
+import { IconPlus, IconTrash, IconGripVertical, IconEdit, IconCheck, IconX } from "@tabler/icons-react";
 
 interface Column {
   id: string;
@@ -48,6 +48,8 @@ export default function ColumnManagementModal({
 }: ColumnManagementModalProps) {
   const [columns, setColumns] = useState<Column[]>([]);
   const [loading, setLoading] = useState(false);
+  const [editingColumnId, setEditingColumnId] = useState<string | null>(null);
+  const [editedColumn, setEditedColumn] = useState<Partial<Column>>({});
   const [newColumnTitle, setNewColumnTitle] = useState("");
   const [newColumnStage, setNewColumnStage] = useState("");
   const [newColumnColor, setNewColumnColor] = useState(DEFAULT_COLORS[0]);
@@ -107,6 +109,77 @@ export default function ColumnManagementModal({
     }
   };
 
+  const handleDeleteColumn = async (columnId: string, columnTitle: string) => {
+    if (!confirm(`Are you sure you want to delete the column "${columnTitle}"?\n\nWarning: All deals in this column will need to be moved to another column first.`)) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/crm/deal-columns/${columnId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        await fetchColumns();
+        onColumnsUpdated();
+      } else {
+        const error = await response.json();
+        alert(`Failed to delete column: ${error.error}`);
+      }
+    } catch (error) {
+      console.error("Error deleting column:", error);
+      alert("Failed to delete column");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEditColumn = (column: Column) => {
+    setEditingColumnId(column.id);
+    setEditedColumn({
+      title: column.title,
+      stage: column.stage,
+      color: column.color,
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingColumnId(null);
+    setEditedColumn({});
+  };
+
+  const handleUpdateColumn = async (columnId: string) => {
+    if (!editedColumn.title?.trim() || !editedColumn.stage?.trim()) {
+      alert("Please enter both title and stage");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/crm/deal-columns/${columnId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editedColumn),
+      });
+
+      if (response.ok) {
+        setEditingColumnId(null);
+        setEditedColumn({});
+        await fetchColumns();
+        onColumnsUpdated();
+      } else {
+        const error = await response.json();
+        alert(`Failed to update column: ${error.error}`);
+      }
+    } catch (error) {
+      console.error("Error updating column:", error);
+      alert("Failed to update column");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleClose = () => {
     setNewColumnTitle("");
     setNewColumnStage("");
@@ -139,20 +212,93 @@ export default function ColumnManagementModal({
                     key={column.id}
                     className="flex items-center gap-3 p-3 bg-secondary/50 rounded-lg"
                   >
-                    <IconGripVertical className="h-4 w-4 text-muted-foreground" />
-                    <div
-                      className="w-3 h-3 rounded-full flex-shrink-0"
-                      style={{ backgroundColor: column.color }}
-                    />
-                    <div className="flex-1">
-                      <div className="font-medium">{column.title}</div>
-                      <div className="text-xs text-muted-foreground">
-                        Stage: {column.stage}
-                      </div>
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      Order: {index + 1}
-                    </div>
+                    {editingColumnId === column.id ? (
+                      // Edit mode
+                      <>
+                        <div className="flex-1 grid grid-cols-2 gap-2">
+                          <Input
+                            value={editedColumn.title || ""}
+                            onChange={(e) => setEditedColumn({ ...editedColumn, title: e.target.value })}
+                            placeholder="Column title"
+                            className="h-8"
+                          />
+                          <Input
+                            value={editedColumn.stage || ""}
+                            onChange={(e) => setEditedColumn({ ...editedColumn, stage: e.target.value })}
+                            placeholder="Stage slug"
+                            className="h-8"
+                          />
+                        </div>
+                        <div className="flex gap-1">
+                          {DEFAULT_COLORS.map((color) => (
+                            <button
+                              key={color}
+                              type="button"
+                              className={`w-6 h-6 rounded-full border-2 transition-all ${
+                                editedColumn.color === color
+                                  ? "border-primary scale-110"
+                                  : "border-transparent"
+                              }`}
+                              style={{ backgroundColor: color }}
+                              onClick={() => setEditedColumn({ ...editedColumn, color })}
+                            />
+                          ))}
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleUpdateColumn(column.id)}
+                          disabled={loading}
+                          className="text-green-600 hover:text-green-600 hover:bg-green-600/10"
+                        >
+                          <IconCheck className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={handleCancelEdit}
+                          disabled={loading}
+                        >
+                          <IconX className="h-4 w-4" />
+                        </Button>
+                      </>
+                    ) : (
+                      // View mode
+                      <>
+                        <IconGripVertical className="h-4 w-4 text-muted-foreground" />
+                        <div
+                          className="w-3 h-3 rounded-full flex-shrink-0"
+                          style={{ backgroundColor: column.color }}
+                        />
+                        <div className="flex-1">
+                          <div className="font-medium">{column.title}</div>
+                          <div className="text-xs text-muted-foreground">
+                            Stage: {column.stage}
+                          </div>
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          Order: {index + 1}
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleEditColumn(column)}
+                          disabled={loading}
+                          className="hover:bg-primary/10"
+                        >
+                          <IconEdit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleDeleteColumn(column.id, column.title)}
+                          disabled={loading}
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                        >
+                          <IconTrash className="h-4 w-4" />
+                        </Button>
+                      </>
+                    )}
                   </div>
                 ))}
               </div>

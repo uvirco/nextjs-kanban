@@ -22,6 +22,9 @@ import {
   IconNote,
   IconPin,
   IconPinFilled,
+  IconLink,
+  IconUpload,
+  IconDownload,
 } from "@tabler/icons-react";
 
 interface Deal {
@@ -113,11 +116,17 @@ export default function DealDetailPage({
   const [stageHistory, setStageHistory] = useState<StageHistory[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [notes, setNotes] = useState<CRMNote[]>([]);
+  const [attachments, setAttachments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editedDeal, setEditedDeal] = useState<Partial<Deal>>({});
   const [newNoteContent, setNewNoteContent] = useState("");
   const [isSavingNote, setIsSavingNote] = useState(false);
+  const [showUploadForm, setShowUploadForm] = useState(false);
+  const [showLinkForm, setShowLinkForm] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+  const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
     fetchDealDetails();
@@ -126,6 +135,7 @@ export default function DealDetailPage({
   useEffect(() => {
     if (deal) {
       fetchNotes();
+      fetchAttachments();
     }
   }, [deal]);
 
@@ -291,6 +301,175 @@ export default function DealDetailPage({
     }
   };
 
+  const fetchAttachments = async () => {
+    if (!deal) return;
+    try {
+      const response = await fetch(`/api/crm/attachments?dealId=${deal.deal_id}`);
+      if (response.ok) {
+        const data = await response.json();
+        setAttachments(data.attachments || []);
+      }
+    } catch (error) {
+      console.error("Failed to fetch attachments:", error);
+    }
+  };
+
+  const handleFileUpload = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!deal) return;
+
+    setIsUploading(true);
+    setUploadError("");
+
+    const formData = new FormData(e.currentTarget);
+    const file = formData.get("file") as File;
+
+    if (!file) {
+      setUploadError("Please select a file");
+      setIsUploading(false);
+      return;
+    }
+
+    try {
+      // Upload file using API endpoint (handles both storage and database)
+      const uploadFormData = new FormData();
+      uploadFormData.append("file", file);
+      uploadFormData.append("dealId", String(deal.deal_id));
+
+      const response = await fetch("/api/crm/attachments/upload-file", {
+        method: "POST",
+        body: uploadFormData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to upload file");
+      }
+
+      setShowUploadForm(false);
+      await fetchAttachments();
+      (e.target as HTMLFormElement).reset();
+    } catch (error) {
+      console.error("Upload error:", error);
+      setUploadError("Failed to upload file");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleLinkSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!deal) return;
+
+    setIsUploading(true);
+    setUploadError("");
+
+    const formData = new FormData(e.currentTarget);
+    const filename = formData.get("filename") as string;
+    const url = formData.get("url") as string;
+
+    if (!filename || !url) {
+      setUploadError("Please provide both filename and URL");
+      setIsUploading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/crm/attachments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          filename,
+          url,
+          dealId: deal.deal_id,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to add link");
+      }
+
+      setShowLinkForm(false);
+      await fetchAttachments();
+      (e.target as HTMLFormElement).reset();
+    } catch (error) {
+      console.error("Link add error:", error);
+      setUploadError("Failed to add link");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleDeleteAttachment = async (attachmentId: string) => {
+    if (!confirm("Are you sure you want to delete this attachment?")) return;
+
+    try {
+      const response = await fetch(`/api/crm/attachments/${attachmentId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        await fetchAttachments();
+      } else {
+        alert("Failed to delete attachment");
+      }
+    } catch (error) {
+      console.error("Failed to delete attachment:", error);
+      alert("Failed to delete attachment");
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    if (!deal) return;
+
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length === 0) return;
+
+    setIsUploading(true);
+    setUploadError("");
+
+    try {
+      // Upload all files using API endpoint
+      for (const file of files) {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("dealId", String(deal.deal_id));
+
+        const response = await fetch("/api/crm/attachments/upload-file", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          console.error("Upload error for", file.name);
+          continue;
+        }
+      }
+
+      await fetchAttachments();
+    } catch (error) {
+      console.error("Drop upload error:", error);
+      setUploadError("Failed to upload some files");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const formatCurrency = (value: number | null) => {
     if (!value) return "Not set";
     return new Intl.NumberFormat("en-US", {
@@ -445,19 +624,6 @@ export default function DealDetailPage({
                       className="mt-1 bg-gray-700 border-gray-600 text-gray-100"
                     />
                   </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-300">
-                      Notes
-                    </label>
-                    <Textarea
-                      value={editedDeal.notes || ""}
-                      onChange={(e) =>
-                        setEditedDeal({ ...editedDeal, notes: e.target.value })
-                      }
-                      rows={6}
-                      className="mt-1 bg-gray-700 border-gray-600 text-gray-100"
-                    />
-                  </div>
                 </>
               ) : (
                 <>
@@ -506,14 +672,6 @@ export default function DealDetailPage({
                       </div>
                     </div>
                   )}
-                  <div>
-                    <label className="text-sm font-medium text-gray-400">
-                      Notes
-                    </label>
-                    <p className="text-gray-100 mt-1 whitespace-pre-wrap">
-                      {deal.notes || "No notes"}
-                    </p>
-                  </div>
                   <div className="pt-4 border-t border-gray-700">
                     <div className="text-xs text-gray-500 space-y-1">
                       <p>Created: {formatDate(deal.createdAt)}</p>
@@ -636,7 +794,11 @@ export default function DealDetailPage({
                                     ? "bg-orange-500"
                                     : activity.type === "NOTE"
                                       ? "bg-amber-500"
-                                      : "bg-gray-500";
+                                      : activity.type === "FILE_ATTACHED"
+                                        ? "bg-cyan-500"
+                                        : activity.type === "DEAL_WON"
+                                          ? "bg-green-500"
+                                          : "bg-gray-500";
 
                           return (
                             <div key={activity.id} className="relative pl-12">
@@ -645,15 +807,24 @@ export default function DealDetailPage({
                                 className={`absolute left-2.5 w-3 h-3 ${iconColor} rounded-full ring-4 ring-gray-950`}
                               ></div>
 
-                              <Card className="bg-gray-800 border-gray-700">
+                              <Card className={`bg-gray-800 border-gray-700 ${activity.type === "DEAL_WON" ? "border-green-500/50" : ""}`}>
                                 <CardContent className="p-4">
                                   <div className="flex items-start justify-between mb-2">
-                                    <Badge
-                                      variant="outline"
-                                      className="text-xs"
-                                    >
-                                      {activity.type.replace("_", " ")}
-                                    </Badge>
+                                    {activity.type === "DEAL_WON" ? (
+                                      <Badge
+                                        variant="outline"
+                                        className="text-xs border-green-500 text-green-400 bg-green-500/10"
+                                      >
+                                        🎉 DEAL WON
+                                      </Badge>
+                                    ) : (
+                                      <Badge
+                                        variant="outline"
+                                        className="text-xs"
+                                      >
+                                        {activity.type.replace("_", " ")}
+                                      </Badge>
+                                    )}
                                     <span className="text-xs text-gray-500">
                                       {new Date(
                                         activity.createdAt
@@ -671,7 +842,7 @@ export default function DealDetailPage({
                                       }}
                                     />
                                   ) : (
-                                    <p className="text-sm text-gray-300 mb-2">
+                                    <p className={`text-sm mb-2 ${activity.type === "DEAL_WON" ? "text-green-300 font-semibold" : "text-gray-300"}`}>
                                       {activity.content}
                                     </p>
                                   )}
@@ -792,8 +963,226 @@ export default function DealDetailPage({
               </TabsContent>
 
               <TabsContent value="files" className="m-0 p-6">
-                <div className="text-center py-12 text-gray-500">
-                  Files feature coming soon
+                <div className="space-y-4">
+                  {/* Drag and Drop Zone */}
+                  <div
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                      isDragging
+                        ? "border-blue-500 bg-blue-500/10"
+                        : "border-gray-700 bg-gray-800/50"
+                    }`}
+                  >
+                    <IconUpload
+                      size={48}
+                      className={`mx-auto mb-4 ${
+                        isDragging ? "text-blue-500" : "text-gray-500"
+                      }`}
+                    />
+                    <h3 className="text-lg font-semibold text-gray-100 mb-2">
+                      {isDragging ? "Drop files here" : "Drag & Drop Files"}
+                    </h3>
+                    <p className="text-sm text-gray-400 mb-4">
+                      or click below to browse
+                    </p>
+                    <div className="flex gap-2 justify-center">
+                      <Button
+                        onClick={() => setShowUploadForm(!showUploadForm)}
+                        className="bg-blue-600 hover:bg-blue-700"
+                      >
+                        <IconUpload size={16} className="mr-2" />
+                        Upload File
+                      </Button>
+                      <Button
+                        onClick={() => setShowLinkForm(!showLinkForm)}
+                        variant="outline"
+                        className="border-gray-600"
+                      >
+                        <IconLink size={16} className="mr-2" />
+                        Add Link
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Upload Form */}
+                  {showUploadForm && (
+                    <Card className="bg-gray-800 border-gray-700">
+                      <CardContent className="p-4">
+                        <form onSubmit={handleFileUpload} className="space-y-3">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Select File
+                            </label>
+                            <input
+                              type="file"
+                              name="file"
+                              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-100 text-sm"
+                              required
+                            />
+                          </div>
+                          {uploadError && (
+                            <div className="text-sm text-red-400">{uploadError}</div>
+                          )}
+                          <div className="flex gap-2">
+                            <Button
+                              type="submit"
+                              disabled={isUploading}
+                              className="bg-green-600 hover:bg-green-700"
+                            >
+                              {isUploading ? "Uploading..." : "Upload"}
+                            </Button>
+                            <Button
+                              type="button"
+                              onClick={() => setShowUploadForm(false)}
+                              variant="outline"
+                              className="border-gray-600"
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        </form>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Link Form */}
+                  {showLinkForm && (
+                    <Card className="bg-gray-800 border-gray-700">
+                      <CardContent className="p-4">
+                        <form onSubmit={handleLinkSubmit} className="space-y-3">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Link Name
+                            </label>
+                            <input
+                              type="text"
+                              name="filename"
+                              placeholder="e.g., Project Proposal"
+                              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-100 text-sm"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              URL
+                            </label>
+                            <input
+                              type="url"
+                              name="url"
+                              placeholder="https://..."
+                              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-100 text-sm"
+                              required
+                            />
+                          </div>
+                          {uploadError && (
+                            <div className="text-sm text-red-400">{uploadError}</div>
+                          )}
+                          <div className="flex gap-2">
+                            <Button
+                              type="submit"
+                              disabled={isUploading}
+                              className="bg-green-600 hover:bg-green-700"
+                            >
+                              {isUploading ? "Adding..." : "Add Link"}
+                            </Button>
+                            <Button
+                              type="button"
+                              onClick={() => setShowLinkForm(false)}
+                              variant="outline"
+                              className="border-gray-600"
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        </form>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Files List */}
+                  <div className="space-y-3">
+                    <h3 className="text-lg font-semibold text-gray-100">
+                      Attachments ({attachments.length})
+                    </h3>
+                    {attachments.length === 0 ? (
+                      <div className="text-center py-12 text-gray-500">
+                        No attachments yet. Upload files or add links above.
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {attachments.map((attachment) => (
+                          <Card
+                            key={attachment.id}
+                            className="bg-gray-800 border-gray-700 hover:bg-gray-750"
+                          >
+                            <CardContent className="p-4">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3 flex-1 min-w-0">
+                                  {attachment.url && !attachment.storage_path ? (
+                                    <IconLink size={20} className="text-blue-400 flex-shrink-0" />
+                                  ) : (
+                                    <IconPaperclip size={20} className="text-gray-400 flex-shrink-0" />
+                                  )}
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium text-gray-100 truncate">
+                                      {attachment.filename}
+                                    </p>
+                                    <div className="flex items-center gap-2 text-xs text-gray-400">
+                                      {attachment.size && (
+                                        <span>
+                                          {(attachment.size / 1024).toFixed(1)} KB
+                                        </span>
+                                      )}
+                                      {attachment.uploadedByUser && (
+                                        <>
+                                          <span>•</span>
+                                          <span>{attachment.uploadedByUser.name}</span>
+                                        </>
+                                      )}
+                                      {attachment.createdAt && (
+                                        <>
+                                          <span>•</span>
+                                          <span>
+                                            {new Date(
+                                              attachment.createdAt
+                                            ).toLocaleDateString()}
+                                          </span>
+                                        </>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2 flex-shrink-0">
+                                  {attachment.url && (
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => window.open(attachment.url, "_blank")}
+                                      className="h-8 w-8 p-0 text-gray-400 hover:text-blue-500"
+                                      title="Open"
+                                    >
+                                      <IconDownload size={16} />
+                                    </Button>
+                                  )}
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => handleDeleteAttachment(attachment.id)}
+                                    className="h-8 w-8 p-0 text-gray-400 hover:text-red-500"
+                                    title="Delete"
+                                  >
+                                    <IconTrash size={16} />
+                                  </Button>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </TabsContent>
             </div>

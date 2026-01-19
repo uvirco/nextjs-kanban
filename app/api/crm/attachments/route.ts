@@ -134,6 +134,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    // Create activity entry for link attachment (only for deals)
+    if (dealId) {
+      await supabaseAdmin.from("CRMActivity").insert({
+        type: "FILE_ATTACHED",
+        content: `Added link: ${filename}`,
+        dealId: String(dealId),
+        createdByUserId: user.id,
+      });
+    }
+
     return NextResponse.json(attachment, { status: 201 });
   } catch (error) {
     console.error("Error in attachments POST API:", error);
