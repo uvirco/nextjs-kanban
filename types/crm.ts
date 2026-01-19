@@ -111,6 +111,27 @@ export interface CRMNote {
   };
 }
 
+// CRM uses the shared Attachment table with parent_type/parent_id pattern
+// parent_type: 'crm_deal' | 'crm_contact' | 'crm_lead'
+// parent_id: deal_id | contact.id | lead.id
+export interface CRMAttachment {
+  id: string;
+  filename: string;
+  url: string | null;
+  storage_path: string | null;
+  size: number | null;
+  mimeType: string | null;
+  parent_type: "crm_deal" | "crm_contact" | "crm_lead" | "crm_email";
+  parent_id: string;
+  taskId: string | null;
+  uploadedBy: string;
+  createdAt: string;
+  uploadedByUser?: {
+    name: string;
+    email: string;
+  };
+}
+
 export interface CRMActivity {
   id: string;
   type: CRMActivityType;
