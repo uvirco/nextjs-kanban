@@ -145,7 +145,10 @@ export async function DELETE(
 
     const { id } = await params;
 
-    const { error } = await supabaseAdmin.from("CRMDeal").delete().eq("deal_id", id);
+    const { error } = await supabaseAdmin
+      .from("CRMDeal")
+      .delete()
+      .eq("deal_id", id);
 
     if (error) {
       console.error("Error deleting CRM deal:", error);

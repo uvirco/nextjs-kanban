@@ -20,7 +20,8 @@ export async function GET(request: NextRequest) {
 
     let query = supabaseAdmin
       .from("CRMEmail")
-      .select(`
+      .select(
+        `
         id,
         subject,
         body,
@@ -37,7 +38,8 @@ export async function GET(request: NextRequest) {
         leadId,
         isRead,
         status
-      `)
+      `
+      )
       .order("receivedAt", { ascending: false, nullsFirst: false })
       .order("sentAt", { ascending: false, nullsFirst: false })
       .range(offset, offset + limit - 1);

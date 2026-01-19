@@ -7,25 +7,25 @@ import { supabaseAdmin } from "../../../lib/supabase"; // Use admin client
 // Supports formats: #123, Deal #123, Deal 123, [Deal 123], [#123]
 function extractDealId(subject) {
   if (!subject) return null;
-  
+
   // Pattern 1: #123
   let match = subject.match(/#(\d+)/);
   if (match && match[1]) {
     return parseInt(match[1], 10);
   }
-  
+
   // Pattern 2: Deal #123 or Deal 123
   match = subject.match(/deal\s*#?(\d+)/i);
   if (match && match[1]) {
     return parseInt(match[1], 10);
   }
-  
+
   // Pattern 3: [Deal 123] or [#123]
   match = subject.match(/\[(?:deal\s*)?#?(\d+)\]/i);
   if (match && match[1]) {
     return parseInt(match[1], 10);
   }
-  
+
   return null;
 }
 
@@ -85,13 +85,15 @@ export async function POST(request) {
       const lastEmailDate = new Date(lastEmail.receivedAt);
       // Add 1 second to avoid fetching the same email again
       lastEmailDate.setSeconds(lastEmailDate.getSeconds() + 1);
-      
+
       // Use ALL and filter later - SINCE has syntax issues with imap-simple
-      searchCriteria = ['ALL'];
-      console.log(`Fetching all emails (will filter to those after ${lastEmailDate.toISOString()})`);
+      searchCriteria = ["ALL"];
+      console.log(
+        `Fetching all emails (will filter to those after ${lastEmailDate.toISOString()})`
+      );
     } else {
       // No emails in database yet, fetch all emails
-      searchCriteria = ['ALL'];
+      searchCriteria = ["ALL"];
       console.log(`No existing emails found, fetching all emails`);
     }
 
@@ -114,12 +116,17 @@ export async function POST(request) {
         if (!messageDate) return false;
         return new Date(messageDate).getTime() > lastEmailTime;
       });
-      console.log(`Filtered to ${messagesToProcess.length} new emails (after ${lastEmail.receivedAt})`);
+      console.log(
+        `Filtered to ${messagesToProcess.length} new emails (after ${lastEmail.receivedAt})`
+      );
     }
 
     if (messagesToProcess.length === 0) {
       connection.end();
-      return NextResponse.json({ message: "No new emails found" }, { status: 200 });
+      return NextResponse.json(
+        { message: "No new emails found" },
+        { status: 200 }
+      );
     }
 
     let emailsProcessed = 0;
@@ -155,55 +162,65 @@ export async function POST(request) {
       }
 
       // Insert the new email (no duplicate check needed since we're only fetching newer emails)
-      
+
       // Try to auto-link email to deal based on subject line
       console.log(`Processing email subject: "${subject}"`);
       const dealNumber = extractDealId(subject);
       console.log(`Extracted deal number: ${dealNumber}`);
       let dealId = null;
-      
+
       if (dealNumber) {
-        console.log(`Found deal reference #${dealNumber} in subject: "${subject}"`);
-        
+        console.log(
+          `Found deal reference #${dealNumber} in subject: "${subject}"`
+        );
+
         const { data: deal, error: dealError } = await supabaseAdmin
           .from("CRMDeal")
           .select("deal_id")
           .eq("deal_id", dealNumber)
           .single();
-        
+
         console.log(`Database query result:`, { deal, dealError });
-        
+
         if (deal && !dealError) {
           dealId = deal.deal_id; // CRMEmail.dealId references CRMDeal.deal_id (INTEGER)
           emailsLinked++;
-          console.log(`✅ Auto-linked email to Deal #${dealNumber} (deal_id: ${dealId})`);
+          console.log(
+            `✅ Auto-linked email to Deal #${dealNumber} (deal_id: ${dealId})`
+          );
         } else {
-          console.warn(`⚠️ Deal #${dealNumber} not found in database`, dealError);
+          console.warn(
+            `⚠️ Deal #${dealNumber} not found in database`,
+            dealError
+          );
         }
       } else {
         console.log(`No deal reference found in subject`);
       }
-      
+
       const emailDate = new Date(envelope.date).toISOString();
-      const { data: insertedEmail, error } = await supabaseAdmin.from("CRMEmail").insert([
-        {
-          fromEmail: fromEmail,
-          toEmail: toEmail,
-          subject: subject,
-          body: body,
-          receivedAt: emailDate,
-          direction: "INBOUND",
-          dealId: dealId, // Auto-linked deal ID if found
-          isRead: false,
-          status: "ACTIVE"
-        },
-      ]).select();
+      const { data: insertedEmail, error } = await supabaseAdmin
+        .from("CRMEmail")
+        .insert([
+          {
+            fromEmail: fromEmail,
+            toEmail: toEmail,
+            subject: subject,
+            body: body,
+            receivedAt: emailDate,
+            direction: "INBOUND",
+            dealId: dealId, // Auto-linked deal ID if found
+            isRead: false,
+            status: "ACTIVE",
+          },
+        ])
+        .select();
 
       if (error) {
         console.error("Supabase error:", error);
       } else {
         emailsProcessed++;
-        
+
         // If email was linked to a deal, log it as an activity
         if (dealId && insertedEmail && insertedEmail[0]) {
           await supabaseAdmin.from("CRMActivity").insert({
@@ -217,23 +234,23 @@ export async function POST(request) {
     }
 
     connection.end();
-    
+
     // Count how many emails were auto-linked
     const { data: recentEmails } = await supabaseAdmin
       .from("CRMEmail")
       .select("id, dealId")
       .order("receivedAt", { ascending: false })
       .limit(emailsProcessed);
-    
-    const linkedCount = recentEmails?.filter(e => e.dealId).length || 0;
+
+    const linkedCount = recentEmails?.filter((e) => e.dealId).length || 0;
     const unlinkedCount = emailsProcessed - linkedCount;
-    
+
     return NextResponse.json(
-      { 
+      {
         message: `${emailsProcessed} new emails processed from ${messagesToProcess.length} found`,
         linked: linkedCount,
         unlinked: unlinkedCount,
-        details: `${linkedCount} auto-linked to deals, ${unlinkedCount} require manual linking`
+        details: `${linkedCount} auto-linked to deals, ${unlinkedCount} require manual linking`,
       },
       { status: 200 }
     );

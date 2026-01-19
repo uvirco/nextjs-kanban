@@ -175,9 +175,13 @@ export default function InboxPage() {
                             <span className="font-medium text-white truncate">
                               {getEmailDisplayName(email)}
                             </span>
-                            {email.attachments && email.attachments.length > 0 && (
-                              <IconPaperclip size={14} className="text-zinc-400" />
-                            )}
+                            {email.attachments &&
+                              email.attachments.length > 0 && (
+                                <IconPaperclip
+                                  size={14}
+                                  className="text-zinc-400"
+                                />
+                              )}
                           </div>
                           <p className="text-sm text-zinc-300 truncate mb-1">
                             {email.subject || "No subject"}
@@ -188,7 +192,11 @@ export default function InboxPage() {
                         </div>
                         <div className="flex flex-col items-end gap-1">
                           <Badge
-                            variant={email.direction === "INBOUND" ? "default" : "secondary"}
+                            variant={
+                              email.direction === "INBOUND"
+                                ? "default"
+                                : "secondary"
+                            }
                             className="text-xs"
                           >
                             {email.direction === "INBOUND" ? "Inbox" : "Sent"}
@@ -227,38 +235,62 @@ export default function InboxPage() {
                           <span>{getEmailAddress(selectedEmail)}</span>
                         </div>
                         <span>
-                          {formatDate(selectedEmail.receivedAt || selectedEmail.sentAt)}
+                          {formatDate(
+                            selectedEmail.receivedAt || selectedEmail.sentAt
+                          )}
                         </span>
                       </div>
                     </div>
                     <Badge
-                      variant={selectedEmail.direction === "INBOUND" ? "default" : "secondary"}
+                      variant={
+                        selectedEmail.direction === "INBOUND"
+                          ? "default"
+                          : "secondary"
+                      }
                     >
-                      {selectedEmail.direction === "INBOUND" ? "Received" : "Sent"}
+                      {selectedEmail.direction === "INBOUND"
+                        ? "Received"
+                        : "Sent"}
                     </Badge>
                   </div>
 
                   {/* Associated Records */}
-                  {(selectedEmail.contact || selectedEmail.deal || selectedEmail.lead) && (
+                  {(selectedEmail.contact ||
+                    selectedEmail.deal ||
+                    selectedEmail.lead) && (
                     <div className="mb-4 p-3 bg-zinc-800 rounded-lg">
-                      <h3 className="text-sm font-medium text-zinc-300 mb-2">Associated Records:</h3>
+                      <h3 className="text-sm font-medium text-zinc-300 mb-2">
+                        Associated Records:
+                      </h3>
                       <div className="flex gap-4">
                         {selectedEmail.contact && (
                           <div className="flex items-center gap-2 text-sm">
                             <IconUser size={14} className="text-blue-400" />
-                            <span className="text-zinc-300">{selectedEmail.contact.name}</span>
+                            <span className="text-zinc-300">
+                              {selectedEmail.contact.name}
+                            </span>
                           </div>
                         )}
                         {selectedEmail.deal && (
                           <div className="flex items-center gap-2 text-sm">
-                            <IconBuilding size={14} className="text-green-400" />
-                            <span className="text-zinc-300">{selectedEmail.deal.title}</span>
+                            <IconBuilding
+                              size={14}
+                              className="text-green-400"
+                            />
+                            <span className="text-zinc-300">
+                              {selectedEmail.deal.title}
+                            </span>
                           </div>
                         )}
                         {selectedEmail.lead && (
                           <div className="flex items-center gap-2 text-sm">
-                            <IconBuilding size={14} className="text-yellow-400" />
-                            <span className="text-zinc-300">{selectedEmail.lead.title}</span>
+                            <IconBuilding
+                              size={14}
+                              className="text-yellow-400"
+                            />
+                            <span className="text-zinc-300">
+                              {selectedEmail.lead.title}
+                            </span>
                           </div>
                         )}
                       </div>
@@ -266,27 +298,32 @@ export default function InboxPage() {
                   )}
 
                   {/* Attachments */}
-                  {selectedEmail.attachments && selectedEmail.attachments.length > 0 && (
-                    <div className="mb-4">
-                      <h3 className="text-sm font-medium text-zinc-300 mb-2">Attachments:</h3>
-                      <div className="flex gap-2 flex-wrap">
-                        {selectedEmail.attachments.map((attachment) => (
-                          <div
-                            key={attachment.id}
-                            className="flex items-center gap-2 px-3 py-2 bg-zinc-800 rounded-lg text-sm"
-                          >
-                            <IconPaperclip size={14} />
-                            <span className="text-zinc-300">{attachment.filename}</span>
-                            {attachment.fileSize && (
-                              <span className="text-zinc-500">
-                                ({Math.round(attachment.fileSize / 1024)}KB)
+                  {selectedEmail.attachments &&
+                    selectedEmail.attachments.length > 0 && (
+                      <div className="mb-4">
+                        <h3 className="text-sm font-medium text-zinc-300 mb-2">
+                          Attachments:
+                        </h3>
+                        <div className="flex gap-2 flex-wrap">
+                          {selectedEmail.attachments.map((attachment) => (
+                            <div
+                              key={attachment.id}
+                              className="flex items-center gap-2 px-3 py-2 bg-zinc-800 rounded-lg text-sm"
+                            >
+                              <IconPaperclip size={14} />
+                              <span className="text-zinc-300">
+                                {attachment.filename}
                               </span>
-                            )}
-                          </div>
-                        ))}
+                              {attachment.fileSize && (
+                                <span className="text-zinc-500">
+                                  ({Math.round(attachment.fileSize / 1024)}KB)
+                                </span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
                   <div className="border-t border-zinc-700 my-4"></div>
 
@@ -295,7 +332,9 @@ export default function InboxPage() {
                     <div
                       className="text-zinc-200 whitespace-pre-wrap"
                       dangerouslySetInnerHTML={{
-                        __html: selectedEmail.body?.replace(/\n/g, "<br>") || "No content"
+                        __html:
+                          selectedEmail.body?.replace(/\n/g, "<br>") ||
+                          "No content",
                       }}
                     />
                   </div>

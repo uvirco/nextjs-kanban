@@ -16,7 +16,8 @@ export async function GET(
 
     const { data: activities, error } = await supabaseAdmin
       .from("CRMActivity")
-      .select(`
+      .select(
+        `
         id,
         type,
         content,
@@ -24,7 +25,8 @@ export async function GET(
         createdAt,
         createdByUserId,
         createdByUser:createdByUserId(id, name, email)
-      `)
+      `
+      )
       .eq("dealId", parseInt(id))
       .order("createdAt", { ascending: false });
 

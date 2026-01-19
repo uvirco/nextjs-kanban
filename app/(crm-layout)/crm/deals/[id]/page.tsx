@@ -111,7 +111,9 @@ export default function DealDetailPage({
 
         // Fetch contact if exists
         if (dealData.contactId) {
-          const contactResponse = await fetch(`/api/crm/contacts/${dealData.contactId}`);
+          const contactResponse = await fetch(
+            `/api/crm/contacts/${dealData.contactId}`
+          );
           if (contactResponse.ok) {
             const contactData = await contactResponse.json();
             setContact(contactData);
@@ -119,7 +121,9 @@ export default function DealDetailPage({
         }
 
         // Fetch related emails
-        const emailsResponse = await fetch(`/api/crm/emails?dealId=${dealData.deal_id}`);
+        const emailsResponse = await fetch(
+          `/api/crm/emails?dealId=${dealData.deal_id}`
+        );
         if (emailsResponse.ok) {
           const emailsData = await emailsResponse.json();
           setEmails(emailsData.emails || []);
@@ -133,7 +137,9 @@ export default function DealDetailPage({
         }
 
         // Fetch activities
-        const activitiesResponse = await fetch(`/api/crm/deals/${id}/activities`);
+        const activitiesResponse = await fetch(
+          `/api/crm/deals/${id}/activities`
+        );
         if (activitiesResponse.ok) {
           const activitiesData = await activitiesResponse.json();
           setActivities(activitiesData.activities || []);
@@ -231,7 +237,11 @@ export default function DealDetailPage({
           <div className="flex gap-2">
             {isEditing ? (
               <>
-                <Button size="sm" onClick={handleSave} className="bg-green-600 hover:bg-green-700">
+                <Button
+                  size="sm"
+                  onClick={handleSave}
+                  className="bg-green-600 hover:bg-green-700"
+                >
                   <IconDeviceFloppy size={16} className="mr-1" />
                   Save
                 </Button>
@@ -249,7 +259,11 @@ export default function DealDetailPage({
               </>
             ) : (
               <>
-                <Button size="sm" onClick={() => setIsEditing(true)} className="bg-gray-700 hover:bg-gray-600">
+                <Button
+                  size="sm"
+                  onClick={() => setIsEditing(true)}
+                  className="bg-gray-700 hover:bg-gray-600"
+                >
                   <IconEdit size={16} className="mr-1" />
                   Edit
                 </Button>
@@ -274,13 +288,17 @@ export default function DealDetailPage({
         <div className="w-1/3 border-r border-gray-800 bg-gray-900 overflow-y-auto p-6">
           <Card className="bg-gray-800 border-gray-700">
             <CardHeader>
-              <CardTitle className="text-lg text-gray-100">Deal Information</CardTitle>
+              <CardTitle className="text-lg text-gray-100">
+                Deal Information
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {isEditing ? (
                 <>
                   <div>
-                    <label className="text-sm font-medium text-gray-300">Title</label>
+                    <label className="text-sm font-medium text-gray-300">
+                      Title
+                    </label>
                     <Input
                       value={editedDeal.title || ""}
                       onChange={(e) =>
@@ -290,7 +308,9 @@ export default function DealDetailPage({
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-300">Value</label>
+                    <label className="text-sm font-medium text-gray-300">
+                      Value
+                    </label>
                     <Input
                       type="number"
                       value={editedDeal.value || ""}
@@ -320,7 +340,9 @@ export default function DealDetailPage({
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-300">Notes</label>
+                    <label className="text-sm font-medium text-gray-300">
+                      Notes
+                    </label>
                     <Textarea
                       value={editedDeal.notes || ""}
                       onChange={(e) =>
@@ -334,13 +356,17 @@ export default function DealDetailPage({
               ) : (
                 <>
                   <div>
-                    <label className="text-sm font-medium text-gray-400">Value</label>
+                    <label className="text-sm font-medium text-gray-400">
+                      Value
+                    </label>
                     <p className="text-lg font-semibold text-gray-100 mt-1">
                       {formatCurrency(deal.value)}
                     </p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-400">Stage</label>
+                    <label className="text-sm font-medium text-gray-400">
+                      Stage
+                    </label>
                     <p className="text-gray-100 mt-1">{deal.stage}</p>
                   </div>
                   <div>
@@ -353,21 +379,31 @@ export default function DealDetailPage({
                   </div>
                   {contact && (
                     <div>
-                      <label className="text-sm font-medium text-gray-400">Contact</label>
+                      <label className="text-sm font-medium text-gray-400">
+                        Contact
+                      </label>
                       <div className="mt-1">
-                        <p className="text-gray-100 font-medium">{contact.name}</p>
+                        <p className="text-gray-100 font-medium">
+                          {contact.name}
+                        </p>
                         <p className="text-sm text-gray-400">{contact.email}</p>
                         {contact.phone && (
-                          <p className="text-sm text-gray-400">{contact.phone}</p>
+                          <p className="text-sm text-gray-400">
+                            {contact.phone}
+                          </p>
                         )}
                         {contact.company && (
-                          <p className="text-sm text-gray-400">{contact.company}</p>
+                          <p className="text-sm text-gray-400">
+                            {contact.company}
+                          </p>
                         )}
                       </div>
                     </div>
                   )}
                   <div>
-                    <label className="text-sm font-medium text-gray-400">Notes</label>
+                    <label className="text-sm font-medium text-gray-400">
+                      Notes
+                    </label>
                     <p className="text-gray-100 mt-1 whitespace-pre-wrap">
                       {deal.notes || "No notes"}
                     </p>
@@ -435,7 +471,10 @@ export default function DealDetailPage({
                                   {email.direction}
                                 </Badge>
                                 {!email.isRead && (
-                                  <Badge variant="destructive" className="text-xs">
+                                  <Badge
+                                    variant="destructive"
+                                    className="text-xs"
+                                  >
                                     Unread
                                   </Badge>
                                 )}
@@ -447,7 +486,9 @@ export default function DealDetailPage({
                                 From: {email.fromEmail}
                               </p>
                               <p className="text-sm text-gray-300 line-clamp-2">
-                                {email.body.replace(/<[^>]*>/g, "").substring(0, 200)}
+                                {email.body
+                                  .replace(/<[^>]*>/g, "")
+                                  .substring(0, 200)}
                                 ...
                               </p>
                             </div>
@@ -464,7 +505,9 @@ export default function DealDetailPage({
 
               <TabsContent value="timeline" className="m-0 p-6">
                 <div className="space-y-6">
-                  <h3 className="text-lg font-semibold text-gray-100">Activity Timeline</h3>
+                  <h3 className="text-lg font-semibold text-gray-100">
+                    Activity Timeline
+                  </h3>
                   {activities.length === 0 ? (
                     <div className="text-center py-12 text-gray-500">
                       No activities recorded yet
@@ -473,27 +516,40 @@ export default function DealDetailPage({
                     <div className="relative">
                       {/* Timeline line */}
                       <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-700"></div>
-                      
+
                       <div className="space-y-6">
                         {activities.map((activity) => {
-                          const iconColor = activity.type === 'STAGE_CHANGE' ? 'bg-blue-500' : 
-                                           activity.type === 'EMAIL' ? 'bg-green-500' :
-                                           activity.type === 'CALL' ? 'bg-purple-500' :
-                                           activity.type === 'MEETING' ? 'bg-orange-500' : 'bg-gray-500';
-                          
+                          const iconColor =
+                            activity.type === "STAGE_CHANGE"
+                              ? "bg-blue-500"
+                              : activity.type === "EMAIL"
+                                ? "bg-green-500"
+                                : activity.type === "CALL"
+                                  ? "bg-purple-500"
+                                  : activity.type === "MEETING"
+                                    ? "bg-orange-500"
+                                    : "bg-gray-500";
+
                           return (
                             <div key={activity.id} className="relative pl-12">
                               {/* Timeline dot */}
-                              <div className={`absolute left-2.5 w-3 h-3 ${iconColor} rounded-full ring-4 ring-gray-950`}></div>
-                              
+                              <div
+                                className={`absolute left-2.5 w-3 h-3 ${iconColor} rounded-full ring-4 ring-gray-950`}
+                              ></div>
+
                               <Card className="bg-gray-800 border-gray-700">
                                 <CardContent className="p-4">
                                   <div className="flex items-start justify-between mb-2">
-                                    <Badge variant="outline" className="text-xs">
-                                      {activity.type.replace('_', ' ')}
+                                    <Badge
+                                      variant="outline"
+                                      className="text-xs"
+                                    >
+                                      {activity.type.replace("_", " ")}
                                     </Badge>
                                     <span className="text-xs text-gray-500">
-                                      {new Date(activity.createdAt).toLocaleString()}
+                                      {new Date(
+                                        activity.createdAt
+                                      ).toLocaleString()}
                                     </span>
                                   </div>
                                   <p className="text-sm text-gray-300 mb-2">

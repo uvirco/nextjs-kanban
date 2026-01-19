@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { supabaseAdmin } from "@/lib/supabase";
 
-export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const session = await auth();
     const userId = session?.user?.id;
@@ -15,7 +18,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const { status } = await request.json();
 
     // Validate status
-    if (!['ACTIVE', 'ARCHIVED', 'DELETED'].includes(status)) {
+    if (!["ACTIVE", "ARCHIVED", "DELETED"].includes(status)) {
       return NextResponse.json({ error: "Invalid status" }, { status: 400 });
     }
 
@@ -35,15 +38,15 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     if (!data || data.length === 0) {
       console.error("No email found with id:", id);
-      return NextResponse.json(
-        { error: "Email not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Email not found" }, { status: 404 });
     }
 
     return NextResponse.json({ success: true, email: data[0] });
   } catch (error) {
     console.error("Error in archive API:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }

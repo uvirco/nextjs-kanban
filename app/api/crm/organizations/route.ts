@@ -18,7 +18,9 @@ export async function GET(request: NextRequest) {
 
     let query = supabaseAdmin
       .from("CRMOrganization")
-      .select("id, name, address, website, industry, annualRevenue, numberOfEmployees, countryCode, createdAt, updatedAt")
+      .select(
+        "id, name, address, website, industry, annualRevenue, numberOfEmployees, countryCode, createdAt, updatedAt"
+      )
       .order("name", { ascending: true })
       .range(offset, offset + limit - 1);
 

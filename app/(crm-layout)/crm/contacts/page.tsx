@@ -5,7 +5,14 @@ import { CRMContact } from "@/types/crm";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
 
@@ -70,7 +77,10 @@ export default function CRMContactsPage() {
         <TabsContent value="grid" className="mt-6">
           <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filteredContacts.map((contact) => (
-              <Card key={contact.id} className="bg-zinc-800 border-zinc-700 hover:border-zinc-600 transition-colors">
+              <Card
+                key={contact.id}
+                className="bg-zinc-800 border-zinc-700 hover:border-zinc-600 transition-colors"
+              >
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base text-white">
                     <Link
@@ -122,7 +132,9 @@ export default function CRMContactsPage() {
                   <TableCell>{contact.email || "-"}</TableCell>
                   <TableCell>{contact.company || "-"}</TableCell>
                   <TableCell>{contact.phone || "-"}</TableCell>
-                  <TableCell>{new Date(contact.createdAt).toLocaleDateString()}</TableCell>
+                  <TableCell>
+                    {new Date(contact.createdAt).toLocaleDateString()}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

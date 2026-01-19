@@ -34,7 +34,9 @@ export default function OrganizationDetailPage() {
   const params = useParams();
   const router = useRouter();
   const organizationId = params.id as string;
-  const [organization, setOrganization] = useState<CRMOrganization | null>(null);
+  const [organization, setOrganization] = useState<CRMOrganization | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -64,7 +66,8 @@ export default function OrganizationDetailPage() {
         website: data.organization.website || "",
         industry: data.organization.industry || "",
         annualRevenue: data.organization.annualRevenue?.toString() || "",
-        numberOfEmployees: data.organization.numberOfEmployees?.toString() || "",
+        numberOfEmployees:
+          data.organization.numberOfEmployees?.toString() || "",
         countryCode: data.organization.countryCode || "",
       });
     } catch (error) {
@@ -81,8 +84,12 @@ export default function OrganizationDetailPage() {
     try {
       const updateData = {
         ...formData,
-        annualRevenue: formData.annualRevenue ? parseFloat(formData.annualRevenue) : null,
-        numberOfEmployees: formData.numberOfEmployees ? parseInt(formData.numberOfEmployees) : null,
+        annualRevenue: formData.annualRevenue
+          ? parseFloat(formData.annualRevenue)
+          : null,
+        numberOfEmployees: formData.numberOfEmployees
+          ? parseInt(formData.numberOfEmployees)
+          : null,
       };
 
       const response = await fetch(`/api/crm/organizations/${organizationId}`, {
@@ -193,7 +200,8 @@ export default function OrganizationDetailPage() {
                     website: organization.website || "",
                     industry: organization.industry || "",
                     annualRevenue: organization.annualRevenue?.toString() || "",
-                    numberOfEmployees: organization.numberOfEmployees?.toString() || "",
+                    numberOfEmployees:
+                      organization.numberOfEmployees?.toString() || "",
                     countryCode: organization.countryCode || "",
                   });
                 }}
@@ -344,14 +352,18 @@ export default function OrganizationDetailPage() {
                   </div>
                 )}
 
-                {(organization.annualRevenue || organization.numberOfEmployees) && (
+                {(organization.annualRevenue ||
+                  organization.numberOfEmployees) && (
                   <div className="flex items-center gap-3">
                     <IconBuilding className="text-indigo-400" size={20} />
                     <div>
                       <p className="text-zinc-500 text-sm">Company Info</p>
                       <div className="text-white text-sm">
                         {organization.annualRevenue && (
-                          <p>Revenue: ${organization.annualRevenue.toLocaleString()}</p>
+                          <p>
+                            Revenue: $
+                            {organization.annualRevenue.toLocaleString()}
+                          </p>
                         )}
                         {organization.numberOfEmployees && (
                           <p>Employees: {organization.numberOfEmployees}</p>

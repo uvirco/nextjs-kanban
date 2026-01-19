@@ -82,6 +82,7 @@ export interface CRMDeal {
   expectedCloseDate?: Date;
   notes?: string;
   columnId?: string;
+  boardId?: string;
   order: number;
   createdAt: Date;
   updatedAt: Date;
@@ -159,7 +160,10 @@ export interface CRMBoard {
   id: string;
   title: string;
   type: "leads" | "deals";
+  description?: string;
   backgroundUrl?: string;
+  isDefault?: boolean;
+  createdByUserId?: string;
   createdAt: Date;
   updatedAt: Date;
 }

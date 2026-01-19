@@ -34,8 +34,12 @@ export default function NewCRMOrganizationPage() {
         },
         body: JSON.stringify({
           ...formData,
-          annualRevenue: formData.annualRevenue ? parseFloat(formData.annualRevenue) : null,
-          numberOfEmployees: formData.numberOfEmployees ? parseInt(formData.numberOfEmployees) : null,
+          annualRevenue: formData.annualRevenue
+            ? parseFloat(formData.annualRevenue)
+            : null,
+          numberOfEmployees: formData.numberOfEmployees
+            ? parseInt(formData.numberOfEmployees)
+            : null,
         }),
       });
 
@@ -53,7 +57,7 @@ export default function NewCRMOrganizationPage() {
   };
 
   const handleChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   return (
@@ -65,7 +69,9 @@ export default function NewCRMOrganizationPage() {
             Back to Organizations
           </Button>
         </Link>
-        <h1 className="text-2xl font-bold text-white">Create New Organization</h1>
+        <h1 className="text-2xl font-bold text-white">
+          Create New Organization
+        </h1>
       </div>
 
       <Card className="max-w-2xl">
@@ -121,7 +127,9 @@ export default function NewCRMOrganizationPage() {
                   type="number"
                   step="0.01"
                   value={formData.annualRevenue}
-                  onChange={(e) => handleChange("annualRevenue", e.target.value)}
+                  onChange={(e) =>
+                    handleChange("annualRevenue", e.target.value)
+                  }
                   placeholder="e.g., 1000000.00"
                 />
               </div>
@@ -132,7 +140,9 @@ export default function NewCRMOrganizationPage() {
                   id="numberOfEmployees"
                   type="number"
                   value={formData.numberOfEmployees}
-                  onChange={(e) => handleChange("numberOfEmployees", e.target.value)}
+                  onChange={(e) =>
+                    handleChange("numberOfEmployees", e.target.value)
+                  }
                 />
               </div>
             </div>

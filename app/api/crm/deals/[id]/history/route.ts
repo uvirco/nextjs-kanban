@@ -16,7 +16,8 @@ export async function GET(
 
     const { data: history, error } = await supabaseAdmin
       .from("CRMDealStageHistory")
-      .select(`
+      .select(
+        `
         id,
         dealId,
         fromStage,
@@ -25,7 +26,8 @@ export async function GET(
         notes,
         changedByUserId,
         changedByUser:changedByUserId(id, name, email)
-      `)
+      `
+      )
       .eq("dealId", parseInt(id))
       .order("changedAt", { ascending: false });
 

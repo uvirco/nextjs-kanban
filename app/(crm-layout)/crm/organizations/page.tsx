@@ -4,7 +4,14 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
 
@@ -119,7 +126,9 @@ export default function CRMOrganizationsPage() {
                     )}
                   </TableCell>
                   <TableCell>{org.numberOfEmployees || "-"}</TableCell>
-                  <TableCell>{new Date(org.createdAt).toLocaleDateString()}</TableCell>
+                  <TableCell>
+                    {new Date(org.createdAt).toLocaleDateString()}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -129,7 +138,10 @@ export default function CRMOrganizationsPage() {
         <TabsContent value="cards" className="mt-6">
           <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filteredOrganizations.map((org) => (
-              <Card key={org.id} className="bg-zinc-800 border-zinc-700 hover:border-zinc-600 transition-colors">
+              <Card
+                key={org.id}
+                className="bg-zinc-800 border-zinc-700 hover:border-zinc-600 transition-colors"
+              >
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base text-white">
                     <Link
@@ -165,7 +177,9 @@ export default function CRMOrganizationsPage() {
       </Tabs>
 
       {filteredOrganizations.length === 0 && (
-        <p className="text-zinc-400 text-center py-8">No organizations found.</p>
+        <p className="text-zinc-400 text-center py-8">
+          No organizations found.
+        </p>
       )}
     </div>
   );

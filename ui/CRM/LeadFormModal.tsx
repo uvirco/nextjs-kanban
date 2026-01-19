@@ -156,7 +156,10 @@ export default function LeadFormModal({
             <Select
               value={formData.contactId || "none"}
               onValueChange={(value) =>
-                setFormData({ ...formData, contactId: value === "none" ? "" : value })
+                setFormData({
+                  ...formData,
+                  contactId: value === "none" ? "" : value,
+                })
               }
             >
               <SelectTrigger className="mt-1 text-white">

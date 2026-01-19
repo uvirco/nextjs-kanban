@@ -8,7 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   IconMail,
   IconPhone,
@@ -28,7 +34,9 @@ export default function ContactDetailPage() {
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [organizations, setOrganizations] = useState<{id: string, name: string}[]>([]);
+  const [organizations, setOrganizations] = useState<
+    { id: string; name: string }[]
+  >([]);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -169,7 +177,9 @@ export default function ContactDetailPage() {
             </CardTitle>
             {contact.position && contact.organizationId && !isEditing && (
               <p className="text-zinc-400 text-lg">
-                {contact.position} at {organizations.find(org => org.id === contact.organizationId)?.name || contact.organizationId}
+                {contact.position} at{" "}
+                {organizations.find((org) => org.id === contact.organizationId)
+                  ?.name || contact.organizationId}
               </p>
             )}
           </div>
@@ -250,7 +260,12 @@ export default function ContactDetailPage() {
                   </Label>
                   <Select
                     value={formData.organizationId || "none"}
-                    onValueChange={(value) => setFormData({ ...formData, organizationId: value === "none" ? null : value })}
+                    onValueChange={(value) =>
+                      setFormData({
+                        ...formData,
+                        organizationId: value === "none" ? null : value,
+                      })
+                    }
                   >
                     <SelectTrigger className="mt-1 text-white">
                       <SelectValue placeholder="Select a company" />
@@ -350,7 +365,9 @@ export default function ContactDetailPage() {
                     <div>
                       <p className="text-zinc-500 text-sm">Company</p>
                       <p className="text-white">
-                        {organizations.find(org => org.id === contact.organizationId)?.name || contact.organizationId}
+                        {organizations.find(
+                          (org) => org.id === contact.organizationId
+                        )?.name || contact.organizationId}
                       </p>
                     </div>
                   </div>

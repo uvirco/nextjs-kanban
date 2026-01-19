@@ -25,6 +25,7 @@ interface DealFormModalProps {
   onClose: () => void;
   onSuccess: () => void;
   stage: string;
+  boardId?: string;
   dealToEdit?: any;
 }
 
@@ -33,6 +34,7 @@ export default function DealFormModal({
   onClose,
   onSuccess,
   stage,
+  boardId,
   dealToEdit,
 }: DealFormModalProps) {
   const [loading, setLoading] = useState(false);
@@ -44,6 +46,7 @@ export default function DealFormModal({
     expectedCloseDate: "",
     notes: "",
     stage: stage,
+    boardId: boardId || "",
     order: 0,
   });
 
@@ -57,12 +60,17 @@ export default function DealFormModal({
         expectedCloseDate: dealToEdit.expectedCloseDate || "",
         notes: dealToEdit.notes || "",
         stage: dealToEdit.stage || stage,
+        boardId: dealToEdit.boardId || boardId || "",
         order: dealToEdit.order || 0,
       });
     } else {
-      setFormData((prev) => ({ ...prev, stage: stage }));
+      setFormData((prev) => ({
+        ...prev,
+        stage: stage,
+        boardId: boardId || "",
+      }));
     }
-  }, [dealToEdit, stage]);
+  }, [dealToEdit, stage, boardId]);
 
   const fetchContacts = async () => {
     try {
@@ -157,7 +165,10 @@ export default function DealFormModal({
             <Select
               value={formData.contactId || "none"}
               onValueChange={(value) =>
-                setFormData({ ...formData, contactId: value === "none" ? "" : value })
+                setFormData({
+                  ...formData,
+                  contactId: value === "none" ? "" : value,
+                })
               }
             >
               <SelectTrigger className="mt-1 text-white">

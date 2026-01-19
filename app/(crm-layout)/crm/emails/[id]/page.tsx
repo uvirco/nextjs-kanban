@@ -5,7 +5,12 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { IconArrowLeft, IconArchive, IconTrash, IconMailOpened } from "@tabler/icons-react";
+import {
+  IconArrowLeft,
+  IconArchive,
+  IconTrash,
+  IconMailOpened,
+} from "@tabler/icons-react";
 
 interface Email {
   id: string;
@@ -19,10 +24,14 @@ interface Email {
   createdAt: string;
   dealId?: string;
   isRead?: boolean;
-  status?: 'ACTIVE' | 'ARCHIVED' | 'DELETED';
+  status?: "ACTIVE" | "ARCHIVED" | "DELETED";
 }
 
-export default function EmailDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default function EmailDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const router = useRouter();
   const { id } = use(params);
   const [email, setEmail] = useState<Email | null>(null);
@@ -120,21 +129,40 @@ export default function EmailDetailPage({ params }: { params: Promise<{ id: stri
   return (
     <div className="p-6 max-w-5xl mx-auto">
       <div className="mb-6 flex items-center justify-between">
-        <Button variant="ghost" onClick={() => router.push("/crm/emails")} className="text-gray-300 hover:text-white hover:bg-gray-700">
+        <Button
+          variant="ghost"
+          onClick={() => router.push("/crm/emails")}
+          className="text-gray-300 hover:text-white hover:bg-gray-700"
+        >
           <IconArrowLeft size={16} className="mr-2" />
           Back to Inbox
         </Button>
 
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={markAsUnread} className="bg-gray-800 border-gray-600 text-gray-200 hover:bg-gray-700 hover:text-white">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={markAsUnread}
+            className="bg-gray-800 border-gray-600 text-gray-200 hover:bg-gray-700 hover:text-white"
+          >
             <IconMailOpened size={16} className="mr-2" />
             Mark as Unread
           </Button>
-          <Button variant="outline" size="sm" onClick={archiveEmail} className="bg-gray-800 border-gray-600 text-gray-200 hover:bg-gray-700 hover:text-white">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={archiveEmail}
+            className="bg-gray-800 border-gray-600 text-gray-200 hover:bg-gray-700 hover:text-white"
+          >
             <IconArchive size={16} className="mr-2" />
             Archive
           </Button>
-          <Button variant="destructive" size="sm" onClick={deleteEmail} className="bg-red-900 hover:bg-red-800 text-white border-red-800">
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={deleteEmail}
+            className="bg-red-900 hover:bg-red-800 text-white border-red-800"
+          >
             <IconTrash size={16} className="mr-2" />
             Delete
           </Button>
@@ -147,7 +175,9 @@ export default function EmailDetailPage({ params }: { params: Promise<{ id: stri
             <CardTitle className="text-2xl text-white">
               {email.subject || "(no subject)"}
             </CardTitle>
-            <Badge variant={email.direction === "INBOUND" ? "default" : "secondary"}>
+            <Badge
+              variant={email.direction === "INBOUND" ? "default" : "secondary"}
+            >
               {email.direction}
             </Badge>
           </div>
@@ -164,7 +194,9 @@ export default function EmailDetailPage({ params }: { params: Promise<{ id: stri
             <div className="flex items-center text-gray-300">
               <span className="font-semibold w-20">Date:</span>
               <span>
-                {new Date(email.receivedAt || email.sentAt || email.createdAt).toLocaleString()}
+                {new Date(
+                  email.receivedAt || email.sentAt || email.createdAt
+                ).toLocaleString()}
               </span>
             </div>
             {email.dealId && (
@@ -180,7 +212,7 @@ export default function EmailDetailPage({ params }: { params: Promise<{ id: stri
 
         <CardContent>
           <div className="prose prose-invert max-w-none">
-            <div 
+            <div
               className="text-gray-200 leading-relaxed"
               dangerouslySetInnerHTML={{ __html: email.body }}
             />

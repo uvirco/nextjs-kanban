@@ -1,45 +1,106 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { CRMDeal } from "@/types/crm";
+import { useRouter, useSearchParams } from "next/navigation";
+import { CRMDeal, CRMBoard } from "@/types/crm";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import DealFormModal from "@/ui/CRM/DealFormModal";
+import BoardManagementModal from "@/ui/CRM/BoardManagementModal";
+import ColumnManagementModal from "@/ui/CRM/ColumnManagementModal";
 import {
   IconPlus,
   IconEdit,
   IconTrash,
   IconCalendar,
+  IconChevronDown,
+  IconSettings,
+  IconColumns,
+  IconGripVertical,
 } from "@tabler/icons-react";
 
 interface DealColumn {
-  id: number;
-  column_id: number;
+  id: string;
   title: string;
   stage: string;
   color: string;
   order: number;
+  boardId?: string;
 }
 
 export default function CRMDealsPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [deals, setDeals] = useState<CRMDeal[]>([]);
   const [columns, setColumns] = useState<DealColumn[]>([]);
+  const [boards, setBoards] = useState<CRMBoard[]>([]);
+  const [selectedBoardId, setSelectedBoardId] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isBoardManagementOpen, setIsBoardManagementOpen] = useState(false);
+  const [isColumnManagementOpen, setIsColumnManagementOpen] = useState(false);
   const [selectedStage, setSelectedStage] = useState<string>("");
   const [dealToEdit, setDealToEdit] = useState<CRMDeal | null>(null);
   const [draggedDeal, setDraggedDeal] = useState<CRMDeal | null>(null);
+  const [draggedColumn, setDraggedColumn] = useState<DealColumn | null>(null);
 
   useEffect(() => {
-    fetchColumns();
-    fetchDeals();
+    fetchBoards();
   }, []);
+
+  // Listen to URL changes for boardId
+  useEffect(() => {
+    const urlBoardId = searchParams?.get("boardId");
+    if (urlBoardId && urlBoardId !== selectedBoardId) {
+      setSelectedBoardId(urlBoardId);
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (selectedBoardId) {
+      fetchColumns();
+      fetchDeals();
+    }
+  }, [selectedBoardId]);
+
+  const fetchBoards = async () => {
+    try {
+      const response = await fetch("/api/crm/boards?type=deals");
+      if (response.ok) {
+        const data = await response.json();
+        const boardsList = data.boards || [];
+        setBoards(boardsList);
+
+        // Check URL for boardId first, then use default or first board
+        const urlBoardId = searchParams?.get("boardId");
+        if (urlBoardId) {
+          setSelectedBoardId(urlBoardId);
+        } else {
+          const defaultBoard = boardsList.find((b: CRMBoard) => b.isDefault);
+          if (defaultBoard) {
+            setSelectedBoardId(defaultBoard.id);
+          } else if (boardsList.length > 0) {
+            setSelectedBoardId(boardsList[0].id);
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching boards:", error);
+    }
+  };
 
   const fetchColumns = async () => {
     try {
-      const response = await fetch("/api/crm/deal-columns");
+      const response = await fetch(
+        `/api/crm/deal-columns?boardId=${selectedBoardId}`
+      );
       if (response.ok) {
         const data = await response.json();
         setColumns(data.columns || []);
@@ -52,25 +113,30 @@ export default function CRMDealsPage() {
   const fetchDeals = async () => {
     try {
       console.log("Fetching deals...");
-      
+
       // First check session
       const sessionResponse = await fetch("/api/auth/session");
       const session = await sessionResponse.json();
       console.log("Session:", session);
-      
-      const response = await fetch("/api/crm/deals");
+
+      const response = await fetch(`/api/crm/deals?boardId=${selectedBoardId}`);
       console.log("Response status:", response.status);
       console.log("Response ok:", response.ok);
-      
+
       if (response.ok) {
         const data = await response.json();
         console.log("Raw deals data:", data);
         console.log("Number of deals:", data.deals?.length);
         console.log("First deal object:", data.deals?.[0]);
         console.log("Second deal object:", data.deals?.[1]);
-        const validDeals = (data.deals || []).filter((deal: CRMDeal) => deal && deal.id);
+        const validDeals = (data.deals || []).filter(
+          (deal: CRMDeal) => deal && deal.id
+        );
         console.log("Valid deals:", validDeals);
-        console.log("Deal stages:", validDeals.map((d: CRMDeal) => ({ id: d.id, stage: d.stage })));
+        console.log(
+          "Deal stages:",
+          validDeals.map((d: CRMDeal) => ({ id: d.id, stage: d.stage }))
+        );
         setDeals(validDeals);
       } else {
         const errorText = await response.text();
@@ -162,6 +228,58 @@ export default function CRMDealsPage() {
     }
   };
 
+  // Column drag and drop handlers
+  const handleColumnDragStart = (column: DealColumn) => {
+    setDraggedColumn(column);
+  };
+
+  const handleColumnDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleColumnDrop = async (targetColumn: DealColumn) => {
+    if (!draggedColumn || draggedColumn.id === targetColumn.id) {
+      setDraggedColumn(null);
+      return;
+    }
+
+    // Reorder columns
+    const newColumns = [...columns];
+    const draggedIndex = newColumns.findIndex((c) => c.id === draggedColumn.id);
+    const targetIndex = newColumns.findIndex((c) => c.id === targetColumn.id);
+
+    // Remove dragged column and insert at target position
+    newColumns.splice(draggedIndex, 1);
+    newColumns.splice(targetIndex, 0, draggedColumn);
+
+    // Update order values
+    const updatedColumns = newColumns.map((col, index) => ({
+      ...col,
+      order: index,
+    }));
+
+    // Optimistically update UI
+    setColumns(updatedColumns);
+    setDraggedColumn(null);
+
+    // Save to database
+    try {
+      await Promise.all(
+        updatedColumns.map((col) =>
+          fetch(`/api/crm/deal-columns/${col.id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ order: col.order }),
+          })
+        )
+      );
+    } catch (error) {
+      console.error("Error updating column order:", error);
+      // Revert on error
+      fetchColumns();
+    }
+  };
+
   console.log("Render - Loading:", loading, "Deals count:", deals.length);
 
   if (loading) {
@@ -189,12 +307,34 @@ export default function CRMDealsPage() {
             </span>
           </p>
         </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-2">
+          <Button
+            onClick={() => setIsColumnManagementOpen(true)}
+            variant="outline"
+            className="bg-zinc-700 border-zinc-600 text-white hover:bg-zinc-600"
+          >
+            <IconColumns size={16} className="mr-2" />
+            Manage Columns
+          </Button>
+          <Button
+            onClick={() => setIsBoardManagementOpen(true)}
+            variant="outline"
+            className="bg-zinc-700 border-zinc-600 text-white hover:bg-zinc-600"
+          >
+            <IconSettings size={16} className="mr-2" />
+            Manage Boards
+          </Button>
+        </div>
       </div>
 
       <div className="flex gap-4 overflow-x-auto pb-4 flex-1">
         {columns.map((column) => {
           const columnDeals = getDealsByColumn(column.stage);
-          console.log(`Rendering column ${column.id} with ${columnDeals.length} deals`);
+          console.log(
+            `Rendering column ${column.id} with ${columnDeals.length} deals`
+          );
           const columnValue = columnDeals.reduce(
             (sum, deal) => sum + parseFloat(deal.value?.toString() || "0"),
             0
@@ -207,9 +347,19 @@ export default function CRMDealsPage() {
               onDragOver={handleDragOver}
               onDrop={() => handleDrop(column.stage)}
             >
-              <div className="flex items-center justify-between mb-4">
+              <div 
+                className="flex items-center justify-between mb-4 cursor-move"
+                draggable
+                onDragStart={() => handleColumnDragStart(column)}
+                onDragOver={handleColumnDragOver}
+                onDrop={(e) => {
+                  e.stopPropagation();
+                  handleColumnDrop(column);
+                }}
+              >
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
+                    <IconGripVertical className="h-4 w-4 text-zinc-500" />
                     <div className={`w-3 h-3 rounded-full ${column.color}`} />
                     <h3 className="font-semibold text-white">{column.title}</h3>
                     <span className="text-xs text-zinc-400">
@@ -246,7 +396,9 @@ export default function CRMDealsPage() {
                       <CardHeader className="p-4 pb-2">
                         <CardTitle className="text-sm text-white flex items-start justify-between">
                           <div className="flex-1">
-                            <div className="text-xs text-zinc-500 font-normal mb-1">#{deal.deal_id}</div>
+                            <div className="text-xs text-zinc-500 font-normal mb-1">
+                              #{deal.deal_id}
+                            </div>
                             <div>{deal.title}</div>
                           </div>
                           <div className="flex gap-1 ml-2">
@@ -277,11 +429,14 @@ export default function CRMDealsPage() {
                       </CardHeader>
                       <CardContent className="p-4 pt-0 space-y-1 text-xs">
                         {deal.contact && (
-                          <p className="text-zinc-300">👤 {deal.contact.name}</p>
+                          <p className="text-zinc-300">
+                            👤 {deal.contact.name}
+                          </p>
                         )}
                         {deal.value && (
                           <p className="text-green-400 font-semibold">
-                            ${parseFloat(deal.value.toString()).toLocaleString()}
+                            $
+                            {parseFloat(deal.value.toString()).toLocaleString()}
                           </p>
                         )}
                         {deal.expectedCloseDate && (
@@ -317,7 +472,26 @@ export default function CRMDealsPage() {
         onClose={() => setIsModalOpen(false)}
         onSuccess={fetchDeals}
         stage={selectedStage}
+        boardId={selectedBoardId}
         dealToEdit={dealToEdit}
+      />
+
+      <BoardManagementModal
+        isOpen={isBoardManagementOpen}
+        onClose={() => setIsBoardManagementOpen(false)}
+        onBoardsChanged={() => {
+          fetchBoards();
+        }}
+      />
+
+      <ColumnManagementModal
+        isOpen={isColumnManagementOpen}
+        onClose={() => setIsColumnManagementOpen(false)}
+        boardId={selectedBoardId}
+        onColumnsUpdated={() => {
+          fetchColumns();
+          fetchDeals();
+        }}
       />
     </div>
   );
