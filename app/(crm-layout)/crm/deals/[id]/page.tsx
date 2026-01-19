@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import RichTextEditor from "@/ui/RichTextEditor";
 import {
   IconArrowLeft,
   IconEdit,
@@ -18,6 +19,9 @@ import {
   IconDeviceFloppy,
   IconX,
   IconClock,
+  IconNote,
+  IconPin,
+  IconPinFilled,
 } from "@tabler/icons-react";
 
 interface Deal {
@@ -80,6 +84,22 @@ interface Activity {
   } | null;
 }
 
+interface CRMNote {
+  id: string;
+  content: string;
+  dealId: number | null;
+  contactId: string | null;
+  leadId: string | null;
+  createdByUserId: string | null;
+  createdAt: string;
+  updatedAt: string;
+  isPinned: boolean;
+  createdByUser?: {
+    name: string;
+    email: string;
+  };
+}
+
 export default function DealDetailPage({
   params,
 }: {
@@ -92,13 +112,22 @@ export default function DealDetailPage({
   const [emails, setEmails] = useState<Email[]>([]);
   const [stageHistory, setStageHistory] = useState<StageHistory[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
+  const [notes, setNotes] = useState<CRMNote[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editedDeal, setEditedDeal] = useState<Partial<Deal>>({});
+  const [newNoteContent, setNewNoteContent] = useState("");
+  const [isSavingNote, setIsSavingNote] = useState(false);
 
   useEffect(() => {
     fetchDealDetails();
   }, [id]);
+
+  useEffect(() => {
+    if (deal) {
+      fetchNotes();
+    }
+  }, [deal]);
 
   const fetchDealDetails = async () => {
     try {
@@ -182,6 +211,83 @@ export default function DealDetailPage({
       }
     } catch (error) {
       console.error("Failed to delete deal:", error);
+    }
+  };
+
+  const fetchNotes = async () => {
+    if (!deal) return;
+    try {
+      const response = await fetch(`/api/crm/notes?dealId=${deal.deal_id}`);
+      if (response.ok) {
+        const data = await response.json();
+        setNotes(data.notes || []);
+      }
+    } catch (error) {
+      console.error("Failed to fetch notes:", error);
+    }
+  };
+
+  const handleSaveNote = async () => {
+    if (!newNoteContent.trim() || !deal) return;
+
+    setIsSavingNote(true);
+    try {
+      const response = await fetch("/api/crm/notes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content: newNoteContent,
+          dealId: deal.deal_id,
+        }),
+      });
+
+      if (response.ok) {
+        setNewNoteContent("");
+        await fetchNotes();
+        await fetchDealDetails(); // Refresh activities
+      } else {
+        alert("Failed to save note");
+      }
+    } catch (error) {
+      console.error("Failed to save note:", error);
+      alert("Failed to save note");
+    } finally {
+      setIsSavingNote(false);
+    }
+  };
+
+  const handleTogglePin = async (noteId: string, currentPinned: boolean) => {
+    try {
+      const response = await fetch(`/api/crm/notes/${noteId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isPinned: !currentPinned }),
+      });
+
+      if (response.ok) {
+        await fetchNotes();
+      }
+    } catch (error) {
+      console.error("Failed to toggle pin:", error);
+    }
+  };
+
+  const handleDeleteNote = async (noteId: string) => {
+    if (!confirm("Are you sure you want to delete this note?")) return;
+
+    try {
+      const response = await fetch(`/api/crm/notes/${noteId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        await fetchNotes();
+      } else {
+        alert("Failed to delete note");
+      }
+    } catch (error) {
+      console.error("Failed to delete note:", error);
+      alert("Failed to delete note");
     }
   };
 
@@ -528,7 +634,9 @@ export default function DealDetailPage({
                                   ? "bg-purple-500"
                                   : activity.type === "MEETING"
                                     ? "bg-orange-500"
-                                    : "bg-gray-500";
+                                    : activity.type === "NOTE"
+                                      ? "bg-amber-500"
+                                      : "bg-gray-500";
 
                           return (
                             <div key={activity.id} className="relative pl-12">
@@ -552,9 +660,21 @@ export default function DealDetailPage({
                                       ).toLocaleString()}
                                     </span>
                                   </div>
-                                  <p className="text-sm text-gray-300 mb-2">
-                                    {activity.content}
-                                  </p>
+                                  {activity.type === "NOTE" ? (
+                                    <div
+                                      className="text-sm text-gray-300 mb-2 prose prose-invert prose-sm max-w-none"
+                                      dangerouslySetInnerHTML={{
+                                        __html: activity.content.replace(
+                                          "Added a note: ",
+                                          ""
+                                        ),
+                                      }}
+                                    />
+                                  ) : (
+                                    <p className="text-sm text-gray-300 mb-2">
+                                      {activity.content}
+                                    </p>
+                                  )}
                                   {activity.createdByUser && (
                                     <p className="text-xs text-gray-400">
                                       By: {activity.createdByUser.name}
@@ -572,8 +692,102 @@ export default function DealDetailPage({
               </TabsContent>
 
               <TabsContent value="notes" className="m-0 p-6">
-                <div className="text-center py-12 text-gray-500">
-                  Notes feature coming soon
+                <div className="space-y-4">
+                  {/* New note editor */}
+                  <Card className="bg-gray-800 border-gray-700">
+                    <CardContent className="p-4">
+                      <h3 className="text-lg font-semibold text-gray-100 mb-3">
+                        Add New Note
+                      </h3>
+                      <RichTextEditor
+                        content={newNoteContent}
+                        onChange={setNewNoteContent}
+                        placeholder="Add a note about this deal..."
+                        className="min-h-[200px]"
+                      />
+                      <Button
+                        onClick={handleSaveNote}
+                        disabled={isSavingNote || !newNoteContent.trim()}
+                        className="mt-3 bg-green-600 hover:bg-green-700"
+                      >
+                        <IconDeviceFloppy size={16} className="mr-2" />
+                        {isSavingNote ? "Saving..." : "Add Note"}
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  {/* Existing notes list */}
+                  <div className="space-y-3">
+                    <h3 className="text-lg font-semibold text-gray-100">
+                      Notes History ({notes.length})
+                    </h3>
+                    {notes.length === 0 ? (
+                      <div className="text-center py-12 text-gray-500">
+                        No notes yet. Add your first note above.
+                      </div>
+                    ) : (
+                      notes.map((note) => (
+                        <Card
+                          key={note.id}
+                          className={`bg-gray-800 border-gray-700 ${
+                            note.isPinned ? "border-yellow-500 border-2" : ""
+                          }`}
+                        >
+                          <CardContent className="p-4">
+                            <div className="flex items-start justify-between mb-2">
+                              <div className="flex items-center gap-2 flex-1">
+                                {note.isPinned && (
+                                  <IconPinFilled
+                                    size={16}
+                                    className="text-yellow-500"
+                                  />
+                                )}
+                                <div className="text-sm text-gray-400">
+                                  {note.createdByUser?.name || "Unknown"} •{" "}
+                                  {new Date(note.createdAt).toLocaleString()}
+                                  {note.createdAt !== note.updatedAt && (
+                                    <span className="ml-1">(edited)</span>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() =>
+                                    handleTogglePin(note.id, note.isPinned)
+                                  }
+                                  className="h-8 w-8 p-0 text-gray-400 hover:text-yellow-500"
+                                  title={
+                                    note.isPinned ? "Unpin note" : "Pin note"
+                                  }
+                                >
+                                  {note.isPinned ? (
+                                    <IconPinFilled size={16} />
+                                  ) : (
+                                    <IconPin size={16} />
+                                  )}
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => handleDeleteNote(note.id)}
+                                  className="h-8 w-8 p-0 text-gray-400 hover:text-red-500"
+                                  title="Delete note"
+                                >
+                                  <IconTrash size={16} />
+                                </Button>
+                              </div>
+                            </div>
+                            <div
+                              className="prose prose-invert prose-sm max-w-none text-gray-100"
+                              dangerouslySetInnerHTML={{ __html: note.content }}
+                            />
+                          </CardContent>
+                        </Card>
+                      ))
+                    )}
+                  </div>
                 </div>
               </TabsContent>
 

@@ -95,6 +95,22 @@ export interface CRMDeal {
   };
 }
 
+export interface CRMNote {
+  id: string;
+  content: string;
+  dealId: number | null;
+  contactId: string | null;
+  leadId: string | null;
+  createdByUserId: string | null;
+  createdAt: string;
+  updatedAt: string;
+  isPinned: boolean;
+  createdByUser?: {
+    name: string;
+    email: string;
+  };
+}
+
 export interface CRMActivity {
   id: string;
   type: CRMActivityType;
