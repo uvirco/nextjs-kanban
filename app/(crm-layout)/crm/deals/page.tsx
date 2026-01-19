@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { CRMDeal } from "@/types/crm";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,6 +23,7 @@ interface DealColumn {
 }
 
 export default function CRMDealsPage() {
+  const router = useRouter();
   const [deals, setDeals] = useState<CRMDeal[]>([]);
   const [columns, setColumns] = useState<DealColumn[]>([]);
   const [loading, setLoading] = useState(true);
@@ -238,7 +240,8 @@ export default function CRMDealsPage() {
                       key={`deal-${deal.id}`}
                       draggable
                       onDragStart={() => handleDragStart(deal)}
-                      className="bg-zinc-700 border-zinc-600 hover:border-zinc-500 cursor-move transition-colors"
+                      onClick={() => router.push(`/crm/deals/${deal.deal_id}`)}
+                      className="bg-zinc-700 border-zinc-600 hover:border-zinc-500 cursor-pointer transition-colors"
                     >
                       <CardHeader className="p-4 pb-2">
                         <CardTitle className="text-sm text-white flex items-start justify-between">
@@ -250,7 +253,10 @@ export default function CRMDealsPage() {
                             <Button
                               size="sm"
                               variant="ghost"
-                              onClick={() => handleEditDeal(deal)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEditDeal(deal);
+                              }}
                               className="h-6 w-6 p-0"
                             >
                               <IconEdit size={14} />
@@ -258,7 +264,10 @@ export default function CRMDealsPage() {
                             <Button
                               size="sm"
                               variant="ghost"
-                              onClick={() => handleDeleteDeal(deal.id)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteDeal(deal.id);
+                              }}
                               className="h-6 w-6 p-0 text-red-400 hover:text-red-300"
                             >
                               <IconTrash size={14} />

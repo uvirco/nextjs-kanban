@@ -1,0 +1,2 @@
+-- Add STAGE_CHANGE to CRMActivityType enum
+ALTER TYPE "CRMActivityType" ADD VALUE IF NOT EXISTS 'STAGE_CHANGE';

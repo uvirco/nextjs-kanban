@@ -15,6 +15,8 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "50");
     const offset = parseInt(searchParams.get("offset") || "0");
     const direction = searchParams.get("direction"); // 'inbound', 'outbound', or null for all
+    const dealId = searchParams.get("dealId"); // Filter by dealId
+    const id = searchParams.get("id"); // Filter by specific email id
 
     let query = supabaseAdmin
       .from("CRMEmail")
@@ -42,6 +44,14 @@ export async function GET(request: NextRequest) {
 
     if (direction) {
       query = query.eq("direction", direction.toUpperCase());
+    }
+
+    if (dealId) {
+      query = query.eq("dealId", parseInt(dealId));
+    }
+
+    if (id) {
+      query = query.eq("id", id);
     }
 
     const { data: emails, error } = await query;

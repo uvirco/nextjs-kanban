@@ -24,6 +24,7 @@ export enum CRMActivityType {
   EMAIL = "EMAIL",
   MEETING = "MEETING",
   NOTE = "NOTE",
+  STAGE_CHANGE = "STAGE_CHANGE",
 }
 
 export enum CRMEmailDirection {

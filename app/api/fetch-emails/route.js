@@ -184,24 +184,35 @@ export async function POST(request) {
         console.log(`No deal reference found in subject`);
       }
       
-      const { error } = await supabaseAdmin.from("CRMEmail").insert([
+      const emailDate = new Date(envelope.date).toISOString();
+      const { data: insertedEmail, error } = await supabaseAdmin.from("CRMEmail").insert([
         {
           fromEmail: fromEmail,
           toEmail: toEmail,
           subject: subject,
           body: body,
-          receivedAt: new Date(envelope.date).toISOString(),
+          receivedAt: emailDate,
           direction: "INBOUND",
           dealId: dealId, // Auto-linked deal ID if found
           isRead: false,
           status: "ACTIVE"
         },
-      ]);
+      ]).select();
 
       if (error) {
         console.error("Supabase error:", error);
       } else {
         emailsProcessed++;
+        
+        // If email was linked to a deal, log it as an activity
+        if (dealId && insertedEmail && insertedEmail[0]) {
+          await supabaseAdmin.from("CRMActivity").insert({
+            type: "EMAIL",
+            content: `Email received: ${subject}`,
+            dealId: dealId,
+            createdAt: emailDate, // Use email's date, not current time
+          });
+        }
       }
     }
 

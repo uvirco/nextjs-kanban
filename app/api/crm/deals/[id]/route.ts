@@ -29,9 +29,6 @@ export async function GET(
       .eq("deal_id", id)
       .single();
 
-    // Map deal_id to id for consistency
-    const dealWithId = deal ? { ...deal, id: deal.deal_id } : null;
-
     if (error) {
       console.error("Error fetching CRM deal:", error);
       return NextResponse.json(
@@ -40,9 +37,10 @@ export async function GET(
       );
     }
 
-    return NextResponse.json({
-      deal: dealWithId as CRMDeal,
-    });
+    // Map deal_id to id for consistency
+    const dealWithId = deal ? { ...deal, id: deal.deal_id } : null;
+
+    return NextResponse.json(dealWithId);
   } catch (error) {
     console.error("Error in CRM deal API:", error);
     return NextResponse.json(
@@ -67,6 +65,13 @@ export async function PUT(
     const { id } = await params;
     const body = await request.json();
 
+    // Get current deal to track stage change
+    const { data: currentDeal } = await supabaseAdmin
+      .from("CRMDeal")
+      .select("stage")
+      .eq("deal_id", id)
+      .single();
+
     const { data: deal, error } = await supabaseAdmin
       .from("CRMDeal")
       .update({
@@ -81,6 +86,27 @@ export async function PUT(
       `
       )
       .single();
+
+    // Log stage change if stage was updated
+    if (body.stage && currentDeal && currentDeal.stage !== body.stage) {
+      // Log to CRMDealStageHistory
+      await supabaseAdmin.from("CRMDealStageHistory").insert({
+        dealId: parseInt(id),
+        fromStage: currentDeal.stage,
+        toStage: body.stage,
+        changedByUserId: userId,
+        changedAt: new Date().toISOString(),
+      });
+
+      // Log to CRMActivity table
+      await supabaseAdmin.from("CRMActivity").insert({
+        type: "STAGE_CHANGE",
+        content: `Deal moved from ${currentDeal.stage} to ${body.stage}`,
+        dealId: parseInt(id),
+        createdByUserId: userId,
+        createdAt: new Date().toISOString(),
+      });
+    }
 
     // Map deal_id to id for consistency
     const dealWithId = deal ? { ...deal, id: deal.deal_id } : null;
