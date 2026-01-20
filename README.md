@@ -1,5 +1,28 @@
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
+## Storage Configuration
+
+This project uses an **abstraction layer for file storage** that supports multiple backends:
+
+- **Supabase Storage** (default) - Cloud storage
+- **Local Filesystem** - Store files on local disk
+
+**Switch backends via environment variable:**
+
+```bash
+# Use Supabase Storage (default)
+STORAGE_TYPE=supabase
+
+# Use Local Filesystem
+STORAGE_TYPE=local
+STORAGE_PATH=/var/app/storage
+STORAGE_BASE_URL=/api/storage
+```
+
+**Migration is easy:** Change one env var to switch from Supabase to local storage with **zero code changes**.
+
+See [lib/STORAGE_README.md](lib/STORAGE_README.md) for detailed documentation.
+
 ## Getting Started
 
 First, run the development server:

@@ -18,13 +18,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Card, CardContent } from "@/components/ui/card";
 import { CRMContact } from "@/types/crm";
 
 interface DealFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  columnId: string;
+  stage: string;
+  boardId?: string;
   dealToEdit?: any;
 }
 
@@ -32,7 +34,8 @@ export default function DealFormModal({
   isOpen,
   onClose,
   onSuccess,
-  columnId,
+  stage,
+  boardId,
   dealToEdit,
 }: DealFormModalProps) {
   const [loading, setLoading] = useState(false);
@@ -43,7 +46,8 @@ export default function DealFormModal({
     value: "",
     expectedCloseDate: "",
     notes: "",
-    stage: columnId || "",
+    stage: stage,
+    boardId: boardId || "",
     order: 0,
   });
 
@@ -56,13 +60,18 @@ export default function DealFormModal({
         value: dealToEdit.value?.toString() || "",
         expectedCloseDate: dealToEdit.expectedCloseDate || "",
         notes: dealToEdit.notes || "",
-        stage: dealToEdit.stage || columnId,
+        stage: dealToEdit.stage || stage,
+        boardId: dealToEdit.boardId || boardId || "",
         order: dealToEdit.order || 0,
       });
     } else {
-      setFormData((prev) => ({ ...prev, stage: columnId }));
+      setFormData((prev) => ({
+        ...prev,
+        stage: stage,
+        boardId: boardId || "",
+      }));
     }
-  }, [dealToEdit, columnId]);
+  }, [dealToEdit, stage, boardId]);
 
   const fetchContacts = async () => {
     try {
@@ -117,7 +126,7 @@ export default function DealFormModal({
   };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     setFormData({
       ...formData,
@@ -223,6 +232,8 @@ export default function DealFormModal({
               rows={3}
             />
           </div>
+
+          {/* Note: Products are added later on the deal detail page, not during creation */}
 
           <div className="flex justify-end space-x-2 pt-4">
             <Button

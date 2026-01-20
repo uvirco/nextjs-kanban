@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const session = await auth();
     const userId = session?.user?.id;
@@ -62,15 +62,38 @@ export async function GET() {
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     const validUserId = uuidRegex.test(userId) ? userId : null;
 
-    const { data: deals, error } = await supabaseAdmin
-      .from("CRMDeal")
-      .select(
-        `
-        *,
+    // Get boardId from query params
+    const { searchParams } = new URL(request.url);
+    const boardId = searchParams.get("boardId");
+
+    let query = supabaseAdmin.from("CRMDeal").select(
+      `
+        deal_id,
+        title,
+        contactId,
+        leadId,
+        value,
+        stage,
+        expectedCloseDate,
+        notes,
+        columnId,
+        boardId,
+        order,
+        createdAt,
+        updatedAt,
+        createdByUserId,
         contact:contactId(*)
       `
-      )
-      .order("order", { ascending: true });
+    );
+
+    // Filter by boardId if provided
+    if (boardId) {
+      query = query.eq("boardId", boardId);
+    }
+
+    const { data: deals, error } = await query.order("order", {
+      ascending: true,
+    });
 
     if (error) {
       console.error("Error fetching CRM deals:", error);
@@ -80,8 +103,14 @@ export async function GET() {
       );
     }
 
+    // Map deal_id to id for consistency
+    const dealsWithId = deals?.map((deal: any) => ({
+      ...deal,
+      id: deal.deal_id,
+    }));
+
     return NextResponse.json({
-      deals: deals as CRMDeal[],
+      deals: dealsWithId as CRMDeal[],
     });
   } catch (error) {
     console.error("Error in CRM deals API:", error);

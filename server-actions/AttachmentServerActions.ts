@@ -2,6 +2,7 @@
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import { supabaseAdmin } from "@/lib/supabase";
+import { storage } from "@/lib/storage-service";
 import { z } from "zod";
 import { MESSAGES } from "@/utils/messages";
 
@@ -50,9 +51,9 @@ export async function handleUploadAttachment(formData: FormData) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    const { error: uploadError } = await supabaseAdmin.storage
-      .from("attachments")
-      .upload(path, buffer, { contentType: file.type });
+    const { error: uploadError } = await storage.upload(path, buffer, {
+      contentType: file.type,
+    });
 
     if (uploadError) {
       console.error("Upload error:", uploadError);
@@ -178,9 +179,9 @@ export async function handleDeleteAttachment({
     // If there's a storage_path, try removing the object from the attachments bucket
     if (existing?.storage_path) {
       try {
-        const { error: removeErr } = await supabaseAdmin.storage
-          .from("attachments")
-          .remove([existing.storage_path]);
+        const { error: removeErr } = await storage.delete([
+          existing.storage_path,
+        ]);
         if (removeErr) {
           // log but continue — metadata should still be deletable
           console.error("Failed to remove storage object:", removeErr);

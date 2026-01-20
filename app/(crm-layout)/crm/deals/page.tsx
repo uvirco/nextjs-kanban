@@ -1,82 +1,174 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { CRMDeal } from "@/types/crm";
+import { useRouter, useSearchParams } from "next/navigation";
+import { CRMDeal, CRMBoard } from "@/types/crm";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import DealFormModal from "@/ui/CRM/DealFormModal";
+import BoardManagementModal from "@/ui/CRM/BoardManagementModal";
+import ColumnManagementModal from "@/ui/CRM/ColumnManagementModal";
 import {
   IconPlus,
   IconEdit,
   IconTrash,
   IconCalendar,
+  IconChevronDown,
+  IconSettings,
+  IconColumns,
+  IconGripVertical,
+  IconExternalLink,
+  IconChevronLeft,
+  IconChevronRight,
 } from "@tabler/icons-react";
+import { Badge } from "@/components/ui/badge";
 
-// Map column IDs from database to display info (full pipeline: Lead → Closed)
-const DEAL_COLUMNS = [
-  {
-    id: "crm-deal-col-lead-0000-0000-0000-000000",
-    title: "Lead",
-    color: "bg-slate-500",
-  },
-  {
-    id: "crm-deal-col-contacted-0000-0000-00000",
-    title: "Contacted",
-    color: "bg-blue-500",
-  },
-  {
-    id: "crm-deal-col-qualified-0000-0000-00000",
-    title: "Qualified",
-    color: "bg-purple-500",
-  },
-  {
-    id: "crm-deal-col-proposal-0000-0000-000000",
-    title: "Proposal",
-    color: "bg-yellow-500",
-  },
-  {
-    id: "crm-deal-col-negotiation-0000-0000-000",
-    title: "Negotiation",
-    color: "bg-orange-500",
-  },
-  {
-    id: "crm-deal-col-won-00000-0000-0000-000000",
-    title: "Closed Won",
-    color: "bg-green-500",
-  },
-  {
-    id: "crm-deal-col-lost-0000-0000-0000-000000",
-    title: "Closed Lost",
-    color: "bg-red-500",
-  },
-];
+interface DealColumn {
+  id: string;
+  title: string;
+  stage: string;
+  color: string;
+  order: number;
+  boardId?: string;
+}
+
+interface DealReference {
+  id: string;
+  dealId: number;
+  boardId: string;
+  stage: string;
+  note: string;
+  createdAt: string;
+  deal?: CRMDeal; // Joined deal data
+}
 
 export default function CRMDealsPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [deals, setDeals] = useState<CRMDeal[]>([]);
+  const [referenceCards, setReferenceCards] = useState<DealReference[]>([]);
+  const [columns, setColumns] = useState<DealColumn[]>([]);
+  const [boards, setBoards] = useState<CRMBoard[]>([]);
+  const [selectedBoardId, setSelectedBoardId] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedColumnId, setSelectedColumnId] = useState<string>("");
+  const [isBoardManagementOpen, setIsBoardManagementOpen] = useState(false);
+  const [isColumnManagementOpen, setIsColumnManagementOpen] = useState(false);
+  const [selectedStage, setSelectedStage] = useState<string>("");
   const [dealToEdit, setDealToEdit] = useState<CRMDeal | null>(null);
   const [draggedDeal, setDraggedDeal] = useState<CRMDeal | null>(null);
+  const [draggedColumn, setDraggedColumn] = useState<DealColumn | null>(null);
+  const [collapsedColumns, setCollapsedColumns] = useState<Set<string>>(
+    new Set(),
+  );
 
   useEffect(() => {
-    fetchDeals();
+    fetchBoards();
   }, []);
+
+  // Listen to URL changes for boardId
+  useEffect(() => {
+    const urlBoardId = searchParams?.get("boardId");
+    if (urlBoardId && urlBoardId !== selectedBoardId) {
+      setSelectedBoardId(urlBoardId);
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (selectedBoardId) {
+      fetchColumns();
+      fetchDeals();
+    }
+  }, [selectedBoardId]);
+
+  const fetchBoards = async () => {
+    try {
+      const response = await fetch("/api/crm/boards?type=deals");
+      if (response.ok) {
+        const data = await response.json();
+        const boardsList = data.boards || [];
+        setBoards(boardsList);
+
+        // Check URL for boardId first, then use default or first board
+        const urlBoardId = searchParams?.get("boardId");
+        if (urlBoardId) {
+          setSelectedBoardId(urlBoardId);
+        } else {
+          const defaultBoard = boardsList.find((b: CRMBoard) => b.isDefault);
+          if (defaultBoard) {
+            setSelectedBoardId(defaultBoard.id);
+          } else if (boardsList.length > 0) {
+            setSelectedBoardId(boardsList[0].id);
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching boards:", error);
+    }
+  };
+
+  const fetchColumns = async () => {
+    try {
+      const response = await fetch(
+        `/api/crm/deal-columns?boardId=${selectedBoardId}`,
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setColumns(data.columns || []);
+      }
+    } catch (error) {
+      console.error("Error fetching columns:", error);
+    }
+  };
 
   const fetchDeals = async () => {
     try {
-      console.log("Fetching deals from /api/crm/deals");
-      const response = await fetch("/api/crm/deals");
+      console.log("Fetching deals...");
+
+      // First check session
+      const sessionResponse = await fetch("/api/auth/session");
+      const session = await sessionResponse.json();
+      console.log("Session:", session);
+
+      const response = await fetch(`/api/crm/deals?boardId=${selectedBoardId}`);
       console.log("Response status:", response.status);
-      
+      console.log("Response ok:", response.ok);
+
       if (response.ok) {
         const data = await response.json();
-        console.log("Deals data:", data);
-        setDeals(data.deals || []);
+        console.log("Raw deals data:", data);
+        console.log("Number of deals:", data.deals?.length);
+        console.log("First deal object:", data.deals?.[0]);
+        console.log("Second deal object:", data.deals?.[1]);
+        const validDeals = (data.deals || []).filter(
+          (deal: CRMDeal) => deal && deal.id,
+        );
+        console.log("Valid deals:", validDeals);
+        console.log(
+          "Deal stages:",
+          validDeals.map((d: CRMDeal) => ({ id: d.id, stage: d.stage })),
+        );
+        setDeals(validDeals);
       } else {
         const errorText = await response.text();
         console.error("Failed to fetch deals:", response.status, errorText);
         setDeals([]);
+      }
+
+      // Fetch reference cards for this board
+      const refResponse = await fetch(
+        `/api/crm/deal-references?boardId=${selectedBoardId}`,
+      );
+      if (refResponse.ok) {
+        const refData = await refResponse.json();
+        setReferenceCards(refData.references || []);
       }
     } catch (error) {
       console.error("Error fetching deals:", error);
@@ -87,20 +179,24 @@ export default function CRMDealsPage() {
     }
   };
 
-  const getDealsByColumn = (columnId: string) => {
+  const getDealsByColumn = (stage: string) => {
     return deals
-      .filter((deal) => deal.stage === columnId)
+      .filter((deal) => deal.stage === stage)
       .sort((a, b) => (a.order || 0) - (b.order || 0));
   };
 
-  const handleAddDeal = (columnId: string) => {
-    setSelectedColumnId(columnId);
+  const getReferencesByColumn = (stage: string) => {
+    return referenceCards.filter((ref) => ref.stage === stage);
+  };
+
+  const handleAddDeal = (stage: string) => {
+    setSelectedStage(stage);
     setDealToEdit(null);
     setIsModalOpen(true);
   };
 
   const handleEditDeal = (deal: CRMDeal) => {
-    setSelectedColumnId(deal.stage);
+    setSelectedStage(deal.stage);
     setDealToEdit(deal);
     setIsModalOpen(true);
   };
@@ -123,7 +219,27 @@ export default function CRMDealsPage() {
       alert("Failed to delete deal");
     }
   };
+  const toggleColumnCollapse = (columnId: string) => {
+    setCollapsedColumns((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(columnId)) {
+        newSet.delete(columnId);
+      } else {
+        newSet.add(columnId);
+      }
+      return newSet;
+    });
+  };
 
+  const toggleAllColumns = () => {
+    if (collapsedColumns.size > 0) {
+      // Expand all
+      setCollapsedColumns(new Set());
+    } else {
+      // Collapse all
+      setCollapsedColumns(new Set(columns.map((col) => col.id)));
+    }
+  };
   const handleDragStart = (deal: CRMDeal) => {
     setDraggedDeal(deal);
   };
@@ -132,8 +248,8 @@ export default function CRMDealsPage() {
     e.preventDefault();
   };
 
-  const handleDrop = async (columnId: string) => {
-    if (!draggedDeal || draggedDeal.stage === columnId) {
+  const handleDrop = async (stage: string) => {
+    if (!draggedDeal || draggedDeal.stage === stage) {
       setDraggedDeal(null);
       return;
     }
@@ -145,7 +261,7 @@ export default function CRMDealsPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          stage: columnId,
+          stage: stage,
         }),
       });
 
@@ -160,6 +276,58 @@ export default function CRMDealsPage() {
       alert("Failed to move deal");
     } finally {
       setDraggedDeal(null);
+    }
+  };
+
+  // Column drag and drop handlers
+  const handleColumnDragStart = (column: DealColumn) => {
+    setDraggedColumn(column);
+  };
+
+  const handleColumnDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleColumnDrop = async (targetColumn: DealColumn) => {
+    if (!draggedColumn || draggedColumn.id === targetColumn.id) {
+      setDraggedColumn(null);
+      return;
+    }
+
+    // Reorder columns
+    const newColumns = [...columns];
+    const draggedIndex = newColumns.findIndex((c) => c.id === draggedColumn.id);
+    const targetIndex = newColumns.findIndex((c) => c.id === targetColumn.id);
+
+    // Remove dragged column and insert at target position
+    newColumns.splice(draggedIndex, 1);
+    newColumns.splice(targetIndex, 0, draggedColumn);
+
+    // Update order values
+    const updatedColumns = newColumns.map((col, index) => ({
+      ...col,
+      order: index,
+    }));
+
+    // Optimistically update UI
+    setColumns(updatedColumns);
+    setDraggedColumn(null);
+
+    // Save to database
+    try {
+      await Promise.all(
+        updatedColumns.map((col) =>
+          fetch(`/api/crm/deal-columns/${col.id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ order: col.order }),
+          }),
+        ),
+      );
+    } catch (error) {
+      console.error("Error updating column order:", error);
+      // Revert on error
+      fetchColumns();
     }
   };
 
@@ -190,110 +358,285 @@ export default function CRMDealsPage() {
             </span>
           </p>
         </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-2">
+          <Button
+            onClick={toggleAllColumns}
+            variant="outline"
+            className="bg-zinc-700 border-zinc-600 text-white hover:bg-zinc-600"
+          >
+            {collapsedColumns.size > 0 ? (
+              <>
+                <IconChevronRight size={16} className="mr-2" />
+                Expand All
+              </>
+            ) : (
+              <>
+                <IconChevronLeft size={16} className="mr-2" />
+                Collapse All
+              </>
+            )}
+          </Button>
+          <Button
+            onClick={() => setIsColumnManagementOpen(true)}
+            variant="outline"
+            className="bg-zinc-700 border-zinc-600 text-white hover:bg-zinc-600"
+          >
+            <IconColumns size={16} className="mr-2" />
+            Manage Columns
+          </Button>
+          <Button
+            onClick={() => setIsBoardManagementOpen(true)}
+            variant="outline"
+            className="bg-zinc-700 border-zinc-600 text-white hover:bg-zinc-600"
+          >
+            <IconSettings size={16} className="mr-2" />
+            Manage Boards
+          </Button>
+        </div>
       </div>
 
       <div className="flex gap-4 overflow-x-auto pb-4 flex-1">
-        {DEAL_COLUMNS.map((column) => {
-          const columnDeals = getDealsByColumn(column.id);
+        {columns.map((column) => {
+          const columnDeals = getDealsByColumn(column.stage);
+          const columnRefs = getReferencesByColumn(column.stage);
+          const totalCount = columnDeals.length + columnRefs.length;
+          console.log(
+            `Rendering column ${column.id} with ${columnDeals.length} deals and ${columnRefs.length} references`,
+          );
           const columnValue = columnDeals.reduce(
             (sum, deal) => sum + parseFloat(deal.value?.toString() || "0"),
-            0
+            0,
           );
 
           return (
             <div
-              key={column.id}
-              className="flex-shrink-0 w-80 bg-zinc-800 rounded-lg p-4"
+              key={`column-${column.id}`}
+              className={`flex-shrink-0 rounded-lg p-4 transition-all duration-200 ${
+                collapsedColumns.has(column.id)
+                  ? "w-16 bg-zinc-800/50"
+                  : "w-80 bg-zinc-800"
+              }`}
               onDragOver={handleDragOver}
-              onDrop={() => handleDrop(column.id)}
+              onDrop={() => handleDrop(column.stage)}
             >
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
+              <div
+                className="flex items-center justify-between mb-4 cursor-move"
+                draggable
+                onDragStart={() => handleColumnDragStart(column)}
+                onDragOver={handleColumnDragOver}
+                onDrop={(e) => {
+                  e.stopPropagation();
+                  handleColumnDrop(column);
+                }}
+              >
+                {collapsedColumns.has(column.id) ? (
+                  // Collapsed view - vertical layout
+                  <div className="flex flex-col items-center gap-3 w-full h-full justify-between">
                     <div className={`w-3 h-3 rounded-full ${column.color}`} />
-                    <h3 className="font-semibold text-white">{column.title}</h3>
-                    <span className="text-xs text-zinc-400">
-                      ({columnDeals.length})
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => toggleColumnCollapse(column.id)}
+                      className="h-6 w-6 p-0"
+                      title="Expand column"
+                    >
+                      <IconChevronRight size={14} />
+                    </Button>
+                    <span className="text-xs text-zinc-500">
+                      ({totalCount})
                     </span>
+                    <div className="flex-1 flex items-center justify-center">
+                      <div className="text-sm font-semibold text-white transform -rotate-90 whitespace-nowrap origin-center">
+                        {column.title}
+                      </div>
+                    </div>
                   </div>
-                  {columnValue > 0 && (
-                    <p className="text-xs text-zinc-400 ml-5">
-                      ${columnValue.toLocaleString()}
-                    </p>
-                  )}
-                </div>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => handleAddDeal(column.id)}
-                  className="h-8 w-8 p-0"
-                >
-                  <IconPlus size={16} />
-                </Button>
+                ) : (
+                  // Expanded view - horizontal layout
+                  <>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <IconGripVertical className="h-4 w-4 text-zinc-500" />
+                        <div
+                          className={`w-3 h-3 rounded-full ${column.color}`}
+                        />
+                        <h3 className="font-semibold text-white">
+                          {column.title}
+                        </h3>
+                        <span className="text-xs text-zinc-400">
+                          ({totalCount})
+                        </span>
+                      </div>
+                      {columnValue > 0 && (
+                        <p className="text-xs text-zinc-400 ml-5">
+                          ${columnValue.toLocaleString()}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => toggleColumnCollapse(column.id)}
+                        className="h-8 w-8 p-0"
+                        title="Collapse column"
+                      >
+                        <IconChevronLeft size={16} />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleAddDeal(column.stage)}
+                        className="h-8 w-8 p-0"
+                      >
+                        <IconPlus size={16} />
+                      </Button>
+                    </div>
+                  </>
+                )}
               </div>
 
-              <div className="space-y-3 max-h-[calc(100vh-280px)] overflow-y-auto">
-                {columnDeals.map((deal) => (
+              <div
+                className={`space-y-3 max-h-[calc(100vh-280px)] overflow-y-auto transition-all duration-200 ${
+                  collapsedColumns.has(column.id)
+                    ? "opacity-0 h-0 overflow-hidden"
+                    : ""
+                }`}
+              >
+                {columnDeals
+                  .filter((deal) => deal && deal.id)
+                  .map((deal) => (
+                    <Card
+                      key={`deal-${deal.id}`}
+                      draggable
+                      onDragStart={() => handleDragStart(deal)}
+                      onClick={() =>
+                        router.push(
+                          `/crm/deals/${deal.deal_id}?boardId=${selectedBoardId}`,
+                        )
+                      }
+                      className="bg-zinc-700 border-zinc-600 hover:border-zinc-500 cursor-pointer transition-colors"
+                    >
+                      <CardHeader className="p-4 pb-2">
+                        <CardTitle className="text-sm text-white flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="text-xs text-zinc-500 font-normal mb-1">
+                              #{deal.deal_id}
+                            </div>
+                            <div>{deal.title}</div>
+                          </div>
+                          <div className="flex gap-1 ml-2">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEditDeal(deal);
+                              }}
+                              className="h-6 w-6 p-0"
+                            >
+                              <IconEdit size={14} />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteDeal(deal.id);
+                              }}
+                              className="h-6 w-6 p-0 text-red-400 hover:text-red-300"
+                            >
+                              <IconTrash size={14} />
+                            </Button>
+                          </div>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="p-4 pt-0 space-y-1 text-xs">
+                        {deal.contact && (
+                          <p className="text-zinc-300">
+                            👤 {deal.contact.name}
+                          </p>
+                        )}
+                        {deal.value && (
+                          <p className="text-green-400 font-semibold">
+                            $
+                            {parseFloat(deal.value.toString()).toLocaleString()}
+                          </p>
+                        )}
+                        {deal.expectedCloseDate && (
+                          <p className="text-zinc-400 flex items-center gap-1">
+                            <IconCalendar size={12} />
+                            {new Date(
+                              deal.expectedCloseDate,
+                            ).toLocaleDateString()}
+                          </p>
+                        )}
+                        {deal.notes && (
+                          <p className="text-zinc-400 truncate">
+                            💬 {deal.notes}
+                          </p>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+
+                {/* Reference cards (won deals that moved to another pipeline) */}
+                {getReferencesByColumn(column.stage).map((ref) => (
                   <Card
-                    key={deal.id}
-                    draggable
-                    onDragStart={() => handleDragStart(deal)}
-                    className="bg-zinc-700 border-zinc-600 hover:border-zinc-500 cursor-move transition-colors"
+                    key={`ref-${ref.id}`}
+                    onClick={() =>
+                      router.push(
+                        `/crm/deals/${ref.dealId}?boardId=${selectedBoardId}`,
+                      )
+                    }
+                    className="bg-zinc-800/50 border-zinc-700 border-2 border-dashed hover:border-zinc-600 cursor-pointer transition-colors relative opacity-80"
                   >
                     <CardHeader className="p-4 pb-2">
-                      <CardTitle className="text-sm text-white flex items-start justify-between">
-                        <span className="flex-1">{deal.title}</span>
-                        <div className="flex gap-1 ml-2">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleEditDeal(deal)}
-                            className="h-6 w-6 p-0"
-                          >
-                            <IconEdit size={14} />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleDeleteDeal(deal.id)}
-                            className="h-6 w-6 p-0 text-red-400 hover:text-red-300"
-                          >
-                            <IconTrash size={14} />
-                          </Button>
+                      <CardTitle className="text-sm text-zinc-300 flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Badge
+                              variant="outline"
+                              className="text-xs border-green-500 text-green-400 bg-green-500/10"
+                            >
+                              WON
+                            </Badge>
+                            <span className="text-xs text-zinc-500">
+                              #{ref.dealId}
+                            </span>
+                          </div>
+                          <div className="text-white">
+                            {ref.deal?.title || "Deal"}
+                          </div>
                         </div>
+                        <IconExternalLink
+                          size={14}
+                          className="text-zinc-500 ml-2 flex-shrink-0"
+                        />
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="p-4 pt-0 space-y-1 text-xs">
-                      {deal.contact && (
-                        <p className="text-zinc-300">👤 {deal.contact.name}</p>
-                      )}
-                      {deal.value && (
+                      {ref.deal?.value && (
                         <p className="text-green-400 font-semibold">
-                          ${parseFloat(deal.value.toString()).toLocaleString()}
+                          $
+                          {parseFloat(
+                            ref.deal.value.toString(),
+                          ).toLocaleString()}
                         </p>
                       )}
-                      {deal.expectedCloseDate && (
-                        <p className="text-zinc-400 flex items-center gap-1">
-                          <IconCalendar size={12} />
-                          {new Date(
-                            deal.expectedCloseDate
-                          ).toLocaleDateString()}
-                        </p>
-                      )}
-                      {deal.notes && (
-                        <p className="text-zinc-400 truncate">
-                          💬 {deal.notes}
-                        </p>
-                      )}
+                      <p className="text-zinc-400 italic">{ref.note}</p>
                     </CardContent>
                   </Card>
                 ))}
 
-                {columnDeals.length === 0 && (
-                  <div className="text-center py-8 text-zinc-500 text-sm">
-                    No deals yet
-                  </div>
-                )}
+                {columnDeals.length === 0 &&
+                  getReferencesByColumn(column.stage).length === 0 && (
+                    <div className="text-center py-8 text-zinc-500 text-sm">
+                      No deals yet
+                    </div>
+                  )}
               </div>
             </div>
           );
@@ -304,8 +647,27 @@ export default function CRMDealsPage() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSuccess={fetchDeals}
-        columnId={selectedColumnId}
+        stage={selectedStage}
+        boardId={selectedBoardId}
         dealToEdit={dealToEdit}
+      />
+
+      <BoardManagementModal
+        isOpen={isBoardManagementOpen}
+        onClose={() => setIsBoardManagementOpen(false)}
+        onBoardsChanged={() => {
+          fetchBoards();
+        }}
+      />
+
+      <ColumnManagementModal
+        isOpen={isColumnManagementOpen}
+        onClose={() => setIsColumnManagementOpen(false)}
+        boardId={selectedBoardId}
+        onColumnsUpdated={() => {
+          fetchColumns();
+          fetchDeals();
+        }}
       />
     </div>
   );

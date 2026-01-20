@@ -24,6 +24,7 @@ export enum CRMActivityType {
   EMAIL = "EMAIL",
   MEETING = "MEETING",
   NOTE = "NOTE",
+  STAGE_CHANGE = "STAGE_CHANGE",
 }
 
 export enum CRMEmailDirection {
@@ -37,6 +38,7 @@ export interface CRMContact {
   email?: string;
   phone?: string;
   company?: string;
+  organizationId?: string;
   position?: string;
   address?: string;
   notes?: string;
@@ -69,6 +71,7 @@ export interface CRMLead {
 
 export interface CRMDeal {
   id: string;
+  deal_id: number;
   title: string;
   contactId?: string;
   contact?: CRMContact;
@@ -79,6 +82,7 @@ export interface CRMDeal {
   expectedCloseDate?: Date;
   notes?: string;
   columnId?: string;
+  boardId?: string;
   order: number;
   createdAt: Date;
   updatedAt: Date;
@@ -86,6 +90,72 @@ export interface CRMDeal {
   assignedUserId?: string;
   assignedUser?: {
     id: string;
+    name: string;
+    email: string;
+  };
+  products?: CRMDealProduct[];
+}
+
+export interface CRMProduct {
+  id: string;
+  name: string;
+  productCode: string;
+  active: boolean;
+  category?: string;
+  description?: string;
+  unitPrice?: number;
+  productType?: string;
+  currency?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  createdByUserId?: string;
+}
+
+export interface CRMDealProduct {
+  id: string;
+  dealId: string;
+  productId: string;
+  product?: CRMProduct;
+  quantity: number;
+  unitPrice: number;
+  currency: string;
+  createdAt: Date;
+  updatedAt: Date;
+  createdByUserId?: string;
+}
+
+export interface CRMNote {
+  id: string;
+  content: string;
+  dealId: number | null;
+  contactId: string | null;
+  leadId: string | null;
+  createdByUserId: string | null;
+  createdAt: string;
+  updatedAt: string;
+  isPinned: boolean;
+  createdByUser?: {
+    name: string;
+    email: string;
+  };
+}
+
+// CRM uses the shared Attachment table with parent_type/parent_id pattern
+// parent_type: 'crm_deal' | 'crm_contact' | 'crm_lead'
+// parent_id: deal_id | contact.id | lead.id
+export interface CRMAttachment {
+  id: string;
+  filename: string;
+  url: string | null;
+  storage_path: string | null;
+  size: number | null;
+  mimeType: string | null;
+  parent_type: "crm_deal" | "crm_contact" | "crm_lead" | "crm_email";
+  parent_id: string;
+  taskId: string | null;
+  uploadedBy: string;
+  createdAt: string;
+  uploadedByUser?: {
     name: string;
     email: string;
   };
@@ -110,7 +180,7 @@ export interface CRMActivity {
 export interface CRMEmail {
   id: string;
   userId?: string;
-  dealId?: string;
+  dealId?: number;
   deal?: CRMDeal;
   leadId?: string;
   lead?: CRMLead;
@@ -128,6 +198,8 @@ export interface CRMEmail {
   threadId?: string;
   createdAt: Date;
   attachments?: CRMEmailAttachment[];
+  isRead?: boolean;
+  status?: string;
 }
 
 export interface CRMEmailAttachment {
@@ -154,7 +226,10 @@ export interface CRMBoard {
   id: string;
   title: string;
   type: "leads" | "deals";
+  description?: string;
   backgroundUrl?: string;
+  isDefault?: boolean;
+  createdByUserId?: string;
   createdAt: Date;
   updatedAt: Date;
 }

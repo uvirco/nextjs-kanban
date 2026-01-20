@@ -11,11 +11,18 @@ import {
   IconMenu2,
   IconX,
   IconUser,
+  IconBuilding,
+  IconMail,
+  IconPackage,
 } from "@tabler/icons-react";
+import PipelineSelector from "./PipelineSelector";
 
 const crmNavItems = [
   { path: "/crm", label: "Dashboard", icon: IconLayoutKanban },
   { path: "/crm/contacts", label: "Contacts", icon: IconUsers },
+  { path: "/crm/organizations", label: "Organizations", icon: IconBuilding },
+  { path: "/crm/products", label: "Products", icon: IconPackage },
+  { path: "/crm/emails", label: "Email Inbox", icon: IconMail },
   { path: "/crm/deals", label: "Pipeline", icon: IconCurrencyDollar },
 ];
 
@@ -68,6 +75,9 @@ export default function CRMLayout({ children }: { children: React.ReactNode }) {
 
           {/* Right Side */}
           <div className="flex items-center gap-4">
+            {/* Pipeline Selector */}
+            <PipelineSelector />
+
             {/* Back to Main App */}
             <Link
               href="/board"

@@ -47,3 +47,4 @@ run-*.js
 nextjs-kanban.tar
 .vercel
 tsconfig.tsbuildinfo
+pipedrive_data/
