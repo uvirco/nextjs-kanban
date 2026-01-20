@@ -25,6 +25,9 @@ import {
   IconLink,
   IconUpload,
   IconDownload,
+  IconPackage,
+  IconPlus,
+  IconMinus,
 } from "@tabler/icons-react";
 
 interface Deal {
@@ -103,6 +106,30 @@ interface CRMNote {
   };
 }
 
+interface CRMProduct {
+  id: string;
+  name: string;
+  productCode: string;
+  active: boolean;
+  category?: string;
+  description?: string;
+  unitPrice?: number;
+  productType?: string;
+  currency?: string;
+}
+
+interface CRMDealProduct {
+  id: string;
+  dealId: string;
+  productId: string;
+  product?: CRMProduct;
+  quantity: number;
+  unitPrice: number;
+  currency: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export default function DealDetailPage({
   params,
 }: {
@@ -119,6 +146,12 @@ export default function DealDetailPage({
   const [activities, setActivities] = useState<Activity[]>([]);
   const [notes, setNotes] = useState<CRMNote[]>([]);
   const [attachments, setAttachments] = useState<any[]>([]);
+  const [dealProducts, setDealProducts] = useState<CRMDealProduct[]>([]);
+  const [availableProducts, setAvailableProducts] = useState<CRMProduct[]>([]);
+  const [showAddProduct, setShowAddProduct] = useState(false);
+  const [selectedProductId, setSelectedProductId] = useState("");
+  const [productQuantity, setProductQuantity] = useState(1);
+  const [productUnitPrice, setProductUnitPrice] = useState(0);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editedDeal, setEditedDeal] = useState<Partial<Deal>>({});
@@ -138,6 +171,7 @@ export default function DealDetailPage({
     if (deal) {
       fetchNotes();
       fetchAttachments();
+      fetchDealProducts();
     }
   }, [deal]);
 
@@ -315,6 +349,104 @@ export default function DealDetailPage({
       }
     } catch (error) {
       console.error("Failed to fetch attachments:", error);
+    }
+  };
+
+  const fetchDealProducts = async () => {
+    if (!deal) return;
+    try {
+      const response = await fetch(`/api/crm/deals/${deal.id}/products`);
+      if (response.ok) {
+        const data = await response.json();
+        setDealProducts(data.dealProducts || []);
+      }
+    } catch (error) {
+      console.error("Failed to fetch deal products:", error);
+    }
+  };
+
+  const fetchAvailableProducts = async () => {
+    try {
+      const response = await fetch("/api/crm/products");
+      if (response.ok) {
+        const data = await response.json();
+        setAvailableProducts(data.products || []);
+      }
+    } catch (error) {
+      console.error("Failed to fetch available products:", error);
+    }
+  };
+
+  const handleAddProduct = async () => {
+    if (!deal || !selectedProductId) return;
+
+    const selectedProduct = availableProducts.find(p => p.id === selectedProductId);
+    if (!selectedProduct) return;
+
+    try {
+      const response = await fetch(`/api/crm/deals/${deal.id}/products`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productId: selectedProductId,
+          quantity: productQuantity,
+          unitPrice: productUnitPrice || selectedProduct.unitPrice,
+          currency: selectedProduct.currency || "EUR",
+        }),
+      });
+
+      if (response.ok) {
+        await fetchDealProducts();
+        setShowAddProduct(false);
+        setSelectedProductId("");
+        setProductQuantity(1);
+        setProductUnitPrice(0);
+      } else {
+        alert("Failed to add product to deal");
+      }
+    } catch (error) {
+      console.error("Failed to add product:", error);
+      alert("Failed to add product to deal");
+    }
+  };
+
+  const handleUpdateProductQuantity = async (productId: string, quantity: number) => {
+    if (!deal || quantity <= 0) return;
+
+    try {
+      const response = await fetch(`/api/crm/deals/${deal.id}/products/${productId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ quantity }),
+      });
+
+      if (response.ok) {
+        await fetchDealProducts();
+      } else {
+        alert("Failed to update product quantity");
+      }
+    } catch (error) {
+      console.error("Failed to update quantity:", error);
+      alert("Failed to update product quantity");
+    }
+  };
+
+  const handleRemoveProduct = async (productId: string) => {
+    if (!deal || !confirm("Are you sure you want to remove this product from the deal?")) return;
+
+    try {
+      const response = await fetch(`/api/crm/deals/${deal.id}/products/${productId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        await fetchDealProducts();
+      } else {
+        alert("Failed to remove product from deal");
+      }
+    } catch (error) {
+      console.error("Failed to remove product:", error);
+      alert("Failed to remove product from deal");
     }
   };
 
@@ -518,7 +650,12 @@ export default function DealDetailPage({
                   {deal.stage}
                 </Badge>
                 <span className="text-sm text-gray-400">
-                  {formatCurrency(deal.value)}
+                  {formatCurrency(
+                    dealProducts.reduce(
+                      (total, dp) => total + dp.quantity * dp.unitPrice,
+                      0
+                    )
+                  )}
                 </span>
               </div>
             </div>
@@ -636,7 +773,12 @@ export default function DealDetailPage({
                       Value
                     </label>
                     <p className="text-lg font-semibold text-gray-100 mt-1">
-                      {formatCurrency(deal.value)}
+                      {formatCurrency(
+                        dealProducts.reduce(
+                          (total, dp) => total + dp.quantity * dp.unitPrice,
+                          0
+                        )
+                      )}
                     </p>
                   </div>
                   <div>
@@ -695,6 +837,10 @@ export default function DealDetailPage({
               <TabsTrigger value="emails" className="gap-2">
                 <IconMail size={16} />
                 Emails ({emails.length})
+              </TabsTrigger>
+              <TabsTrigger value="products" className="gap-2">
+                <IconPackage size={16} />
+                Products ({dealProducts.length})
               </TabsTrigger>
               <TabsTrigger value="timeline" className="gap-2">
                 <IconClock size={16} />
@@ -767,6 +913,214 @@ export default function DealDetailPage({
                         </CardContent>
                       </Card>
                     ))
+                  )}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="products" className="m-0 p-6">
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold text-gray-100">
+                      Deal Products
+                    </h3>
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        setShowAddProduct(true);
+                        fetchAvailableProducts();
+                      }}
+                      className="bg-indigo-600 hover:bg-indigo-700"
+                    >
+                      <IconPlus size={16} className="mr-1" />
+                      Add Product
+                    </Button>
+                  </div>
+
+                  {/* Deal Value Summary */}
+                  <Card className="bg-gray-800 border-gray-700">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm text-gray-400">Total Deal Value</p>
+                          <p className="text-2xl font-bold text-green-400">
+                            {formatCurrency(
+                              dealProducts.reduce(
+                                (total, dp) => total + dp.quantity * dp.unitPrice,
+                                0
+                              )
+                            )}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm text-gray-400">Items</p>
+                          <p className="text-lg font-semibold text-gray-100">
+                            {dealProducts.reduce((total, dp) => total + dp.quantity, 0)}
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Products List */}
+                  {dealProducts.length === 0 ? (
+                    <div className="text-center py-12 text-gray-500">
+                      No products added to this deal yet
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {dealProducts.map((dealProduct) => (
+                        <Card key={dealProduct.id} className="bg-gray-800 border-gray-700">
+                          <CardContent className="p-4">
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1">
+                                <h4 className="font-semibold text-gray-100">
+                                  {dealProduct.product?.name || "Unknown Product"}
+                                </h4>
+                                <p className="text-sm text-gray-400">
+                                  Code: {dealProduct.product?.productCode}
+                                </p>
+                                <p className="text-sm text-gray-400">
+                                  Category: {dealProduct.product?.category || "N/A"}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-4">
+                                <div className="text-right">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => handleUpdateProductQuantity(
+                                        dealProduct.productId,
+                                        dealProduct.quantity - 1
+                                      )}
+                                      disabled={dealProduct.quantity <= 1}
+                                      className="h-8 w-8 p-0"
+                                    >
+                                      <IconMinus size={14} />
+                                    </Button>
+                                    <span className="text-gray-100 min-w-[3rem] text-center">
+                                      {dealProduct.quantity}
+                                    </span>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => handleUpdateProductQuantity(
+                                        dealProduct.productId,
+                                        dealProduct.quantity + 1
+                                      )}
+                                      className="h-8 w-8 p-0"
+                                    >
+                                      <IconPlus size={14} />
+                                    </Button>
+                                  </div>
+                                  <p className="text-sm text-gray-400">
+                                    {formatCurrency(dealProduct.unitPrice)} each
+                                  </p>
+                                  <p className="text-lg font-semibold text-green-400">
+                                    {formatCurrency(dealProduct.quantity * dealProduct.unitPrice)}
+                                  </p>
+                                </div>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => handleRemoveProduct(dealProduct.productId)}
+                                  className="h-8 w-8 p-0"
+                                >
+                                  <IconTrash size={14} />
+                                </Button>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Add Product Modal */}
+                  {showAddProduct && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                      <Card className="w-full max-w-md bg-gray-800 border-gray-700">
+                        <CardHeader>
+                          <CardTitle className="text-gray-100">Add Product to Deal</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div>
+                            <label className="text-sm font-medium text-gray-300">
+                              Product
+                            </label>
+                            <select
+                              value={selectedProductId}
+                              onChange={(e) => {
+                                setSelectedProductId(e.target.value);
+                                const product = availableProducts.find(p => p.id === e.target.value);
+                                if (product) {
+                                  setProductUnitPrice(product.unitPrice || 0);
+                                }
+                              }}
+                              className="w-full mt-1 px-3 py-2 rounded-md bg-gray-700 border border-gray-600 text-gray-100"
+                            >
+                              <option value="">Select a product...</option>
+                              {availableProducts
+                                .filter(product => !dealProducts.some(dp => dp.productId === product.id))
+                                .map((product) => (
+                                  <option key={product.id} value={product.id}>
+                                    {product.name} ({product.productCode}) - {formatCurrency(product.unitPrice || 0)}
+                                  </option>
+                                ))}
+                            </select>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-sm font-medium text-gray-300">
+                                Quantity
+                              </label>
+                              <Input
+                                type="number"
+                                min="1"
+                                value={productQuantity}
+                                onChange={(e) => setProductQuantity(parseInt(e.target.value) || 1)}
+                                className="mt-1 bg-gray-700 border-gray-600 text-gray-100"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium text-gray-300">
+                                Unit Price
+                              </label>
+                              <Input
+                                type="number"
+                                step="0.01"
+                                value={productUnitPrice}
+                                onChange={(e) => setProductUnitPrice(parseFloat(e.target.value) || 0)}
+                                className="mt-1 bg-gray-700 border-gray-600 text-gray-100"
+                              />
+                            </div>
+                          </div>
+                          <div className="text-sm text-gray-400">
+                            Total: {formatCurrency(productQuantity * productUnitPrice)}
+                          </div>
+                          <div className="flex gap-2 pt-4">
+                            <Button
+                              onClick={handleAddProduct}
+                              disabled={!selectedProductId}
+                              className="bg-indigo-600 hover:bg-indigo-700"
+                            >
+                              Add Product
+                            </Button>
+                            <Button
+                              variant="outline"
+                              onClick={() => {
+                                setShowAddProduct(false);
+                                setSelectedProductId("");
+                                setProductQuantity(1);
+                                setProductUnitPrice(0);
+                              }}
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
                   )}
                 </div>
               </TabsContent>

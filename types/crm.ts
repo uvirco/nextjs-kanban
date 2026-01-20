@@ -93,6 +93,7 @@ export interface CRMDeal {
     name: string;
     email: string;
   };
+  products?: CRMDealProduct[];
 }
 
 export interface CRMProduct {
@@ -105,6 +106,19 @@ export interface CRMProduct {
   unitPrice?: number;
   productType?: string;
   currency?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  createdByUserId?: string;
+}
+
+export interface CRMDealProduct {
+  id: string;
+  dealId: string;
+  productId: string;
+  product?: CRMProduct;
+  quantity: number;
+  unitPrice: number;
+  currency: string;
   createdAt: Date;
   updatedAt: Date;
   createdByUserId?: string;

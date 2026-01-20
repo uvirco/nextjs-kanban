@@ -127,7 +127,6 @@ export default function CRMProductsPage() {
                   <TableHead className="text-zinc-300">Product Code</TableHead>
                   <TableHead className="text-zinc-300">Category</TableHead>
                   <TableHead className="text-zinc-300">Unit Price</TableHead>
-                  <TableHead className="text-zinc-300">Billing Cycle</TableHead>
                   <TableHead className="text-zinc-300">Product Type</TableHead>
                   <TableHead className="text-zinc-300">Status</TableHead>
                   <TableHead className="text-zinc-300">Actions</TableHead>
@@ -136,7 +135,7 @@ export default function CRMProductsPage() {
               <TableBody>
                 {filteredProducts.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8 text-zinc-500">
+                    <TableCell colSpan={7} className="text-center py-8 text-zinc-500">
                       No products found
                     </TableCell>
                   </TableRow>
@@ -159,9 +158,6 @@ export default function CRMProductsPage() {
                         {product.unitPrice
                           ? `${product.unitPrice.toLocaleString()} ${product.currency || "EUR"}`
                           : "-"}
-                      </TableCell>
-                      <TableCell className="text-zinc-400">
-                        {product.billingCycle || "-"}
                       </TableCell>
                       <TableCell className="text-zinc-400">
                         {product.productType || "-"}
@@ -237,12 +233,6 @@ export default function CRMProductsPage() {
                           {product.unitPrice.toLocaleString()}{" "}
                           {product.currency || "EUR"}
                         </p>
-                      </div>
-                    )}
-                    {product.billingCycle && (
-                      <div>
-                        <p className="text-xs text-zinc-500">Billing Cycle</p>
-                        <p className="text-sm text-white">{product.billingCycle}</p>
                       </div>
                     )}
                     {product.productType && (
