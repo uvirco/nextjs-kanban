@@ -113,7 +113,7 @@ function EpicDetailPageClient({
                 className="flex items-center gap-2 text-zinc-400 hover:text-zinc-300 transition-colors"
               >
                 <IconArrowLeft size={20} />
-                <span>Back to Epics</span>
+                <span>Back to Projects</span>
               </Link>
               <div className="h-6 w-px bg-zinc-700" />
               <h1 className="text-2xl font-bold text-white">{epic.title}</h1>
@@ -157,7 +157,7 @@ function EpicDetailPageClient({
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <h2 className="text-2xl font-bold text-white">
-                        Epic Overview
+                        Project Overview
                       </h2>
                       {/* Member Avatars and Add Button */}
                       <div className="flex items-center gap-1">

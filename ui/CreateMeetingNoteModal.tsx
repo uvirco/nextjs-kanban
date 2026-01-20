@@ -316,8 +316,8 @@ export default function CreateMeetingNoteModal({
               ) : (
                 <div className="text-sm text-zinc-400 p-3 bg-zinc-900 border border-zinc-700 rounded-lg">
                   {formData.epicId
-                    ? "No members found for this epic"
-                    : "Select an epic first"}
+                    ? "No members found for this project"
+                    : "Select a project first"}
                 </div>
               )}
             </div>

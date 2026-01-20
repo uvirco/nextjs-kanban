@@ -344,7 +344,7 @@ export function EpicTasksGanttTimeline({
           📊 Task Flow Timeline
         </h3>
         <div className="text-zinc-500">
-          No subtasks to display yet. Create some tasks within this epic to see
+          No subtasks to display yet. Create some tasks within this project to see
           the timeline.
         </div>
       </div>

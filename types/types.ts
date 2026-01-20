@@ -437,3 +437,19 @@ export type TaskDeletionData = {
   boardId: Board["id"];
   columnId: Column["id"];
 };
+
+export interface Risk {
+  id: string;
+  epicId: string;
+  title: string;
+  description: string | null;
+  probability: "Low" | "Medium" | "High";
+  impact: "Low" | "Medium" | "High";
+  mitigationPlan: string | null;
+  status: "Open" | "Mitigated" | "Closed";
+  createdAt: Date;
+  updatedAt: Date;
+  epic?: {
+    title: string;
+  };
+}

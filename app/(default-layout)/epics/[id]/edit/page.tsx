@@ -85,7 +85,7 @@ export default async function EditEpicPage(props: {
             className="inline-flex items-center gap-2 text-zinc-400 hover:text-white"
           >
             <IconArrowLeft size={20} />
-            Back to Epic
+            Back to Project
           </Link>
         </div>
 

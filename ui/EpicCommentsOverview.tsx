@@ -108,7 +108,7 @@ export default function EpicCommentsOverview({
         />
         <TaskDetailItemContent indented>
           <div className="text-center py-8 text-zinc-500">
-            No comments found across epic tasks
+            No comments found across project tasks
           </div>
         </TaskDetailItemContent>
       </div>
