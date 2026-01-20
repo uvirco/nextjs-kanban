@@ -90,18 +90,6 @@ export default function SidebarMenuContent({
             showTitle={!isCollapsed}
           />
           <MenuItem
-            path="/projects/risks"
-            title={isCollapsed ? "" : "Risks"}
-            icon={<IconShield stroke={1.5} size={20} />}
-            showTitle={!isCollapsed}
-          />
-          <MenuItem
-            path="/projects/budget"
-            title={isCollapsed ? "" : "Budget"}
-            icon={<IconCurrencyDollar stroke={1.5} size={20} />}
-            showTitle={!isCollapsed}
-          />
-          <MenuItem
             path="/projects/meetings"
             title={isCollapsed ? "" : "Meetings"}
             icon={<IconCalendar stroke={1.5} size={20} />}
@@ -124,6 +112,18 @@ export default function SidebarMenuContent({
             />
           ))}
 
+          <MenuItem
+            path="/projects/risks"
+            title={isCollapsed ? "" : "Risks"}
+            icon={<IconShield stroke={1.5} size={20} />}
+            showTitle={!isCollapsed}
+          />
+          <MenuItem
+            path="/projects/budget"
+            title={isCollapsed ? "" : "Budget"}
+            icon={<IconCurrencyDollar stroke={1.5} size={20} />}
+            showTitle={!isCollapsed}
+          />
           <MenuItem
             path="/projects/admin/settings"
             title={isCollapsed ? "" : "Settings"}
