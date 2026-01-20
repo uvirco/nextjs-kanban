@@ -25,7 +25,11 @@ interface AddRiskModalProps {
   onSuccess: () => void;
 }
 
-export default function AddRiskModal({ isOpen, onClose, onSuccess }: AddRiskModalProps) {
+export default function AddRiskModal({
+  isOpen,
+  onClose,
+  onSuccess,
+}: AddRiskModalProps) {
   const [epics, setEpics] = useState<Epic[]>([]);
   const [formData, setFormData] = useState({
     title: "",
@@ -60,26 +64,26 @@ export default function AddRiskModal({ isOpen, onClose, onSuccess }: AddRiskModa
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validation
     const newErrors: Record<string, string> = {};
     if (!formData.title.trim()) newErrors.title = "Title is required";
     if (!formData.epicId) newErrors.epicId = "Epic is required";
-    if (!formData.probability) newErrors.probability = "Probability is required";
+    if (!formData.probability)
+      newErrors.probability = "Probability is required";
     if (!formData.impact) newErrors.impact = "Impact is required";
-    
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       toast.error("Please fill in all required fields");
       return;
     }
-    
+
     setErrors({});
     setIsSubmitting(true);
 
-    const { data, error } = await supabase
-      .from("risks")
-      .insert([{
+    const { data, error } = await supabase.from("risks").insert([
+      {
         title: formData.title,
         description: formData.description || null,
         epic_id: formData.epicId,
@@ -87,7 +91,8 @@ export default function AddRiskModal({ isOpen, onClose, onSuccess }: AddRiskModa
         impact: formData.impact,
         mitigation_plan: formData.mitigationPlan || null,
         status: formData.status,
-      }]);
+      },
+    ]);
 
     if (error) {
       console.error("Error adding risk:", error);
@@ -110,12 +115,12 @@ export default function AddRiskModal({ isOpen, onClose, onSuccess }: AddRiskModa
   };
 
   const handleChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   return (
-    <Modal 
-      isOpen={isOpen} 
+    <Modal
+      isOpen={isOpen}
       onOpenChange={onClose}
       isDismissable={false}
       hideCloseButton={false}
@@ -143,7 +148,9 @@ export default function AddRiskModal({ isOpen, onClose, onSuccess }: AddRiskModa
               <div onClick={(e) => e.stopPropagation()}>
                 <Select
                   selectedKeys={formData.epicId ? [formData.epicId] : []}
-                  onSelectionChange={(keys) => handleChange("epicId", Array.from(keys)[0] as string)}
+                  onSelectionChange={(keys) =>
+                    handleChange("epicId", Array.from(keys)[0] as string)
+                  }
                   placeholder="Select an epic"
                   aria-label="Epic"
                   isInvalid={!!errors.epicId}
@@ -159,7 +166,9 @@ export default function AddRiskModal({ isOpen, onClose, onSuccess }: AddRiskModa
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Description</label>
+              <label className="block text-sm font-medium mb-2">
+                Description
+              </label>
               <textarea
                 value={formData.description}
                 onChange={(e) => handleChange("description", e.target.value)}
@@ -171,11 +180,17 @@ export default function AddRiskModal({ isOpen, onClose, onSuccess }: AddRiskModa
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Probability *</label>
+                <label className="block text-sm font-medium mb-2">
+                  Probability *
+                </label>
                 <div onClick={(e) => e.stopPropagation()}>
                   <Select
-                    selectedKeys={formData.probability ? [formData.probability] : []}
-                    onSelectionChange={(keys) => handleChange("probability", Array.from(keys)[0] as string)}
+                    selectedKeys={
+                      formData.probability ? [formData.probability] : []
+                    }
+                    onSelectionChange={(keys) =>
+                      handleChange("probability", Array.from(keys)[0] as string)
+                    }
                     placeholder="Select probability"
                     aria-label="Probability"
                     isInvalid={!!errors.probability}
@@ -189,11 +204,15 @@ export default function AddRiskModal({ isOpen, onClose, onSuccess }: AddRiskModa
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Impact *</label>
+                <label className="block text-sm font-medium mb-2">
+                  Impact *
+                </label>
                 <div onClick={(e) => e.stopPropagation()}>
                   <Select
                     selectedKeys={formData.impact ? [formData.impact] : []}
-                    onSelectionChange={(keys) => handleChange("impact", Array.from(keys)[0] as string)}
+                    onSelectionChange={(keys) =>
+                      handleChange("impact", Array.from(keys)[0] as string)
+                    }
                     placeholder="Select impact"
                     aria-label="Impact"
                     isInvalid={!!errors.impact}
@@ -208,7 +227,9 @@ export default function AddRiskModal({ isOpen, onClose, onSuccess }: AddRiskModa
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Mitigation Plan</label>
+              <label className="block text-sm font-medium mb-2">
+                Mitigation Plan
+              </label>
               <RichTextEditor
                 content={formData.mitigationPlan}
                 onChange={(content) => handleChange("mitigationPlan", content)}
@@ -223,7 +244,9 @@ export default function AddRiskModal({ isOpen, onClose, onSuccess }: AddRiskModa
                 <Select
                   defaultSelectedKeys={["Open"]}
                   selectedKeys={[formData.status]}
-                  onSelectionChange={(keys) => handleChange("status", Array.from(keys)[0] as string)}
+                  onSelectionChange={(keys) =>
+                    handleChange("status", Array.from(keys)[0] as string)
+                  }
                   aria-label="Status"
                 >
                   <SelectItem key="Open">Open</SelectItem>

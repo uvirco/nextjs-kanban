@@ -104,19 +104,23 @@ export default function RisksPage() {
         }}
       />
 
-      <Modal 
-        isOpen={isInfoModalOpen} 
+      <Modal
+        isOpen={isInfoModalOpen}
         onOpenChange={setIsInfoModalOpen}
         size="5xl"
         scrollBehavior="inside"
       >
         <ModalContent>
           <ModalHeader>
-            <h2 className="text-2xl font-bold">Best Practice Risk Management Features</h2>
+            <h2 className="text-2xl font-bold">
+              Best Practice Risk Management Features
+            </h2>
           </ModalHeader>
           <ModalBody>
             <div className="prose prose-invert max-w-none">
-              <div dangerouslySetInnerHTML={{ __html: `
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: `
                 <h3>1. Risk Detail Page</h3>
                 <p>When clicking a risk, open a dedicated page with:</p>
                 <ul>
@@ -154,11 +158,16 @@ export default function RisksPage() {
                   <li>Aggregate risk scores for epics</li>
                   <li>Dashboard showing epics with highest risk exposure</li>
                 </ul>
-              ` }} />
+              `,
+                }}
+              />
             </div>
           </ModalBody>
           <ModalFooter>
-            <Button onClick={() => setIsInfoModalOpen(false)} className="bg-blue-600 text-white">
+            <Button
+              onClick={() => setIsInfoModalOpen(false)}
+              className="bg-blue-600 text-white"
+            >
               Close
             </Button>
           </ModalFooter>

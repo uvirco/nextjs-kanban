@@ -147,7 +147,9 @@ export default function AddBudgetModal({
     }
 
     // Get unique categories from existing entries
-    const existingCategories = [...new Set(data?.map((d) => d.category) || [])];
+    const existingCategories = [
+      ...new Set(data?.map((d: { category: string }) => d.category) || []),
+    ];
 
     // Combine default categories with existing ones (remove duplicates)
     const defaultCategories = [
@@ -163,7 +165,7 @@ export default function AddBudgetModal({
 
     const combined = [
       ...new Set([...defaultCategories, ...existingCategories]),
-    ];
+    ] as string[];
     setAllCategories(combined.sort());
   };
 
@@ -456,11 +458,14 @@ export default function AddBudgetModal({
                   aria-label="Category"
                   isInvalid={!!errors.category}
                   errorMessage={errors.category}
+                  items={[
+                    ...allCategories.map((cat) => ({ key: cat, label: cat })),
+                    { key: "Other", label: "Other (Custom)" },
+                  ]}
                 >
-                  {allCategories.map((cat) => (
-                    <SelectItem key={cat}>{cat}</SelectItem>
-                  ))}
-                  <SelectItem key="Other">Other (Custom)</SelectItem>
+                  {(item) => (
+                    <SelectItem key={item.key}>{item.label}</SelectItem>
+                  )}
                 </Select>
               </div>
             </div>
