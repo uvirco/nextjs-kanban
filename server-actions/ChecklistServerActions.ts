@@ -42,6 +42,20 @@ export async function handleCreateChecklist({
   }
 
   try {
+    // Check if a checklist already exists for this task
+    const { data: existingChecklist } = await supabaseAdmin
+      .from("Checklist")
+      .select("id")
+      .eq("taskId", parse.data.taskId)
+      .single();
+
+    if (existingChecklist) {
+      return {
+        success: false,
+        message: "This epic already has a checklist. Only one checklist is allowed per epic.",
+      };
+    }
+
     const { error } = await supabaseAdmin.from("Checklist").insert({
       title: parse.data.title,
       taskId: parse.data.taskId,

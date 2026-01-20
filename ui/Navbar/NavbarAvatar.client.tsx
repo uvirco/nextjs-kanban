@@ -1,5 +1,5 @@
 "use client";
-import { IconLogout, IconUser } from "@tabler/icons-react";
+import { IconLogout, IconUser, IconLock } from "@tabler/icons-react";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -14,10 +14,12 @@ export default function NavbarAvatarClient({
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleAction = async (action: "profile" | "signout") => {
+  const handleAction = async (action: "profile" | "changePassword" | "signout") => {
     setIsOpen(false);
     if (action === "profile") {
       router.push("/profile");
+    } else if (action === "changePassword") {
+      router.push("/account/change-password");
     } else if (action === "signout") {
       await signOut({ redirect: false });
       router.push("/");
@@ -57,6 +59,13 @@ export default function NavbarAvatarClient({
               >
                 <IconUser size={18} className="mr-3" />
                 Profile
+              </button>
+              <button
+                onClick={() => handleAction("changePassword")}
+                className="flex items-center w-full px-4 py-2 text-sm text-zinc-200 hover:bg-zinc-800 hover:text-white"
+              >
+                <IconLock size={18} className="mr-3" />
+                Change Password
               </button>
               <button
                 onClick={() => handleAction("signout")}

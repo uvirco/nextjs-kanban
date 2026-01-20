@@ -6,7 +6,7 @@ import { IconBrandGithub } from "@tabler/icons-react";
 const SignInGithub = () => {
   return (
     <Button
-      onClick={() => signIn("github", { callbackUrl: "/projects/dashboard" })}
+      onClick={() => signIn("github", { callbackUrl: "/projects/epics" })}
       type="button"
       variant="ghost"
     >

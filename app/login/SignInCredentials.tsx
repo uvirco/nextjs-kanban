@@ -16,14 +16,14 @@ const SignInCredentials = () => {
       const result = await signIn("credentials", {
         email,
         password,
-        callbackUrl: "/projects/dashboard",
+        callbackUrl: "/projects/epics",
         redirect: false,
       });
 
       if (result?.error) {
         alert("Login failed. Please try again.");
       } else {
-        window.location.href = "/projects/dashboard";
+        window.location.href = "/projects/epics";
       }
     } catch (error) {
       alert("An error occurred. Please try again.");

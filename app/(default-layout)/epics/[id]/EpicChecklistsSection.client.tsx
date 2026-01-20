@@ -63,7 +63,7 @@ function CollapsibleSection({
         ) : (
           <IconChevronDown size={20} className="text-zinc-400" />
         )}
-        <span className="text-zinc-400">{icon}</span>
+        <span className="text-zinc-300">{icon}</span>
         <h3 className="text-sm font-semibold text-white">{title}</h3>
       </button>
       {!isCollapsed && <div className="p-3 pt-0">{children}</div>}
@@ -89,18 +89,6 @@ export default function EpicChecklistsSection({
       <div className="space-y-4">
         {checklist ? (
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <ChecklistTitleForm
-                checklistTitle={checklist.title}
-                checklistId={checklist.id}
-                taskId={params.id}
-              />
-              <DeleteChecklistButton
-                checklistId={checklist.id}
-                taskId={params.id}
-              />
-            </div>
-
             {/* Progress bar */}
             {checklist.items && checklist.items.length > 0 && (
               <div className="w-full bg-zinc-700 rounded-full h-2">

@@ -326,7 +326,7 @@ export default function MeetingsPageClient() {
                 }}
                 className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="all">All Epics</option>
+                <option value="all">All Projects</option>
                 {epics.map((epic) => (
                   <option key={epic.id} value={epic.id}>
                     {epic.title}

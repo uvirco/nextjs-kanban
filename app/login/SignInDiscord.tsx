@@ -6,7 +6,7 @@ import { IconBrandDiscord } from "@tabler/icons-react";
 const SignInDiscord = () => {
   return (
     <Button
-      onClick={() => signIn("discord", { callbackUrl: "/projects/dashboard" })}
+      onClick={() => signIn("discord", { callbackUrl: "/projects/epics" })}
       type="button"
       variant="ghost"
       isDisabled
