@@ -4,7 +4,7 @@ import { auth } from "@/auth";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
 );
 
 export async function GET(req: NextRequest) {
@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
     console.error("Error fetching products:", error);
     return NextResponse.json(
       { error: "Failed to fetch products" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
     if (!name || !productCode) {
       return NextResponse.json(
         { error: "Name and Product Code are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -92,7 +92,7 @@ export async function POST(req: NextRequest) {
     console.error("Error creating product:", error);
     return NextResponse.json(
       { error: "Failed to create product" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

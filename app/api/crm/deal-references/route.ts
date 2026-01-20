@@ -16,14 +16,15 @@ export async function GET(request: NextRequest) {
     if (!boardId) {
       return NextResponse.json(
         { error: "boardId is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Fetch reference cards with joined deal data
     const { data: references, error } = await supabaseAdmin
       .from("CRMDealReference")
-      .select(`
+      .select(
+        `
         *,
         deal:CRMDeal!CRMDealReference_dealId_fkey(
           deal_id,
@@ -32,7 +33,8 @@ export async function GET(request: NextRequest) {
           stage,
           boardId
         )
-      `)
+      `,
+      )
       .eq("boardId", boardId)
       .order("createdAt", { ascending: false });
 
@@ -46,7 +48,7 @@ export async function GET(request: NextRequest) {
     console.error("Error in deal references API:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

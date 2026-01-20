@@ -65,7 +65,9 @@ export default function CRMDealsPage() {
   const [dealToEdit, setDealToEdit] = useState<CRMDeal | null>(null);
   const [draggedDeal, setDraggedDeal] = useState<CRMDeal | null>(null);
   const [draggedColumn, setDraggedColumn] = useState<DealColumn | null>(null);
-  const [collapsedColumns, setCollapsedColumns] = useState<Set<string>>(new Set());
+  const [collapsedColumns, setCollapsedColumns] = useState<Set<string>>(
+    new Set(),
+  );
 
   useEffect(() => {
     fetchBoards();
@@ -161,7 +163,9 @@ export default function CRMDealsPage() {
       }
 
       // Fetch reference cards for this board
-      const refResponse = await fetch(`/api/crm/deal-references?boardId=${selectedBoardId}`);
+      const refResponse = await fetch(
+        `/api/crm/deal-references?boardId=${selectedBoardId}`,
+      );
       if (refResponse.ok) {
         const refData = await refResponse.json();
         setReferenceCards(refData.references || []);
@@ -216,7 +220,7 @@ export default function CRMDealsPage() {
     }
   };
   const toggleColumnCollapse = (columnId: string) => {
-    setCollapsedColumns(prev => {
+    setCollapsedColumns((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(columnId)) {
         newSet.delete(columnId);
@@ -233,7 +237,7 @@ export default function CRMDealsPage() {
       setCollapsedColumns(new Set());
     } else {
       // Collapse all
-      setCollapsedColumns(new Set(columns.map(col => col.id)));
+      setCollapsedColumns(new Set(columns.map((col) => col.id)));
     }
   };
   const handleDragStart = (deal: CRMDeal) => {
@@ -411,8 +415,8 @@ export default function CRMDealsPage() {
               key={`column-${column.id}`}
               className={`flex-shrink-0 rounded-lg p-4 transition-all duration-200 ${
                 collapsedColumns.has(column.id)
-                  ? 'w-16 bg-zinc-800/50'
-                  : 'w-80 bg-zinc-800'
+                  ? "w-16 bg-zinc-800/50"
+                  : "w-80 bg-zinc-800"
               }`}
               onDragOver={handleDragOver}
               onDrop={() => handleDrop(column.stage)}
@@ -455,8 +459,12 @@ export default function CRMDealsPage() {
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <IconGripVertical className="h-4 w-4 text-zinc-500" />
-                        <div className={`w-3 h-3 rounded-full ${column.color}`} />
-                        <h3 className="font-semibold text-white">{column.title}</h3>
+                        <div
+                          className={`w-3 h-3 rounded-full ${column.color}`}
+                        />
+                        <h3 className="font-semibold text-white">
+                          {column.title}
+                        </h3>
                         <span className="text-xs text-zinc-400">
                           ({totalCount})
                         </span>
@@ -490,9 +498,13 @@ export default function CRMDealsPage() {
                 )}
               </div>
 
-              <div className={`space-y-3 max-h-[calc(100vh-280px)] overflow-y-auto transition-all duration-200 ${
-                collapsedColumns.has(column.id) ? 'opacity-0 h-0 overflow-hidden' : ''
-              }`}>
+              <div
+                className={`space-y-3 max-h-[calc(100vh-280px)] overflow-y-auto transition-all duration-200 ${
+                  collapsedColumns.has(column.id)
+                    ? "opacity-0 h-0 overflow-hidden"
+                    : ""
+                }`}
+              >
                 {columnDeals
                   .filter((deal) => deal && deal.id)
                   .map((deal) => (
@@ -500,7 +512,11 @@ export default function CRMDealsPage() {
                       key={`deal-${deal.id}`}
                       draggable
                       onDragStart={() => handleDragStart(deal)}
-                      onClick={() => router.push(`/crm/deals/${deal.deal_id}?boardId=${selectedBoardId}`)}
+                      onClick={() =>
+                        router.push(
+                          `/crm/deals/${deal.deal_id}?boardId=${selectedBoardId}`,
+                        )
+                      }
                       className="bg-zinc-700 border-zinc-600 hover:border-zinc-500 cursor-pointer transition-colors"
                     >
                       <CardHeader className="p-4 pb-2">
@@ -570,41 +586,57 @@ export default function CRMDealsPage() {
                 {getReferencesByColumn(column.stage).map((ref) => (
                   <Card
                     key={`ref-${ref.id}`}
-                    onClick={() => router.push(`/crm/deals/${ref.dealId}?boardId=${selectedBoardId}`)}
+                    onClick={() =>
+                      router.push(
+                        `/crm/deals/${ref.dealId}?boardId=${selectedBoardId}`,
+                      )
+                    }
                     className="bg-zinc-800/50 border-zinc-700 border-2 border-dashed hover:border-zinc-600 cursor-pointer transition-colors relative opacity-80"
                   >
                     <CardHeader className="p-4 pb-2">
                       <CardTitle className="text-sm text-zinc-300 flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
-                            <Badge variant="outline" className="text-xs border-green-500 text-green-400 bg-green-500/10">
+                            <Badge
+                              variant="outline"
+                              className="text-xs border-green-500 text-green-400 bg-green-500/10"
+                            >
                               WON
                             </Badge>
-                            <span className="text-xs text-zinc-500">#{ref.dealId}</span>
+                            <span className="text-xs text-zinc-500">
+                              #{ref.dealId}
+                            </span>
                           </div>
-                          <div className="text-white">{ref.deal?.title || "Deal"}</div>
+                          <div className="text-white">
+                            {ref.deal?.title || "Deal"}
+                          </div>
                         </div>
-                        <IconExternalLink size={14} className="text-zinc-500 ml-2 flex-shrink-0" />
+                        <IconExternalLink
+                          size={14}
+                          className="text-zinc-500 ml-2 flex-shrink-0"
+                        />
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="p-4 pt-0 space-y-1 text-xs">
                       {ref.deal?.value && (
                         <p className="text-green-400 font-semibold">
-                          ${parseFloat(ref.deal.value.toString()).toLocaleString()}
+                          $
+                          {parseFloat(
+                            ref.deal.value.toString(),
+                          ).toLocaleString()}
                         </p>
                       )}
-                      <p className="text-zinc-400 italic">
-                        {ref.note}
-                      </p>
+                      <p className="text-zinc-400 italic">{ref.note}</p>
                     </CardContent>
                   </Card>
                 ))}
 
-                {columnDeals.length === 0 && getReferencesByColumn(column.stage).length === 0 && (
-                  <div className="text-center py-8 text-zinc-500 text-sm">
-                    No deals yet
-                  </div>
-                )}
+                {columnDeals.length === 0 &&
+                  getReferencesByColumn(column.stage).length === 0 && (
+                    <div className="text-center py-8 text-zinc-500 text-sm">
+                      No deals yet
+                    </div>
+                  )}
               </div>
             </div>
           );

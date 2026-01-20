@@ -1,17 +1,21 @@
 # Products Management Feature - Implementation Guide
 
 ## Overview
+
 Added a complete Products management section to the CRM alongside Organizations. This allows you to manage product catalogs with pricing, categories, billing cycles, and more.
 
 ## Features Implemented
 
 ### 1. **Navigation Integration**
+
 - Added "Products" link to CRM main navigation (between Organizations and Email Inbox)
 - Uses IconPackage icon from Tabler icons
 - Fully integrated into CRMLayout navigation system
 
 ### 2. **Products Page** (`/crm/products`)
+
 - **Table View**: Display all products with columns:
+
   - Name
   - Product Code
   - Category
@@ -22,6 +26,7 @@ Added a complete Products management section to the CRM alongside Organizations.
   - Actions (Edit/Delete)
 
 - **Card View**: Alternative grid layout for product browsing
+
   - Shows product details in card format
   - Quick access to edit/delete actions
 
@@ -30,9 +35,11 @@ Added a complete Products management section to the CRM alongside Organizations.
   - Filter by status (All, Active, Inactive)
 
 ### 3. **Add Product Page** (`/crm/products/new`)
+
 Form with fields:
-- Product Name * (required)
-- Product Code * (required)
+
+- Product Name \* (required)
+- Product Code \* (required)
 - Category
 - Product Type
 - Description (text area)
@@ -42,6 +49,7 @@ Form with fields:
 - Active checkbox
 
 ### 4. **Edit Product Page** (`/crm/products/[id]`)
+
 - Pre-populated form with product details
 - Same fields as add product page
 - Save or cancel options
@@ -49,6 +57,7 @@ Form with fields:
 ## Database Schema
 
 ### CRMProduct Table
+
 ```sql
 CREATE TABLE "CRMProduct" (
   id TEXT PRIMARY KEY
@@ -68,6 +77,7 @@ CREATE TABLE "CRMProduct" (
 ```
 
 **Indexes Created:**
+
 - active
 - category
 - productCode
@@ -76,29 +86,41 @@ CREATE TABLE "CRMProduct" (
 ## API Routes
 
 ### GET `/api/crm/products`
+
 Fetch all products
+
 - Returns: `{ products: CRMProduct[] }`
 
 ### POST `/api/crm/products`
+
 Create new product
+
 - Body: Product data
 - Returns: Created product object
 
 ### GET `/api/crm/products/[id]`
+
 Fetch single product
+
 - Returns: Product object
 
 ### PUT `/api/crm/products/[id]`
+
 Update product
+
 - Body: Updated product data
 - Returns: Updated product object
 
 ### DELETE `/api/crm/products/[id]`
+
 Delete product
+
 - Returns: `{ success: true }`
 
 ## Sample Data
+
 The SQL migration includes 5 sample products:
+
 1. CoroCAM 6D - Discontinued (C6000) - 34,000 EUR
 2. CoroCAM 7HD (C7000) - 46,000 EUR
 3. Corocam 7 Core (C7000Core) - 43,000 EUR
@@ -108,21 +130,26 @@ The SQL migration includes 5 sample products:
 ## Installation Steps
 
 ### 1. Create the Database Table
+
 Run the SQL migration in Supabase SQL Editor:
+
 ```bash
 # File: supabase-add-products-table.sql
 ```
 
 ### 2. Build & Test
+
 ```bash
 npm run build
 npm run dev
 ```
 
 ### 3. Access the Feature
+
 Navigate to: `/crm/products`
 
 ## File Structure
+
 ```
 app/
   (crm-layout)/crm/
@@ -150,11 +177,13 @@ supabase-add-products-table.sql  # Database migration
 ## Usage Examples
 
 ### Access Products List
+
 ```
 Navigate to: /crm → Products
 ```
 
 ### Add New Product
+
 ```
 1. Click "Add Product" button
 2. Fill in product details
@@ -162,6 +191,7 @@ Navigate to: /crm → Products
 ```
 
 ### Edit Product
+
 ```
 1. Click Edit button (pencil icon) on product
 2. Modify details
@@ -169,6 +199,7 @@ Navigate to: /crm → Products
 ```
 
 ### Delete Product
+
 ```
 1. Click Delete button (trash icon) on product
 2. Confirm deletion
@@ -178,15 +209,18 @@ Navigate to: /crm → Products
 ## Customization Options
 
 ### Add More Fields
+
 1. Update `CRMProduct` interface in `types/crm.ts`
 2. Update API route handlers
 3. Add form fields to new/edit pages
 
 ### Change Product Code to Optional
+
 Edit API route: `app/api/crm/products/route.ts`
 Remove `productCode` from required check
 
 ### Add Product Categories Enum
+
 ```typescript
 export enum ProductCategory {
   CAMERA_HANDHELD = "Camera Handheld",
@@ -196,7 +230,9 @@ export enum ProductCategory {
 ```
 
 ### Add Sorting Options
+
 Update products page to include:
+
 - Sort by name (A-Z)
 - Sort by price (low-high)
 - Sort by date (newest first)
@@ -230,19 +266,24 @@ Update products page to include:
 ## Troubleshooting
 
 ### Products table not found
+
 - Ensure SQL migration was run in Supabase
 - Check table exists: `SELECT * FROM "CRMProduct" LIMIT 1;`
 
 ### API returning 401 Unauthorized
+
 - Check session/authentication is working
 - Verify user is logged in
 
 ### Product Code duplicate error
+
 - Product codes must be unique
 - Use different code for new product
 
 ## Support
+
 For questions or issues, refer to the CRM documentation or check:
+
 - API response status codes
 - Browser console for client-side errors
 - Server logs for backend errors

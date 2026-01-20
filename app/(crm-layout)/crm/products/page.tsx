@@ -135,7 +135,10 @@ export default function CRMProductsPage() {
               <TableBody>
                 {filteredProducts.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8 text-zinc-500">
+                    <TableCell
+                      colSpan={7}
+                      className="text-center py-8 text-zinc-500"
+                    >
                       No products found
                     </TableCell>
                   </TableRow>
@@ -238,7 +241,9 @@ export default function CRMProductsPage() {
                     {product.productType && (
                       <div>
                         <p className="text-xs text-zinc-500">Product Type</p>
-                        <p className="text-sm text-white">{product.productType}</p>
+                        <p className="text-sm text-white">
+                          {product.productType}
+                        </p>
                       </div>
                     )}
                     <div className="pt-3 border-t border-zinc-800 flex justify-between items-center">

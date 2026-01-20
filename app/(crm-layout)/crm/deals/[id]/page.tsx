@@ -380,7 +380,9 @@ export default function DealDetailPage({
   const handleAddProduct = async () => {
     if (!deal || !selectedProductId) return;
 
-    const selectedProduct = availableProducts.find(p => p.id === selectedProductId);
+    const selectedProduct = availableProducts.find(
+      (p) => p.id === selectedProductId,
+    );
     if (!selectedProduct) return;
 
     try {
@@ -410,15 +412,21 @@ export default function DealDetailPage({
     }
   };
 
-  const handleUpdateProductQuantity = async (productId: string, quantity: number) => {
+  const handleUpdateProductQuantity = async (
+    productId: string,
+    quantity: number,
+  ) => {
     if (!deal || quantity <= 0) return;
 
     try {
-      const response = await fetch(`/api/crm/deals/${deal.id}/products/${productId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ quantity }),
-      });
+      const response = await fetch(
+        `/api/crm/deals/${deal.id}/products/${productId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ quantity }),
+        },
+      );
 
       if (response.ok) {
         await fetchDealProducts();
@@ -432,12 +440,19 @@ export default function DealDetailPage({
   };
 
   const handleRemoveProduct = async (productId: string) => {
-    if (!deal || !confirm("Are you sure you want to remove this product from the deal?")) return;
+    if (
+      !deal ||
+      !confirm("Are you sure you want to remove this product from the deal?")
+    )
+      return;
 
     try {
-      const response = await fetch(`/api/crm/deals/${deal.id}/products/${productId}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(
+        `/api/crm/deals/${deal.id}/products/${productId}`,
+        {
+          method: "DELETE",
+        },
+      );
 
       if (response.ok) {
         await fetchDealProducts();
@@ -636,7 +651,11 @@ export default function DealDetailPage({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => router.push(boardId ? `/crm/deals?boardId=${boardId}` : "/crm/deals")}
+              onClick={() =>
+                router.push(
+                  boardId ? `/crm/deals?boardId=${boardId}` : "/crm/deals",
+                )
+              }
             >
               <IconArrowLeft size={16} className="mr-1" />
               Back to Deals
@@ -653,8 +672,8 @@ export default function DealDetailPage({
                   {formatCurrency(
                     dealProducts.reduce(
                       (total, dp) => total + dp.quantity * dp.unitPrice,
-                      0
-                    )
+                      0,
+                    ),
                   )}
                 </span>
               </div>
@@ -776,8 +795,8 @@ export default function DealDetailPage({
                       {formatCurrency(
                         dealProducts.reduce(
                           (total, dp) => total + dp.quantity * dp.unitPrice,
-                          0
-                        )
+                          0,
+                        ),
                       )}
                     </p>
                   </div>
@@ -941,20 +960,26 @@ export default function DealDetailPage({
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm text-gray-400">Total Deal Value</p>
+                          <p className="text-sm text-gray-400">
+                            Total Deal Value
+                          </p>
                           <p className="text-2xl font-bold text-green-400">
                             {formatCurrency(
                               dealProducts.reduce(
-                                (total, dp) => total + dp.quantity * dp.unitPrice,
-                                0
-                              )
+                                (total, dp) =>
+                                  total + dp.quantity * dp.unitPrice,
+                                0,
+                              ),
                             )}
                           </p>
                         </div>
                         <div className="text-right">
                           <p className="text-sm text-gray-400">Items</p>
                           <p className="text-lg font-semibold text-gray-100">
-                            {dealProducts.reduce((total, dp) => total + dp.quantity, 0)}
+                            {dealProducts.reduce(
+                              (total, dp) => total + dp.quantity,
+                              0,
+                            )}
                           </p>
                         </div>
                       </div>
@@ -969,18 +994,23 @@ export default function DealDetailPage({
                   ) : (
                     <div className="space-y-4">
                       {dealProducts.map((dealProduct) => (
-                        <Card key={dealProduct.id} className="bg-gray-800 border-gray-700">
+                        <Card
+                          key={dealProduct.id}
+                          className="bg-gray-800 border-gray-700"
+                        >
                           <CardContent className="p-4">
                             <div className="flex items-center justify-between">
                               <div className="flex-1">
                                 <h4 className="font-semibold text-gray-100">
-                                  {dealProduct.product?.name || "Unknown Product"}
+                                  {dealProduct.product?.name ||
+                                    "Unknown Product"}
                                 </h4>
                                 <p className="text-sm text-gray-400">
                                   Code: {dealProduct.product?.productCode}
                                 </p>
                                 <p className="text-sm text-gray-400">
-                                  Category: {dealProduct.product?.category || "N/A"}
+                                  Category:{" "}
+                                  {dealProduct.product?.category || "N/A"}
                                 </p>
                               </div>
                               <div className="flex items-center gap-4">
@@ -989,10 +1019,12 @@ export default function DealDetailPage({
                                     <Button
                                       size="sm"
                                       variant="outline"
-                                      onClick={() => handleUpdateProductQuantity(
-                                        dealProduct.productId,
-                                        dealProduct.quantity - 1
-                                      )}
+                                      onClick={() =>
+                                        handleUpdateProductQuantity(
+                                          dealProduct.productId,
+                                          dealProduct.quantity - 1,
+                                        )
+                                      }
                                       disabled={dealProduct.quantity <= 1}
                                       className="h-8 w-8 p-0"
                                     >
@@ -1004,10 +1036,12 @@ export default function DealDetailPage({
                                     <Button
                                       size="sm"
                                       variant="outline"
-                                      onClick={() => handleUpdateProductQuantity(
-                                        dealProduct.productId,
-                                        dealProduct.quantity + 1
-                                      )}
+                                      onClick={() =>
+                                        handleUpdateProductQuantity(
+                                          dealProduct.productId,
+                                          dealProduct.quantity + 1,
+                                        )
+                                      }
                                       className="h-8 w-8 p-0"
                                     >
                                       <IconPlus size={14} />
@@ -1017,13 +1051,18 @@ export default function DealDetailPage({
                                     {formatCurrency(dealProduct.unitPrice)} each
                                   </p>
                                   <p className="text-lg font-semibold text-green-400">
-                                    {formatCurrency(dealProduct.quantity * dealProduct.unitPrice)}
+                                    {formatCurrency(
+                                      dealProduct.quantity *
+                                        dealProduct.unitPrice,
+                                    )}
                                   </p>
                                 </div>
                                 <Button
                                   size="sm"
                                   variant="destructive"
-                                  onClick={() => handleRemoveProduct(dealProduct.productId)}
+                                  onClick={() =>
+                                    handleRemoveProduct(dealProduct.productId)
+                                  }
                                   className="h-8 w-8 p-0"
                                 >
                                   <IconTrash size={14} />
@@ -1041,7 +1080,9 @@ export default function DealDetailPage({
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                       <Card className="w-full max-w-md bg-gray-800 border-gray-700">
                         <CardHeader>
-                          <CardTitle className="text-gray-100">Add Product to Deal</CardTitle>
+                          <CardTitle className="text-gray-100">
+                            Add Product to Deal
+                          </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                           <div>
@@ -1052,7 +1093,9 @@ export default function DealDetailPage({
                               value={selectedProductId}
                               onChange={(e) => {
                                 setSelectedProductId(e.target.value);
-                                const product = availableProducts.find(p => p.id === e.target.value);
+                                const product = availableProducts.find(
+                                  (p) => p.id === e.target.value,
+                                );
                                 if (product) {
                                   setProductUnitPrice(product.unitPrice || 0);
                                 }
@@ -1061,10 +1104,16 @@ export default function DealDetailPage({
                             >
                               <option value="">Select a product...</option>
                               {availableProducts
-                                .filter(product => !dealProducts.some(dp => dp.productId === product.id))
+                                .filter(
+                                  (product) =>
+                                    !dealProducts.some(
+                                      (dp) => dp.productId === product.id,
+                                    ),
+                                )
                                 .map((product) => (
                                   <option key={product.id} value={product.id}>
-                                    {product.name} ({product.productCode}) - {formatCurrency(product.unitPrice || 0)}
+                                    {product.name} ({product.productCode}) -{" "}
+                                    {formatCurrency(product.unitPrice || 0)}
                                   </option>
                                 ))}
                             </select>
@@ -1078,7 +1127,11 @@ export default function DealDetailPage({
                                 type="number"
                                 min="1"
                                 value={productQuantity}
-                                onChange={(e) => setProductQuantity(parseInt(e.target.value) || 1)}
+                                onChange={(e) =>
+                                  setProductQuantity(
+                                    parseInt(e.target.value) || 1,
+                                  )
+                                }
                                 className="mt-1 bg-gray-700 border-gray-600 text-gray-100"
                               />
                             </div>
@@ -1090,13 +1143,18 @@ export default function DealDetailPage({
                                 type="number"
                                 step="0.01"
                                 value={productUnitPrice}
-                                onChange={(e) => setProductUnitPrice(parseFloat(e.target.value) || 0)}
+                                onChange={(e) =>
+                                  setProductUnitPrice(
+                                    parseFloat(e.target.value) || 0,
+                                  )
+                                }
                                 className="mt-1 bg-gray-700 border-gray-600 text-gray-100"
                               />
                             </div>
                           </div>
                           <div className="text-sm text-gray-400">
-                            Total: {formatCurrency(productQuantity * productUnitPrice)}
+                            Total:{" "}
+                            {formatCurrency(productQuantity * productUnitPrice)}
                           </div>
                           <div className="flex gap-2 pt-4">
                             <Button

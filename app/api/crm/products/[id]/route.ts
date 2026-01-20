@@ -4,12 +4,12 @@ import { auth } from "@/auth";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
 );
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const session = await auth();
@@ -39,14 +39,14 @@ export async function GET(
     console.error("Error fetching product:", error);
     return NextResponse.json(
       { error: "Failed to fetch product" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const session = await auth();
@@ -71,7 +71,7 @@ export async function PUT(
     if (!name || !productCode) {
       return NextResponse.json(
         { error: "Name and Product Code are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -103,14 +103,14 @@ export async function PUT(
     console.error("Error updating product:", error);
     return NextResponse.json(
       { error: "Failed to update product" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const session = await auth();
@@ -120,10 +120,7 @@ export async function DELETE(
 
     const { id } = await params;
 
-    const { error } = await supabase
-      .from("CRMProduct")
-      .delete()
-      .eq("id", id);
+    const { error } = await supabase.from("CRMProduct").delete().eq("id", id);
 
     if (error) {
       console.error("Supabase error:", error);
@@ -135,8 +132,7 @@ export async function DELETE(
     console.error("Error deleting product:", error);
     return NextResponse.json(
       { error: "Failed to delete product" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-

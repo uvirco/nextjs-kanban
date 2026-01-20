@@ -24,15 +24,15 @@ export default function NewProductPage() {
   });
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
   ) => {
     const { name, value, type } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]:
-        type === "checkbox"
-          ? (e.target as HTMLInputElement).checked
-          : value,
+        type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
     }));
   };
 
@@ -63,7 +63,10 @@ export default function NewProductPage() {
 
   return (
     <div className="p-6">
-      <Link href="/crm/products" className="inline-flex items-center gap-2 text-zinc-400 hover:text-white mb-6">
+      <Link
+        href="/crm/products"
+        className="inline-flex items-center gap-2 text-zinc-400 hover:text-white mb-6"
+      >
         <ArrowLeft size={18} />
         Back to Products
       </Link>
