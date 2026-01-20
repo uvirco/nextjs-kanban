@@ -453,3 +453,26 @@ export interface Risk {
     title: string;
   };
 }
+
+export interface BudgetEntry {
+  id: string;
+  epicId: string | null;
+  departmentId: string | null;
+  category: string;
+  description: string | null;
+  amount: number;
+  currency: string;
+  entryType: "Expense" | "Budget";
+  frequency: "One-time" | "Weekly" | "Monthly" | "Quarterly" | "Yearly";
+  fiscalYear: string;
+  purchaseDate?: string | null; // Format: YYYY-MM
+  date: Date;
+  createdAt: Date;
+  updatedAt: Date;
+  epic?: {
+    title: string;
+  };
+  department?: {
+    name: string;
+  };
+}
