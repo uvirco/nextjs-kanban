@@ -4,7 +4,7 @@ import { supabase } from "@/lib/supabase";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ dealId: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -12,13 +12,13 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { dealId } = await params;
+    const { id } = await params;
 
     // Verify user has access to this deal
     const { data: deal, error: dealError } = await supabase
       .from("crm_deals")
       .select("id, created_by_user_id, assigned_user_id")
-      .eq("id", dealId)
+      .eq("id", id)
       .single();
 
     if (dealError || !deal) {
@@ -36,7 +36,7 @@ export async function GET(
         *,
         product:crm_products(*)
       `)
-      .eq("deal_id", dealId)
+      .eq("deal_id", id)
       .order("created_at", { ascending: true });
 
     if (error) {
@@ -46,14 +46,14 @@ export async function GET(
 
     return NextResponse.json({ dealProducts: dealProducts || [] });
   } catch (error) {
-    console.error("Error in GET /api/crm/deals/[dealId]/products:", error);
+    console.error("Error in GET /api/crm/deals/[id]/products:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ dealId: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -61,7 +61,7 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { dealId } = await params;
+    const { id } = await params;
     const body = await request.json();
     const { productId, quantity, unitPrice, currency } = body;
 
@@ -73,7 +73,7 @@ export async function POST(
     const { data: deal, error: dealError } = await supabase
       .from("crm_deals")
       .select("id, created_by_user_id, assigned_user_id")
-      .eq("id", dealId)
+      .eq("id", id)
       .single();
 
     if (dealError || !deal) {
@@ -104,7 +104,7 @@ export async function POST(
     const { data: dealProduct, error } = await supabase
       .from("crm_deal_products")
       .insert({
-        deal_id: dealId,
+        deal_id: id,
         product_id: productId,
         quantity,
         unit_price: finalUnitPrice,
@@ -124,7 +124,7 @@ export async function POST(
 
     return NextResponse.json({ dealProduct });
   } catch (error) {
-    console.error("Error in POST /api/crm/deals/[dealId]/products:", error);
+    console.error("Error in POST /api/crm/deals/[id]/products:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

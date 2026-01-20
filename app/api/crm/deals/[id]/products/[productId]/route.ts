@@ -4,7 +4,7 @@ import { supabase } from "@/lib/supabase";
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ dealId: string; productId: string }> }
+  { params }: { params: Promise<{ id: string; productId: string }> }
 ) {
   try {
     const session = await auth();
@@ -12,7 +12,7 @@ export async function PUT(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { dealId, productId } = await params;
+    const { id, productId } = await params;
     const body = await request.json();
     const { quantity, unitPrice, currency } = body;
 
@@ -24,7 +24,7 @@ export async function PUT(
     const { data: deal, error: dealError } = await supabase
       .from("crm_deals")
       .select("id, created_by_user_id, assigned_user_id")
-      .eq("id", dealId)
+      .eq("id", id)
       .single();
 
     if (dealError || !deal) {
@@ -45,7 +45,7 @@ export async function PUT(
     const { data: dealProduct, error } = await supabase
       .from("crm_deal_products")
       .update(updateData)
-      .eq("deal_id", dealId)
+      .eq("deal_id", id)
       .eq("product_id", productId)
       .select(`
         *,
@@ -64,14 +64,14 @@ export async function PUT(
 
     return NextResponse.json({ dealProduct });
   } catch (error) {
-    console.error("Error in PUT /api/crm/deals/[dealId]/products/[productId]:", error);
+    console.error("Error in PUT /api/crm/deals/[id]/products/[productId]:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ dealId: string; productId: string }> }
+  { params }: { params: Promise<{ id: string; productId: string }> }
 ) {
   try {
     const session = await auth();
@@ -79,13 +79,13 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { dealId, productId } = await params;
+    const { id, productId } = await params;
 
     // Verify user has access to this deal
     const { data: deal, error: dealError } = await supabase
       .from("crm_deals")
       .select("id, created_by_user_id, assigned_user_id")
-      .eq("id", dealId)
+      .eq("id", id)
       .single();
 
     if (dealError || !deal) {
@@ -100,7 +100,7 @@ export async function DELETE(
     const { error } = await supabase
       .from("crm_deal_products")
       .delete()
-      .eq("deal_id", dealId)
+      .eq("deal_id", id)
       .eq("product_id", productId);
 
     if (error) {
@@ -110,7 +110,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error in DELETE /api/crm/deals/[dealId]/products/[productId]:", error);
+    console.error("Error in DELETE /api/crm/deals/[id]/products/[productId]:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
