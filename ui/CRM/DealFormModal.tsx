@@ -186,7 +186,7 @@ export default function DealFormModal({
 
       if (response.ok) {
         const dealData = await response.json();
-        const createdDealId = dealData.id || dealData.data?.id;
+        const createdDealId = dealData.deal?.id || dealData.id || dealData.data?.id;
 
         // Add products if this is a new deal and products are selected
         if (!dealToEdit && createdDealId && dealProducts.length > 0) {
@@ -341,7 +341,16 @@ export default function DealFormModal({
                   <Label htmlFor="productId" className="text-white text-sm">
                     Select Product
                   </Label>
-                  <Select value={selectedProductId} onValueChange={setSelectedProductId}>
+                  <Select 
+                    value={selectedProductId} 
+                    onValueChange={(value) => {
+                      setSelectedProductId(value);
+                      const product = products.find((p) => p.id === value);
+                      if (product) {
+                        setSelectedProductPrice(product.unitPrice || 0);
+                      }
+                    }}
+                  >
                     <SelectTrigger className="mt-1 text-white">
                       <SelectValue placeholder="Choose a product..." />
                     </SelectTrigger>
@@ -370,13 +379,13 @@ export default function DealFormModal({
                   </div>
 
                   <div>
-                    <Label className="text-white text-sm">Unit Price</Label>
+                    <Label className="text-white text-sm">Unit Price (€)</Label>
                     <Input
                       type="number"
                       step="0.01"
                       value={selectedProductPrice}
                       onChange={(e) => setSelectedProductPrice(parseFloat(e.target.value) || 0)}
-                      placeholder="Auto-filled"
+                      placeholder="0.00"
                       className="mt-1 text-white"
                     />
                   </div>
