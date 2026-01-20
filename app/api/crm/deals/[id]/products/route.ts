@@ -9,36 +9,55 @@ export async function GET(
   try {
     const session = await auth();
     if (!session?.user?.id) {
+      console.log("[GET products] Unauthorized");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { id } = await params;
+    console.log("[GET products] Request:", { dealId: id, userId: session.user.id });
 
     // Verify user has access to this deal
+    // Note: The URL parameter 'id' is actually the numeric deal_id from CRMDeal table
+    // We need to select all fields to get the UUID id if it exists
     const { data: deal, error: dealError } = await supabase
       .from("CRMDeal")
-      .select("id, createdByUserId, assignedUserId")
-      .eq("id", id)
+      .select("*")
+      .eq("deal_id", id)
       .single();
 
+    console.log("[GET products] Deal lookup:", { dealError, deal });
+
     if (dealError || !deal) {
+      console.log("[GET products] Deal not found");
       return NextResponse.json({ error: "Deal not found" }, { status: 404 });
     }
 
-    if (
-      deal.createdByUserId !== session.user.id &&
-      deal.assignedUserId !== session.user.id
-    ) {
+    // Check access - allow if user created it, is assigned to it, or if deal has no owner (null)
+    const hasAccess =
+      !deal.createdByUserId ||
+      !deal.assignedUserId ||
+      deal.createdByUserId === session.user.id ||
+      deal.assignedUserId === session.user.id;
+
+    if (!hasAccess) {
+      console.log("[GET products] Access denied");
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
-    // Get deal products with product details
+    // Get deal products - don't use relationship syntax since there's no FK
     const { data: dealProducts, error } = await supabase
       .from("CRMDealProduct")
       .select(
         `
-        *,
-        product:CRMProduct(*)
+        id,
+        dealId,
+        productId,
+        quantity,
+        unitPrice,
+        currency,
+        createdAt,
+        updatedAt,
+        createdByUserId
       `,
       )
       .eq("dealId", id)
@@ -52,7 +71,23 @@ export async function GET(
       );
     }
 
-    return NextResponse.json({ dealProducts: dealProducts || [] });
+    // If we have deal products, fetch the product details for each
+    let enrichedProducts = dealProducts || [];
+    if (enrichedProducts.length > 0) {
+      const productIds = enrichedProducts.map((dp) => dp.productId);
+      const { data: products } = await supabase
+        .from("CRMProduct")
+        .select("*")
+        .in("id", productIds);
+
+      // Map products into deal products
+      enrichedProducts = enrichedProducts.map((dp) => ({
+        ...dp,
+        product: products?.find((p) => p.id === dp.productId),
+      }));
+    }
+
+    return NextResponse.json({ dealProducts: enrichedProducts });
   } catch (error) {
     console.error("Error in GET /api/crm/deals/[id]/products:", error);
     return NextResponse.json(
@@ -89,6 +124,7 @@ export async function POST(
     });
 
     if (!productId || !quantity || quantity <= 0) {
+      console.error("[POST products] Invalid product data");
       return NextResponse.json(
         { error: "Invalid product data" },
         { status: 400 },
@@ -96,20 +132,34 @@ export async function POST(
     }
 
     // Verify user has access to this deal
+    // Note: The URL parameter 'id' is actually the numeric deal_id from CRMDeal table
+    // We need to select all fields to get the UUID id if it exists
     const { data: deal, error: dealError } = await supabase
       .from("CRMDeal")
-      .select("id, createdByUserId, assignedUserId")
-      .eq("id", id)
+      .select("*")
+      .eq("deal_id", id)
       .single();
 
+    console.log("[POST products] Deal lookup:", { dealError, deal });
+
     if (dealError || !deal) {
+      console.error("[POST products] Deal not found:", { dealError, id });
       return NextResponse.json({ error: "Deal not found" }, { status: 404 });
     }
 
-    if (
-      deal.createdByUserId !== session.user.id &&
-      deal.assignedUserId !== session.user.id
-    ) {
+    // Check access - allow if user created it, is assigned to it, or if deal has no owner (null)
+    const hasAccess =
+      !deal.createdByUserId ||
+      !deal.assignedUserId ||
+      deal.createdByUserId === session.user.id ||
+      deal.assignedUserId === session.user.id;
+
+    if (!hasAccess) {
+      console.error("[POST products] Access denied:", {
+        userId: session.user.id,
+        createdBy: deal.createdByUserId,
+        assignedTo: deal.assignedUserId,
+      });
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
@@ -121,7 +171,10 @@ export async function POST(
       .eq("active", true)
       .single();
 
+    console.log("[POST products] Product lookup:", { productError, product });
+
     if (productError || !product) {
+      console.error("[POST products] Product not found or inactive:", { productError, productId });
       return NextResponse.json(
         { error: "Product not found or inactive" },
         { status: 404 },
@@ -143,9 +196,12 @@ export async function POST(
     });
 
     // Add product to deal
+    // Use deal.id if available (UUID), otherwise use the numeric id from URL
+    const dealUUID = deal.id || deal.deal_id;
+    
     // Try with explicit table and column specification
     const insertData = {
-      dealId: id,
+      dealId: dealUUID,
       productId: productId,
       quantity: quantity,
       unitPrice: finalUnitPrice,
@@ -167,8 +223,7 @@ export async function POST(
         unitPrice,
         currency,
         createdAt,
-        createdByUserId,
-        product:CRMProduct(id, name, productCode, unitPrice, currency)
+        createdByUserId
       `,
       )
       .single();
@@ -181,9 +236,21 @@ export async function POST(
       );
     }
 
-    console.log("Successfully inserted deal product:", dealProduct);
+    // Fetch the product details to include in response
+    const { data: product } = await supabase
+      .from("CRMProduct")
+      .select("*")
+      .eq("id", productId)
+      .single();
 
-    return NextResponse.json({ dealProduct });
+    const dealProductWithProduct = {
+      ...dealProduct,
+      product,
+    };
+
+    console.log("Successfully inserted deal product:", dealProductWithProduct);
+
+    return NextResponse.json({ dealProduct: dealProductWithProduct });
   } catch (error) {
     console.error("Error in POST /api/crm/deals/[id]/products:", error);
     return NextResponse.json(

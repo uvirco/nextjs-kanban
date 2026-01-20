@@ -355,7 +355,8 @@ export default function DealDetailPage({
   const fetchDealProducts = async () => {
     if (!deal) return;
     try {
-      const response = await fetch(`/api/crm/deals/${deal.id}/products`);
+      // Use URL id parameter, not deal.id - they might be different
+      const response = await fetch(`/api/crm/deals/${id}/products`);
       if (response.ok) {
         const data = await response.json();
         setDealProducts(data.dealProducts || []);
@@ -386,7 +387,8 @@ export default function DealDetailPage({
     if (!selectedProduct) return;
 
     try {
-      const response = await fetch(`/api/crm/deals/${deal.id}/products`, {
+      // Use URL id parameter, not deal.id
+      const response = await fetch(`/api/crm/deals/${id}/products`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -420,7 +422,7 @@ export default function DealDetailPage({
 
     try {
       const response = await fetch(
-        `/api/crm/deals/${deal.id}/products/${productId}`,
+        `/api/crm/deals/${id}/products/${productId}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -448,7 +450,7 @@ export default function DealDetailPage({
 
     try {
       const response = await fetch(
-        `/api/crm/deals/${deal.id}/products/${productId}`,
+        `/api/crm/deals/${id}/products/${productId}`,
         {
           method: "DELETE",
         },
