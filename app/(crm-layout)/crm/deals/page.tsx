@@ -25,6 +25,8 @@ import {
   IconColumns,
   IconGripVertical,
   IconExternalLink,
+  IconChevronLeft,
+  IconChevronRight,
 } from "@tabler/icons-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -63,6 +65,7 @@ export default function CRMDealsPage() {
   const [dealToEdit, setDealToEdit] = useState<CRMDeal | null>(null);
   const [draggedDeal, setDraggedDeal] = useState<CRMDeal | null>(null);
   const [draggedColumn, setDraggedColumn] = useState<DealColumn | null>(null);
+  const [collapsedColumns, setCollapsedColumns] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetchBoards();
@@ -212,7 +215,27 @@ export default function CRMDealsPage() {
       alert("Failed to delete deal");
     }
   };
+  const toggleColumnCollapse = (columnId: string) => {
+    setCollapsedColumns(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(columnId)) {
+        newSet.delete(columnId);
+      } else {
+        newSet.add(columnId);
+      }
+      return newSet;
+    });
+  };
 
+  const toggleAllColumns = () => {
+    if (collapsedColumns.size > 0) {
+      // Expand all
+      setCollapsedColumns(new Set());
+    } else {
+      // Collapse all
+      setCollapsedColumns(new Set(columns.map(col => col.id)));
+    }
+  };
   const handleDragStart = (deal: CRMDeal) => {
     setDraggedDeal(deal);
   };
@@ -335,6 +358,23 @@ export default function CRMDealsPage() {
         {/* Action Buttons */}
         <div className="flex gap-2">
           <Button
+            onClick={toggleAllColumns}
+            variant="outline"
+            className="bg-zinc-700 border-zinc-600 text-white hover:bg-zinc-600"
+          >
+            {collapsedColumns.size > 0 ? (
+              <>
+                <IconChevronRight size={16} className="mr-2" />
+                Expand All
+              </>
+            ) : (
+              <>
+                <IconChevronLeft size={16} className="mr-2" />
+                Collapse All
+              </>
+            )}
+          </Button>
+          <Button
             onClick={() => setIsColumnManagementOpen(true)}
             variant="outline"
             className="bg-zinc-700 border-zinc-600 text-white hover:bg-zinc-600"
@@ -369,7 +409,11 @@ export default function CRMDealsPage() {
           return (
             <div
               key={`column-${column.id}`}
-              className="flex-shrink-0 w-80 bg-zinc-800 rounded-lg p-4"
+              className={`flex-shrink-0 rounded-lg p-4 transition-all duration-200 ${
+                collapsedColumns.has(column.id)
+                  ? 'w-16 bg-zinc-800/50'
+                  : 'w-80 bg-zinc-800'
+              }`}
               onDragOver={handleDragOver}
               onDrop={() => handleDrop(column.stage)}
             >
@@ -383,32 +427,72 @@ export default function CRMDealsPage() {
                   handleColumnDrop(column);
                 }}
               >
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <IconGripVertical className="h-4 w-4 text-zinc-500" />
+                {collapsedColumns.has(column.id) ? (
+                  // Collapsed view - vertical layout
+                  <div className="flex flex-col items-center gap-3 w-full h-full justify-between">
                     <div className={`w-3 h-3 rounded-full ${column.color}`} />
-                    <h3 className="font-semibold text-white">{column.title}</h3>
-                    <span className="text-xs text-zinc-400">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => toggleColumnCollapse(column.id)}
+                      className="h-6 w-6 p-0"
+                      title="Expand column"
+                    >
+                      <IconChevronRight size={14} />
+                    </Button>
+                    <span className="text-xs text-zinc-500">
                       ({totalCount})
                     </span>
+                    <div className="flex-1 flex items-center justify-center">
+                      <div className="text-sm font-semibold text-white transform -rotate-90 whitespace-nowrap origin-center">
+                        {column.title}
+                      </div>
+                    </div>
                   </div>
-                  {columnValue > 0 && (
-                    <p className="text-xs text-zinc-400 ml-5">
-                      ${columnValue.toLocaleString()}
-                    </p>
-                  )}
-                </div>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => handleAddDeal(column.stage)}
-                  className="h-8 w-8 p-0"
-                >
-                  <IconPlus size={16} />
-                </Button>
+                ) : (
+                  // Expanded view - horizontal layout
+                  <>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <IconGripVertical className="h-4 w-4 text-zinc-500" />
+                        <div className={`w-3 h-3 rounded-full ${column.color}`} />
+                        <h3 className="font-semibold text-white">{column.title}</h3>
+                        <span className="text-xs text-zinc-400">
+                          ({totalCount})
+                        </span>
+                      </div>
+                      {columnValue > 0 && (
+                        <p className="text-xs text-zinc-400 ml-5">
+                          ${columnValue.toLocaleString()}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => toggleColumnCollapse(column.id)}
+                        className="h-8 w-8 p-0"
+                        title="Collapse column"
+                      >
+                        <IconChevronLeft size={16} />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleAddDeal(column.stage)}
+                        className="h-8 w-8 p-0"
+                      >
+                        <IconPlus size={16} />
+                      </Button>
+                    </div>
+                  </>
+                )}
               </div>
 
-              <div className="space-y-3 max-h-[calc(100vh-280px)] overflow-y-auto">
+              <div className={`space-y-3 max-h-[calc(100vh-280px)] overflow-y-auto transition-all duration-200 ${
+                collapsedColumns.has(column.id) ? 'opacity-0 h-0 overflow-hidden' : ''
+              }`}>
                 {columnDeals
                   .filter((deal) => deal && deal.id)
                   .map((deal) => (
@@ -416,7 +500,7 @@ export default function CRMDealsPage() {
                       key={`deal-${deal.id}`}
                       draggable
                       onDragStart={() => handleDragStart(deal)}
-                      onClick={() => router.push(`/crm/deals/${deal.deal_id}`)}
+                      onClick={() => router.push(`/crm/deals/${deal.deal_id}?boardId=${selectedBoardId}`)}
                       className="bg-zinc-700 border-zinc-600 hover:border-zinc-500 cursor-pointer transition-colors"
                     >
                       <CardHeader className="p-4 pb-2">
@@ -486,7 +570,7 @@ export default function CRMDealsPage() {
                 {getReferencesByColumn(column.stage).map((ref) => (
                   <Card
                     key={`ref-${ref.id}`}
-                    onClick={() => router.push(`/crm/deals/${ref.dealId}`)}
+                    onClick={() => router.push(`/crm/deals/${ref.dealId}?boardId=${selectedBoardId}`)}
                     className="bg-zinc-800/50 border-zinc-700 border-2 border-dashed hover:border-zinc-600 cursor-pointer transition-colors relative opacity-80"
                   >
                     <CardHeader className="p-4 pb-2">

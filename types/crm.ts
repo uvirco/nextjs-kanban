@@ -95,6 +95,21 @@ export interface CRMDeal {
   };
 }
 
+export interface CRMProduct {
+  id: string;
+  name: string;
+  productCode: string;
+  active: boolean;
+  category?: string;
+  description?: string;
+  unitPrice?: number;
+  productType?: string;
+  currency?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  createdByUserId?: string;
+}
+
 export interface CRMNote {
   id: string;
   content: string;

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, use } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -110,6 +110,8 @@ export default function DealDetailPage({
 }) {
   const { id } = use(params);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const boardId = searchParams?.get("boardId");
   const [deal, setDeal] = useState<Deal | null>(null);
   const [contact, setContact] = useState<Contact | null>(null);
   const [emails, setEmails] = useState<Email[]>([]);
@@ -217,7 +219,7 @@ export default function DealDetailPage({
       });
 
       if (response.ok) {
-        router.push("/crm/deals");
+        router.push(boardId ? `/crm/deals?boardId=${boardId}` : "/crm/deals");
       }
     } catch (error) {
       console.error("Failed to delete deal:", error);
@@ -502,7 +504,7 @@ export default function DealDetailPage({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => router.push("/crm/deals")}
+              onClick={() => router.push(boardId ? `/crm/deals?boardId=${boardId}` : "/crm/deals")}
             >
               <IconArrowLeft size={16} className="mr-1" />
               Back to Deals
