@@ -150,6 +150,7 @@ export default function DealDetailPage({
   const [availableProducts, setAvailableProducts] = useState<CRMProduct[]>([]);
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [productQuantity, setProductQuantity] = useState(1);
   const [productUnitPrice, setProductUnitPrice] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -378,6 +379,11 @@ export default function DealDetailPage({
     }
   };
 
+  const handleOpenAddProduct = async () => {
+    setShowAddProduct(true);
+    await fetchAvailableProducts();
+  };
+
   const handleAddProduct = async () => {
     if (!deal || !selectedProductId) return;
 
@@ -403,6 +409,7 @@ export default function DealDetailPage({
         await fetchDealProducts();
         setShowAddProduct(false);
         setSelectedProductId("");
+        setSelectedCategory("");
         setProductQuantity(1);
         setProductUnitPrice(0);
       } else {
@@ -946,10 +953,7 @@ export default function DealDetailPage({
                     </h3>
                     <Button
                       size="sm"
-                      onClick={() => {
-                        setShowAddProduct(true);
-                        fetchAvailableProducts();
-                      }}
+                      onClick={handleOpenAddProduct}
                       className="bg-indigo-600 hover:bg-indigo-700"
                     >
                       <IconPlus size={16} className="mr-1" />
@@ -1089,6 +1093,38 @@ export default function DealDetailPage({
                         <CardContent className="space-y-4">
                           <div>
                             <label className="text-sm font-medium text-gray-300">
+                              Category
+                            </label>
+                            <select
+                              value={selectedCategory}
+                              onChange={(e) => {
+                                setSelectedCategory(e.target.value);
+                                setSelectedProductId("");
+                              }}
+                              className="w-full mt-1 px-3 py-2 rounded-md bg-gray-700 border border-gray-600 text-gray-100"
+                            >
+                              <option value="">All Categories</option>
+                              {Array.from(
+                                new Set(
+                                  availableProducts
+                                    .filter(
+                                      (product) =>
+                                        !dealProducts.some(
+                                          (dp) => dp.productId === product.id,
+                                        ),
+                                    )
+                                    .map((p) => p.category)
+                                    .filter((cat) => cat),
+                                ),
+                              ).map((category) => (
+                                <option key={category} value={category}>
+                                  {category}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium text-gray-300">
                               Product
                             </label>
                             <select
@@ -1110,7 +1146,9 @@ export default function DealDetailPage({
                                   (product) =>
                                     !dealProducts.some(
                                       (dp) => dp.productId === product.id,
-                                    ),
+                                    ) &&
+                                    (selectedCategory === "" ||
+                                      product.category === selectedCategory),
                                 )
                                 .map((product) => (
                                   <option key={product.id} value={product.id}>
