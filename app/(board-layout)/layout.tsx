@@ -18,3 +18,13 @@ export default async function RootLayout({
   // Check if user has Projects module permission (any role)
   const hasProjectsAccess = session.user.modulePermissions?.projects;
   if (!hasProjectsAccess) {
+    redirect("/"); // Redirect to home page if no Projects access
+  }
+  
+  return (
+    <DashboardLayout>
+      {children}
+      {modal}
+    </DashboardLayout>
+  );
+}
