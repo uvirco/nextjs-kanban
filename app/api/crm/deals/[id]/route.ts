@@ -86,94 +86,30 @@ export async function PUT(
     console.log("Is stage change:", isStageChange);
     console.log("New stage:", body.stage);
 
-    // Check if this is a transition to "won" stage
-    const isWinningDeal =
-      isStageChange &&
-      (body.stage.toLowerCase() === "won" ||
-        body.stage.toLowerCase() === "closed_won" ||
-        body.stage === "CLOSED_WON");
+    // If there's a stage change, just update the deal stage
+    if (isStageChange) {
+      updateData = {
+        ...updateData,
+        stage: body.stage,
+      };
 
-    console.log("Is winning deal:", isWinningDeal);
+      // Create STAGE_CHANGE activity
+      await supabaseAdmin.from("CRMActivity").insert({
+        type: "STAGE_CHANGE",
+        content: `Deal moved to ${body.stage}`,
+        dealId: parseInt(id),
+        createdByUserId: userId,
+        createdAt: new Date().toISOString(),
+      });
 
-    // AUTO-TRANSITION: If moved to "won" stage, transition to delivery pipeline
-    if (isWinningDeal) {
-      // Check if delivery pipeline exists
-      const { data: deliveryBoard } = await supabaseAdmin
-        .from("CRMBoard")
-        .select("id, title")
-        .or("title.ilike.%delivery%,title.ilike.%fulfillment%")
-        .single();
-
-      if (deliveryBoard) {
-        // Get first column of delivery pipeline
-        const { data: firstColumn } = await supabaseAdmin
-          .from("CRMColumn")
-          .select("stage, title")
-          .eq("boardId", deliveryBoard.id)
-          .order("order", { ascending: true })
-          .limit(1)
-          .single();
-
-        if (firstColumn) {
-          // Update to move to delivery pipeline
-          updateData = {
-            ...updateData,
-            boardId: deliveryBoard.id,
-            stage: firstColumn.stage,
-            outcome: "won",
-          };
-
-          // Create DEAL_WON activity (special activity type)
-          await supabaseAdmin.from("CRMActivity").insert({
-            type: "DEAL_WON",
-            content: `Deal won with value $${body.value || currentDeal?.value || 0}`,
-            dealId: parseInt(id),
-            createdByUserId: userId,
-            createdAt: new Date().toISOString(),
-          });
-
-          // Create pipeline transition activity
-          await supabaseAdmin.from("CRMActivity").insert({
-            type: "STAGE_CHANGE",
-            content: `Deal automatically moved to ${deliveryBoard.title} pipeline - ${firstColumn.title}`,
-            dealId: parseInt(id),
-            createdByUserId: userId,
-            createdAt: new Date().toISOString(),
-          });
-
-          // Log to stage history
-          await supabaseAdmin.from("CRMDealStageHistory").insert({
-            dealId: parseInt(id),
-            fromStage: currentDeal.stage,
-            toStage: firstColumn.stage,
-            changedByUserId: userId,
-            changedAt: new Date().toISOString(),
-          });
-
-          // Create reference card in original Won column
-          await supabaseAdmin.from("CRMDealReference").insert({
-            dealId: parseInt(id),
-            boardId: currentDeal.boardId,
-            stage: body.stage, // Use the won stage, not the previous stage
-            note: `Won on ${new Date().toLocaleDateString()} - Now in ${deliveryBoard.title}`,
-          });
-        }
-      } else {
-        // No delivery pipeline found, just mark as won
-        updateData = {
-          ...updateData,
-          outcome: "won",
-        };
-
-        // Create DEAL_WON activity
-        await supabaseAdmin.from("CRMActivity").insert({
-          type: "DEAL_WON",
-          content: `Deal won with value $${body.value || currentDeal?.value || 0}`,
-          dealId: parseInt(id),
-          createdByUserId: userId,
-          createdAt: new Date().toISOString(),
-        });
-      }
+      // Log to stage history
+      await supabaseAdmin.from("CRMDealStageHistory").insert({
+        dealId: parseInt(id),
+        fromStage: currentDeal.stage,
+        toStage: body.stage,
+        changedByUserId: userId,
+        changedAt: new Date().toISOString(),
+      });
     }
 
     const { data: deal, error } = await supabaseAdmin
@@ -196,8 +132,8 @@ export async function PUT(
       );
     }
 
-    // Log regular stage change if stage was updated (and not already logged by won transition)
-    if (isStageChange && !isWinningDeal) {
+    // Log regular stage change if stage was updated
+    if (isStageChange) {
       // Log to CRMDealStageHistory
       await supabaseAdmin.from("CRMDealStageHistory").insert({
         dealId: parseInt(id),
@@ -219,14 +155,6 @@ export async function PUT(
 
     // Map deal_id to id for consistency
     const dealWithId = deal ? { ...deal, id: deal.deal_id } : null;
-
-    if (error) {
-      console.error("Error updating CRM deal:", error);
-      return NextResponse.json(
-        { error: "Failed to update deal", details: error.message },
-        { status: 500 },
-      );
-    }
 
     return NextResponse.json({
       deal: dealWithId as CRMDeal,

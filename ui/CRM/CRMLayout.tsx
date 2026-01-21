@@ -14,8 +14,8 @@ import {
   IconBuilding,
   IconMail,
   IconPackage,
+  IconTruck,
 } from "@tabler/icons-react";
-import PipelineSelector from "./PipelineSelector";
 
 const crmNavItems = [
   { path: "/crm", label: "Dashboard", icon: IconLayoutKanban },
@@ -33,6 +33,35 @@ export default function CRMLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-zinc-950 to-purple-950">
+      {/* Left Sidebar with Icons */}
+      <aside className="hidden md:flex fixed left-0 top-0 h-screen w-20 bg-zinc-900/95 border-r border-zinc-800 flex-col items-center py-6 gap-4">
+        {/* CRM Pipeline */}
+        <Link
+          href="/crm/pipeline"
+          title="CRM Pipeline"
+          className="flex items-center justify-center w-12 h-12 rounded-lg bg-zinc-800 hover:bg-indigo-600 text-zinc-400 hover:text-white transition-all group relative"
+        >
+          <IconCurrencyDollar size={24} />
+          <span className="absolute left-20 bg-zinc-800 text-white text-sm px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+            CRM Pipeline
+          </span>
+        </Link>
+
+        {/* Delivery Board */}
+        <Link
+          href="/crm/delivery"
+          title="Delivery Board"
+          className="flex items-center justify-center w-12 h-12 rounded-lg bg-zinc-800 hover:bg-indigo-600 text-zinc-400 hover:text-white transition-all group relative"
+        >
+          <IconTruck size={24} />
+          <span className="absolute left-20 bg-zinc-800 text-white text-sm px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+            Delivery Board
+          </span>
+        </Link>
+      </aside>
+
+      {/* Adjust main content to account for sidebar */}
+      <div className="md:ml-20">
       {/* CRM Header */}
       <header className="sticky top-0 z-50 bg-zinc-900/95 backdrop-blur border-b border-zinc-800">
         <div className="flex items-center justify-between px-6 py-4">
@@ -75,9 +104,6 @@ export default function CRMLayout({ children }: { children: React.ReactNode }) {
 
           {/* Right Side */}
           <div className="flex items-center gap-4">
-            {/* Pipeline Selector */}
-            <PipelineSelector />
-
             {/* Back to Main App */}
             <Link
               href="/board"
@@ -151,6 +177,7 @@ export default function CRMLayout({ children }: { children: React.ReactNode }) {
 
       {/* CRM Content */}
       <main className="min-h-[calc(100vh-73px)]">{children}</main>
+      </div>
     </div>
   );
 }
