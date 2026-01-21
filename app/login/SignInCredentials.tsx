@@ -1,12 +1,15 @@
 "use client";
 import { signIn } from "next-auth/react";
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { IconMail, IconLock, IconLoader2 } from "@tabler/icons-react";
 
 const SignInCredentials = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/projects/epics";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,14 +19,14 @@ const SignInCredentials = () => {
       const result = await signIn("credentials", {
         email,
         password,
-        callbackUrl: "/projects/epics",
+        callbackUrl,
         redirect: false,
       });
 
       if (result?.error) {
         alert("Login failed. Please try again.");
       } else {
-        window.location.href = "/projects/epics";
+        window.location.href = callbackUrl;
       }
     } catch (error) {
       alert("An error occurred. Please try again.");

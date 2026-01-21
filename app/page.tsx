@@ -7,8 +7,11 @@ import {
   IconBriefcase,
   IconUsers,
 } from "@tabler/icons-react";
+import { auth } from "@/auth";
 
-export default function Home() {
+export default async function Home() {
+  const session = await auth();
+
   return (
     <main className="min-h-screen bg-gradient-to-br from-zinc-950 to-zinc-900 text-white">
       <nav className="px-3 md:px-10 py-3 mb-5 flex justify-between items-center">
@@ -37,7 +40,7 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {/* Projects Card */}
-            <Link href="/projects/epics" className="group">
+            <Link href={session ? "/projects/epics" : "/login?callbackUrl=/projects/epics"} className="group">
               <div className="bg-gradient-to-br from-purple-900/20 to-purple-800/20 border border-purple-700/50 rounded-xl p-8 hover:border-purple-600/70 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/20 min-h-[320px] flex flex-col justify-between">
                 <div>
                   <div className="w-16 h-16 bg-purple-600/20 rounded-lg flex items-center justify-center mb-6 group-hover:bg-purple-600/30 transition-colors">
@@ -60,7 +63,7 @@ export default function Home() {
             </Link>
 
             {/* CRM Card */}
-            <Link href="/crm" className="group">
+            <Link href={session ? "/crm" : "/login?callbackUrl=/crm"} className="group">
               <div className="bg-gradient-to-br from-indigo-900/20 to-indigo-800/20 border border-indigo-700/50 rounded-xl p-8 hover:border-indigo-600/70 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-indigo-500/20 min-h-[320px] flex flex-col justify-between">
                 <div>
                   <div className="w-16 h-16 bg-indigo-600/20 rounded-lg flex items-center justify-center mb-6 group-hover:bg-indigo-600/30 transition-colors">
