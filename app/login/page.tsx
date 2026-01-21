@@ -1,9 +1,6 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import SignInGithub from "./SignInGithub";
 import { IconLayoutKanban } from "@tabler/icons-react";
-import SignInGoogle from "./SignInGoogle";
-import SignInDiscord from "./SignInDiscord";
 import SignInCredentials from "./SignInCredentials";
 
 export default async function CustomSignInPage() {
@@ -12,38 +9,32 @@ export default async function CustomSignInPage() {
     redirect("/dashboard");
   } else {
     return (
-      <div className="flex justify-center items-center h-full">
-        <div className="min-w-96 shadow-xl bg-zinc-900 border-2 border-primary rounded-lg">
-          <div className="px-10 py-5 flex items-center">
-            <IconLayoutKanban className="text-primary w-8 h-8 md:w-14 md:h-14" />
-            <h3 className="text-3xl md:text-5xl tracking-tighter text-center w-full font-bold">
-              Next Kanban
-            </h3>
-          </div>
-          <div className="space-y-3 p-10 pt-0">
-            <div className="space-y-4">
-              <div>
-                <p className="uppercase text-xs text-center text-primary mb-2">
-                  Development Login
-                </p>
-                <SignInCredentials />
-              </div>
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-gray-600" />
+      <div className="flex justify-center items-center h-screen w-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-900">
+        {/* Decorative background elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-20 right-20 w-72 h-72 bg-purple-600/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-20 left-20 w-72 h-72 bg-blue-600/10 rounded-full blur-3xl" />
+        </div>
+        
+        {/* Login card */}
+        <div className="relative z-10 min-w-96 shadow-2xl bg-slate-900/80 backdrop-blur border border-purple-500/30 rounded-xl overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-blue-500/5" />
+          <div className="relative">
+            <div className="px-10 py-8 flex items-center border-b border-purple-500/20">
+              <IconLayoutKanban className="text-purple-400 w-8 h-8 md:w-10 md:h-10" />
+              <h3 className="text-3xl md:text-4xl tracking-tight text-center w-full font-bold bg-gradient-to-r from-purple-300 to-purple-100 bg-clip-text text-transparent">
+                Uvirco Projects
+              </h3>
+            </div>
+            <div className="space-y-3 p-10">
+              <div className="space-y-4">
+                <div>
+                  <p className="uppercase text-xs text-center text-purple-300 mb-4 font-semibold tracking-widest">
+                    Sign In
+                  </p>
+                  <SignInCredentials />
                 </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-zinc-900 px-2 text-gray-400">
-                    Or continue with
-                  </span>
-                </div>
               </div>
-              <p className="uppercase text-xs text-center text-primary">
-                OAuth Providers
-              </p>
-              <SignInGithub />
-              <SignInGoogle />
-              <SignInDiscord />
             </div>
           </div>
         </div>

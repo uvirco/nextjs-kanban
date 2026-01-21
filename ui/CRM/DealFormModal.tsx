@@ -213,7 +213,7 @@ export default function DealFormModal({
                 type="date"
                 value={formData.expectedCloseDate}
                 onChange={handleChange}
-                className="mt-1 text-white"
+                className="mt-1 text-white bg-zinc-700 border border-zinc-600"
               />
             </div>
           </div>
@@ -238,9 +238,9 @@ export default function DealFormModal({
           <div className="flex justify-end space-x-2 pt-4">
             <Button
               type="button"
-              variant="outline"
               onClick={onClose}
               disabled={loading}
+              className="bg-zinc-700 hover:bg-zinc-600 text-white"
             >
               Cancel
             </Button>

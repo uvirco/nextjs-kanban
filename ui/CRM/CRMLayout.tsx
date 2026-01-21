@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { usePathname, useRouter } from "next/navigation";
+import { useSession, signOut } from "next-auth/react";
 import {
   IconUsers,
   IconCurrencyDollar,
@@ -15,6 +15,8 @@ import {
   IconMail,
   IconPackage,
   IconTruck,
+  IconLogout,
+  IconLock,
 } from "@tabler/icons-react";
 
 const crmNavItems = [
@@ -28,7 +30,9 @@ const crmNavItems = [
 
 export default function CRMLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const { data: session } = useSession();
 
   return (
@@ -121,20 +125,69 @@ export default function CRMLayout({ children }: { children: React.ReactNode }) {
               {mobileMenuOpen ? <IconX size={24} /> : <IconMenu2 size={24} />}
             </button>
 
-            {/* User Avatar */}
-            <Link
-              href="/projects/profile"
-              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 transition-colors"
-            >
-              <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center">
-                <IconUser size={18} className="text-white" />
-              </div>
-              {session?.user?.name && (
-                <span className="text-sm text-white hidden md:block">
-                  {session.user.name}
-                </span>
+            {/* User Avatar with Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                className="relative inline-flex items-center justify-center w-8 h-8 text-sm font-medium text-white bg-purple-500 border-2 border-white rounded-full hover:bg-purple-600 transition-colors"
+              >
+                {session?.user?.image ? (
+                  <img
+                    src={session.user.image}
+                    alt={session.user.name || "User"}
+                    className="w-full h-full rounded-full object-cover"
+                  />
+                ) : (
+                  <span className="text-xs font-bold">
+                    {session?.user?.name?.charAt(0).toUpperCase() || "U"}
+                  </span>
+                )}
+              </button>
+
+              {userMenuOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-10"
+                    onClick={() => setUserMenuOpen(false)}
+                  />
+                  <div className="absolute right-0 z-20 mt-2 w-48 bg-zinc-900 border border-zinc-700 rounded-md shadow-lg">
+                    <div className="py-1">
+                      <button
+                        onClick={() => {
+                          setUserMenuOpen(false);
+                          router.push("/profile");
+                        }}
+                        className="flex items-center w-full px-4 py-2 text-sm text-zinc-200 hover:bg-zinc-800 hover:text-white"
+                      >
+                        <IconUser size={18} className="mr-3" />
+                        Profile
+                      </button>
+                      <button
+                        onClick={() => {
+                          setUserMenuOpen(false);
+                          router.push("/account/change-password");
+                        }}
+                        className="flex items-center w-full px-4 py-2 text-sm text-zinc-200 hover:bg-zinc-800 hover:text-white"
+                      >
+                        <IconLock size={18} className="mr-3" />
+                        Change Password
+                      </button>
+                      <button
+                        onClick={async () => {
+                          setUserMenuOpen(false);
+                          await signOut({ redirect: false });
+                          router.push("/");
+                        }}
+                        className="flex items-center w-full px-4 py-2 text-sm text-zinc-200 hover:bg-zinc-800 hover:text-white"
+                      >
+                        <IconLogout size={18} className="mr-3" />
+                        Sign out
+                      </button>
+                    </div>
+                  </div>
+                </>
               )}
-            </Link>
+            </div>
           </div>
         </div>
 
