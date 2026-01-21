@@ -38,7 +38,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         if (!supabaseAdmin) {
           console.log(
-            "supabaseAdmin not available — ensure SUPABASE_SERVICE_ROLE_KEY is set for server runtime"
+            "supabaseAdmin not available — ensure SUPABASE_SERVICE_ROLE_KEY is set for server runtime",
           );
           return null;
         }
@@ -66,7 +66,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         const isValidPassword = await bcrypt.compare(
           credentials.password as string,
-          user.password
+          user.password,
         );
 
         if (!isValidPassword) {
@@ -80,6 +80,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           email: user.email,
           name: user.name,
           role: user.role,
+          permissions: user.permissions || ["projects", "crm"],
         };
       },
     }),
@@ -90,6 +91,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (user) {
         token.sub = user.id; // Set the JWT subject to the user ID
         token.role = user.role;
+        token.permissions = user.permissions;
       }
       return token;
     },
@@ -97,6 +99,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (session?.user) {
         session.user.id = token.sub as string; // Use token.sub for the user ID
         session.user.role = token.role as string;
+        session.user.permissions = token.permissions as string[];
       }
       return session;
     },

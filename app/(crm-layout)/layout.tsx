@@ -9,11 +9,17 @@ export default async function CRMRootLayout({
   children: React.ReactNode;
 }) {
   const session = await auth();
-  
+
   if (!session) {
     redirect("/login");
   }
-  
+
+  // Check if user has CRM permission
+  const hasPermission = session.user.permissions?.includes("crm");
+  if (!hasPermission) {
+    redirect("/"); // Redirect to home page if no CRM access
+  }
+
   return (
     <SessionProvider session={session}>
       <CRMLayout>{children}</CRMLayout>
