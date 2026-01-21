@@ -4,19 +4,19 @@ import { createClient } from "@supabase/supabase-js";
 // module won't throw on import (middleware/edge environments may not expose
 // server secrets). We intentionally avoid constructing clients unless the
 // required env values exist.
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
 export const supabase: any =
   supabaseUrl && supabaseKey
     ? createClient(supabaseUrl, supabaseKey)
-    : undefined;
+    : null;
 
 export const supabaseAdmin: any =
   supabaseUrl && supabaseServiceKey
     ? createClient(supabaseUrl, supabaseServiceKey)
-    : undefined;
+    : null;
 
 // Helpful runtime guard for debugging: export helper getters if needed.
 export function ensureSupabaseAdmin() {
