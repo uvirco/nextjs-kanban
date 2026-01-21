@@ -532,7 +532,7 @@ export default function CRMDeliveryPage() {
           }}
           stage={selectedStage}
           boardId={selectedBoardId}
-          deal={dealToEdit}
+          dealToEdit={dealToEdit}
         />
       )}
 
@@ -540,7 +540,7 @@ export default function CRMDeliveryPage() {
         <BoardManagementModal
           isOpen={isBoardManagementOpen}
           onClose={() => setIsBoardManagementOpen(false)}
-          onSuccess={() => {
+          onBoardsChanged={() => {
             fetchBoards();
             setIsBoardManagementOpen(false);
           }}
@@ -552,7 +552,7 @@ export default function CRMDeliveryPage() {
           isOpen={isColumnManagementOpen}
           onClose={() => setIsColumnManagementOpen(false)}
           boardId={selectedBoardId}
-          onSuccess={() => {
+          onColumnsUpdated={() => {
             fetchColumns();
             setIsColumnManagementOpen(false);
           }}

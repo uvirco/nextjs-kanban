@@ -528,7 +528,7 @@ export default function CRMPipelinePage() {
           }}
           stage={selectedStage}
           boardId={selectedBoardId}
-          deal={dealToEdit}
+          dealToEdit={dealToEdit}
         />
       )}
 
@@ -536,7 +536,7 @@ export default function CRMPipelinePage() {
         <BoardManagementModal
           isOpen={isBoardManagementOpen}
           onClose={() => setIsBoardManagementOpen(false)}
-          onSuccess={() => {
+          onBoardsChanged={() => {
             fetchBoards();
             setIsBoardManagementOpen(false);
           }}
@@ -548,7 +548,7 @@ export default function CRMPipelinePage() {
           isOpen={isColumnManagementOpen}
           onClose={() => setIsColumnManagementOpen(false)}
           boardId={selectedBoardId}
-          onSuccess={() => {
+          onColumnsUpdated={() => {
             fetchColumns();
             setIsColumnManagementOpen(false);
           }}
