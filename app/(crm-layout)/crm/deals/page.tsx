@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+
+export const dynamic = 'force-dynamic';
 import { CRMDeal, CRMBoard } from "@/types/crm";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
