@@ -80,7 +80,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           email: user.email,
           name: user.name,
           role: user.role,
-          permissions: user.permissions || ["projects", "crm"],
+          modulePermissions: user.module_permissions || { projects: "MEMBER", crm: "MEMBER" },
         };
       },
     }),
@@ -91,7 +91,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (user) {
         token.sub = user.id; // Set the JWT subject to the user ID
         token.role = user.role;
-        token.permissions = user.permissions;
+        token.modulePermissions = user.modulePermissions;
       }
       return token;
     },
@@ -99,7 +99,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (session?.user) {
         session.user.id = token.sub as string; // Use token.sub for the user ID
         session.user.role = token.role as string;
-        session.user.permissions = token.permissions as string[];
+        session.user.modulePermissions = token.modulePermissions as { projects?: string; crm?: string };
       }
       return session;
     },

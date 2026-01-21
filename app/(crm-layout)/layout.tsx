@@ -14,15 +14,6 @@ export default async function CRMRootLayout({
     redirect("/login");
   }
 
-  // Check if user has CRM permission
-  const hasPermission = session.user.permissions?.includes("crm");
-  if (!hasPermission) {
-    redirect("/"); // Redirect to home page if no CRM access
-  }
-
-  return (
-    <SessionProvider session={session}>
-      <CRMLayout>{children}</CRMLayout>
-    </SessionProvider>
-  );
-}
+  // Check if user has CRM module permission (any role)
+  const hasCrmAccess = session.user.modulePermissions?.crm;
+  if (!hasCrmAccess) {
