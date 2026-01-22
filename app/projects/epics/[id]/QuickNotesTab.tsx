@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { IconPlus, IconEdit, IconTrash } from "@tabler/icons-react";
+import { IconPlus, IconEdit, IconTrash, IconChevronDown, IconChevronUp } from "@tabler/icons-react";
 
 interface QuickNotesTabProps {
   epic: any;
@@ -23,6 +23,7 @@ export default function QuickNotesTab({ epic, onSave, searchTerm = "" }: QuickNo
   const [isCreating, setIsCreating] = useState(false);
   const [editingNote, setEditingNote] = useState<QuickNote | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [expandedNotes, setExpandedNotes] = useState<Set<string>>(new Set());
 
   // Load existing quick notes
   useEffect(() => {
@@ -135,6 +136,26 @@ export default function QuickNotesTab({ epic, onSave, searchTerm = "" }: QuickNo
     }
   };
 
+  const toggleExpand = (noteId: string) => {
+    setExpandedNotes(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(noteId)) {
+        newSet.delete(noteId);
+      } else {
+        newSet.add(noteId);
+      }
+      return newSet;
+    });
+  };
+
+  const getPreviewText = (html: string, maxLength: number = 200) => {
+    // Strip HTML tags for preview
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = html;
+    const text = tempDiv.textContent || tempDiv.innerText || "";
+    return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-4 p-4">
@@ -193,7 +214,11 @@ export default function QuickNotesTab({ epic, onSave, searchTerm = "" }: QuickNo
               searchTerm === "" || 
               note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
               (note.notes && note.notes.toLowerCase().includes(searchTerm.toLowerCase()))
-            ).map((note) => (
+            ).map((note) => {
+              const isExpanded = expandedNotes.has(note.id);
+              const hasLongContent = note.notes && note.notes.length > 200;
+              
+              return (
               <div key={note.id} className="border border-zinc-700 rounded-lg p-4 bg-zinc-800">
                 <div className="flex justify-between items-start mb-2">
                   <div>
@@ -226,13 +251,39 @@ export default function QuickNotesTab({ epic, onSave, searchTerm = "" }: QuickNo
                 </div>
                 <div className="text-sm text-zinc-300">
                   {note.notes ? (
-                    <div dangerouslySetInnerHTML={{ __html: note.notes }} />
+                    <>
+                      {isExpanded || !hasLongContent ? (
+                        <div dangerouslySetInnerHTML={{ __html: note.notes }} />
+                      ) : (
+                        <div className="text-zinc-400">{getPreviewText(note.notes)}</div>
+                      )}
+                      {hasLongContent && (
+                        <Button
+                          onClick={() => toggleExpand(note.id)}
+                          size="sm"
+                          variant="ghost"
+                          className="text-blue-400 hover:text-blue-300 mt-2 p-0 h-auto"
+                        >
+                          {isExpanded ? (
+                            <>
+                              <IconChevronUp size={16} className="mr-1" />
+                              Show Less
+                            </>
+                          ) : (
+                            <>
+                              <IconChevronDown size={16} className="mr-1" />
+                              Read More
+                            </>
+                          )}
+                        </Button>
+                      )}
+                    </>
                   ) : (
                     <span className="text-zinc-500">No content</span>
                   )}
                 </div>
               </div>
-            ))
+            )})
           )}
         </div>
       )}
@@ -340,13 +391,60 @@ function RichTextEditor({ value, onChange, placeholder }: {
           placeholder: placeholder || 'Add your quick notes, reminders, or action items...',
           modules: {
             toolbar: [
-              ['bold', 'italic', 'underline'],
-              [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-              ['link'],
+              [{ 'header': [1, 2, 3, false] }],
+              ['bold', 'italic', 'underline', 'strike'],
+              [{ 'color': [] }, { 'background': [] }],
+              [{ 'list': 'ordered'}, { 'list': 'bullet' }, { 'list': 'check' }],
+              [{ 'indent': '-1'}, { 'indent': '+1' }],
+              ['blockquote', 'code-block'],
+              ['link', 'image'],
+              [{ 'align': [] }],
               ['clean']
             ]
           }
         });
+
+        // Add tooltips to toolbar buttons
+        const toolbar = editorRef.current.parentElement?.querySelector('.ql-toolbar');
+        if (toolbar) {
+          const tooltips: Record<string, string> = {
+            'ql-bold': 'Bold',
+            'ql-italic': 'Italic',
+            'ql-underline': 'Underline',
+            'ql-strike': 'Strikethrough',
+            'ql-blockquote': 'Blockquote',
+            'ql-code-block': 'Code Block',
+            'ql-link': 'Insert Link',
+            'ql-image': 'Insert Image',
+            'ql-clean': 'Remove Formatting',
+            'ql-list[value="ordered"]': 'Ordered List',
+            'ql-list[value="bullet"]': 'Bullet List',
+            'ql-list[value="check"]': 'Checklist',
+            'ql-indent[value="-1"]': 'Decrease Indent',
+            'ql-indent[value="+1"]': 'Increase Indent',
+          };
+
+          Object.entries(tooltips).forEach(([selector, title]) => {
+            const button = toolbar.querySelector(`.${selector.replace(/\[.*\]/, '')}[value="${selector.match(/\[value="(.+)"\]/)?.[1] || ''}"]`) || 
+                          toolbar.querySelector(`.${selector}`);
+            if (button) {
+              button.setAttribute('title', title);
+            }
+          });
+
+          // Add tooltips for pickers
+          const headerPicker = toolbar.querySelector('.ql-header');
+          if (headerPicker) headerPicker.setAttribute('title', 'Heading');
+          
+          const colorPicker = toolbar.querySelector('.ql-color');
+          if (colorPicker) colorPicker.setAttribute('title', 'Text Color');
+          
+          const backgroundPicker = toolbar.querySelector('.ql-background');
+          if (backgroundPicker) backgroundPicker.setAttribute('title', 'Background Color');
+          
+          const alignPicker = toolbar.querySelector('.ql-align');
+          if (alignPicker) alignPicker.setAttribute('title', 'Text Alignment');
+        }
 
         // Set initial content
         if (value) {

@@ -82,6 +82,8 @@
 /* Quill Editor Custom Styles for Dark Theme */
 .ql-toolbar {
   @apply bg-zinc-700 border-zinc-600;
+  overflow: visible !important;
+  position: relative;
 }
 
 .ql-toolbar .ql-stroke {
@@ -98,6 +100,20 @@
 
 .ql-toolbar button.ql-active {
   @apply bg-zinc-600;
+}
+
+/* Tooltip styles */
+.ql-toolbar button,
+.ql-toolbar .ql-picker-label {
+  @apply relative;
+  overflow: visible !important;
+}
+
+.ql-toolbar button:hover::after,
+.ql-toolbar .ql-picker-label:hover::after {
+  content: attr(title);
+  @apply absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 bg-zinc-900 text-white text-xs rounded whitespace-nowrap pointer-events-none shadow-lg border border-zinc-700;
+  z-index: 9999;
 }
 
 .ql-container {
