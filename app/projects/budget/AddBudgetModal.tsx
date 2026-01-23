@@ -258,15 +258,21 @@ export default function AddBudgetModal({
       onOpenChange={onClose}
       isDismissable={false}
       hideCloseButton={false}
+      classNames={{
+        base: "bg-zinc-900 border border-zinc-800",
+        header: "border-b border-zinc-800",
+        body: "bg-zinc-900",
+        footer: "border-t border-zinc-800",
+      }}
     >
       <ModalContent>
         <ModalHeader>
-          <h2>Add Budget Entry</h2>
+          <h2 className="text-white">Add Budget Entry</h2>
         </ModalHeader>
         <ModalBody>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-2">
+              <label className="block text-sm font-medium mb-2 text-zinc-300">
                 Link To *
               </label>
               <div onClick={(e) => e.stopPropagation()}>

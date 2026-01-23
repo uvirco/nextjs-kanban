@@ -419,7 +419,7 @@ function EpicDetailPageClient({
                 <TabsContent value="raci" className="space-y-6">
                   {/* RACI matrix */}
                   <div className="w-full">
-                    <RaciMatrixSection raciUsers={raciUsers} />
+                    <RaciMatrixSection raciUsers={raciUsers} epicId={params.id} />
                   </div>
                 </TabsContent>
 

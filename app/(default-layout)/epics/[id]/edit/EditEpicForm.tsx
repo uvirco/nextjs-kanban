@@ -3,7 +3,6 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { IconLoader, IconPlus, IconX, IconUser } from "@tabler/icons-react";
-import RaciMatrixSection from "../RaciMatrixSection";
 import GoalSection from "@/ui/GoalSection";
 import { Department, FunctionalRole } from "@/types/types";
 
@@ -851,11 +850,6 @@ export default function EditEpicForm({
           )}
         </div>
       </div>
-
-      {/* RACI Matrix (read-only for edit view) */}
-      <RaciMatrixSection
-        epicId={epic.id}
-      />
 
       {/* Submit */}
       <div className="flex gap-4 pt-6">

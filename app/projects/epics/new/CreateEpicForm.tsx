@@ -116,7 +116,7 @@ export default function CreateEpicForm({
 
         <div>
           <label className="block text-sm font-medium text-zinc-300 mb-2">
-            Epic Title *
+            Project Title *
           </label>
           <input
             type="text"
@@ -124,7 +124,7 @@ export default function CreateEpicForm({
             value={formData.title}
             onChange={(e) => handleChange("title", e.target.value)}
             className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:border-zinc-600 focus:outline-none"
-            placeholder="Enter epic title..."
+            placeholder="Enter project title..."
           />
         </div>
 
