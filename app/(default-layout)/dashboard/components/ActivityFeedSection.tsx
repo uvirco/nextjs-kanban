@@ -395,10 +395,10 @@ export default function ActivityFeedSection({
                           >
                             {getActivityIcon(activity.type)}
                           </span>
-                          {activity.type === "MEETING_NOTE_ADDED" || activity.type === "QUICK_NOTE_ADDED" ? (
+                          {activity.type === "MEETING_NOTE_ADDED" || activity.type === "QUICK_NOTE_ADDED" || activity.type === "COMMENT_ADDED" ? (
                             <div 
-                              className="text-sm text-zinc-300 line-clamp-3" 
-                              dangerouslySetInnerHTML={{ __html: activity.content }}
+                              className="text-sm text-zinc-300 line-clamp-3 prose prose-invert prose-sm max-w-none" 
+                              dangerouslySetInnerHTML={{ __html: activity.content.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&nbsp;/g, ' ') }}
                             />
                           ) : (
                             <p className="text-sm text-zinc-300">
