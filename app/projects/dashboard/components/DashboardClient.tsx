@@ -141,17 +141,6 @@ export default function DashboardClient({ userId }: DashboardClientProps) {
         {/* Tab Navigation */}
         <div className="flex gap-1 mb-8 bg-zinc-900 p-1 rounded-lg w-fit">
           <button
-            onClick={() => setActiveTab("activities")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
-              activeTab === "activities"
-                ? "bg-zinc-800 text-white"
-                : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
-            }`}
-          >
-            <IconActivity size={18} />
-            Activity Trends
-          </button>
-          <button
             onClick={() => setActiveTab("feed")}
             className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
               activeTab === "feed"
@@ -183,6 +172,17 @@ export default function DashboardClient({ userId }: DashboardClientProps) {
           >
             <IconChartBar size={18} />
             Summary
+          </button>
+          <button
+            onClick={() => setActiveTab("activities")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
+              activeTab === "activities"
+                ? "bg-zinc-800 text-white"
+                : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
+            }`}
+          >
+            <IconActivity size={18} />
+            Activity Trends
           </button>
         </div>
 

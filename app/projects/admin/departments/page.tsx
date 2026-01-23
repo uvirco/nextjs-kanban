@@ -7,7 +7,7 @@ export default async function AdminDepartmentsPage() {
   const session = await auth();
 
   if (!session || !session.user || session.user.role !== "ADMIN") {
-    redirect("/dashboard");
+    redirect("/projects/dashboard");
   }
 
   // Fetch departments

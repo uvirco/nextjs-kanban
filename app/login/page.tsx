@@ -6,7 +6,7 @@ import SignInCredentials from "./SignInCredentials";
 export default async function CustomSignInPage() {
   const session = await auth();
   if (session) {
-    redirect("/dashboard");
+    redirect("/projects/dashboard");
   } else {
     return (
       <div className="flex justify-center items-center h-screen w-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-900">

@@ -395,9 +395,16 @@ export default function ActivityFeedSection({
                           >
                             {getActivityIcon(activity.type)}
                           </span>
-                          <p className="text-sm text-zinc-300">
-                            {activity.content}
-                          </p>
+                          {activity.type === "MEETING_NOTE_ADDED" || activity.type === "QUICK_NOTE_ADDED" ? (
+                            <div 
+                              className="text-sm text-zinc-300 line-clamp-3" 
+                              dangerouslySetInnerHTML={{ __html: activity.content }}
+                            />
+                          ) : (
+                            <p className="text-sm text-zinc-300">
+                              {activity.content}
+                            </p>
+                          )}
                         </div>
                         
                         {/* Task/Epic Info */}

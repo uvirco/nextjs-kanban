@@ -255,7 +255,7 @@ export default function QuickNotesTab({ epic, onSave, searchTerm = "" }: QuickNo
                       {isExpanded || !hasLongContent ? (
                         <div dangerouslySetInnerHTML={{ __html: note.notes }} />
                       ) : (
-                        <div className="text-zinc-400">{getPreviewText(note.notes)}</div>
+                        <div className="text-zinc-400 line-clamp-3" dangerouslySetInnerHTML={{ __html: note.notes }} />
                       )}
                       {hasLongContent && (
                         <Button
