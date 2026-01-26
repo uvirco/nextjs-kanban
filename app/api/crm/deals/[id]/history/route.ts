@@ -32,6 +32,10 @@ export async function GET(
       .order("changedAt", { ascending: false });
 
     if (error) {
+      // If table doesn't exist, return empty array instead of error
+      if (error.code === "PGRST205" || error.message?.includes("Could not find the table")) {
+        return NextResponse.json({ history: [] });
+      }
       console.error("Error fetching deal stage history:", error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }

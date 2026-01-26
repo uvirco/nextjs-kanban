@@ -3,7 +3,7 @@ import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 import {
   IconUsers,
   IconClock,
@@ -27,6 +27,8 @@ import EditEpicForm from "./edit/EditEpicForm";
 import ManageMembersModal from "./ManageMembersModal";
 import EditTasksForm from "./edit/EditTasksForm";
 import QuickNotesTab from "./QuickNotesTab";
+import EpicActivityTab from "./EpicActivityTab";
+import TeamTab from "./TeamTab";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 function EpicDetailPageClient({
@@ -141,7 +143,7 @@ function EpicDetailPageClient({
                 className="w-full"
                 id={`epic-tabs-${epic.id}`}
               >
-                <TabsList className="grid w-full grid-cols-9 mb-6">
+                <TabsList className="grid w-full grid-cols-10 mb-6">
                   <TabsTrigger value="overview">Overview</TabsTrigger>
                   <TabsTrigger value="taskboard">Taskboard</TabsTrigger>
                   <TabsTrigger value="tasks">Tasks</TabsTrigger>
@@ -150,6 +152,7 @@ function EpicDetailPageClient({
                   <TabsTrigger value="quick-notes">Quick Notes</TabsTrigger>
                   <TabsTrigger value="links">Links & Files</TabsTrigger>
                   <TabsTrigger value="activity">Activity</TabsTrigger>
+                  <TabsTrigger value="team">Team</TabsTrigger>
                   <TabsTrigger value="raci">RACI</TabsTrigger>
                 </TabsList>
 
@@ -432,7 +435,10 @@ function EpicDetailPageClient({
                 <TabsContent value="raci" className="space-y-6">
                   {/* RACI matrix */}
                   <div className="w-full">
-                    <RaciMatrixSection raciUsers={raciUsers} epicId={params.id} />
+                    <RaciMatrixSection
+                      raciUsers={raciUsers}
+                      epicId={params.id}
+                    />
                   </div>
                 </TabsContent>
 
@@ -458,7 +464,7 @@ function EpicDetailPageClient({
                           (note.notes &&
                             note.notes
                               .toLowerCase()
-                              .includes(meetingNotesSearch.toLowerCase()))
+                              .includes(meetingNotesSearch.toLowerCase())),
                       )
                       .map((note: any) => (
                         <div
@@ -473,7 +479,7 @@ function EpicDetailPageClient({
                               <p className="text-sm text-zinc-400">
                                 {note.meeting_type} •{" "}
                                 {new Date(
-                                  note.meeting_date
+                                  note.meeting_date,
                                 ).toLocaleDateString()}
                               </p>
                             </div>
@@ -515,7 +521,7 @@ function EpicDetailPageClient({
                           (note.notes &&
                             note.notes
                               .toLowerCase()
-                              .includes(meetingNotesSearch.toLowerCase()))
+                              .includes(meetingNotesSearch.toLowerCase())),
                       ).length === 0 &&
                       meetingNotesSearch !== "" && (
                         <p className="text-zinc-500 text-center py-4">
@@ -565,7 +571,15 @@ function EpicDetailPageClient({
                 </TabsContent>
 
                 <TabsContent value="activity">
-                  <EpicCommentsOverview epicId={epic.id} />
+                  <EpicActivityTab epicId={epic.id} />
+                </TabsContent>
+
+                <TabsContent value="team" className="space-y-6">
+                  <TeamTab
+                    epicId={epic.id}
+                    members={epic.members}
+                    stakeholders={epic.stakeholders}
+                  />
                 </TabsContent>
               </Tabs>
             </Suspense>

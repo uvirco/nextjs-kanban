@@ -1,7 +1,13 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { IconPlus, IconEdit, IconTrash, IconChevronDown, IconChevronUp } from "@tabler/icons-react";
+import {
+  IconPlus,
+  IconEdit,
+  IconTrash,
+  IconChevronDown,
+  IconChevronUp,
+} from "@tabler/icons-react";
 
 interface QuickNotesTabProps {
   epic: any;
@@ -18,7 +24,11 @@ interface QuickNote {
   type: string;
 }
 
-export default function QuickNotesTab({ epic, onSave, searchTerm = "" }: QuickNotesTabProps) {
+export default function QuickNotesTab({
+  epic,
+  onSave,
+  searchTerm = "",
+}: QuickNotesTabProps) {
   const [quickNotes, setQuickNotes] = useState<QuickNote[]>([]);
   const [isCreating, setIsCreating] = useState(false);
   const [editingNote, setEditingNote] = useState<QuickNote | null>(null);
@@ -32,7 +42,9 @@ export default function QuickNotesTab({ epic, onSave, searchTerm = "" }: QuickNo
         const response = await fetch(`/api/epics/${epic.id}/meeting-notes`);
         if (response.ok) {
           const notes = await response.json();
-          const quickNotesOnly = notes.filter((note: any) => note.type === 'quick');
+          const quickNotesOnly = notes.filter(
+            (note: any) => note.type === "quick",
+          );
           setQuickNotes(quickNotesOnly);
         }
       } catch (error) {
@@ -65,15 +77,18 @@ export default function QuickNotesTab({ epic, onSave, searchTerm = "" }: QuickNo
       let response;
       if (editingNote) {
         // Update existing note
-        response = await fetch(`/api/epics/${epic.id}/meeting-notes/${editingNote.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            title: noteData.title,
-            notes: noteData.notes,
-            type: "quick",
-          }),
-        });
+        response = await fetch(
+          `/api/epics/${epic.id}/meeting-notes/${editingNote.id}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              title: noteData.title,
+              notes: noteData.notes,
+              type: "quick",
+            }),
+          },
+        );
       } else {
         // Create new note
         response = await fetch(`/api/epics/${epic.id}/meeting-notes`, {
@@ -94,23 +109,27 @@ export default function QuickNotesTab({ epic, onSave, searchTerm = "" }: QuickNo
 
         if (editingNote) {
           // Update the note in the list
-          setQuickNotes(prev => prev.map(note =>
-            note.id === editingNote.id ? savedNote : note
-          ));
+          setQuickNotes((prev) =>
+            prev.map((note) => (note.id === editingNote.id ? savedNote : note)),
+          );
         } else {
           // Add new note to the list
-          setQuickNotes(prev => [savedNote, ...prev]);
+          setQuickNotes((prev) => [savedNote, ...prev]);
         }
 
         setIsCreating(false);
         setEditingNote(null);
       } else {
         const errorData = await response.json();
-        alert(`Failed to save quick note: ${errorData.error || 'Unknown error'}`);
+        alert(
+          `Failed to save quick note: ${errorData.error || "Unknown error"}`,
+        );
       }
     } catch (error) {
       console.error("Save error:", error);
-      alert(`Error saving quick note: ${error instanceof Error ? error.message : 'Network error'}`);
+      alert(
+        `Error saving quick note: ${error instanceof Error ? error.message : "Network error"}`,
+      );
     }
   };
 
@@ -120,24 +139,31 @@ export default function QuickNotesTab({ epic, onSave, searchTerm = "" }: QuickNo
     }
 
     try {
-      const response = await fetch(`/api/epics/${epic.id}/meeting-notes/${noteId}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(
+        `/api/epics/${epic.id}/meeting-notes/${noteId}`,
+        {
+          method: "DELETE",
+        },
+      );
 
       if (response.ok) {
-        setQuickNotes(prev => prev.filter(note => note.id !== noteId));
+        setQuickNotes((prev) => prev.filter((note) => note.id !== noteId));
       } else {
         const errorData = await response.json();
-        alert(`Failed to delete quick note: ${errorData.error || 'Unknown error'}`);
+        alert(
+          `Failed to delete quick note: ${errorData.error || "Unknown error"}`,
+        );
       }
     } catch (error) {
       console.error("Delete error:", error);
-      alert(`Error deleting quick note: ${error instanceof Error ? error.message : 'Network error'}`);
+      alert(
+        `Error deleting quick note: ${error instanceof Error ? error.message : "Network error"}`,
+      );
     }
   };
 
   const toggleExpand = (noteId: string) => {
-    setExpandedNotes(prev => {
+    setExpandedNotes((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(noteId)) {
         newSet.delete(noteId);
@@ -153,7 +179,9 @@ export default function QuickNotesTab({ epic, onSave, searchTerm = "" }: QuickNo
     const tempDiv = document.createElement("div");
     tempDiv.innerHTML = html;
     const text = tempDiv.textContent || tempDiv.innerText || "";
-    return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
+    return text.length > maxLength
+      ? text.substring(0, maxLength) + "..."
+      : text;
   };
 
   if (isLoading) {
@@ -201,89 +229,111 @@ export default function QuickNotesTab({ epic, onSave, searchTerm = "" }: QuickNo
                 Create Your First Quick Note
               </Button>
             </div>
-          ) : quickNotes.filter((note) => 
-            searchTerm === "" || 
-            note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (note.notes && note.notes.toLowerCase().includes(searchTerm.toLowerCase()))
-          ).length === 0 && searchTerm !== "" ? (
+          ) : quickNotes.filter(
+              (note) =>
+                searchTerm === "" ||
+                note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                (note.notes &&
+                  note.notes.toLowerCase().includes(searchTerm.toLowerCase())),
+            ).length === 0 && searchTerm !== "" ? (
             <div className="text-center py-8">
               <p className="text-zinc-500">No quick notes match your search</p>
             </div>
           ) : (
-            quickNotes.filter((note) => 
-              searchTerm === "" || 
-              note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-              (note.notes && note.notes.toLowerCase().includes(searchTerm.toLowerCase()))
-            ).map((note) => {
-              const isExpanded = expandedNotes.has(note.id);
-              const hasLongContent = note.notes && note.notes.length > 200;
-              
-              return (
-              <div key={note.id} className="border border-zinc-700 rounded-lg p-4 bg-zinc-800">
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <h4 className="font-medium text-white">{note.title}</h4>
-                    <p className="text-sm text-zinc-400">
-                      Created {new Date(note.created_at).toLocaleDateString()}
-                      {note.updated_at !== note.created_at && (
-                        <span> • Updated {new Date(note.updated_at).toLocaleDateString()}</span>
-                      )}
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      onClick={() => handleEditNote(note)}
-                      size="sm"
-                      variant="outline"
-                      className="text-zinc-300 border-zinc-600 hover:bg-zinc-700"
-                    >
-                      <IconEdit size={14} />
-                    </Button>
-                    <Button
-                      onClick={() => handleDelete(note.id)}
-                      size="sm"
-                      variant="outline"
-                      className="text-red-400 border-red-600 hover:bg-red-900"
-                    >
-                      <IconTrash size={14} />
-                    </Button>
-                  </div>
-                </div>
-                <div className="text-sm text-zinc-300">
-                  {note.notes ? (
-                    <>
-                      {isExpanded || !hasLongContent ? (
-                        <div dangerouslySetInnerHTML={{ __html: note.notes }} />
-                      ) : (
-                        <div className="text-zinc-400 line-clamp-3" dangerouslySetInnerHTML={{ __html: note.notes }} />
-                      )}
-                      {hasLongContent && (
-                        <Button
-                          onClick={() => toggleExpand(note.id)}
-                          size="sm"
-                          variant="ghost"
-                          className="text-blue-400 hover:text-blue-300 mt-2 p-0 h-auto"
-                        >
-                          {isExpanded ? (
-                            <>
-                              <IconChevronUp size={16} className="mr-1" />
-                              Show Less
-                            </>
-                          ) : (
-                            <>
-                              <IconChevronDown size={16} className="mr-1" />
-                              Read More
-                            </>
+            quickNotes
+              .filter(
+                (note) =>
+                  searchTerm === "" ||
+                  note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                  (note.notes &&
+                    note.notes
+                      .toLowerCase()
+                      .includes(searchTerm.toLowerCase())),
+              )
+              .map((note) => {
+                const isExpanded = expandedNotes.has(note.id);
+                const hasLongContent = note.notes && note.notes.length > 200;
+
+                return (
+                  <div
+                    key={note.id}
+                    className="border border-zinc-700 rounded-lg p-4 bg-zinc-800"
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <h4 className="font-medium text-white">{note.title}</h4>
+                        <p className="text-sm text-zinc-400">
+                          Created{" "}
+                          {new Date(note.created_at).toLocaleDateString()}
+                          {note.updated_at !== note.created_at && (
+                            <span>
+                              {" "}
+                              • Updated{" "}
+                              {new Date(note.updated_at).toLocaleDateString()}
+                            </span>
                           )}
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={() => handleEditNote(note)}
+                          size="sm"
+                          variant="outline"
+                          className="text-zinc-300 border-zinc-600 hover:bg-zinc-700"
+                        >
+                          <IconEdit size={14} />
                         </Button>
+                        <Button
+                          onClick={() => handleDelete(note.id)}
+                          size="sm"
+                          variant="outline"
+                          className="text-red-400 border-red-600 hover:bg-red-900"
+                        >
+                          <IconTrash size={14} />
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="text-sm text-zinc-300">
+                      {note.notes ? (
+                        <>
+                          {isExpanded || !hasLongContent ? (
+                            <div
+                              dangerouslySetInnerHTML={{ __html: note.notes }}
+                            />
+                          ) : (
+                            <div
+                              className="text-zinc-400 line-clamp-3"
+                              dangerouslySetInnerHTML={{ __html: note.notes }}
+                            />
+                          )}
+                          {hasLongContent && (
+                            <Button
+                              onClick={() => toggleExpand(note.id)}
+                              size="sm"
+                              variant="ghost"
+                              className="text-blue-400 hover:text-blue-300 mt-2 p-0 h-auto"
+                            >
+                              {isExpanded ? (
+                                <>
+                                  <IconChevronUp size={16} className="mr-1" />
+                                  Show Less
+                                </>
+                              ) : (
+                                <>
+                                  <IconChevronDown size={16} className="mr-1" />
+                                  Read More
+                                </>
+                              )}
+                            </Button>
+                          )}
+                        </>
+                      ) : (
+                        <span className="text-zinc-500">No content</span>
                       )}
-                    </>
-                  ) : (
-                    <span className="text-zinc-500">No content</span>
-                  )}
-                </div>
-              </div>
-            )})
+                    </div>
+                  </div>
+                );
+              })
           )}
         </div>
       )}
@@ -292,7 +342,11 @@ export default function QuickNotesTab({ epic, onSave, searchTerm = "" }: QuickNo
 }
 
 // Separate component for editing/creating notes
-function QuickNoteEditor({ note, onSave, onCancel }: {
+function QuickNoteEditor({
+  note,
+  onSave,
+  onCancel,
+}: {
   note: QuickNote | null;
   onSave: (data: any) => void;
   onCancel: () => void;
@@ -356,7 +410,11 @@ function QuickNoteEditor({ note, onSave, onCancel }: {
 }
 
 // Rich text editor component with proper Quill initialization
-function RichTextEditor({ value, onChange, placeholder }: {
+function RichTextEditor({
+  value,
+  onChange,
+  placeholder,
+}: {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
@@ -374,7 +432,7 @@ function RichTextEditor({ value, onChange, placeholder }: {
     const initQuill = async () => {
       try {
         // Dynamically import Quill
-        const QuillModule = await import('quill');
+        const QuillModule = await import("quill");
         const Quill = QuillModule.default || QuillModule;
 
         // Check again after async import
@@ -383,67 +441,73 @@ function RichTextEditor({ value, onChange, placeholder }: {
         }
 
         // Clear any existing content to prevent double toolbar
-        editorRef.current.innerHTML = '';
+        editorRef.current.innerHTML = "";
 
         // Initialize Quill
         const quill = new Quill(editorRef.current, {
-          theme: 'snow',
-          placeholder: placeholder || 'Add your quick notes, reminders, or action items...',
+          theme: "snow",
+          placeholder:
+            placeholder ||
+            "Add your quick notes, reminders, or action items...",
           modules: {
             toolbar: [
-              [{ 'header': [1, 2, 3, false] }],
-              ['bold', 'italic', 'underline', 'strike'],
-              [{ 'color': [] }, { 'background': [] }],
-              [{ 'list': 'ordered'}, { 'list': 'bullet' }, { 'list': 'check' }],
-              [{ 'indent': '-1'}, { 'indent': '+1' }],
-              ['blockquote', 'code-block'],
-              ['link', 'image'],
-              [{ 'align': [] }],
-              ['clean']
-            ]
-          }
+              [{ header: [1, 2, 3, false] }],
+              ["bold", "italic", "underline", "strike"],
+              [{ color: [] }, { background: [] }],
+              [{ list: "ordered" }, { list: "bullet" }, { list: "check" }],
+              [{ indent: "-1" }, { indent: "+1" }],
+              ["blockquote", "code-block"],
+              ["link", "image"],
+              [{ align: [] }],
+              ["clean"],
+            ],
+          },
         });
 
         // Add tooltips to toolbar buttons
-        const toolbar = editorRef.current.parentElement?.querySelector('.ql-toolbar');
+        const toolbar =
+          editorRef.current.parentElement?.querySelector(".ql-toolbar");
         if (toolbar) {
           const tooltips: Record<string, string> = {
-            'ql-bold': 'Bold',
-            'ql-italic': 'Italic',
-            'ql-underline': 'Underline',
-            'ql-strike': 'Strikethrough',
-            'ql-blockquote': 'Blockquote',
-            'ql-code-block': 'Code Block',
-            'ql-link': 'Insert Link',
-            'ql-image': 'Insert Image',
-            'ql-clean': 'Remove Formatting',
-            'ql-list[value="ordered"]': 'Ordered List',
-            'ql-list[value="bullet"]': 'Bullet List',
-            'ql-list[value="check"]': 'Checklist',
-            'ql-indent[value="-1"]': 'Decrease Indent',
-            'ql-indent[value="+1"]': 'Increase Indent',
+            "ql-bold": "Bold",
+            "ql-italic": "Italic",
+            "ql-underline": "Underline",
+            "ql-strike": "Strikethrough",
+            "ql-blockquote": "Blockquote",
+            "ql-code-block": "Code Block",
+            "ql-link": "Insert Link",
+            "ql-image": "Insert Image",
+            "ql-clean": "Remove Formatting",
+            'ql-list[value="ordered"]': "Ordered List",
+            'ql-list[value="bullet"]': "Bullet List",
+            'ql-list[value="check"]': "Checklist",
+            'ql-indent[value="-1"]': "Decrease Indent",
+            'ql-indent[value="+1"]': "Increase Indent",
           };
 
           Object.entries(tooltips).forEach(([selector, title]) => {
-            const button = toolbar.querySelector(`.${selector.replace(/\[.*\]/, '')}[value="${selector.match(/\[value="(.+)"\]/)?.[1] || ''}"]`) || 
-                          toolbar.querySelector(`.${selector}`);
+            const button =
+              toolbar.querySelector(
+                `.${selector.replace(/\[.*\]/, "")}[value="${selector.match(/\[value="(.+)"\]/)?.[1] || ""}"]`,
+              ) || toolbar.querySelector(`.${selector}`);
             if (button) {
-              button.setAttribute('title', title);
+              button.setAttribute("title", title);
             }
           });
 
           // Add tooltips for pickers
-          const headerPicker = toolbar.querySelector('.ql-header');
-          if (headerPicker) headerPicker.setAttribute('title', 'Heading');
-          
-          const colorPicker = toolbar.querySelector('.ql-color');
-          if (colorPicker) colorPicker.setAttribute('title', 'Text Color');
-          
-          const backgroundPicker = toolbar.querySelector('.ql-background');
-          if (backgroundPicker) backgroundPicker.setAttribute('title', 'Background Color');
-          
-          const alignPicker = toolbar.querySelector('.ql-align');
-          if (alignPicker) alignPicker.setAttribute('title', 'Text Alignment');
+          const headerPicker = toolbar.querySelector(".ql-header");
+          if (headerPicker) headerPicker.setAttribute("title", "Heading");
+
+          const colorPicker = toolbar.querySelector(".ql-color");
+          if (colorPicker) colorPicker.setAttribute("title", "Text Color");
+
+          const backgroundPicker = toolbar.querySelector(".ql-background");
+          if (backgroundPicker)
+            backgroundPicker.setAttribute("title", "Background Color");
+
+          const alignPicker = toolbar.querySelector(".ql-align");
+          if (alignPicker) alignPicker.setAttribute("title", "Text Alignment");
         }
 
         // Set initial content
@@ -452,7 +516,7 @@ function RichTextEditor({ value, onChange, placeholder }: {
         }
 
         // Listen for changes
-        quill.on('text-change', () => {
+        quill.on("text-change", () => {
           const html = quill.root.innerHTML;
           onChange(html);
         });
@@ -460,7 +524,7 @@ function RichTextEditor({ value, onChange, placeholder }: {
         quillInstanceRef.current = quill;
         isInitializedRef.current = true;
       } catch (error) {
-        console.error('Failed to load Quill:', error);
+        console.error("Failed to load Quill:", error);
       }
     };
 
@@ -469,7 +533,7 @@ function RichTextEditor({ value, onChange, placeholder }: {
     return () => {
       // Clean up on unmount
       if (quillInstanceRef.current) {
-        quillInstanceRef.current.off('text-change');
+        quillInstanceRef.current.off("text-change");
         quillInstanceRef.current = null;
       }
       isInitializedRef.current = false;
@@ -478,7 +542,11 @@ function RichTextEditor({ value, onChange, placeholder }: {
 
   // Update content when value prop changes
   useEffect(() => {
-    if (quillInstanceRef.current && isInitializedRef.current && value !== undefined) {
+    if (
+      quillInstanceRef.current &&
+      isInitializedRef.current &&
+      value !== undefined
+    ) {
       const currentHtml = quillInstanceRef.current.root.innerHTML;
       if (currentHtml !== value) {
         quillInstanceRef.current.root.innerHTML = value;

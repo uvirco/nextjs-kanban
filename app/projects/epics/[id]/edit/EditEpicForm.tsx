@@ -209,10 +209,10 @@ export default function EditEpicForm({
     // Check members changes
     const membersChanged =
       JSON.stringify(
-        members.map((m) => ({ userId: m.user.id, role: m.role }))
+        members.map((m) => ({ userId: m.user.id, role: m.role })),
       ) !==
       JSON.stringify(
-        initialMembersState.map((m) => ({ userId: m.user.id, role: m.role }))
+        initialMembersState.map((m) => ({ userId: m.user.id, role: m.role })),
       );
 
     return formDataChanged || membersChanged;
@@ -238,7 +238,7 @@ export default function EditEpicForm({
     (href: string) => {
       if (hasUnsavedChanges()) {
         const confirmed = window.confirm(
-          "You have unsaved changes. Are you sure you want to leave?"
+          "You have unsaved changes. Are you sure you want to leave?",
         );
         if (!confirmed) {
           return false; // Prevent navigation
@@ -247,7 +247,7 @@ export default function EditEpicForm({
       router.push(href);
       return true;
     },
-    [hasUnsavedChanges, router]
+    [hasUnsavedChanges, router],
   );
 
   const addMember = async () => {
@@ -288,7 +288,7 @@ export default function EditEpicForm({
                   userId: selectedUserId,
                   role: role,
                 }),
-              })
+              }),
             );
 
             const raciResponses = await Promise.all(raciPromises);
@@ -296,7 +296,7 @@ export default function EditEpicForm({
 
             if (failedRaci.length > 0) {
               console.warn(
-                `${failedRaci.length} RACI role(s) failed to assign`
+                `${failedRaci.length} RACI role(s) failed to assign`,
               );
             }
           } catch (raciError) {
@@ -678,7 +678,7 @@ export default function EditEpicForm({
                   <option value="">Choose a user...</option>
                   {users
                     .filter(
-                      (user) => !members.some((m) => m.user.id === user.id)
+                      (user) => !members.some((m) => m.user.id === user.id),
                     )
                     .map((user) => (
                       <option key={user.id} value={user.id}>
@@ -764,7 +764,7 @@ export default function EditEpicForm({
                             setSelectedRaciRoles([...selectedRaciRoles, role]);
                           } else {
                             setSelectedRaciRoles(
-                              selectedRaciRoles.filter((r) => r !== role)
+                              selectedRaciRoles.filter((r) => r !== role),
                             );
                           }
                         }}

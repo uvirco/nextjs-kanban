@@ -29,41 +29,58 @@ interface User {
 
 interface ManageMembersModalProps {
   epicId: string;
-  currentMembers: EpicMember[];
+  currentMembers?: EpicMember[];
+  members?: EpicMember[];
   onClose: () => void;
-  onSave: (updatedMembers: EpicMember[]) => void;
+  onSave?: (updatedMembers: EpicMember[]) => void;
+  onMemberAdded?: () => void;
+  isOpen?: boolean;
 }
 
 export default function ManageMembersModal({
   epicId,
   currentMembers,
+  members,
   onClose,
   onSave,
+  onMemberAdded,
+  isOpen = true,
 }: ManageMembersModalProps) {
-  const [members, setMembers] = useState<EpicMember[]>(currentMembers);
+  const memberList = currentMembers || members || [];
+  const [memberState, setMembers] = useState<EpicMember[]>(memberList);
   const [availableUsers, setAvailableUsers] = useState<User[]>([]);
+  const [roles, setRoles] = useState<any[]>([]);
   const [selectedUserId, setSelectedUserId] = useState("");
   const [selectedRole, setSelectedRole] = useState("contributor");
+  const [selectedRoleCategory, setSelectedRoleCategory] = useState("all");
   const [isLoading, setIsLoading] = useState(false);
 
-  // Fetch available users (board members not already in epic)
+  // Fetch available users and roles
   useEffect(() => {
-    const fetchAvailableUsers = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch("/api/users");
-        if (response.ok) {
-          const allUsers = await response.json();
+        // Fetch roles
+        const rolesResponse = await fetch("/api/roles");
+        if (rolesResponse.ok) {
+          const rolesList = await rolesResponse.json();
+          setRoles(rolesList);
+        }
+
+        // Fetch users
+        const usersResponse = await fetch("/api/users");
+        if (usersResponse.ok) {
+          const allUsers = await usersResponse.json();
           // Filter out users already in the epic
-          const currentUserIds = members.map(m => m.user.id);
+          const currentUserIds = memberState.map(m => m.user.id);
           const available = allUsers.filter((user: User) => !currentUserIds.includes(user.id));
           setAvailableUsers(available);
         }
       } catch (error) {
-        console.error("Failed to fetch users:", error);
+        console.error("Failed to fetch data:", error);
       }
     };
-    fetchAvailableUsers();
-  }, [members]);
+    fetchData();
+  }, [memberState]);
 
   const handleAddMember = async () => {
     if (!selectedUserId) return;
@@ -83,9 +100,10 @@ export default function ManageMembersModal({
 
       if (response.ok) {
         const newMember = await response.json();
-        setMembers([...members, newMember]);
+        setMembers([...memberState, newMember]);
         setSelectedUserId("");
         setSelectedRole("contributor");
+        if (onMemberAdded) onMemberAdded();
       } else {
         console.error("Failed to add member");
       }
@@ -104,7 +122,8 @@ export default function ManageMembersModal({
       });
 
       if (response.ok) {
-        setMembers(members.filter(m => m.id !== memberId));
+        setMembers(memberState.filter(m => m.id !== memberId));
+        if (onMemberAdded) onMemberAdded();
       } else {
         console.error("Failed to remove member");
       }
@@ -116,11 +135,23 @@ export default function ManageMembersModal({
   };
 
   const handleSave = () => {
-    onSave(members);
+    if (onSave) {
+      onSave(memberState);
+    }
+    onClose();
   };
 
+  // Filter roles by selected category
+  const filteredRoles =
+    selectedRoleCategory === "all"
+      ? roles
+      : roles.filter((role) => role.category === selectedRoleCategory);
+
+  // Get unique role categories
+  const roleCategories = ["all", ...new Set(roles.map((role) => role.category))];
+
   return (
-    <Dialog open={true} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl bg-zinc-900 border-zinc-700">
         <DialogHeader>
           <DialogTitle className="text-white">Manage Epic Team Members</DialogTitle>
@@ -148,16 +179,42 @@ export default function ManageMembersModal({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="role-select" className="text-white">Role</Label>
+                <Label htmlFor="role-select" className="text-white">Role (Optional)</Label>
+                
+                {roles.length > 0 && roleCategories.length > 1 && (
+                  <Select value={selectedRoleCategory} onValueChange={setSelectedRoleCategory}>
+                    <SelectTrigger className="bg-zinc-700 border-zinc-600 text-white text-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {roleCategories.map((category) => (
+                        <SelectItem key={category} value={category}>
+                          {category === "all" ? "All Categories" : category.charAt(0).toUpperCase() + category.slice(1)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+
                 <Select value={selectedRole} onValueChange={setSelectedRole}>
                   <SelectTrigger className="bg-zinc-700 border-zinc-600 text-white">
-                    <SelectValue />
+                    <SelectValue placeholder="Select a role..." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="owner">Owner</SelectItem>
-                    <SelectItem value="contributor">Contributor</SelectItem>
-                    <SelectItem value="stakeholder">Stakeholder</SelectItem>
-                    <SelectItem value="viewer">Viewer</SelectItem>
+                    {filteredRoles.length > 0 ? (
+                      filteredRoles.map((role) => (
+                        <SelectItem key={role.id} value={role.name}>
+                          {role.name}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <>
+                        <SelectItem value="owner">Owner</SelectItem>
+                        <SelectItem value="contributor">Contributor</SelectItem>
+                        <SelectItem value="stakeholder">Stakeholder</SelectItem>
+                        <SelectItem value="viewer">Viewer</SelectItem>
+                      </>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -179,10 +236,10 @@ export default function ManageMembersModal({
           <div className="bg-zinc-800 rounded-lg p-4">
             <h3 className="text-lg font-semibold text-white mb-4">Current Team Members</h3>
             <div className="space-y-3">
-              {members.length === 0 ? (
+              {memberState.length === 0 ? (
                 <p className="text-zinc-500 text-sm">No team members assigned</p>
               ) : (
-                members.map((member) => (
+                memberState.map((member) => (
                   <div key={member.id} className="flex items-center justify-between bg-zinc-700 rounded p-3">
                     <div className="flex items-center space-x-3">
                       <Avatar className="h-8 w-8">

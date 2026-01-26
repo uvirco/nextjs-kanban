@@ -6,7 +6,7 @@ import SignInCredentials from "./SignInCredentials";
 export default async function CustomSignInPage() {
   const session = await auth();
   if (session) {
-    redirect("/projects/dashboard");
+    redirect("/projects/dashboard?tab=feed");
   } else {
     return (
       <div className="flex justify-center items-center h-screen w-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-900">
@@ -15,7 +15,7 @@ export default async function CustomSignInPage() {
           <div className="absolute top-20 right-20 w-72 h-72 bg-purple-600/10 rounded-full blur-3xl" />
           <div className="absolute bottom-20 left-20 w-72 h-72 bg-blue-600/10 rounded-full blur-3xl" />
         </div>
-        
+
         {/* Login card */}
         <div className="relative z-10 min-w-96 shadow-2xl bg-slate-900/80 backdrop-blur border border-purple-500/30 rounded-xl overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-blue-500/5" />

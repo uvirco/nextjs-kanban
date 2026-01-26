@@ -12,18 +12,27 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const epics = await supabaseAdmin
+    const { searchParams } = new URL(request.url);
+    const departmentId = searchParams.get("departmentId");
+
+    let query = supabaseAdmin
       .from("Task")
       .select(
         `
         id,
         title,
         createdAt,
-        updatedAt
+        updatedAt,
+        departmentId
       `
       )
-      .eq("taskType", "EPIC")
-      .order("updatedAt", { ascending: false });
+      .eq("taskType", "EPIC");
+
+    if (departmentId) {
+      query = query.eq("departmentId", departmentId);
+    }
+
+    const epics = await query.order("updatedAt", { ascending: false });
 
     return NextResponse.json(epics.data || []);
   } catch (error) {

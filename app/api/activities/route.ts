@@ -16,8 +16,35 @@ export async function GET(request: NextRequest) {
     const activityType = searchParams.get("type");
     const taskId = searchParams.get("taskId");
     const boardId = searchParams.get("boardId");
+    const departmentId = searchParams.get("departmentId");
+    const epicId = searchParams.get("epicId");
     const startDate = searchParams.get("startDate");
     const endDate = searchParams.get("endDate");
+
+    // First, get relevant task IDs based on department/epic filters
+    let taskIds: string[] | null = null;
+
+    if (departmentId) {
+      // Get all tasks in this department
+      const { data: deptTasks } = await supabaseAdmin
+        .from("Task")
+        .select("id")
+        .eq("departmentId", departmentId);
+      taskIds = deptTasks?.map((t: any) => t.id) || [];
+    }
+
+    if (epicId) {
+      // If a specific epic is selected, only get activities from that epic and its subtasks
+      // First get the epic itself
+      const { data: subtasks } = await supabaseAdmin
+        .from("Task")
+        .select("id")
+        .eq("parentTaskId", epicId);
+      
+      const subTaskIds = subtasks?.map((t: any) => t.id) || [];
+      // Include both the epic itself and all its subtasks
+      taskIds = [epicId, ...subTaskIds];
+    }
 
     let query = supabaseAdmin
       .from("Activity")
@@ -43,6 +70,17 @@ export async function GET(request: NextRequest) {
 
     if (boardId) {
       query = query.eq("boardId", boardId);
+    }
+
+    // Apply department/epic filter by task IDs
+    // If department or epic is selected, MUST filter by taskIds (even if empty)
+    if (taskIds !== null) {
+      if (taskIds.length > 0) {
+        query = query.in("taskId", taskIds);
+      } else {
+        // No tasks in this department/epic, return empty results
+        query = query.in("taskId", [""]);
+      }
     }
 
     if (startDate) {

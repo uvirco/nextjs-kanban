@@ -273,7 +273,7 @@ export default function CreateMeetingNoteModal({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-2 flex items-center gap-2">
+              <label className="text-sm font-medium text-zinc-300 mb-2 flex items-center gap-2">
                 <IconCalendar size={16} />
                 Meeting Date *
               </label>
@@ -287,7 +287,7 @@ export default function CreateMeetingNoteModal({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-2 flex items-center gap-2">
+              <label className="text-sm font-medium text-zinc-300 mb-2 flex items-center gap-2">
                 <IconUsers size={16} />
                 Attendees
               </label>

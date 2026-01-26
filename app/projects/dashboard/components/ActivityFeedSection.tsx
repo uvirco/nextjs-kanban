@@ -59,10 +59,47 @@ export default function ActivityFeedSection({
   const [filterType, setFilterType] = useState<string>("all");
   const [filterEntity, setFilterEntity] = useState<string>("all");
   const [filterTimeRange, setFilterTimeRange] = useState<string>("all");
+  const [filterDepartment, setFilterDepartment] = useState<string>("all");
+  const [filterProject, setFilterProject] = useState<string>("all");
+  const [departments, setDepartments] = useState<
+    { id: string; name: string }[]
+  >([]);
+  const [projects, setProjects] = useState<{ id: string; title: string }[]>([]);
 
   useEffect(() => {
     fetchActivities();
-  }, [dateRange, filterType, filterEntity, filterTimeRange]);
+    fetchDepartments();
+  }, [dateRange, filterType, filterEntity, filterTimeRange, filterDepartment, filterProject]);
+
+  useEffect(() => {
+    fetchProjects(filterDepartment);
+  }, [filterDepartment]);
+
+  const fetchDepartments = async () => {
+    try {
+      const response = await fetch("/api/departments");
+      const data = await response.json();
+      setDepartments(data);
+    } catch (error) {
+      console.error("Failed to fetch departments:", error);
+    }
+  };
+
+  const fetchProjects = async (departmentId: string) => {
+    try {
+      let url = "/api/epics";
+      if (departmentId !== "all") {
+        url += `?departmentId=${departmentId}`;
+      }
+      const response = await fetch(url);
+      const data = await response.json();
+      setProjects(data);
+      // Reset project filter when department changes
+      setFilterProject("all");
+    } catch (error) {
+      console.error("Failed to fetch projects:", error);
+    }
+  };
 
   const fetchActivities = async () => {
     setLoading(true);
@@ -74,6 +111,14 @@ export default function ActivityFeedSection({
         params.set("type", filterType);
       }
 
+      if (filterDepartment !== "all") {
+        params.set("departmentId", filterDepartment);
+      }
+
+      if (filterProject !== "all") {
+        params.set("epicId", filterProject);
+      }
+
       // Apply time range filter
       let startDate = dateRange?.start;
       let endDate = dateRange?.end;
@@ -81,7 +126,7 @@ export default function ActivityFeedSection({
       if (filterTimeRange !== "all" && !dateRange) {
         const now = new Date();
         endDate = now;
-        
+
         switch (filterTimeRange) {
           case "today":
             startDate = new Date(now.setHours(0, 0, 0, 0));
@@ -106,25 +151,41 @@ export default function ActivityFeedSection({
       if (response.ok) {
         const data = await response.json();
         let filtered = data.activities || [];
-        
+
         // Client-side filter by entity type
         if (filterEntity !== "all") {
           filtered = filtered.filter((activity: Activity) => {
             switch (filterEntity) {
               case "tasks":
-                return ["TASK_CREATED", "TASK_UPDATED", "TASK_MOVED", "TASK_DELETED", "TASK_ASSIGNED", "TASK_UNASSIGNED"].includes(activity.type);
+                return [
+                  "TASK_CREATED",
+                  "TASK_UPDATED",
+                  "TASK_MOVED",
+                  "TASK_DELETED",
+                  "TASK_ASSIGNED",
+                  "TASK_UNASSIGNED",
+                ].includes(activity.type);
               case "epics":
                 return ["EPIC_CREATED", "EPIC_UPDATED"].includes(activity.type);
               case "notes":
-                return ["MEETING_NOTE_ADDED", "QUICK_NOTE_ADDED"].includes(activity.type);
+                return ["MEETING_NOTE_ADDED", "QUICK_NOTE_ADDED"].includes(
+                  activity.type,
+                );
               case "dates":
-                return ["START_DATE_ADDED", "START_DATE_UPDATED", "START_DATE_REMOVED", "DUE_DATE_ADDED", "DUE_DATE_UPDATED", "DUE_DATE_REMOVED"].includes(activity.type);
+                return [
+                  "START_DATE_ADDED",
+                  "START_DATE_UPDATED",
+                  "START_DATE_REMOVED",
+                  "DUE_DATE_ADDED",
+                  "DUE_DATE_UPDATED",
+                  "DUE_DATE_REMOVED",
+                ].includes(activity.type);
               default:
                 return true;
             }
           });
         }
-        
+
         setActivities(filtered);
       }
     } catch (error) {
@@ -242,213 +303,306 @@ export default function ActivityFeedSection({
   ];
 
   return (
-    <div className="space-y-6">
-      {/* Filter Section */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <IconFilter size={20} className="text-zinc-400" />
-          <span className="text-sm font-medium text-zinc-300">Filters</span>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          {/* Entity Type Filter */}
+    <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+      {/* Left Sidebar - Compact Filters */}
+      <div className="lg:col-span-1">
+        <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-3 sticky top-8 space-y-3">
+          {/* Department Filter */}
           <div>
-            <label className="block text-xs text-zinc-400 mb-1.5">Entity Type</label>
-            <select
-              value={filterEntity}
-              onChange={(e) => setFilterEntity(e.target.value)}
-              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">All Entities</option>
-              <option value="tasks">Tasks Only</option>
-              <option value="epics">Epics Only</option>
-              <option value="notes">Notes Only</option>
-              <option value="dates">Date Changes</option>
-            </select>
+            <label className="block text-xs font-semibold text-zinc-400 mb-1.5 uppercase">
+              Department
+            </label>
+            <div className="space-y-1">
+              <button
+                onClick={() => setFilterDepartment("all")}
+                className={`w-full text-left px-2 py-1 rounded text-xs transition-colors ${
+                  filterDepartment === "all"
+                    ? "bg-blue-600 text-white"
+                    : "text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200"
+                }`}
+              >
+                All Depts
+              </button>
+              {departments.map((dept) => (
+                <button
+                  key={dept.id}
+                  onClick={() => setFilterDepartment(dept.id)}
+                  className={`w-full text-left px-2 py-1 rounded text-xs transition-colors truncate ${
+                    filterDepartment === dept.id
+                      ? "bg-blue-600 text-white"
+                      : "text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200"
+                  }`}
+                  title={dept.name}
+                >
+                  {dept.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Project Filter */}
+          <div className="pt-2 border-t border-zinc-800">
+            <label className="block text-xs font-semibold text-zinc-400 mb-1.5 uppercase">
+              Project
+            </label>
+            <div className="space-y-1 max-h-32 overflow-y-auto">
+              <button
+                onClick={() => setFilterProject("all")}
+                className={`w-full text-left px-2 py-1 rounded text-xs transition-colors ${
+                  filterProject === "all"
+                    ? "bg-blue-600 text-white"
+                    : "text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200"
+                }`}
+              >
+                All Projects
+              </button>
+              {projects.map((proj) => (
+                <button
+                  key={proj.id}
+                  onClick={() => setFilterProject(proj.id)}
+                  className={`w-full text-left px-2 py-1 rounded text-xs transition-colors truncate ${
+                    filterProject === proj.id
+                      ? "bg-blue-600 text-white"
+                      : "text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200"
+                  }`}
+                  title={proj.title}
+                >
+                  {proj.title}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Entity Type Filter */}
+          <div className="pt-2 border-t border-zinc-800">
+            <label className="block text-xs font-semibold text-zinc-400 mb-1.5 uppercase">
+              Entity
+            </label>
+            <div className="space-y-1">
+              {[
+                { value: "all", label: "All" },
+                { value: "tasks", label: "Tasks" },
+                { value: "epics", label: "Projects" },
+                { value: "notes", label: "Notes" },
+                { value: "dates", label: "Dates" },
+              ].map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => setFilterEntity(option.value)}
+                  className={`w-full text-left px-2 py-1 rounded text-xs transition-colors ${
+                    filterEntity === option.value
+                      ? "bg-blue-600 text-white"
+                      : "text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200"
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Activity Type Filter */}
-          <div>
-            <label className="block text-xs text-zinc-400 mb-1.5">Activity Type</label>
-            <select
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
+          <div className="pt-2 border-t border-zinc-800">
+            <label className="block text-xs font-semibold text-zinc-400 mb-1.5 uppercase">
+              Type
+            </label>
+            <div className="space-y-1 max-h-40 overflow-y-auto">
               {activityTypes.map((type) => (
-                <option key={type.value} value={type.value}>
+                <button
+                  key={type.value}
+                  onClick={() => setFilterType(type.value)}
+                  className={`w-full text-left px-2 py-1 rounded text-xs transition-colors truncate ${
+                    filterType === type.value
+                      ? "bg-blue-600 text-white"
+                      : "text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200"
+                  }`}
+                  title={type.label}
+                >
                   {type.label}
-                </option>
+                </button>
               ))}
-            </select>
+            </div>
           </div>
 
           {/* Time Range Filter */}
-          <div>
-            <label className="block text-xs text-zinc-400 mb-1.5">Time Range</label>
-            <select
-              value={filterTimeRange}
-              onChange={(e) => setFilterTimeRange(e.target.value)}
-              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">All Time</option>
-              <option value="today">Today</option>
-              <option value="week">Last 7 Days</option>
-              <option value="month">Last 30 Days</option>
-            </select>
-          </div>
-        </div>
-        
-        {/* Active Filters Display */}
-        {(filterEntity !== "all" || filterType !== "all" || filterTimeRange !== "all") && (
-          <div className="flex items-center gap-2 mt-3 pt-3 border-t border-zinc-800">
-            <span className="text-xs text-zinc-400">Active filters:</span>
-            <div className="flex flex-wrap gap-1.5">
-              {filterEntity !== "all" && (
-                <span className="px-2 py-0.5 bg-blue-900/30 text-blue-400 text-xs rounded-full">
-                  {filterEntity}
-                </span>
-              )}
-              {filterType !== "all" && (
-                <span className="px-2 py-0.5 bg-blue-900/30 text-blue-400 text-xs rounded-full">
-                  {activityTypes.find(t => t.value === filterType)?.label}
-                </span>
-              )}
-              {filterTimeRange !== "all" && (
-                <span className="px-2 py-0.5 bg-blue-900/30 text-blue-400 text-xs rounded-full">
-                  {filterTimeRange === "today" ? "Today" : filterTimeRange === "week" ? "Last 7 Days" : "Last 30 Days"}
-                </span>
-              )}
-              <button
-                onClick={() => {
-                  setFilterEntity("all");
-                  setFilterType("all");
-                  setFilterTimeRange("all");
-                }}
-                className="px-2 py-0.5 text-xs text-zinc-400 hover:text-white transition-colors"
-              >
-                Clear all
-              </button>
+          <div className="pt-2 border-t border-zinc-800">
+            <label className="block text-xs font-semibold text-zinc-400 mb-1.5 uppercase">
+              Time
+            </label>
+            <div className="space-y-1">
+              {[
+                { value: "all", label: "All" },
+                { value: "today", label: "Today" },
+                { value: "week", label: "7 Days" },
+                { value: "month", label: "30 Days" },
+              ].map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => setFilterTimeRange(option.value)}
+                  className={`w-full text-left px-2 py-1 rounded text-xs transition-colors ${
+                    filterTimeRange === option.value
+                      ? "bg-blue-600 text-white"
+                      : "text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200"
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
             </div>
           </div>
-        )}
+
+          {/* Clear Filters */}
+          {(filterEntity !== "all" ||
+            filterType !== "all" ||
+            filterTimeRange !== "all" ||
+            filterProject !== "all" ||
+            filterDepartment !== "all") && (
+            <button
+              onClick={() => {
+                setFilterEntity("all");
+                setFilterType("all");
+                setFilterTimeRange("all");
+                setFilterProject("all");
+                setFilterDepartment("all");
+              }}
+              className="w-full mt-2 px-2 py-1 bg-zinc-800 text-zinc-400 hover:text-white rounded text-xs transition-colors border border-zinc-700"
+            >
+              Clear
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* Activities List */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-lg">
-        {loading ? (
-          <div className="p-8">
-            <div className="animate-pulse space-y-4">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-zinc-800 rounded-full" />
-                  <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-zinc-800 rounded w-3/4" />
-                    <div className="h-3 bg-zinc-800 rounded w-1/2" />
+      {/* Right Content - Activities List */}
+      <div className="lg:col-span-4">
+        <div className="bg-zinc-900 border border-zinc-800 rounded-lg">
+          {loading ? (
+            <div className="p-8">
+              <div className="animate-pulse space-y-4">
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} className="flex items-start gap-4">
+                    <div className="w-10 h-10 bg-zinc-800 rounded-full" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 bg-zinc-800 rounded w-3/4" />
+                      <div className="h-3 bg-zinc-800 rounded w-1/2" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : activities.length === 0 ? (
+            <div className="p-12 text-center">
+              <IconActivity size={48} className="mx-auto text-zinc-600 mb-4" />
+              <h3 className="text-lg font-semibold text-white mb-2">
+                No activity yet
+              </h3>
+              <p className="text-zinc-400">
+                Activities will appear here as you and your team work on tasks
+                and epics.
+              </p>
+            </div>
+          ) : (
+            <div className="divide-y divide-zinc-800">
+              {activities.map((activity) => (
+                <div
+                  key={activity.id}
+                  className="p-4 hover:bg-zinc-800/50 transition-colors"
+                >
+                  <div className="flex items-start gap-4">
+                    {/* User Avatar */}
+                    <div className="flex-shrink-0">
+                      {activity.user.image ? (
+                        <img
+                          src={activity.user.image}
+                          alt={activity.user.name}
+                          className="w-10 h-10 rounded-full"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-zinc-700 flex items-center justify-center text-white font-medium">
+                          {activity.user.name[0].toUpperCase()}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Activity Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span
+                              className={`flex items-center gap-1 ${getActivityColor(
+                                activity.type,
+                              )}`}
+                            >
+                              {getActivityIcon(activity.type)}
+                            </span>
+                            {activity.type === "MEETING_NOTE_ADDED" ||
+                            activity.type === "QUICK_NOTE_ADDED" ||
+                            activity.type === "COMMENT_ADDED" ? (
+                              <div
+                                className="text-sm text-zinc-300 line-clamp-3 prose prose-invert prose-sm max-w-none"
+                                dangerouslySetInnerHTML={{
+                                  __html: activity.content
+                                    .replace(/&amp;/g, "&")
+                                    .replace(/&lt;/g, "<")
+                                    .replace(/&gt;/g, ">")
+                                    .replace(/&nbsp;/g, " "),
+                                }}
+                              />
+                            ) : (
+                              <p className="text-sm text-zinc-300">
+                                {activity.content}
+                              </p>
+                            )}
+                          </div>
+
+                          {/* Task/Epic Info */}
+                          {activity.task && (
+                            <div className="flex items-center gap-2 mt-2">
+                              <span className="text-xs text-zinc-500">
+                                {activity.task.taskType === "EPIC"
+                                  ? "Epic:"
+                                  : "Task:"}
+                              </span>
+                              <a
+                                href={
+                                  activity.task.taskType === "EPIC"
+                                    ? `/epics/${activity.task.id}`
+                                    : `/task/${activity.task.id}`
+                                }
+                                className="text-xs text-blue-400 hover:text-blue-300 hover:underline font-medium"
+                              >
+                                {activity.task.title}
+                              </a>
+                            </div>
+                          )}
+
+                          {/* Board Info */}
+                          {activity.board && !activity.task && (
+                            <div className="flex items-center gap-2 mt-2">
+                              <span className="text-xs text-zinc-500">
+                                Board:
+                              </span>
+                              <a
+                                href={`/board/${activity.board.id}`}
+                                className="text-xs text-blue-400 hover:text-blue-300 hover:underline font-medium"
+                              >
+                                {activity.board.title}
+                              </a>
+                            </div>
+                          )}
+                        </div>
+                        <span className="text-xs text-zinc-500 whitespace-nowrap">
+                          {formatDate(activity.createdAt)}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
-          </div>
-        ) : activities.length === 0 ? (
-          <div className="p-12 text-center">
-            <IconActivity size={48} className="mx-auto text-zinc-600 mb-4" />
-            <h3 className="text-lg font-semibold text-white mb-2">
-              No activity yet
-            </h3>
-            <p className="text-zinc-400">
-              Activities will appear here as you and your team work on tasks and epics.
-            </p>
-          </div>
-        ) : (
-          <div className="divide-y divide-zinc-800">
-            {activities.map((activity) => (
-              <div
-                key={activity.id}
-                className="p-4 hover:bg-zinc-800/50 transition-colors"
-              >
-                <div className="flex items-start gap-4">
-                  {/* User Avatar */}
-                  <div className="flex-shrink-0">
-                    {activity.user.image ? (
-                      <img
-                        src={activity.user.image}
-                        alt={activity.user.name}
-                        className="w-10 h-10 rounded-full"
-                      />
-                    ) : (
-                      <div className="w-10 h-10 rounded-full bg-zinc-700 flex items-center justify-center text-white font-medium">
-                        {activity.user.name[0].toUpperCase()}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Activity Content */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span
-                            className={`flex items-center gap-1 ${getActivityColor(
-                              activity.type
-                            )}`}
-                          >
-                            {getActivityIcon(activity.type)}
-                          </span>
-                          {activity.type === "MEETING_NOTE_ADDED" || activity.type === "QUICK_NOTE_ADDED" || activity.type === "COMMENT_ADDED" ? (
-                            <div 
-                              className="text-sm text-zinc-300 line-clamp-3 prose prose-invert prose-sm max-w-none" 
-                              dangerouslySetInnerHTML={{ __html: activity.content.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&nbsp;/g, ' ') }}
-                            />
-                          ) : (
-                            <p className="text-sm text-zinc-300">
-                              {activity.content}
-                            </p>
-                          )}
-                        </div>
-                        
-                        {/* Task/Epic Info */}
-                        {activity.task && (
-                          <div className="flex items-center gap-2 mt-2">
-                            <span className="text-xs text-zinc-500">
-                              {activity.task.taskType === "EPIC" ? "Epic:" : "Task:"}
-                            </span>
-                            <a
-                              href={
-                                activity.task.taskType === "EPIC"
-                                  ? `/epics/${activity.task.id}`
-                                  : `/task/${activity.task.id}`
-                              }
-                              className="text-xs text-blue-400 hover:text-blue-300 hover:underline font-medium"
-                            >
-                              {activity.task.title}
-                            </a>
-                          </div>
-                        )}
-                        
-                        {/* Board Info */}
-                        {activity.board && !activity.task && (
-                          <div className="flex items-center gap-2 mt-2">
-                            <span className="text-xs text-zinc-500">Board:</span>
-                            <a
-                              href={`/board/${activity.board.id}`}
-                              className="text-xs text-blue-400 hover:text-blue-300 hover:underline font-medium"
-                            >
-                              {activity.board.title}
-                            </a>
-                          </div>
-                        )}
-                      </div>
-                      <span className="text-xs text-zinc-500 whitespace-nowrap">
-                        {formatDate(activity.createdAt)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Load More */}

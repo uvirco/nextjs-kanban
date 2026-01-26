@@ -29,9 +29,9 @@ type TimePeriod = "7d" | "30d" | "90d" | "1y";
 export default function DashboardClient({ userId }: DashboardClientProps) {
   const [epics, setEpics] = useState<Epic[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("activities");
+  const [activeTab, setActiveTab] = useState("feed");
   const [dateRange, setDateRange] = useState<{ start: Date; end: Date } | null>(
-    null
+    null,
   );
   const [timePeriod, setTimePeriod] = useState<TimePeriod>("90d");
 

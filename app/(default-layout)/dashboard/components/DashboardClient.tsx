@@ -31,7 +31,7 @@ export default function DashboardClient({ userId }: DashboardClientProps) {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("activities");
   const [dateRange, setDateRange] = useState<{ start: Date; end: Date } | null>(
-    null
+    null,
   );
   const [timePeriod, setTimePeriod] = useState<TimePeriod>("90d");
 
@@ -191,9 +191,7 @@ export default function DashboardClient({ userId }: DashboardClientProps) {
           <ActivityTrendsSection epics={epics} dateRange={dateRange} />
         )}
 
-        {activeTab === "feed" && (
-          <ActivityFeedSection dateRange={dateRange} />
-        )}
+        {activeTab === "feed" && <ActivityFeedSection dateRange={dateRange} />}
 
         {activeTab === "progress" && <ProgressOverviewSection />}
 
