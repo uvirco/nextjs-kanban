@@ -65,12 +65,14 @@ interface AddBudgetModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  editingEntry?: any | null;
 }
 
 export default function AddBudgetModal({
   isOpen,
   onClose,
   onSuccess,
+  editingEntry,
 }: AddBudgetModalProps) {
   const [epics, setEpics] = useState<Epic[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -97,7 +99,10 @@ export default function AddBudgetModal({
     frequency: "One-time",
     fiscalYear: getCurrentFiscalYear(),
     purchaseDate: "",
-    date: new Date().toISOString().split("T")[0],
+    date: (() => {
+      const today = new Date();
+      return today.toISOString().split("T")[0];
+    })(),
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -107,8 +112,46 @@ export default function AddBudgetModal({
       fetchEpics();
       fetchDepartments();
       fetchExistingCategories();
+      
+      // Populate form if editing an entry
+      if (editingEntry) {
+        setFormData({
+          linkType: editingEntry.epic_id ? "epic" : "department",
+          epicId: editingEntry.epic_id || "",
+          departmentId: editingEntry.department_id || "",
+          category: editingEntry.category,
+          description: editingEntry.description || "",
+          amount: editingEntry.amount.toString(),
+          currency: editingEntry.currency,
+          entryType: editingEntry.entry_type,
+          frequency: editingEntry.frequency,
+          fiscalYear: editingEntry.fiscal_year,
+          purchaseDate: editingEntry.purchase_date || "",
+          date: editingEntry.date,
+        });
+      } else {
+        // Reset form for new entry
+        setFormData({
+          linkType: "epic",
+          epicId: "",
+          departmentId: "",
+          category: "",
+          description: "",
+          amount: "",
+          currency: "ZAR",
+          entryType: "Expense",
+          frequency: "One-time",
+          fiscalYear: getCurrentFiscalYear(),
+          purchaseDate: "",
+          date: (() => {
+            const today = new Date();
+            return today.toISOString().split("T")[0];
+          })(),
+        });
+      }
+      setErrors({});
     }
-  }, [isOpen]);
+  }, [isOpen, editingEntry]);
 
   const fetchEpics = async () => {
     const { data, error } = await supabase
@@ -201,48 +244,92 @@ export default function AddBudgetModal({
     setErrors({});
     setIsSubmitting(true);
 
-    const { data, error } = await supabase.from("budget_entries").insert([
-      {
-        epic_id: formData.linkType === "epic" ? formData.epicId : null,
-        department_id:
-          formData.linkType === "department" ? formData.departmentId : null,
-        category:
-          formData.category === "Other" ? customCategory : formData.category,
-        description: formData.description || null,
-        amount: parseFloat(formData.amount),
-        currency: formData.currency,
-        entry_type: formData.entryType,
-        frequency: formData.frequency,
-        fiscal_year: formData.fiscalYear,
-        purchase_date:
-          formData.entryType === "Expense" && formData.purchaseDate
-            ? formData.purchaseDate
-            : null,
-        date: formData.date,
-      },
-    ]);
+    // Ensure date is in YYYY-MM-DD format
+    const dateValue = formData.date;
+    if (!dateValue || !/^\d{4}-\d{2}-\d{2}$/.test(dateValue)) {
+      console.error("Invalid date format:", dateValue);
+      toast.error("Date must be in YYYY-MM-DD format");
+      setIsSubmitting(false);
+      return;
+    }
 
-    if (error) {
-      console.error("Error adding budget entry:", error);
-      toast.error("Failed to add budget entry");
-    } else {
-      toast.success("Budget entry added successfully");
-      onSuccess();
-      setCustomCategory("");
-      setFormData({
-        linkType: "epic",
-        epicId: "",
-        departmentId: "",
-        category: "",
-        description: "",
-        amount: "",
-        currency: "ZAR",
-        entryType: "Expense",
-        frequency: "One-time",
-        fiscalYear: getCurrentFiscalYear(),
-        purchaseDate: "",
-        date: new Date().toISOString().split("T")[0],
-      });
+    // Ensure purchase_date is in YYYY-MM-DD format if provided
+    let purchaseDateValue = null;
+    if (formData.entryType === "Expense" && formData.purchaseDate) {
+      if (!/^\d{4}-\d{2}$/.test(formData.purchaseDate)) {
+        console.error("Invalid purchase date format:", formData.purchaseDate);
+        toast.error("Purchase date must be in YYYY-MM format");
+        setIsSubmitting(false);
+        return;
+      }
+      // Convert YYYY-MM to YYYY-MM-01 for database
+      purchaseDateValue = `${formData.purchaseDate}-01`;
+    }
+
+    const entryData = {
+      epic_id: formData.linkType === "epic" ? formData.epicId : null,
+      department_id:
+        formData.linkType === "department" ? formData.departmentId : null,
+      category:
+        formData.category === "Other" ? customCategory : formData.category,
+      description: formData.description || null,
+      amount: parseFloat(formData.amount),
+      currency: formData.currency,
+      entry_type: formData.entryType,
+      frequency: formData.frequency,
+      fiscal_year: formData.fiscalYear,
+      purchase_date: purchaseDateValue,
+      date: dateValue,
+    };
+
+    try {
+      let result;
+      if (editingEntry) {
+        // Update existing entry
+        result = await supabase
+          .from("budget_entries")
+          .update(entryData)
+          .eq("id", editingEntry.id);
+      } else {
+        // Create new entry
+        result = await supabase.from("budget_entries").insert([entryData]);
+      }
+
+      const { error } = result;
+
+      if (error) {
+        console.error("Error saving budget entry:", error);
+        toast.error(
+          editingEntry
+            ? "Failed to update budget entry"
+            : "Failed to add budget entry"
+        );
+      } else {
+        toast.success(
+          editingEntry
+            ? "Budget entry updated successfully"
+            : "Budget entry added successfully"
+        );
+        onSuccess();
+        setCustomCategory("");
+        setFormData({
+          linkType: "epic",
+          epicId: "",
+          departmentId: "",
+          category: "",
+          description: "",
+          amount: "",
+          currency: "ZAR",
+          entryType: "Expense",
+          frequency: "One-time",
+          fiscalYear: getCurrentFiscalYear(),
+          purchaseDate: "",
+          date: new Date().toISOString().split("T")[0],
+        });
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error("An error occurred while saving the budget entry");
     }
 
     setIsSubmitting(false);
@@ -267,7 +354,9 @@ export default function AddBudgetModal({
     >
       <ModalContent>
         <ModalHeader>
-          <h2 className="text-white">Add Budget Entry</h2>
+          <h2 className="text-white">
+            {editingEntry ? "Edit Budget Entry" : "Add Budget Entry"}
+          </h2>
         </ModalHeader>
         <ModalBody>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -553,7 +642,13 @@ export default function AddBudgetModal({
             color="primary"
             className="bg-blue-600 hover:bg-blue-700 text-white"
           >
-            {isSubmitting ? "Adding..." : "Add Entry"}
+            {isSubmitting
+              ? editingEntry
+                ? "Updating..."
+                : "Adding..."
+              : editingEntry
+              ? "Update Entry"
+              : "Add Entry"}
           </Button>
         </ModalFooter>
       </ModalContent>

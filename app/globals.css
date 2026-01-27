@@ -167,3 +167,89 @@
 .ql-toolbar button.ql-active .ql-fill {
   @apply fill-white;
 }
+
+/* Print Styles */
+@media print {
+  /* Hide non-essential elements */
+  .no-print,
+  button,
+  .print-hidden {
+    display: none !important;
+  }
+
+  /* Dark mode to light for printing */
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  #portfolio-table {
+    background: white !important;
+    color: black !important;
+  }
+
+  #portfolio-table * {
+    background: white !important;
+    color: black !important;
+    border-color: #999 !important;
+  }
+
+  /* Table styling for print */
+  table {
+    page-break-inside: avoid;
+    width: 100%;
+  }
+
+  tr {
+    page-break-inside: avoid;
+  }
+
+  th {
+    background: #f0f0f0 !important;
+    color: black !important;
+    font-weight: 700 !important;
+    border: 1px solid #999 !important;
+  }
+
+  td {
+    border: 1px solid #999 !important;
+    color: black !important;
+    padding: 8px !important;
+  }
+
+  /* Header and title for printing */
+  h1, h2, h3 {
+    color: black !important;
+    page-break-after: avoid;
+  }
+
+  /* Print-friendly colors */
+  .bg-zinc-800,
+  .bg-zinc-900,
+  .bg-blue-600,
+  .bg-green-600,
+  .bg-red-600,
+  .bg-yellow-600,
+  .bg-purple-600,
+  .bg-indigo-900 {
+    background: white !important;
+    color: black !important;
+  }
+
+  .text-zinc-400,
+  .text-zinc-300,
+  .text-gray-400 {
+    color: #666 !important;
+  }
+
+  .text-white,
+  .text-blue-400 {
+    color: black !important;
+  }
+
+  /* Badge colors */
+  .rounded {
+    border: 1px solid #999 !important;
+  }
+}
+

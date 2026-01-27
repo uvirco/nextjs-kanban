@@ -456,19 +456,19 @@ export interface Risk {
 
 export interface BudgetEntry {
   id: string;
-  epicId: string | null;
-  departmentId: string | null;
+  epic_id: string | null;
+  department_id: string | null;
   category: string;
   description: string | null;
   amount: number;
   currency: string;
-  entryType: "Expense" | "Budget";
+  entry_type: "Expense" | "Budget";
   frequency: "One-time" | "Weekly" | "Monthly" | "Quarterly" | "Yearly";
-  fiscalYear: string;
-  purchaseDate?: string | null; // Format: YYYY-MM
-  date: Date;
-  createdAt: Date;
-  updatedAt: Date;
+  fiscal_year: string;
+  purchase_date?: string | null; // Format: YYYY-MM-DD (date type)
+  date: string | Date;
+  created_at?: string | Date;
+  updated_at?: string | Date;
   epic?: {
     title: string;
   };

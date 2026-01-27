@@ -265,7 +265,7 @@ export default function EpicTableView({
   const visibleColumns = columns.filter((col) => col.visible);
 
   return (
-    <div className="space-y-4">
+    <div id="portfolio-table" className="space-y-4">
       {/* Table */}
       <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
         <div className="overflow-x-auto">

@@ -9,7 +9,10 @@ import {
   IconChartLine,
   IconSettings,
   IconGridDots,
+  IconPrinter,
+  IconDownload,
 } from "@tabler/icons-react";
+import { exportTableToPDF, printElement } from "@/lib/pdf-export";
 import EpicPriorityView from "./EpicPriorityView";
 import EpicTableView from "./EpicTableView";
 import EpicBoard from "./EpicBoard";
@@ -315,13 +318,31 @@ export default function EpicPortfolioClient({
             {filteredEpics.length !== epics.length && " (filtered)"}
           </p>
         </div>
-        <Link
-          href="/projects/epics/new"
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
-        >
-          <IconPlus size={20} />
-          New Project
-        </Link>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => printElement("portfolio-table")}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition-colors"
+            title="Print the current view"
+          >
+            <IconPrinter size={20} />
+            Print
+          </button>
+          <button
+            onClick={() => exportTableToPDF("portfolio-table", `epics-${new Date().toISOString().split('T')[0]}.pdf`)}
+            className="flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-700 rounded-lg transition-colors"
+            title="Export to PDF"
+          >
+            <IconDownload size={20} />
+            PDF
+          </button>
+          <Link
+            href="/projects/epics/new"
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+          >
+            <IconPlus size={20} />
+            New Project
+          </Link>
+        </div>
       </div>
 
       {/* View Switcher and Filters */}

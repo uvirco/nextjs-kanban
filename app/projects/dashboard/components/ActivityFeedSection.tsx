@@ -19,6 +19,63 @@ import {
   IconLayout,
   IconFilter,
 } from "@tabler/icons-react";
+import "quill/dist/quill.snow.css";
+
+// Inline styles for read-only Quill content
+const quillReadOnlyStyles = `
+  .ql-editor.ql-disabled {
+    color: inherit !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+  }
+  
+  .ql-editor.ql-disabled p {
+    margin: 0.5em 0 !important;
+    font-size: inherit !important;
+    line-height: 1.4 !important;
+  }
+  
+  .ql-editor.ql-disabled ol, .ql-editor.ql-disabled ul {
+    padding-left: 1.5em !important;
+    margin: 0.5em 0 !important;
+  }
+  
+  .ql-editor.ql-disabled blockquote {
+    border-left: 4px solid currentColor;
+    padding-left: 1em;
+    margin: 0.5em 0 !important;
+    color: #a1a1aa;
+  }
+  
+  .ql-editor.ql-disabled pre {
+    background-color: rgba(0,0,0,0.3);
+    padding: 0.5em;
+    border-radius: 0.25em;
+    margin: 0.5em 0 !important;
+  }
+  
+  .ql-editor.ql-disabled a {
+    color: #3b82f6;
+    text-decoration: underline;
+  }
+  
+  .ql-editor.ql-disabled strong {
+    font-weight: 600 !important;
+  }
+  
+  .ql-editor.ql-disabled em {
+    font-style: italic !important;
+  }
+  
+  .ql-editor.ql-disabled u {
+    text-decoration: underline !important;
+  }
+  
+  .ql-editor.ql-disabled s {
+    text-decoration: line-through !important;
+  }
+`;
 
 interface Activity {
   id: string;
@@ -65,6 +122,7 @@ export default function ActivityFeedSection({
     { id: string; name: string }[]
   >([]);
   const [projects, setProjects] = useState<{ id: string; title: string }[]>([]);
+  const [expandedActivities, setExpandedActivities] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetchActivities();
@@ -195,6 +253,16 @@ export default function ActivityFeedSection({
     }
   };
 
+  const toggleExpanded = (activityId: string) => {
+    const newExpanded = new Set(expandedActivities);
+    if (newExpanded.has(activityId)) {
+      newExpanded.delete(activityId);
+    } else {
+      newExpanded.add(activityId);
+    }
+    setExpandedActivities(newExpanded);
+  };
+
   const getActivityIcon = (type: string) => {
     const iconProps = { size: 16 };
     switch (type) {
@@ -304,6 +372,7 @@ export default function ActivityFeedSection({
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+      <style jsx global>{quillReadOnlyStyles}</style>
       {/* Left Sidebar - Compact Filters */}
       <div className="lg:col-span-1">
         <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-3 sticky top-8 space-y-3">
@@ -537,8 +606,42 @@ export default function ActivityFeedSection({
                               {getActivityIcon(activity.type)}
                             </span>
                             {activity.type === "MEETING_NOTE_ADDED" ||
-                            activity.type === "QUICK_NOTE_ADDED" ||
-                            activity.type === "COMMENT_ADDED" ? (
+                            activity.type === "QUICK_NOTE_ADDED" ? (
+                              <div className="flex-1">
+                                {!expandedActivities.has(activity.id) && (
+                                  <>
+                                    <div
+                                      className="text-sm text-zinc-300 ql-editor ql-disabled line-clamp-3"
+                                      dangerouslySetInnerHTML={{
+                                        __html: activity.content,
+                                      }}
+                                    />
+                                    <button
+                                      onClick={() => toggleExpanded(activity.id)}
+                                      className="mt-1 text-xs text-blue-400 hover:text-blue-300"
+                                    >
+                                      ▼ Read More
+                                    </button>
+                                  </>
+                                )}
+                                {expandedActivities.has(activity.id) && (
+                                  <div>
+                                    <div
+                                      className="text-sm text-zinc-300 ql-editor ql-disabled max-h-60 overflow-y-auto"
+                                      dangerouslySetInnerHTML={{
+                                        __html: activity.content,
+                                      }}
+                                    />
+                                    <button
+                                      onClick={() => toggleExpanded(activity.id)}
+                                      className="mt-2 text-xs text-blue-400 hover:text-blue-300"
+                                    >
+                                      ▲ Show Less
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            ) : activity.type === "COMMENT_ADDED" ? (
                               <div
                                 className="text-sm text-zinc-300 line-clamp-3 prose prose-invert prose-sm max-w-none"
                                 dangerouslySetInnerHTML={{

@@ -18,6 +18,7 @@ export default function BudgetPage() {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
+  const [editingEntry, setEditingEntry] = useState<BudgetEntry | null>(null);
 
   useEffect(() => {
     fetchBudgetEntries();
@@ -46,27 +47,70 @@ export default function BudgetPage() {
     }).format(amount);
   };
 
-  const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString();
+  const formatDate = (dateValue: string | Date | null | undefined) => {
+    if (!dateValue) return "-";
+    try {
+      const date = typeof dateValue === "string" ? new Date(dateValue) : dateValue;
+      if (isNaN(date.getTime())) return "-";
+      return date.toLocaleDateString();
+    } catch {
+      return "-";
+    }
   };
 
   const formatMonth = (monthString: string | null | undefined) => {
     if (!monthString) return "-";
     // Format YYYY-MM to "Month YYYY"
     const [year, month] = monthString.split("-");
-    const date = new Date(parseInt(year), parseInt(month) - 1);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-    });
+    if (!year || !month) return "-";
+    try {
+      const date = new Date(parseInt(year), parseInt(month) - 1);
+      if (isNaN(date.getTime())) return "-";
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+      });
+    } catch {
+      return "-";
+    }
   };
 
-  const calculateAge = (createdAt: Date) => {
-    const created = new Date(createdAt);
-    const today = new Date();
-    const diffTime = Math.abs(today.getTime() - created.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
+  const calculateAge = (createdAt: string | Date | null | undefined) => {
+    if (!createdAt) return 0;
+    try {
+      const created = typeof createdAt === "string" ? new Date(createdAt) : createdAt;
+      if (isNaN(created.getTime())) return 0;
+      const today = new Date();
+      const diffTime = Math.abs(today.getTime() - created.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return diffDays;
+    } catch {
+      return 0;
+    }
+  };
+
+  const calculateAnnualTotal = (
+    amount: number,
+    frequency: string
+  ): number => {
+    const frequencyMultipliers: Record<string, number> = {
+      "One-time": 1,
+      Weekly: 52,
+      Monthly: 12,
+      Quarterly: 4,
+      Yearly: 1,
+    };
+    return amount * (frequencyMultipliers[frequency] || 1);
+  };
+
+  const calculateTotalAmounts = () => {
+    let totalAmount = 0;
+    let totalAnnual = 0;
+    budgetEntries.forEach((entry) => {
+      totalAmount += entry.amount || 0;
+      totalAnnual += calculateAnnualTotal(entry.amount || 0, entry.frequency);
+    });
+    return { totalAmount, totalAnnual };
   };
 
   if (loading) {
@@ -101,6 +145,7 @@ export default function BudgetPage() {
               <th className="px-4 py-3 text-left">Category</th>
               <th className="px-4 py-3 text-left">Description</th>
               <th className="px-4 py-3 text-right">Amount</th>
+              <th className="px-4 py-3 text-right">Annual Total</th>
               <th className="px-4 py-3 text-left">Purchase Month</th>
               <th className="px-4 py-3 text-left">Created</th>
               <th className="px-4 py-3 text-left">Updated</th>
@@ -114,7 +159,7 @@ export default function BudgetPage() {
                 <td className="px-4 py-3">{formatDate(entry.date)}</td>
                 <td className="px-4 py-3">
                   <span className="px-2 py-1 bg-indigo-900 text-indigo-200 rounded text-xs">
-                    {entry.fiscalYear}
+                    {entry.fiscal_year}
                   </span>
                 </td>
                 <td className="px-4 py-3">
@@ -135,12 +180,12 @@ export default function BudgetPage() {
                 <td className="px-4 py-3">
                   <span
                     className={`px-2 py-1 rounded text-xs ${
-                      entry.entryType === "Budget"
+                      entry.entry_type === "Budget"
                         ? "bg-blue-900 text-blue-200"
                         : "bg-red-900 text-red-200"
                     }`}
                   >
-                    {entry.entryType}
+                    {entry.entry_type}
                   </span>
                 </td>
                 <td className="px-4 py-3">
@@ -159,27 +204,60 @@ export default function BudgetPage() {
                 <td className="px-4 py-3 text-right font-mono">
                   {formatCurrency(entry.amount, entry.currency)}
                 </td>
-                <td className="px-4 py-3 text-sm text-zinc-400">
-                  {formatMonth(entry.purchaseDate)}
+                <td className="px-4 py-3 text-right font-mono text-green-400">
+                  {formatCurrency(
+                    calculateAnnualTotal(entry.amount, entry.frequency),
+                    entry.currency
+                  )}
                 </td>
                 <td className="px-4 py-3 text-sm text-zinc-400">
-                  {formatDate(entry.createdAt)}
+                  {formatMonth(entry.purchase_date)}
                 </td>
                 <td className="px-4 py-3 text-sm text-zinc-400">
-                  {formatDate(entry.updatedAt)}
+                  {formatDate(entry.created_at)}
+                </td>
+                <td className="px-4 py-3 text-sm text-zinc-400">
+                  {formatDate(entry.updated_at)}
                 </td>
                 <td className="px-4 py-3 text-sm">
                   <span className="px-2 py-1 bg-zinc-800 rounded">
-                    {calculateAge(entry.createdAt)} days
+                    {calculateAge(entry.created_at)} days
                   </span>
                 </td>
                 <td className="px-4 py-3">
-                  <Button variant="flat" size="sm" onClick={() => {}}>
+                  <Button 
+                    variant="flat" 
+                    size="sm" 
+                    onClick={() => {
+                      setEditingEntry(entry);
+                      setIsModalOpen(true);
+                    }}
+                  >
                     Edit
                   </Button>
                 </td>
               </tr>
             ))}
+            {budgetEntries.length > 0 && (
+              <tr className="border-t-2 border-zinc-700 bg-zinc-800/50 font-semibold">
+                <td colSpan={8} className="px-4 py-3 text-right">
+                  Total Amount:
+                </td>
+                <td className="px-4 py-3 text-right font-mono">
+                  {formatCurrency(
+                    calculateTotalAmounts().totalAmount,
+                    budgetEntries[0]?.currency || "USD"
+                  )}
+                </td>
+                <td className="px-4 py-3 text-right font-mono text-green-400">
+                  {formatCurrency(
+                    calculateTotalAmounts().totalAnnual,
+                    budgetEntries[0]?.currency || "USD"
+                  )}
+                </td>
+                <td colSpan={5}></td>
+              </tr>
+            )}
             {budgetEntries.length === 0 && (
               <tr>
                 <td
@@ -196,11 +274,16 @@ export default function BudgetPage() {
 
       <AddBudgetModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingEntry(null);
+        }} 
         onSuccess={() => {
           setIsModalOpen(false);
+          setEditingEntry(null);
           fetchBudgetEntries();
         }}
+        editingEntry={editingEntry}
       />
 
       <Modal

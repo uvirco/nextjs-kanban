@@ -21,6 +21,8 @@ interface ActivityLogInput {
  */
 export async function logActivity(input: ActivityLogInput): Promise<void> {
   try {
+    console.log("logActivity called with:", { type: input.type, userId: input.userId, taskId: input.taskId });
+    
     const { data, error } = await supabaseAdmin.from("Activity").insert({
       type: input.type,
       content: input.content,
@@ -36,8 +38,14 @@ export async function logActivity(input: ActivityLogInput): Promise<void> {
     });
 
     if (error) {
-      console.error("Failed to log activity:", error);
+      console.error("Failed to log activity - Database Error:", {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+      });
       // Don't throw - we don't want to fail the main operation if logging fails
+    } else {
+      console.log("Activity logged successfully:", data);
     }
   } catch (error) {
     console.error("Activity logging error:", error);

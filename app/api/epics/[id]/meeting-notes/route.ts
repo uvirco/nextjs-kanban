@@ -200,15 +200,15 @@ export async function POST(
     }
 
     // Log activity
+    console.log("Logging activity for note:", {
+      type: type === "quick" ? "QUICK_NOTE_ADDED" : "MEETING_NOTE_ADDED",
+      epicId,
+      userId: session.user.id,
+    });
+
     await logActivity({
       type: (type === "quick" ? "QUICK_NOTE_ADDED" : "MEETING_NOTE_ADDED") as ActivityType,
-      content: formatActivityContent({
-        action: "added",
-        userName: session.user.name || session.user.email || "User",
-        entityType: type === "quick" ? "quick note" : "meeting note",
-        entityName: title,
-        details: `to epic ${completeMeetingNote.epic?.title || ""}`
-      }),
+      content: notes || title || "", // Use the actual note content instead of a formatted description
       userId: session.user.id,
       taskId: epicId,
     });

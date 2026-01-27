@@ -51,6 +51,7 @@ function EpicDetailPageClient({
   const [meetingNotesSearch, setMeetingNotesSearch] = useState("");
   const [quickNotesSearch, setQuickNotesSearch] = useState("");
   const [showMemberModal, setShowMemberModal] = useState(false);
+  const [activityRefreshKey, setActivityRefreshKey] = useState(0);
 
   // Load last active tab from localStorage on mount
   useEffect(() => {
@@ -552,8 +553,8 @@ function EpicDetailPageClient({
                     epic={epic}
                     searchTerm={quickNotesSearch}
                     onSave={(updatedEpic) => {
-                      // Handle save - you might need to refresh or update state
-                      window.location.reload(); // Simple refresh for now
+                      // Refresh activity tab when note is saved
+                      setActivityRefreshKey(prev => prev + 1);
                     }}
                   />
                 </TabsContent>
@@ -570,8 +571,8 @@ function EpicDetailPageClient({
                   </div>
                 </TabsContent>
 
-                <TabsContent value="activity">
-                  <EpicActivityTab epicId={epic.id} />
+                <TabsContent value="activity" key={`activity-${activityRefreshKey}`}>
+                  <EpicActivityTab epicId={epic.id} key={`activity-tab-${activityRefreshKey}`} />
                 </TabsContent>
 
                 <TabsContent value="team" className="space-y-6">
