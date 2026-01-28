@@ -13,6 +13,7 @@ import {
   IconBook,
   IconShield,
   IconCurrencyDollar,
+  IconAddressBook,
 } from "@tabler/icons-react";
 import SidebarHeader from "./SidebarHeader";
 import { useEffect, useState } from "react";
@@ -122,6 +123,12 @@ export default function SidebarMenuContent({
             path="/projects/budget"
             title={isCollapsed ? "" : "Budget"}
             icon={<IconCurrencyDollar stroke={1.5} size={20} />}
+            showTitle={!isCollapsed}
+          />
+          <MenuItem
+            path="/projects/contacts"
+            title={isCollapsed ? "" : "Contacts"}
+            icon={<IconAddressBook stroke={1.5} size={20} />}
             showTitle={!isCollapsed}
           />
           <MenuItem

@@ -512,3 +512,41 @@ export interface Conversation {
   created_at: string | Date;
   updated_at: string | Date;
 }
+
+// Contact Types
+export type ContactType = 'supplier' | 'contractor' | 'team_member' | 'client' | 'other';
+export type RelationType = 'supplier' | 'approver' | 'team_member' | 'stakeholder' | 'contractor';
+export type ParentType = 'project' | 'budget_entry' | 'task';
+
+export interface Contact {
+  id: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  company?: string;
+  contact_type: ContactType;
+  address?: string;
+  city?: string;
+  country?: string;
+  notes?: string;
+  created_by?: string;
+  created_at?: string | Date;
+  updated_at?: string | Date;
+  user?: {
+    id: string;
+    email: string;
+    name: string;
+  };
+  relations?: ContactRelation[];
+}
+
+export interface ContactRelation {
+  id: string;
+  contact_id: string;
+  parent_type: ParentType;
+  parent_id: string;
+  relation_type: RelationType;
+  created_at?: string | Date;
+  created_by?: string;
+  contact?: Contact;
+}
