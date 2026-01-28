@@ -19,6 +19,16 @@ export default function BudgetPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<BudgetEntry | null>(null);
+  
+  // Sorting state
+  const [sortColumn, setSortColumn] = useState<string>("date");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  
+  // Filtering state
+  const [filterType, setFilterType] = useState<string>("");
+  const [filterFrequency, setFilterFrequency] = useState<string>("");
+  const [filterFiscalYear, setFilterFiscalYear] = useState<string>("");
+  const [filterCategory, setFilterCategory] = useState<string>("");
 
   useEffect(() => {
     fetchBudgetEntries();
@@ -106,11 +116,72 @@ export default function BudgetPage() {
   const calculateTotalAmounts = () => {
     let totalAmount = 0;
     let totalAnnual = 0;
-    budgetEntries.forEach((entry) => {
+    getFilteredAndSortedEntries().forEach((entry) => {
       totalAmount += entry.amount || 0;
       totalAnnual += calculateAnnualTotal(entry.amount || 0, entry.frequency);
     });
     return { totalAmount, totalAnnual };
+  };
+
+  const getFilteredAndSortedEntries = () => {
+    let filtered = budgetEntries;
+
+    // Apply filters
+    if (filterType) {
+      filtered = filtered.filter((e) => e.entry_type === filterType);
+    }
+    if (filterFrequency) {
+      filtered = filtered.filter((e) => e.frequency === filterFrequency);
+    }
+    if (filterFiscalYear) {
+      filtered = filtered.filter((e) => e.fiscal_year === filterFiscalYear);
+    }
+    if (filterCategory) {
+      filtered = filtered.filter((e) => e.category === filterCategory);
+    }
+
+    // Apply sorting
+    filtered.sort((a, b) => {
+      let aVal: any = a[sortColumn as keyof BudgetEntry];
+      let bVal: any = b[sortColumn as keyof BudgetEntry];
+
+      // Handle nested properties
+      if (sortColumn === "epic") {
+        aVal = a.epic?.title || "";
+        bVal = b.epic?.title || "";
+      } else if (sortColumn === "department") {
+        aVal = a.department?.name || "";
+        bVal = b.department?.name || "";
+      }
+
+      if (aVal === null || aVal === undefined) aVal = "";
+      if (bVal === null || bVal === undefined) bVal = "";
+
+      if (typeof aVal === "string") {
+        aVal = aVal.toLowerCase();
+        bVal = bVal.toLowerCase();
+      }
+
+      if (aVal < bVal) return sortDirection === "asc" ? -1 : 1;
+      if (aVal > bVal) return sortDirection === "asc" ? 1 : -1;
+      return 0;
+    });
+
+    return filtered;
+  };
+
+  const handleSort = (column: string) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortColumn(column);
+      setSortDirection("asc");
+    }
+  };
+
+  const SortIcon = ({ column }: { column: string }) => {
+    if (sortColumn !== column) return <span className="text-xs text-zinc-600">⇅</span>;
+    return sortDirection === "asc" ? <span className="text-xs">▲</span> : <span className="text-xs">▼</span>;
   };
 
   if (loading) {
@@ -133,28 +204,125 @@ export default function BudgetPage() {
         </div>
       </div>
 
+      <div className="bg-zinc-900 rounded-lg overflow-hidden mb-4 p-4 border border-zinc-800">
+        <h3 className="text-sm font-semibold text-zinc-300 mb-3">Filters</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div>
+            <label className="text-xs text-zinc-400 block mb-1">Type</label>
+            <select
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+              className="w-full px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-sm text-zinc-300"
+            >
+              <option value="">All Types</option>
+              <option value="Budget">Budget</option>
+              <option value="Expense">Expense</option>
+            </select>
+          </div>
+          <div>
+            <label className="text-xs text-zinc-400 block mb-1">Frequency</label>
+            <select
+              value={filterFrequency}
+              onChange={(e) => setFilterFrequency(e.target.value)}
+              className="w-full px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-sm text-zinc-300"
+            >
+              <option value="">All Frequencies</option>
+              <option value="One-time">One-time</option>
+              <option value="Monthly">Monthly</option>
+              <option value="Quarterly">Quarterly</option>
+              <option value="Yearly">Yearly</option>
+            </select>
+          </div>
+          <div>
+            <label className="text-xs text-zinc-400 block mb-1">Fiscal Year</label>
+            <select
+              value={filterFiscalYear}
+              onChange={(e) => setFilterFiscalYear(e.target.value)}
+              className="w-full px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-sm text-zinc-300"
+            >
+              <option value="">All Fiscal Years</option>
+              {[...new Set(budgetEntries.map((e) => e.fiscal_year))].sort().reverse().map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="text-xs text-zinc-400 block mb-1">Category</label>
+            <select
+              value={filterCategory}
+              onChange={(e) => setFilterCategory(e.target.value)}
+              className="w-full px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-sm text-zinc-300"
+            >
+              <option value="">All Categories</option>
+              {[...new Set(budgetEntries.map((e) => e.category))].sort().map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+        {(filterType || filterFrequency || filterFiscalYear || filterCategory) && (
+          <button
+            onClick={() => {
+              setFilterType("");
+              setFilterFrequency("");
+              setFilterFiscalYear("");
+              setFilterCategory("");
+            }}
+            className="mt-3 text-xs text-blue-400 hover:text-blue-300"
+          >
+            Clear Filters
+          </button>
+        )}
+      </div>
+
       <div className="bg-zinc-900 rounded-lg overflow-hidden">
         <table className="w-full text-sm text-zinc-300">
           <thead className="bg-zinc-800">
             <tr>
-              <th className="px-4 py-3 text-left">Date</th>
-              <th className="px-4 py-3 text-left">Fiscal Year</th>
-              <th className="px-4 py-3 text-left">Linked To</th>
-              <th className="px-4 py-3 text-left">Type</th>
-              <th className="px-4 py-3 text-left">Frequency</th>
-              <th className="px-4 py-3 text-left">Category</th>
-              <th className="px-4 py-3 text-left">Description</th>
-              <th className="px-4 py-3 text-right">Amount</th>
+              <th className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700" onClick={() => handleSort("date")}>
+                Date <SortIcon column="date" />
+              </th>
+              <th className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700" onClick={() => handleSort("fiscal_year")}>
+                Fiscal Year <SortIcon column="fiscal_year" />
+              </th>
+              <th className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700" onClick={() => handleSort("epic")}>
+                Linked To <SortIcon column="epic" />
+              </th>
+              <th className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700" onClick={() => handleSort("entry_type")}>
+                Type <SortIcon column="entry_type" />
+              </th>
+              <th className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700" onClick={() => handleSort("frequency")}>
+                Frequency <SortIcon column="frequency" />
+              </th>
+              <th className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700" onClick={() => handleSort("category")}>
+                Category <SortIcon column="category" />
+              </th>
+              <th className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700" onClick={() => handleSort("description")}>
+                Description <SortIcon column="description" />
+              </th>
+              <th className="px-4 py-3 text-right cursor-pointer hover:bg-zinc-700" onClick={() => handleSort("amount")}>
+                Amount <SortIcon column="amount" />
+              </th>
               <th className="px-4 py-3 text-right">Annual Total</th>
-              <th className="px-4 py-3 text-left">Purchase Month</th>
-              <th className="px-4 py-3 text-left">Created</th>
-              <th className="px-4 py-3 text-left">Updated</th>
+              <th className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700" onClick={() => handleSort("purchase_date")}>
+                Purchase Month <SortIcon column="purchase_date" />
+              </th>
+              <th className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700" onClick={() => handleSort("created_at")}>
+                Created <SortIcon column="created_at" />
+              </th>
+              <th className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700" onClick={() => handleSort("updated_at")}>
+                Updated <SortIcon column="updated_at" />
+              </th>
               <th className="px-4 py-3 text-left">Age (days)</th>
               <th className="px-4 py-3 text-left">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {budgetEntries.map((entry) => (
+            {getFilteredAndSortedEntries().map((entry) => (
               <tr key={entry.id} className="border-t border-zinc-800">
                 <td className="px-4 py-3">{formatDate(entry.date)}</td>
                 <td className="px-4 py-3">
@@ -241,7 +409,7 @@ export default function BudgetPage() {
             {budgetEntries.length > 0 && (
               <tr className="border-t-2 border-zinc-700 bg-zinc-800/50 font-semibold">
                 <td colSpan={8} className="px-4 py-3 text-right">
-                  Total Amount:
+                  Total Amount ({getFilteredAndSortedEntries().length} entries):
                 </td>
                 <td className="px-4 py-3 text-right font-mono">
                   {formatCurrency(
@@ -258,13 +426,13 @@ export default function BudgetPage() {
                 <td colSpan={5}></td>
               </tr>
             )}
-            {budgetEntries.length === 0 && (
+            {getFilteredAndSortedEntries().length === 0 && (
               <tr>
                 <td
-                  colSpan={13}
+                  colSpan={14}
                   className="px-4 py-8 text-center text-zinc-500"
                 >
-                  No budget entries found. Add your first entry!
+                  {budgetEntries.length === 0 ? "No budget entries found. Add your first entry!" : "No entries match the selected filters."}
                 </td>
               </tr>
             )}
