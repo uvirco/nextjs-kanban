@@ -407,7 +407,7 @@ export default function ContactsPage() {
                   </td>
                   <td className="px-4 py-3 text-sm">{contact.company || "-"}</td>
                   <td className="px-4 py-3">
-                    <span className="px-2 py-1 bg-blue-900/30 text-blue-300 rounded text-xs">
+                    <span className="px-2 py-1 bg-zinc-800 text-zinc-300 rounded text-xs">
                       {contact.contact_type}
                     </span>
                   </td>
