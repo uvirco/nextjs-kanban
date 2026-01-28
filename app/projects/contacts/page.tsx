@@ -6,15 +6,14 @@ import { Contact } from "@/types/types";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@nextui-org/button";
 import { Input } from "@nextui-org/input";
-import { Select, SelectItem } from "@nextui-org/select";
-import { IconPlus } from "@tabler/icons-react";
+import { Chip } from "@nextui-org/chip";
 import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-} from "@nextui-org/modal";
+  IconPlus,
+  IconChevronUp,
+  IconChevronDown,
+  IconSearch,
+  IconX,
+} from "@tabler/icons-react";
 import { toast } from "sonner";
 import AddContactModal from "./AddContactModal";
 
@@ -204,14 +203,129 @@ export default function ContactsPage() {
     }
   };
 
+  const getTypeOptions = () => [
+    { key: "supplier", label: "Supplier" },
+    { key: "contractor", label: "Contractor" },
+    { key: "team_member", label: "Team Member" },
+    { key: "client", label: "Client" },
+    { key: "other", label: "Other" },
+  ];
+
   const SortIcon = ({ column }: { column: string }) => {
-    if (sortColumn !== column) return <span className="text-zinc-500">⇅</span>;
-    return sortDirection === "asc" ? (
-      <span className="text-blue-400">↑</span>
-    ) : (
-      <span className="text-blue-400">↓</span>
+    if (sortColumn !== column) return null;
+    return sortDirection === "asc" ? 
+      <IconChevronUp size={14} className="inline ml-1" /> : 
+      <IconChevronDown size={14} className="inline ml-1" />;
+  };
+
+  const FilterSection = ({
+    title,
+    options,
+    selectedKey,
+    onSelectionChange,
+    color,
+  }: {
+    title: string;
+    options: Array<{ key: string; label: string }>;
+    selectedKey: string;
+    onSelectionChange: (key: string) => void;
+    color: string;
+  }) => {
+    const [isOpen, setIsOpen] = useState(true);
+
+    const counts = getFilterCounts();
+    const countMap = {
+      Type: counts.types,
+      Company: counts.companies,
+      City: counts.cities,
+      Country: counts.countries,
+      "Created By": counts.creators,
+    };
+
+    return (
+      <div className="mb-6 border-b border-zinc-700 pb-6">
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="flex items-center justify-between w-full mb-3"
+        >
+          <h4 className={`font-semibold text-sm uppercase tracking-wide ${
+            color === "purple" ? "text-purple-300" :
+            color === "blue" ? "text-blue-300" :
+            color === "green" ? "text-green-300" :
+            color === "orange" ? "text-orange-300" :
+            "text-cyan-300"
+          }`}>
+            {title}
+          </h4>
+          {isOpen ? (
+            <IconChevronUp size={16} className="text-zinc-400" />
+          ) : (
+            <IconChevronDown size={16} className="text-zinc-400" />
+          )}
+        </button>
+
+        {isOpen && (
+          <div className="space-y-2">
+            {options.map((option) => (
+              <button
+                key={option.key}
+                onClick={() => onSelectionChange(selectedKey === option.key ? "" : option.key)}
+                className={`w-full text-left px-3 py-2 rounded transition-colors text-sm ${
+                  selectedKey === option.key
+                    ? `bg-${color}-900/40 text-${color}-300 border border-${color}-700/50`
+                    : "bg-zinc-800/50 text-zinc-300 hover:bg-zinc-800"
+                }`}
+              >
+                <div className="flex justify-between items-center">
+                  <span>{option.label}</span>
+                  {countMap[title as keyof typeof countMap]?.[option.key] && (
+                    <span className={`text-xs font-bold ${
+                      color === "purple" ? "text-purple-300" :
+                      color === "blue" ? "text-blue-300" :
+                      color === "green" ? "text-green-300" :
+                      color === "orange" ? "text-orange-300" :
+                      "text-cyan-300"
+                    }`}>
+                      {countMap[title as keyof typeof countMap][option.key]}
+                    </span>
+                  )}
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
     );
   };
+
+  const getFilterCounts = () => {
+    return {
+      types: contacts.reduce((acc: any, c) => ({
+        ...acc,
+        [c.contact_type]: (acc[c.contact_type] || 0) + 1,
+      }), {}),
+      companies: contacts.reduce((acc: any, c) => ({
+        ...acc,
+        [c.company || "unspecified"]: (acc[c.company || "unspecified"] || 0) + 1,
+      }), {}),
+      cities: contacts.reduce((acc: any, c) => ({
+        ...acc,
+        [c.city || "unspecified"]: (acc[c.city || "unspecified"] || 0) + 1,
+      }), {}),
+      countries: contacts.reduce((acc: any, c) => ({
+        ...acc,
+        [c.country || "unspecified"]: (acc[c.country || "unspecified"] || 0) + 1,
+      }), {}),
+      creators: contacts.reduce((acc: any, c) => ({
+        ...acc,
+        [c.created_by || "unspecified"]: (acc[c.created_by || "unspecified"] || 0) + 1,
+      }), {}),
+    };
+  };
+
+  const IconChevronUp = require("@tabler/icons-react").IconChevronUp;
+  const IconChevronDown = require("@tabler/icons-react").IconChevronDown;
+  const IconSearch = require("@tabler/icons-react").IconSearch;
 
   const filteredContacts = getFilteredAndSortedContacts();
 
@@ -239,250 +353,252 @@ export default function ContactsPage() {
         </Button>
       </div>
 
-      {/* Filters */}
-      <div className="bg-zinc-900 p-6 rounded-lg mb-6 border border-zinc-700">
-        <h3 className="text-lg font-semibold mb-4 text-white">Filters</h3>
+      <div className="flex gap-8">
+        {/* Sidebar */}
+        <div className="w-80 flex-shrink-0">
+          <div className="bg-zinc-900 rounded-lg border border-zinc-700 p-6 sticky top-8">
+            {/* Search */}
+            <div className="mb-6">
+              <Input
+                placeholder="Search contacts..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                startContent={<IconSearch size={18} className="text-zinc-400" />}
+                classNames={{
+                  input: "text-white bg-zinc-800 placeholder-zinc-500",
+                  inputWrapper: "bg-zinc-800 border-zinc-700",
+                }}
+              />
+            </div>
 
-        {/* Search */}
-        <div className="mb-4">
-          <Input
-            placeholder="Search by name, email, or phone..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            classNames={{
-              input: "text-white bg-zinc-800 placeholder-zinc-500",
-              inputWrapper: "bg-zinc-800 border-zinc-700",
-            }}
-          />
-        </div>
-
-        {/* Filter Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-4">
-          <Select
-            label="Type"
-            selectedKeys={filterType ? [filterType] : []}
-            onSelectionChange={(keys) =>
-              setFilterType(Array.from(keys)[0] as string)
-            }
-            labelPlacement="outside"
-            classNames={{
-              label: "text-white",
-              trigger: "bg-zinc-800 text-white border-zinc-700",
-              value: "text-white",
-              popoverContent: "bg-zinc-800 text-white",
-            }}
-          >
-            <SelectItem key="supplier">Supplier</SelectItem>
-            <SelectItem key="contractor">Contractor</SelectItem>
-            <SelectItem key="team_member">Team Member</SelectItem>
-            <SelectItem key="client">Client</SelectItem>
-            <SelectItem key="other">Other</SelectItem>
-          </Select>
-
-          <Select
-            label="Company"
-            selectedKeys={filterCompany ? [filterCompany] : []}
-            onSelectionChange={(keys) =>
-              setFilterCompany(Array.from(keys)[0] as string)
-            }
-            labelPlacement="outside"
-            classNames={{
-              label: "text-white",
-              trigger: "bg-zinc-800 text-white border-zinc-700",
-              value: "text-white",
-              popoverContent: "bg-zinc-800 text-white",
-            }}
-          >
-            {allCompanies.map((company) => (
-              <SelectItem key={company}>{company}</SelectItem>
-            ))}
-          </Select>
-
-          <Select
-            label="City"
-            selectedKeys={filterCity ? [filterCity] : []}
-            onSelectionChange={(keys) =>
-              setFilterCity(Array.from(keys)[0] as string)
-            }
-            labelPlacement="outside"
-            classNames={{
-              label: "text-white",
-              trigger: "bg-zinc-800 text-white border-zinc-700",
-              value: "text-white",
-              popoverContent: "bg-zinc-800 text-white",
-            }}
-          >
-            {allCities.map((city) => (
-              <SelectItem key={city}>{city}</SelectItem>
-            ))}
-          </Select>
-
-          <Select
-            label="Country"
-            selectedKeys={filterCountry ? [filterCountry] : []}
-            onSelectionChange={(keys) =>
-              setFilterCountry(Array.from(keys)[0] as string)
-            }
-            labelPlacement="outside"
-            classNames={{
-              label: "text-white",
-              trigger: "bg-zinc-800 text-white border-zinc-700",
-              value: "text-white",
-              popoverContent: "bg-zinc-800 text-white",
-            }}
-          >
-            {allCountries.map((country) => (
-              <SelectItem key={country}>{country}</SelectItem>
-            ))}
-          </Select>
-
-          <Select
-            label="Created By"
-            selectedKeys={filterCreatedBy ? [filterCreatedBy] : []}
-            onSelectionChange={(keys) =>
-              setFilterCreatedBy(Array.from(keys)[0] as string)
-            }
-            labelPlacement="outside"
-            classNames={{
-              label: "text-white",
-              trigger: "bg-zinc-800 text-white border-zinc-700",
-              value: "text-white",
-              popoverContent: "bg-zinc-800 text-white",
-            }}
-          >
-            {allUsers.map((user) => (
-              <SelectItem key={user.id}>{user.name}</SelectItem>
-            ))}
-          </Select>
-
-          <Button
-            variant="flat"
-            onClick={clearFilters}
-            className="bg-zinc-700 text-white hover:bg-zinc-600 mt-6"
-          >
-            Clear Filters
-          </Button>
-        </div>
-      </div>
-
-      {/* Results */}
-      <div className="text-sm text-zinc-300 mb-4 font-medium">
-        Showing <span className="text-cyan-400 font-bold">{filteredContacts.length}</span> of <span className="text-cyan-400 font-bold">{contacts.length}</span> contacts
-      </div>
-
-      {/* Table */}
-      <div className="bg-zinc-900 rounded-lg border border-zinc-700 overflow-hidden">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-zinc-700 bg-zinc-800">
-              <th
-                className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700 text-white font-semibold"
-                onClick={() => handleSort("name")}
-              >
-                Name <SortIcon column="name" />
-              </th>
-              <th
-                className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700 text-white font-semibold"
-                onClick={() => handleSort("email")}
-              >
-                Email <SortIcon column="email" />
-              </th>
-              <th
-                className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700 text-white font-semibold"
-                onClick={() => handleSort("phone")}
-              >
-                Phone <SortIcon column="phone" />
-              </th>
-              <th
-                className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700 text-white font-semibold"
-                onClick={() => handleSort("company")}
-              >
-                Company <SortIcon column="company" />
-              </th>
-              <th
-                className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700 text-white font-semibold"
-                onClick={() => handleSort("contact_type")}
-              >
-                Type <SortIcon column="contact_type" />
-              </th>
-              <th
-                className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700 text-white font-semibold"
-                onClick={() => handleSort("city")}
-              >
-                City <SortIcon column="city" />
-              </th>
-              <th
-                className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700 text-white font-semibold"
-                onClick={() => handleSort("country")}
-              >
-                Country <SortIcon column="country" />
-              </th>
-              <th className="px-4 py-3 text-left text-white font-semibold">Created By</th>
-              <th className="px-4 py-3 text-right text-white font-semibold">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredContacts.length === 0 ? (
-              <tr>
-                <td colSpan={9} className="px-4 py-8 text-center text-zinc-400">
-                  No contacts found
-                </td>
-              </tr>
-            ) : (
-              filteredContacts.map((contact) => (
-                <tr key={contact.id} className="border-t border-zinc-700 hover:bg-zinc-800/80 transition-colors">
-                  <td className="px-4 py-3 text-white font-medium">{contact.name}</td>
-                  <td className="px-4 py-3 text-sm text-cyan-300">
-                    {contact.email || "-"}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-cyan-300">
-                    {contact.phone || "-"}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-white">{contact.company || "-"}</td>
-                  <td className="px-4 py-3">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                      contact.contact_type === 'supplier' ? 'bg-purple-900/40 text-purple-300' :
-                      contact.contact_type === 'contractor' ? 'bg-orange-900/40 text-orange-300' :
-                      contact.contact_type === 'team_member' ? 'bg-green-900/40 text-green-300' :
-                      contact.contact_type === 'client' ? 'bg-blue-900/40 text-blue-300' :
-                      'bg-zinc-700 text-zinc-300'
-                    }`}>
-                      {contact.contact_type}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-sm text-white">{contact.city || "-"}</td>
-                  <td className="px-4 py-3 text-sm text-white">{contact.country || "-"}</td>
-                  <td className="px-4 py-3 text-sm text-zinc-300">
-                    {contact.user?.name || contact.created_by || "-"}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="flex gap-2 justify-end">
-                      <Button
-                        variant="flat"
-                        size="sm"
-                        className="bg-cyan-900/40 text-cyan-300 hover:bg-cyan-900/60"
-                        onClick={() => {
-                          setEditingContact(contact);
-                          setIsModalOpen(true);
-                        }}
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        variant="flat"
-                        size="sm"
-                        className="bg-red-900/40 text-red-300 hover:bg-red-900/60"
-                        onClick={() => handleDelete(contact.id)}
-                      >
-                        Delete
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              ))
+            {/* Active Filters */}
+            {(filterType || filterCompany || filterCity || filterCountry || filterCreatedBy) && (
+              <div className="mb-6">
+                <p className="text-xs font-semibold text-zinc-400 uppercase mb-3">Active Filters</p>
+                <div className="flex flex-wrap gap-2">
+                  {filterType && (
+                    <Chip
+                      onClose={() => setFilterType("")}
+                      variant="flat"
+                      className="bg-purple-900/40 text-purple-300"
+                    >
+                      {filterType}
+                    </Chip>
+                  )}
+                  {filterCompany && (
+                    <Chip
+                      onClose={() => setFilterCompany("")}
+                      variant="flat"
+                      className="bg-blue-900/40 text-blue-300"
+                    >
+                      {filterCompany}
+                    </Chip>
+                  )}
+                  {filterCity && (
+                    <Chip
+                      onClose={() => setFilterCity("")}
+                      variant="flat"
+                      className="bg-green-900/40 text-green-300"
+                    >
+                      {filterCity}
+                    </Chip>
+                  )}
+                  {filterCountry && (
+                    <Chip
+                      onClose={() => setFilterCountry("")}
+                      variant="flat"
+                      className="bg-orange-900/40 text-orange-300"
+                    >
+                      {filterCountry}
+                    </Chip>
+                  )}
+                  {filterCreatedBy && (
+                    <Chip
+                      onClose={() => setFilterCreatedBy("")}
+                      variant="flat"
+                      className="bg-cyan-900/40 text-cyan-300"
+                    >
+                      {allUsers.find((u) => u.id === filterCreatedBy)?.name || filterCreatedBy}
+                    </Chip>
+                  )}
+                </div>
+                <Button
+                  variant="light"
+                  size="sm"
+                  className="mt-3 text-red-400 hover:text-red-300"
+                  onClick={clearFilters}
+                >
+                  Clear All
+                </Button>
+              </div>
             )}
-          </tbody>
-        </table>
+
+            {/* Filter Sections */}
+            <FilterSection
+              title="Type"
+              options={getTypeOptions()}
+              selectedKey={filterType}
+              onSelectionChange={setFilterType}
+              color="purple"
+            />
+
+            <FilterSection
+              title="Company"
+              options={allCompanies.map((c) => ({ key: c, label: c }))}
+              selectedKey={filterCompany}
+              onSelectionChange={setFilterCompany}
+              color="blue"
+            />
+
+            <FilterSection
+              title="City"
+              options={allCities.map((c) => ({ key: c, label: c }))}
+              selectedKey={filterCity}
+              onSelectionChange={setFilterCity}
+              color="green"
+            />
+
+            <FilterSection
+              title="Country"
+              options={allCountries.map((c) => ({ key: c, label: c }))}
+              selectedKey={filterCountry}
+              onSelectionChange={setFilterCountry}
+              color="orange"
+            />
+
+            <FilterSection
+              title="Created By"
+              options={allUsers.map((u) => ({ key: u.id, label: u.name }))}
+              selectedKey={filterCreatedBy}
+              onSelectionChange={setFilterCreatedBy}
+              color="cyan"
+            />
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="flex-1">
+          {/* Results Counter */}
+          <div className="text-sm text-zinc-300 mb-4 font-medium">
+            Showing <span className="text-cyan-400 font-bold">{filteredContacts.length}</span> of{" "}
+            <span className="text-cyan-400 font-bold">{contacts.length}</span> contacts
+          </div>
+
+          {/* Table */}
+          <div className="bg-zinc-900 rounded-lg border border-zinc-700 overflow-hidden">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-zinc-700 bg-zinc-800">
+                  <th
+                    className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700 text-white font-semibold"
+                    onClick={() => handleSort("name")}
+                  >
+                    Name <SortIcon column="name" />
+                  </th>
+                  <th
+                    className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700 text-white font-semibold"
+                    onClick={() => handleSort("email")}
+                  >
+                    Email <SortIcon column="email" />
+                  </th>
+                  <th
+                    className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700 text-white font-semibold"
+                    onClick={() => handleSort("phone")}
+                  >
+                    Phone <SortIcon column="phone" />
+                  </th>
+                  <th
+                    className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700 text-white font-semibold"
+                    onClick={() => handleSort("company")}
+                  >
+                    Company <SortIcon column="company" />
+                  </th>
+                  <th
+                    className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700 text-white font-semibold"
+                    onClick={() => handleSort("contact_type")}
+                  >
+                    Type <SortIcon column="contact_type" />
+                  </th>
+                  <th
+                    className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700 text-white font-semibold"
+                    onClick={() => handleSort("city")}
+                  >
+                    City <SortIcon column="city" />
+                  </th>
+                  <th
+                    className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700 text-white font-semibold"
+                    onClick={() => handleSort("country")}
+                  >
+                    Country <SortIcon column="country" />
+                  </th>
+                  <th className="px-4 py-3 text-left text-white font-semibold">Created By</th>
+                  <th className="px-4 py-3 text-right text-white font-semibold">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredContacts.length === 0 ? (
+                  <tr>
+                    <td colSpan={9} className="px-4 py-8 text-center text-zinc-400">
+                      No contacts found
+                    </td>
+                  </tr>
+                ) : (
+                  filteredContacts.map((contact) => (
+                    <tr key={contact.id} className="border-t border-zinc-700 hover:bg-zinc-800/80 transition-colors">
+                      <td className="px-4 py-3 text-white font-medium">{contact.name}</td>
+                      <td className="px-4 py-3 text-sm text-cyan-300">
+                        {contact.email || "-"}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-cyan-300">
+                        {contact.phone || "-"}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-white">{contact.company || "-"}</td>
+                      <td className="px-4 py-3">
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                          contact.contact_type === 'supplier' ? 'bg-purple-900/40 text-purple-300' :
+                          contact.contact_type === 'contractor' ? 'bg-orange-900/40 text-orange-300' :
+                          contact.contact_type === 'team_member' ? 'bg-green-900/40 text-green-300' :
+                          contact.contact_type === 'client' ? 'bg-blue-900/40 text-blue-300' :
+                          'bg-zinc-700 text-zinc-300'
+                        }`}>
+                          {contact.contact_type}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-white">{contact.city || "-"}</td>
+                      <td className="px-4 py-3 text-sm text-white">{contact.country || "-"}</td>
+                      <td className="px-4 py-3 text-sm text-zinc-300">
+                        {contact.user?.name || contact.created_by || "-"}
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <div className="flex gap-2 justify-end">
+                          <Button
+                            variant="flat"
+                            size="sm"
+                            className="bg-cyan-900/40 text-cyan-300 hover:bg-cyan-900/60"
+                            onClick={() => {
+                              setEditingContact(contact);
+                              setIsModalOpen(true);
+                            }}
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            variant="flat"
+                            size="sm"
+                            className="bg-red-900/40 text-red-300 hover:bg-red-900/60"
+                            onClick={() => handleDelete(contact.id)}
+                          >
+                            Delete
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       <AddContactModal
