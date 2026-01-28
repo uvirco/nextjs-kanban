@@ -226,7 +226,7 @@ export default function ContactsPage() {
   return (
     <div className="p-8 min-h-screen bg-zinc-950">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Contacts</h1>
+        <h1 className="text-4xl font-bold text-white">Contacts</h1>
         <Button
           color="primary"
           onClick={() => {
@@ -240,8 +240,8 @@ export default function ContactsPage() {
       </div>
 
       {/* Filters */}
-      <div className="bg-zinc-900 p-6 rounded-lg mb-6 border border-zinc-800">
-        <h3 className="text-lg font-semibold mb-4">Filters</h3>
+      <div className="bg-zinc-900 p-6 rounded-lg mb-6 border border-zinc-700">
+        <h3 className="text-lg font-semibold mb-4 text-white">Filters</h3>
 
         {/* Search */}
         <div className="mb-4">
@@ -249,7 +249,10 @@ export default function ContactsPage() {
             placeholder="Search by name, email, or phone..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="bg-zinc-800"
+            classNames={{
+              input: "text-white bg-zinc-800 placeholder-zinc-500",
+              inputWrapper: "bg-zinc-800 border-zinc-700",
+            }}
           />
         </div>
 
@@ -261,7 +264,13 @@ export default function ContactsPage() {
             onSelectionChange={(keys) =>
               setFilterType(Array.from(keys)[0] as string)
             }
-            className="bg-zinc-800"
+            labelPlacement="outside"
+            classNames={{
+              label: "text-white",
+              trigger: "bg-zinc-800 text-white border-zinc-700",
+              value: "text-white",
+              popoverContent: "bg-zinc-800 text-white",
+            }}
           >
             <SelectItem key="supplier">Supplier</SelectItem>
             <SelectItem key="contractor">Contractor</SelectItem>
@@ -276,7 +285,13 @@ export default function ContactsPage() {
             onSelectionChange={(keys) =>
               setFilterCompany(Array.from(keys)[0] as string)
             }
-            className="bg-zinc-800"
+            labelPlacement="outside"
+            classNames={{
+              label: "text-white",
+              trigger: "bg-zinc-800 text-white border-zinc-700",
+              value: "text-white",
+              popoverContent: "bg-zinc-800 text-white",
+            }}
           >
             {allCompanies.map((company) => (
               <SelectItem key={company}>{company}</SelectItem>
@@ -289,7 +304,13 @@ export default function ContactsPage() {
             onSelectionChange={(keys) =>
               setFilterCity(Array.from(keys)[0] as string)
             }
-            className="bg-zinc-800"
+            labelPlacement="outside"
+            classNames={{
+              label: "text-white",
+              trigger: "bg-zinc-800 text-white border-zinc-700",
+              value: "text-white",
+              popoverContent: "bg-zinc-800 text-white",
+            }}
           >
             {allCities.map((city) => (
               <SelectItem key={city}>{city}</SelectItem>
@@ -302,7 +323,13 @@ export default function ContactsPage() {
             onSelectionChange={(keys) =>
               setFilterCountry(Array.from(keys)[0] as string)
             }
-            className="bg-zinc-800"
+            labelPlacement="outside"
+            classNames={{
+              label: "text-white",
+              trigger: "bg-zinc-800 text-white border-zinc-700",
+              value: "text-white",
+              popoverContent: "bg-zinc-800 text-white",
+            }}
           >
             {allCountries.map((country) => (
               <SelectItem key={country}>{country}</SelectItem>
@@ -315,7 +342,13 @@ export default function ContactsPage() {
             onSelectionChange={(keys) =>
               setFilterCreatedBy(Array.from(keys)[0] as string)
             }
-            className="bg-zinc-800"
+            labelPlacement="outside"
+            classNames={{
+              label: "text-white",
+              trigger: "bg-zinc-800 text-white border-zinc-700",
+              value: "text-white",
+              popoverContent: "bg-zinc-800 text-white",
+            }}
           >
             {allUsers.map((user) => (
               <SelectItem key={user.id}>{user.name}</SelectItem>
@@ -325,7 +358,7 @@ export default function ContactsPage() {
           <Button
             variant="flat"
             onClick={clearFilters}
-            className="bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+            className="bg-zinc-700 text-white hover:bg-zinc-600 mt-6"
           >
             Clear Filters
           </Button>
@@ -333,59 +366,59 @@ export default function ContactsPage() {
       </div>
 
       {/* Results */}
-      <div className="text-sm text-zinc-400 mb-4">
-        Showing {filteredContacts.length} of {contacts.length} contacts
+      <div className="text-sm text-zinc-300 mb-4 font-medium">
+        Showing <span className="text-cyan-400 font-bold">{filteredContacts.length}</span> of <span className="text-cyan-400 font-bold">{contacts.length}</span> contacts
       </div>
 
       {/* Table */}
-      <div className="bg-zinc-900 rounded-lg border border-zinc-800 overflow-hidden">
+      <div className="bg-zinc-900 rounded-lg border border-zinc-700 overflow-hidden">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-zinc-800 bg-zinc-800">
+            <tr className="border-b border-zinc-700 bg-zinc-800">
               <th
-                className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700"
+                className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700 text-white font-semibold"
                 onClick={() => handleSort("name")}
               >
                 Name <SortIcon column="name" />
               </th>
               <th
-                className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700"
+                className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700 text-white font-semibold"
                 onClick={() => handleSort("email")}
               >
                 Email <SortIcon column="email" />
               </th>
               <th
-                className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700"
+                className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700 text-white font-semibold"
                 onClick={() => handleSort("phone")}
               >
                 Phone <SortIcon column="phone" />
               </th>
               <th
-                className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700"
+                className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700 text-white font-semibold"
                 onClick={() => handleSort("company")}
               >
                 Company <SortIcon column="company" />
               </th>
               <th
-                className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700"
+                className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700 text-white font-semibold"
                 onClick={() => handleSort("contact_type")}
               >
                 Type <SortIcon column="contact_type" />
               </th>
               <th
-                className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700"
+                className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700 text-white font-semibold"
                 onClick={() => handleSort("city")}
               >
                 City <SortIcon column="city" />
               </th>
               <th
-                className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700"
+                className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700 text-white font-semibold"
                 onClick={() => handleSort("country")}
               >
                 Country <SortIcon column="country" />
               </th>
-              <th className="px-4 py-3 text-left">Created By</th>
-              <th className="px-4 py-3 text-right">Actions</th>
+              <th className="px-4 py-3 text-left text-white font-semibold">Created By</th>
+              <th className="px-4 py-3 text-right text-white font-semibold">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -397,23 +430,29 @@ export default function ContactsPage() {
               </tr>
             ) : (
               filteredContacts.map((contact) => (
-                <tr key={contact.id} className="border-t border-zinc-800 hover:bg-zinc-800/50">
-                  <td className="px-4 py-3">{contact.name}</td>
-                  <td className="px-4 py-3 text-sm text-zinc-400">
+                <tr key={contact.id} className="border-t border-zinc-700 hover:bg-zinc-800/80 transition-colors">
+                  <td className="px-4 py-3 text-white font-medium">{contact.name}</td>
+                  <td className="px-4 py-3 text-sm text-cyan-300">
                     {contact.email || "-"}
                   </td>
-                  <td className="px-4 py-3 text-sm text-zinc-400">
+                  <td className="px-4 py-3 text-sm text-cyan-300">
                     {contact.phone || "-"}
                   </td>
-                  <td className="px-4 py-3 text-sm">{contact.company || "-"}</td>
+                  <td className="px-4 py-3 text-sm text-white">{contact.company || "-"}</td>
                   <td className="px-4 py-3">
-                    <span className="px-2 py-1 bg-zinc-800 text-zinc-300 rounded text-xs">
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                      contact.contact_type === 'supplier' ? 'bg-purple-900/40 text-purple-300' :
+                      contact.contact_type === 'contractor' ? 'bg-orange-900/40 text-orange-300' :
+                      contact.contact_type === 'team_member' ? 'bg-green-900/40 text-green-300' :
+                      contact.contact_type === 'client' ? 'bg-blue-900/40 text-blue-300' :
+                      'bg-zinc-700 text-zinc-300'
+                    }`}>
                       {contact.contact_type}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-sm">{contact.city || "-"}</td>
-                  <td className="px-4 py-3 text-sm">{contact.country || "-"}</td>
-                  <td className="px-4 py-3 text-sm text-zinc-400">
+                  <td className="px-4 py-3 text-sm text-white">{contact.city || "-"}</td>
+                  <td className="px-4 py-3 text-sm text-white">{contact.country || "-"}</td>
+                  <td className="px-4 py-3 text-sm text-zinc-300">
                     {contact.user?.name || contact.created_by || "-"}
                   </td>
                   <td className="px-4 py-3 text-right">
@@ -421,6 +460,7 @@ export default function ContactsPage() {
                       <Button
                         variant="flat"
                         size="sm"
+                        className="bg-cyan-900/40 text-cyan-300 hover:bg-cyan-900/60"
                         onClick={() => {
                           setEditingContact(contact);
                           setIsModalOpen(true);
@@ -431,7 +471,7 @@ export default function ContactsPage() {
                       <Button
                         variant="flat"
                         size="sm"
-                        color="danger"
+                        className="bg-red-900/40 text-red-300 hover:bg-red-900/60"
                         onClick={() => handleDelete(contact.id)}
                       >
                         Delete

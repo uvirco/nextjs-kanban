@@ -177,15 +177,15 @@ export default function AddContactModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="lg" scrollBehavior="inside">
-      <ModalContent>
-        <ModalHeader>
+      <ModalContent className="bg-zinc-900">
+        <ModalHeader className="text-white text-xl font-bold">
           {editingContact ? "Edit Contact" : "Add New Contact"}
         </ModalHeader>
         <form onSubmit={handleSubmit}>
-          <ModalBody className="space-y-4">
+          <ModalBody className="space-y-4 text-white">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-2">
+                <label className="block text-sm font-medium mb-2 text-white">
                   Name *
                 </label>
                 <Input
@@ -199,7 +199,7 @@ export default function AddContactModal({
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Type *</label>
+                <label className="block text-sm font-medium mb-2 text-white">Type *</label>
                 <div onClick={(e) => e.stopPropagation()}>
                   <Select
                     selectedKeys={[formData.contact_type]}
@@ -209,7 +209,11 @@ export default function AddContactModal({
                     aria-label="Contact Type"
                     isInvalid={!!errors.contact_type}
                     errorMessage={errors.contact_type}
-                    className="bg-zinc-800"
+                    classNames={{
+                      trigger: "bg-zinc-800 text-white border-zinc-700",
+                      value: "text-white",
+                      popoverContent: "bg-zinc-800 text-white",
+                    }}
                   >
                     <SelectItem key="supplier">Supplier</SelectItem>
                     <SelectItem key="contractor">Contractor</SelectItem>
@@ -223,7 +227,7 @@ export default function AddContactModal({
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Email</label>
+                <label className="block text-sm font-medium mb-2 text-white">Email</label>
                 <Input
                   type="email"
                   placeholder="contact@example.com"
@@ -234,7 +238,7 @@ export default function AddContactModal({
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Phone</label>
+                <label className="block text-sm font-medium mb-2 text-white">Phone</label>
                 <Input
                   placeholder="+1 (555) 000-0000"
                   value={formData.phone}
@@ -246,7 +250,7 @@ export default function AddContactModal({
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Company</label>
+                <label className="block text-sm font-medium mb-2 text-white">Company</label>
                 <Input
                   placeholder="Company name"
                   value={formData.company}
@@ -256,7 +260,7 @@ export default function AddContactModal({
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Address</label>
+                <label className="block text-sm font-medium mb-2 text-white">Address</label>
                 <Input
                   placeholder="Street address"
                   value={formData.address}
@@ -268,7 +272,7 @@ export default function AddContactModal({
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-2">City</label>
+                <label className="block text-sm font-medium mb-2 text-white">City</label>
                 <Input
                   placeholder="City"
                   value={formData.city}
@@ -278,7 +282,7 @@ export default function AddContactModal({
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Country</label>
+                <label className="block text-sm font-medium mb-2 text-white">Country</label>
                 <Input
                   placeholder="Country"
                   value={formData.country}
@@ -289,7 +293,7 @@ export default function AddContactModal({
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Notes</label>
+              <label className="block text-sm font-medium mb-2 text-white">Notes</label>
               <Textarea
                 placeholder="Additional notes about this contact..."
                 value={formData.notes}
@@ -301,7 +305,7 @@ export default function AddContactModal({
           </ModalBody>
 
           <ModalFooter>
-            <Button variant="light" onClick={onClose}>
+            <Button variant="light" onClick={onClose} className="text-zinc-300">
               Cancel
             </Button>
             <Button
