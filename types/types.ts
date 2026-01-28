@@ -465,14 +465,50 @@ export interface BudgetEntry {
   entry_type: "Expense" | "Budget";
   frequency: "One-time" | "Weekly" | "Monthly" | "Quarterly" | "Yearly";
   fiscal_year: string;
-  purchase_date?: string | null; // Format: YYYY-MM-DD (date type)
+  purchase_date?: string | null;
   date: string | Date;
   created_at?: string | Date;
   updated_at?: string | Date;
+  created_by?: string;
+  status?: "PLANNED" | "ORDERED" | "RECEIVED" | "PAID";
+  parent_budget_id?: string | null;
   epic?: {
+    id: string;
     title: string;
   };
   department?: {
+    id: string;
     name: string;
   };
+  user?: {
+    id: string;
+    email: string;
+    name: string;
+  };
+  children?: BudgetEntry[];
+}
+
+export interface Comment {
+  id: string;
+  parent_type: "task" | "epic" | "budget_entry" | "project" | "chat" | "conversation";
+  parent_id: string;
+  user_id: string;
+  content: string;
+  is_edited: boolean;
+  created_at: string | Date;
+  updated_at: string | Date;
+  user?: {
+    id: string;
+    email: string;
+    name: string;
+  };
+}
+
+export interface Conversation {
+  id: string;
+  name?: string;
+  type: "direct" | "group" | "channel";
+  created_by: string;
+  created_at: string | Date;
+  updated_at: string | Date;
 }

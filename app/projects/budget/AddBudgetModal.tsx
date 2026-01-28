@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@nextui-org/button";
 import { Input } from "@nextui-org/input";
@@ -74,8 +75,10 @@ export default function AddBudgetModal({
   onSuccess,
   editingEntry,
 }: AddBudgetModalProps) {
+  const { data: session, status } = useSession();
   const [epics, setEpics] = useState<Epic[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
+  const [parentBudgets, setParentBudgets] = useState<any[]>([]);
   const [customCategory, setCustomCategory] = useState("");
   const [allCategories, setAllCategories] = useState<string[]>([
     "Computers",
@@ -91,6 +94,7 @@ export default function AddBudgetModal({
     linkType: "epic",
     epicId: "",
     departmentId: "",
+    parentBudgetId: "",
     category: "",
     description: "",
     amount: "",
@@ -98,6 +102,7 @@ export default function AddBudgetModal({
     entryType: "Expense",
     frequency: "One-time",
     fiscalYear: getCurrentFiscalYear(),
+    status: "PLANNED",
     purchaseDate: "",
     date: (() => {
       const today = new Date();
@@ -111,6 +116,7 @@ export default function AddBudgetModal({
     if (isOpen) {
       fetchEpics();
       fetchDepartments();
+      fetchParentBudgets();
       fetchExistingCategories();
       
       // Populate form if editing an entry
@@ -119,6 +125,7 @@ export default function AddBudgetModal({
           linkType: editingEntry.epic_id ? "epic" : "department",
           epicId: editingEntry.epic_id || "",
           departmentId: editingEntry.department_id || "",
+          parentBudgetId: editingEntry.parent_budget_id || "",
           category: editingEntry.category,
           description: editingEntry.description || "",
           amount: editingEntry.amount.toString(),
@@ -126,6 +133,7 @@ export default function AddBudgetModal({
           entryType: editingEntry.entry_type,
           frequency: editingEntry.frequency,
           fiscalYear: editingEntry.fiscal_year,
+          status: editingEntry.status || "PLANNED",
           purchaseDate: editingEntry.purchase_date || "",
           date: editingEntry.date,
         });
@@ -135,6 +143,7 @@ export default function AddBudgetModal({
           linkType: "epic",
           epicId: "",
           departmentId: "",
+          parentBudgetId: "",
           category: "",
           description: "",
           amount: "",
@@ -142,6 +151,7 @@ export default function AddBudgetModal({
           entryType: "Expense",
           frequency: "One-time",
           fiscalYear: getCurrentFiscalYear(),
+          status: "PLANNED",
           purchaseDate: "",
           date: (() => {
             const today = new Date();
@@ -178,6 +188,20 @@ export default function AddBudgetModal({
     }
   };
 
+  const fetchParentBudgets = async () => {
+    const { data, error } = await supabase
+      .from("budget_entries")
+      .select("id, description, amount, parent_budget_id")
+      .is("parent_budget_id", null)
+      .order("description", { ascending: true });
+
+    if (error) {
+      console.error("Error fetching parent budgets:", error);
+    } else {
+      setParentBudgets(data || []);
+    }
+  };
+
   const fetchExistingCategories = async () => {
     const { data, error } = await supabase
       .from("budget_entries")
@@ -210,6 +234,27 @@ export default function AddBudgetModal({
       ...new Set([...defaultCategories, ...existingCategories]),
     ] as string[];
     setAllCategories(combined.sort());
+  };
+
+  // Helper function to get user ID by email from custom User table
+  const getUserIdByEmail = async (email: string): Promise<string | null> => {
+    try {
+      const { data, error } = await supabase
+        .from("User")
+        .select("id")
+        .eq("email", email)
+        .single();
+
+      if (error) {
+        console.warn(`Could not find user with email ${email}:`, error);
+        return null;
+      }
+
+      return data?.id || null;
+    } catch (err) {
+      console.warn("Error fetching user by email:", err);
+      return null;
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -266,7 +311,7 @@ export default function AddBudgetModal({
       purchaseDateValue = `${formData.purchaseDate}-01`;
     }
 
-    const entryData = {
+    const entryData: any = {
       epic_id: formData.linkType === "epic" ? formData.epicId : null,
       department_id:
         formData.linkType === "department" ? formData.departmentId : null,
@@ -280,15 +325,57 @@ export default function AddBudgetModal({
       fiscal_year: formData.fiscalYear,
       purchase_date: purchaseDateValue,
       date: dateValue,
+      parent_budget_id: formData.parentBudgetId || null,
+      status: formData.status,
     };
+
+    // Get current user for created_by on new entries
+    if (!editingEntry) {
+      let userId: string | null = null;
+
+      // Wait for session to load (don't try if still loading)
+      if (status === "authenticated" && session?.user?.id) {
+        userId = session.user.id;
+        console.log("Using NextAuth session user ID:", userId);
+      } else if (status === "authenticated" && session?.user?.email) {
+        // Fallback: look up user by email in custom User table
+        console.log("Session loaded but no user.id, looking up by email:", session.user.email);
+        userId = await getUserIdByEmail(session.user.email);
+        if (userId) {
+          console.log("Found user ID by email:", userId);
+        } else {
+          console.warn("Could not find user by email");
+        }
+      } else if (status === "loading") {
+        console.warn("Session still loading, cannot determine user ID");
+        toast.error("Session is still loading. Please try again.");
+        setIsSubmitting(false);
+        return;
+      } else {
+        console.warn("User not authenticated");
+        toast.error("You must be logged in to create a budget entry");
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (userId) {
+        entryData.created_by = userId;
+      } else {
+        console.warn("Could not determine user ID, created_by will be null");
+        entryData.created_by = null;
+      }
+    }
 
     try {
       let result;
+      console.log("Saving budget entry:", entryData);
+      
       if (editingEntry) {
-        // Update existing entry
+        // Update existing entry (don't change created_by or parent_budget_id on update)
+        const { parent_budget_id, created_by, ...updateData } = entryData;
         result = await supabase
           .from("budget_entries")
-          .update(entryData)
+          .update(updateData)
           .eq("id", editingEntry.id);
       } else {
         // Create new entry
@@ -299,6 +386,7 @@ export default function AddBudgetModal({
 
       if (error) {
         console.error("Error saving budget entry:", error);
+        console.error("Full error details:", JSON.stringify(error, null, 2));
         toast.error(
           editingEntry
             ? "Failed to update budget entry"
@@ -316,6 +404,7 @@ export default function AddBudgetModal({
           linkType: "epic",
           epicId: "",
           departmentId: "",
+          parentBudgetId: "",
           category: "",
           description: "",
           amount: "",
@@ -323,6 +412,7 @@ export default function AddBudgetModal({
           entryType: "Expense",
           frequency: "One-time",
           fiscalYear: getCurrentFiscalYear(),
+          status: "PLANNED",
           purchaseDate: "",
           date: new Date().toISOString().split("T")[0],
         });
@@ -436,6 +526,31 @@ export default function AddBudgetModal({
               </div>
             )}
 
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Parent Budget (Optional)
+              </label>
+              <div onClick={(e) => e.stopPropagation()}>
+                <Select
+                  selectedKeys={formData.parentBudgetId ? [formData.parentBudgetId] : []}
+                  onSelectionChange={(keys) =>
+                    handleChange("parentBudgetId", Array.from(keys)[0] as string)
+                  }
+                  placeholder="Select parent budget (for sub-items)"
+                  aria-label="Parent Budget"
+                >
+                  {parentBudgets.map((budget) => (
+                    <SelectItem key={budget.id} value={budget.id}>
+                      {budget.description} (${budget.amount.toFixed(2)})
+                    </SelectItem>
+                  ))}
+                </Select>
+              </div>
+              <p className="text-xs text-zinc-500 mt-1">
+                Use this to create sub-items under a parent budget entry
+              </p>
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium mb-2">Type *</label>
@@ -454,6 +569,29 @@ export default function AddBudgetModal({
                 </div>
               </div>
 
+              <div>
+                <label className="block text-sm font-medium mb-2">Status</label>
+                <div onClick={(e) => e.stopPropagation()}>
+                  <Select
+                    defaultSelectedKeys={["PLANNED"]}
+                    selectedKeys={[formData.status]}
+                    onSelectionChange={(keys) =>
+                      handleChange("status", Array.from(keys)[0] as string)
+                    }
+                    aria-label="Status"
+                    className="bg-zinc-900 text-white"
+                  >
+                    <SelectItem key="PLANNED">Planned</SelectItem>
+                    <SelectItem key="ORDERED">Ordered</SelectItem>
+                    <SelectItem key="RECEIVED">Received</SelectItem>
+                    <SelectItem key="PAID">Paid</SelectItem>
+                    <SelectItem key="APPROVED">Approved</SelectItem>
+                  </Select>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium mb-2">
                   Frequency *
@@ -475,9 +613,7 @@ export default function AddBudgetModal({
                   </Select>
                 </div>
               </div>
-            </div>
 
-            <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium mb-2">
                   Fiscal Year *
@@ -501,33 +637,22 @@ export default function AddBudgetModal({
                   Cannot add to past fiscal years after April 1
                 </p>
               </div>
-
-              {formData.entryType === "Expense" && (
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Purchase Month
-                  </label>
-                  <Input
-                    type="month"
-                    value={formData.purchaseDate}
-                    onChange={(e) =>
-                      handleChange("purchaseDate", e.target.value)
-                    }
-                  />
-                </div>
-              )}
             </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-2">Date *</label>
-              <Input
-                type="date"
-                value={formData.date}
-                onChange={(e) => handleChange("date", e.target.value)}
-                isInvalid={!!errors.date}
-                errorMessage={errors.date}
-              />
-            </div>
+            {formData.entryType === "Expense" && (
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Purchase Month *
+                </label>
+                <Input
+                  type="month"
+                  value={formData.purchaseDate}
+                  onChange={(e) =>
+                    handleChange("purchaseDate", e.target.value)
+                  }
+                />
+              </div>
+            )}
 
             <div>
               <label className="block text-sm font-medium mb-2">

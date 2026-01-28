@@ -1,5 +1,7 @@
 "use client";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { BudgetEntry } from "@/types/types";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@nextui-org/button";
@@ -14,11 +16,14 @@ import {
 import AddBudgetModal from "./AddBudgetModal";
 
 export default function BudgetPage() {
+  const router = useRouter();
+  const { data: session } = useSession();
   const [budgetEntries, setBudgetEntries] = useState<BudgetEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<BudgetEntry | null>(null);
+  const [allUsers, setAllUsers] = useState<any[]>([]);
   
   // Sorting state
   const [sortColumn, setSortColumn] = useState<string>("date");
@@ -29,6 +34,17 @@ export default function BudgetPage() {
   const [filterFrequency, setFilterFrequency] = useState<string>("");
   const [filterFiscalYear, setFilterFiscalYear] = useState<string>("");
   const [filterCategory, setFilterCategory] = useState<string>("");
+  const [filterStatus, setFilterStatus] = useState<string>("");
+  const [filterDepartment, setFilterDepartment] = useState<string>("");
+  const [filterProject, setFilterProject] = useState<string>("");
+  const [filterUser, setFilterUser] = useState<string>("");
+  
+  // Expanded rows state
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    console.log("Session:", session?.user);
+  }, [session]);
 
   useEffect(() => {
     fetchBudgetEntries();
@@ -38,15 +54,81 @@ export default function BudgetPage() {
     const { data, error } = await supabase
       .from("budget_entries")
       .select(
-        "*, epic:Task!epic_id(title), department:Department!department_id(name)",
+        "*, epic:Task!epic_id(id, title), department:Department!department_id(id, name)"
       )
       .order("date", { ascending: false });
 
     if (error) {
       console.error("Error fetching budget entries:", error);
-    } else {
-      setBudgetEntries(data || []);
+      setLoading(false);
+      return;
     }
+
+    console.log("Budget entries fetched:", data?.slice(0, 2).map((e: any) => ({ id: e.id, created_by: e.created_by })));
+
+    // Collect unique user IDs and fetch user details
+    const userIds = new Set<string>();
+    (data || []).forEach((entry: any) => {
+      if (entry.created_by) {
+        userIds.add(entry.created_by);
+      }
+    });
+
+    const userMap: Record<string, any> = {};
+    if (userIds.size > 0) {
+      const { data: userData } = await supabase
+        .from("User")
+        .select("id, name, email")
+        .in("id", Array.from(userIds));
+
+      if (userData) {
+        userData.forEach((user: any) => {
+          userMap[user.id] = user;
+        });
+      }
+    }
+
+    // Attach user data and build unique users list
+    const usersSet = new Set<string>();
+    const enrichedData = (data || []).map((entry: any) => {
+      if (entry.created_by) {
+        usersSet.add(entry.created_by);
+      }
+      return {
+        ...entry,
+        user: entry.created_by ? userMap[entry.created_by] : null
+      };
+    });
+
+    const uniqueUsers = Array.from(usersSet).map(id => ({
+      id,
+      name: userMap[id]?.name || id,
+      email: userMap[id]?.email || id
+    }));
+    setAllUsers(uniqueUsers);
+
+    // Build parent-child hierarchy
+    const entriesMap = new Map();
+    const parentEntries: BudgetEntry[] = [];
+
+    // First pass: index all entries
+    enrichedData.forEach((entry: any) => {
+      entriesMap.set(entry.id, { ...entry, children: [] });
+    });
+
+    // Second pass: organize hierarchy
+    enrichedData.forEach((entry: any) => {
+      if (entry.parent_budget_id) {
+        const parent = entriesMap.get(entry.parent_budget_id);
+        if (parent) {
+          parent.children.push(entriesMap.get(entry.id));
+        }
+      } else {
+        parentEntries.push(entriesMap.get(entry.id));
+      }
+    });
+
+    setBudgetEntries(parentEntries);
     setLoading(false);
   };
 
@@ -139,6 +221,18 @@ export default function BudgetPage() {
     if (filterCategory) {
       filtered = filtered.filter((e) => e.category === filterCategory);
     }
+    if (filterStatus) {
+      filtered = filtered.filter((e) => e.status === filterStatus);
+    }
+    if (filterDepartment) {
+      filtered = filtered.filter((e) => e.department_id === filterDepartment);
+    }
+    if (filterProject) {
+      filtered = filtered.filter((e) => e.epic_id === filterProject);
+    }
+    if (filterUser) {
+      filtered = filtered.filter((e) => e.created_by === filterUser);
+    }
 
     // Apply sorting
     filtered.sort((a, b) => {
@@ -179,6 +273,16 @@ export default function BudgetPage() {
     }
   };
 
+  const toggleRowExpanded = (id: string) => {
+    const newExpanded = new Set(expandedRows);
+    if (newExpanded.has(id)) {
+      newExpanded.delete(id);
+    } else {
+      newExpanded.add(id);
+    }
+    setExpandedRows(newExpanded);
+  };
+
   const SortIcon = ({ column }: { column: string }) => {
     if (sortColumn !== column) return <span className="text-xs text-zinc-600">⇅</span>;
     return sortDirection === "asc" ? <span className="text-xs">▲</span> : <span className="text-xs">▼</span>;
@@ -206,7 +310,7 @@ export default function BudgetPage() {
 
       <div className="bg-zinc-900 rounded-lg overflow-hidden mb-4 p-4 border border-zinc-800">
         <h3 className="text-sm font-semibold text-zinc-300 mb-3">Filters</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-7 gap-3">
           <div>
             <label className="text-xs text-zinc-400 block mb-1">Type</label>
             <select
@@ -263,14 +367,93 @@ export default function BudgetPage() {
               ))}
             </select>
           </div>
+          <div>
+            <label className="text-xs text-zinc-400 block mb-1">Status</label>
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="w-full px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-sm text-zinc-300"
+            >
+              <option value="">All Statuses</option>
+              <option value="PLANNED">Planned</option>
+              <option value="ORDERED">Ordered</option>
+              <option value="RECEIVED">Received</option>
+              <option value="PAID">Paid</option>
+            </select>
+          </div>
+          <div>
+            <label className="text-xs text-zinc-400 block mb-1">User</label>
+            <select
+              value={filterUser}
+              onChange={(e) => setFilterUser(e.target.value)}
+              className="w-full px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-sm text-zinc-300"
+            >
+              <option value="">All Users</option>
+              {allUsers.map((user) => (
+                <option key={user.id} value={user.id}>
+                  {user.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="text-xs text-zinc-400 block mb-1">Project</label>
+            <select
+              value={filterProject}
+              onChange={(e) => setFilterProject(e.target.value)}
+              className="w-full px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-sm text-zinc-300"
+            >
+              <option value="">All Projects</option>
+              {budgetEntries
+                .filter((e) => e.epic_id)
+                .map((e) => e.epic)
+                .filter(
+                  (epic, idx, arr) =>
+                    epic && arr.findIndex((ep) => ep?.id === epic.id) === idx
+                )
+                .sort((a, b) => (a?.title || "").localeCompare(b?.title || ""))
+                .map((epic) => (
+                  <option key={epic?.id} value={epic?.id || ""}>
+                    {epic?.title}
+                  </option>
+                ))}
+            </select>
+          </div>
+          <div>
+            <label className="text-xs text-zinc-400 block mb-1">Department</label>
+            <select
+              value={filterDepartment}
+              onChange={(e) => setFilterDepartment(e.target.value)}
+              className="w-full px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-sm text-zinc-300"
+            >
+              <option value="">All Departments</option>
+              {budgetEntries
+                .filter((e) => e.department_id)
+                .map((e) => e.department)
+                .filter(
+                  (dept, idx, arr) =>
+                    dept && arr.findIndex((d) => d?.id === dept.id) === idx
+                )
+                .sort((a, b) => (a?.name || "").localeCompare(b?.name || ""))
+                .map((dept) => (
+                  <option key={dept?.id} value={dept?.id || ""}>
+                    {dept?.name}
+                  </option>
+                ))}
+            </select>
+          </div>
         </div>
-        {(filterType || filterFrequency || filterFiscalYear || filterCategory) && (
+        {(filterType || filterFrequency || filterFiscalYear || filterCategory || filterStatus || filterProject || filterDepartment || filterUser) && (
           <button
             onClick={() => {
               setFilterType("");
               setFilterFrequency("");
               setFilterFiscalYear("");
               setFilterCategory("");
+              setFilterStatus("");
+              setFilterProject("");
+              setFilterDepartment("");
+              setFilterUser("");
             }}
             className="mt-3 text-xs text-blue-400 hover:text-blue-300"
           >
@@ -283,8 +466,12 @@ export default function BudgetPage() {
         <table className="w-full text-sm text-zinc-300">
           <thead className="bg-zinc-800">
             <tr>
+              <th className="px-4 py-3 text-left w-8"></th>
               <th className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700" onClick={() => handleSort("date")}>
                 Date <SortIcon column="date" />
+              </th>
+              <th className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700" onClick={() => handleSort("status")}>
+                Status <SortIcon column="status" />
               </th>
               <th className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700" onClick={() => handleSort("fiscal_year")}>
                 Fiscal Year <SortIcon column="fiscal_year" />
@@ -295,116 +482,151 @@ export default function BudgetPage() {
               <th className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700" onClick={() => handleSort("entry_type")}>
                 Type <SortIcon column="entry_type" />
               </th>
-              <th className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700" onClick={() => handleSort("frequency")}>
-                Frequency <SortIcon column="frequency" />
-              </th>
               <th className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700" onClick={() => handleSort("category")}>
                 Category <SortIcon column="category" />
               </th>
-              <th className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700" onClick={() => handleSort("description")}>
-                Description <SortIcon column="description" />
+              <th className="px-4 py-3 text-left">Description</th>
+              <th className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700" onClick={() => handleSort("created_by")}>
+                Created By <SortIcon column="created_by" />
               </th>
               <th className="px-4 py-3 text-right cursor-pointer hover:bg-zinc-700" onClick={() => handleSort("amount")}>
                 Amount <SortIcon column="amount" />
               </th>
-              <th className="px-4 py-3 text-right">Annual Total</th>
-              <th className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700" onClick={() => handleSort("purchase_date")}>
-                Purchase Month <SortIcon column="purchase_date" />
-              </th>
-              <th className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700" onClick={() => handleSort("created_at")}>
-                Created <SortIcon column="created_at" />
-              </th>
-              <th className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700" onClick={() => handleSort("updated_at")}>
-                Updated <SortIcon column="updated_at" />
-              </th>
-              <th className="px-4 py-3 text-left">Age (days)</th>
               <th className="px-4 py-3 text-left">Actions</th>
             </tr>
           </thead>
           <tbody>
             {getFilteredAndSortedEntries().map((entry) => (
-              <tr key={entry.id} className="border-t border-zinc-800">
-                <td className="px-4 py-3">{formatDate(entry.date)}</td>
-                <td className="px-4 py-3">
-                  <span className="px-2 py-1 bg-indigo-900 text-indigo-200 rounded text-xs">
-                    {entry.fiscal_year}
-                  </span>
-                </td>
-                <td className="px-4 py-3">
-                  {entry.epic ? (
-                    <span className="text-blue-400">
-                      <span className="text-xs text-zinc-500">Project: </span>
-                      {entry.epic.title}
+              <React.Fragment key={entry.id}>
+                <tr className="border-t border-zinc-800">
+                  <td className="px-4 py-3 text-center">
+                    {entry.children && entry.children.length > 0 && (
+                      <button onClick={() => toggleRowExpanded(entry.id)} className="text-blue-400 hover:text-blue-300">
+                        {expandedRows.has(entry.id) ? "▼" : "▶"}
+                      </button>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">{formatDate(entry.date)}</td>
+                  <td className="px-4 py-3">
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${
+                      entry.status === 'PLANNED' ? 'bg-yellow-900 text-yellow-200' :
+                      entry.status === 'ORDERED' ? 'bg-blue-900 text-blue-200' :
+                      entry.status === 'RECEIVED' ? 'bg-green-900 text-green-200' :
+                      'bg-purple-900 text-purple-200'
+                    }`}>
+                      {entry.status || 'PLANNED'}
                     </span>
-                  ) : entry.department ? (
-                    <span className="text-purple-400">
-                      <span className="text-xs text-zinc-500">Dept: </span>
-                      {entry.department.name}
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className="px-2 py-1 bg-indigo-900 text-indigo-200 rounded text-xs">
+                      {entry.fiscal_year}
                     </span>
-                  ) : (
-                    <span className="text-zinc-500">-</span>
-                  )}
-                </td>
-                <td className="px-4 py-3">
-                  <span
-                    className={`px-2 py-1 rounded text-xs ${
+                  </td>
+                  <td className="px-4 py-3">
+                    {entry.epic ? (
+                      <span className="text-blue-400 text-xs">{entry.epic.title}</span>
+                    ) : entry.department ? (
+                      <span className="text-purple-400 text-xs">{entry.department.name}</span>
+                    ) : (
+                      <span className="text-zinc-500 text-xs">-</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className={`px-2 py-1 rounded text-xs ${
                       entry.entry_type === "Budget"
                         ? "bg-blue-900 text-blue-200"
                         : "bg-red-900 text-red-200"
-                    }`}
-                  >
-                    {entry.entry_type}
-                  </span>
-                </td>
-                <td className="px-4 py-3">
-                  <span
-                    className={`px-2 py-1 rounded text-xs ${
-                      entry.frequency === "One-time"
-                        ? "bg-zinc-800 text-zinc-300"
-                        : "bg-purple-900 text-purple-200"
-                    }`}
-                  >
-                    {entry.frequency}
-                  </span>
-                </td>
-                <td className="px-4 py-3">{entry.category}</td>
-                <td className="px-4 py-3">{entry.description || "-"}</td>
-                <td className="px-4 py-3 text-right font-mono">
-                  {formatCurrency(entry.amount, entry.currency)}
-                </td>
-                <td className="px-4 py-3 text-right font-mono text-green-400">
-                  {formatCurrency(
-                    calculateAnnualTotal(entry.amount, entry.frequency),
-                    entry.currency
-                  )}
-                </td>
-                <td className="px-4 py-3 text-sm text-zinc-400">
-                  {formatMonth(entry.purchase_date)}
-                </td>
-                <td className="px-4 py-3 text-sm text-zinc-400">
-                  {formatDate(entry.created_at)}
-                </td>
-                <td className="px-4 py-3 text-sm text-zinc-400">
-                  {formatDate(entry.updated_at)}
-                </td>
-                <td className="px-4 py-3 text-sm">
-                  <span className="px-2 py-1 bg-zinc-800 rounded">
-                    {calculateAge(entry.created_at)} days
-                  </span>
-                </td>
-                <td className="px-4 py-3">
-                  <Button 
-                    variant="flat" 
-                    size="sm" 
-                    onClick={() => {
-                      setEditingEntry(entry);
-                      setIsModalOpen(true);
-                    }}
-                  >
-                    Edit
-                  </Button>
-                </td>
-              </tr>
+                    }`}>
+                      {entry.entry_type}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-sm">{entry.category}</td>
+                  <td className="px-4 py-3 text-sm">{entry.description || "-"}</td>
+                  <td className="px-4 py-3 text-sm text-zinc-400">
+                    {entry.user?.name || entry.user?.email || "-"}
+                  </td>
+                  <td className="px-4 py-3 text-right font-mono">
+                    {formatCurrency(entry.amount, entry.currency)}
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="flat" 
+                        size="sm" 
+                        onClick={() => router.push(`/projects/budget/${entry.id}`)}
+                      >
+                        View
+                      </Button>
+                      <Button 
+                        variant="solid" 
+                        size="sm" 
+                        color="primary"
+                        onClick={() => {
+                          setEditingEntry(entry);
+                          setIsModalOpen(true);
+                        }}
+                      >
+                        Edit
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+                
+                {/* Show children if expanded */}
+                {expandedRows.has(entry.id) && entry.children && entry.children.length > 0 && (
+                  <>
+                    {entry.children.map((child) => (
+                      <tr key={child.id} className="border-t border-zinc-700 bg-zinc-800/30">
+                        <td className="px-4 py-3"></td>
+                        <td className="px-4 py-3 pl-8 text-sm">├ {formatDate(child.date)}</td>
+                        <td className="px-4 py-3">
+                          <span className={`px-2 py-1 rounded text-xs font-medium ${
+                            child.status === 'PLANNED' ? 'bg-yellow-900 text-yellow-200' :
+                            child.status === 'ORDERED' ? 'bg-blue-900 text-blue-200' :
+                            child.status === 'RECEIVED' ? 'bg-green-900 text-green-200' :
+                            'bg-purple-900 text-purple-200'
+                          }`}>
+                            {child.status || 'PLANNED'}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-zinc-500">{child.fiscal_year}</td>
+                        <td className="px-4 py-3 text-sm text-zinc-500">-</td>
+                        <td className="px-4 py-3 text-sm">{child.entry_type}</td>
+                        <td className="px-4 py-3 text-sm">{child.category}</td>
+                        <td className="px-4 py-3 text-sm text-zinc-400">{child.description || "-"}</td>
+                        <td className="px-4 py-3 text-sm text-zinc-400">
+                          {child.user?.name || child.user?.email || "-"}
+                        </td>
+                        <td className="px-4 py-3 text-right font-mono text-sm">
+                          {formatCurrency(child.amount, child.currency)}
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex gap-2">
+                            <Button 
+                              variant="flat" 
+                              size="sm" 
+                              onClick={() => router.push(`/projects/budget/${child.id}`)}
+                            >
+                              View
+                            </Button>
+                            <Button 
+                              variant="solid" 
+                              size="sm" 
+                              color="primary"
+                              onClick={() => {
+                                setEditingEntry(child);
+                                setIsModalOpen(true);
+                              }}
+                            >
+                              Edit
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </>
+                )}
+              </React.Fragment>
             ))}
             {budgetEntries.length > 0 && (
               <tr className="border-t-2 border-zinc-700 bg-zinc-800/50 font-semibold">
