@@ -242,19 +242,21 @@ export default function ContactsPage() {
       "Created By": counts.creators,
     };
 
+    const colorClasses = {
+      purple: "text-purple-300 bg-purple-900/40",
+      blue: "text-blue-300 bg-blue-900/40",
+      green: "text-green-300 bg-green-900/40",
+      orange: "text-orange-300 bg-orange-900/40",
+      cyan: "text-cyan-300 bg-cyan-900/40",
+    };
+
     return (
       <div className="mb-6 border-b border-zinc-700 pb-6">
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="flex items-center justify-between w-full mb-3"
         >
-          <h4 className={`font-semibold text-sm uppercase tracking-wide ${
-            color === "purple" ? "text-purple-300" :
-            color === "blue" ? "text-blue-300" :
-            color === "green" ? "text-green-300" :
-            color === "orange" ? "text-orange-300" :
-            "text-cyan-300"
-          }`}>
+          <h4 className={`font-semibold text-sm uppercase tracking-wide ${colorClasses[color as keyof typeof colorClasses]}`}>
             {title}
           </h4>
           {isOpen ? (
@@ -272,20 +274,14 @@ export default function ContactsPage() {
                 onClick={() => onSelectionChange(selectedKey === option.key ? "" : option.key)}
                 className={`w-full text-left px-3 py-2 rounded transition-colors text-sm ${
                   selectedKey === option.key
-                    ? `bg-${color}-900/40 text-${color}-300 border border-${color}-700/50`
+                    ? `${colorClasses[color as keyof typeof colorClasses]} border border-${color}-700/50`
                     : "bg-zinc-800/50 text-zinc-300 hover:bg-zinc-800"
                 }`}
               >
                 <div className="flex justify-between items-center">
                   <span>{option.label}</span>
                   {countMap[title as keyof typeof countMap]?.[option.key] && (
-                    <span className={`text-xs font-bold ${
-                      color === "purple" ? "text-purple-300" :
-                      color === "blue" ? "text-blue-300" :
-                      color === "green" ? "text-green-300" :
-                      color === "orange" ? "text-orange-300" :
-                      "text-cyan-300"
-                    }`}>
+                    <span className={`text-xs font-bold ${colorClasses[color as keyof typeof colorClasses]}`}>
                       {countMap[title as keyof typeof countMap][option.key]}
                     </span>
                   )}
@@ -339,7 +335,7 @@ export default function ContactsPage() {
 
   return (
     <div className="p-8 min-h-screen bg-zinc-950">
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex justify-between items-center mb-8 gap-4">
         <h1 className="text-4xl font-bold text-white">Contacts</h1>
         <Button
           color="primary"
@@ -348,6 +344,7 @@ export default function ContactsPage() {
             setIsModalOpen(true);
           }}
           startContent={<IconPlus size={20} />}
+          className="whitespace-nowrap flex-shrink-0 bg-blue-600 hover:bg-blue-700"
         >
           Add Contact
         </Button>

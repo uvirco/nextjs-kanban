@@ -209,11 +209,7 @@ export default function AddContactModal({
                     aria-label="Contact Type"
                     isInvalid={!!errors.contact_type}
                     errorMessage={errors.contact_type}
-                    classNames={{
-                      trigger: "bg-zinc-800 text-white border-zinc-700",
-                      value: "text-white",
-                      popoverContent: "bg-zinc-800 text-white",
-                    }}
+                    className="bg-zinc-800"
                   >
                     <SelectItem key="supplier">Supplier</SelectItem>
                     <SelectItem key="contractor">Contractor</SelectItem>
