@@ -14,6 +14,7 @@ import { StrategicGoal } from "@/types/types";
 
 interface GoalHierarchyDiagramProps {
   goals: StrategicGoal[];
+  onSelectGoal?: (goal: StrategicGoal) => void;
 }
 
 // Custom node component for goal nodes
@@ -21,21 +22,26 @@ const GoalNode = ({ data }: any) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
-        return "bg-blue-600";
+        return "bg-blue-600 hover:bg-blue-700";
       case "achieved":
-        return "bg-green-600";
+        return "bg-green-600 hover:bg-green-700";
       case "on_hold":
-        return "bg-orange-600";
+        return "bg-orange-600 hover:bg-orange-700";
       case "abandoned":
-        return "bg-red-600";
+        return "bg-red-600 hover:bg-red-700";
       default:
-        return "bg-zinc-600";
+        return "bg-zinc-600 hover:bg-zinc-700";
     }
   };
 
   return (
     <div
-      className={`px-4 py-3 rounded-lg border-2 border-white shadow-lg ${getStatusColor(
+      onClick={() => {
+        if (data.onSelectGoal) {
+          data.onSelectGoal(data.goal);
+        }
+      }}
+      className={`px-4 py-3 rounded-lg border-2 border-white shadow-lg cursor-pointer transition-colors ${getStatusColor(
         data.status
       )} text-white font-semibold text-center max-w-xs`}
     >
@@ -57,6 +63,7 @@ const GoalNode = ({ data }: any) => {
 
 export default function GoalHierarchyDiagram({
   goals,
+  onSelectGoal,
 }: GoalHierarchyDiagramProps) {
   const { nodes: initialNodes, edges: initialEdges } = useMemo(() => {
     const nodes: Node[] = [];
@@ -107,6 +114,8 @@ export default function GoalHierarchyDiagram({
           isParent: childGoals.length > 0,
           childCount: childGoals.length,
           projectCount: goal.linkedTasksCount || 0,
+          goal: goal,
+          onSelectGoal: onSelectGoal,
         },
         position,
         type: "default",

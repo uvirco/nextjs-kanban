@@ -55,7 +55,8 @@ export default function StrategyPage() {
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [expandedGoals, setExpandedGoals] = useState<Set<string>>(new Set());
   const [parentGoalId, setParentGoalId] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<"tree" | "diagram">("tree");
+  const [viewMode, setViewMode] = useState<"simplified-diagram" | "drill-down" | "list" | "timeline">("simplified-diagram");
+  const [selectedGoal, setSelectedGoal] = useState<StrategicGoal | null>(null);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -141,6 +142,21 @@ export default function StrategyPage() {
     });
 
     return rootGoals;
+  };
+
+  // Count goal level (depth) in hierarchy for indentation
+  const countGoalLevel = (goal: StrategicGoal, allGoals: StrategicGoal[]): number => {
+    let level = 0;
+    let current = goal;
+    
+    while (current.parent_goal_id) {
+      const parent = allGoals.find(g => g.id === current.parent_goal_id);
+      if (!parent) break;
+      level++;
+      current = parent;
+    }
+    
+    return level;
   };
 
   const handleSave = async () => {
@@ -313,28 +329,35 @@ export default function StrategyPage() {
   };
 
   const renderGoalCard = (goal: StrategicGoal, level: number = 0) => (
-    <div key={goal.id} className={`${level > 0 ? "ml-6 mt-4" : ""}`}>
-      <div className="bg-zinc-900 rounded-lg border border-zinc-700 p-6 hover:border-zinc-600 transition-colors">
-        {/* Header with expand button for goals with children */}
-        <div className="flex justify-between items-start mb-4">
-          <div className="flex-1 flex items-start gap-2">
-            {goal.children && goal.children.length > 0 && (
+    <div key={goal.id} className={`${level > 0 ? "ml-6 mt-2" : ""}`}>
+      <div className="bg-zinc-900 rounded-lg border border-zinc-700 p-4 hover:border-zinc-600 transition-colors">
+        {/* Horizontal compact layout */}
+        <div className="flex items-center gap-4">
+          {/* Expand button */}
+          <div className="flex-shrink-0">
+            {goal.children && goal.children.length > 0 ? (
               <button
                 onClick={() => toggleExpanded(goal.id)}
-                className="text-cyan-400 hover:text-cyan-300 mt-0.5 flex-shrink-0"
+                className="text-cyan-400 hover:text-cyan-300 flex-shrink-0"
               >
                 {expandedGoals.has(goal.id) ? (
-                  <IconChevronDown size={20} />
+                  <IconChevronDown size={18} />
                 ) : (
-                  <IconChevronUp size={20} />
+                  <IconChevronUp size={18} />
                 )}
               </button>
+            ) : (
+              <div className="w-6" /> // Placeholder for alignment
             )}
-            <div>
-              <h3 className="text-xl font-bold text-white mb-2">
+          </div>
+
+          {/* Title and status chips */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-2">
+              <h3 className="text-sm font-bold text-white truncate">
                 {goal.title}
               </h3>
-              <div className="flex gap-2 flex-wrap">
+              <div className="flex gap-1 flex-shrink-0">
                 <Chip
                   variant="flat"
                   className={getStatusColor(goal.status)}
@@ -342,109 +365,90 @@ export default function StrategyPage() {
                 >
                   {goal.status.replace("_", " ")}
                 </Chip>
-                {goal.fiscal_year && (
-                  <Chip
-                    variant="flat"
-                    className="bg-cyan-900/40 text-cyan-300"
-                    size="sm"
-                  >
-                    {goal.fiscal_year}
-                  </Chip>
-                )}
-                {goal.children && goal.children.length > 0 && (
-                  <Chip
-                    variant="flat"
-                    className="bg-purple-900/40 text-purple-300"
-                    size="sm"
-                  >
-                    {goal.children.length} sub-goal{goal.children.length !== 1 ? "s" : ""}
-                  </Chip>
-                )}
               </div>
             </div>
+            
+            {/* Compact info row */}
+            <div className="flex items-center gap-3 text-xs text-zinc-400 flex-wrap">
+              {goal.fiscal_year && (
+                <span className="whitespace-nowrap">FY: {goal.fiscal_year}</span>
+              )}
+              {goal.target_date && (
+                <span className="whitespace-nowrap">
+                  Due: {new Date(goal.target_date).toLocaleDateString()}
+                </span>
+              )}
+              {goal.linkedTasksCount ? (
+                <span className="whitespace-nowrap text-cyan-300">
+                  📊 {goal.linkedTasksCount} project{goal.linkedTasksCount !== 1 ? "s" : ""}
+                </span>
+              ) : null}
+              {goal.children && goal.children.length > 0 && (
+                <span className="whitespace-nowrap text-purple-300">
+                  ↳ {goal.children.length} sub-goal{goal.children.length !== 1 ? "s" : ""}
+                </span>
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* Description */}
-        {goal.description && (
-          <p className="text-sm text-zinc-300 mb-4">{goal.description}</p>
-        )}
-
-        {/* Progress Bar */}
-        <div className="mb-4">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium text-zinc-300">
-              Progress
-            </span>
-            <span className="text-sm font-bold text-cyan-400">
-              {goal.progress}%
-            </span>
+          {/* Progress bar (compact) */}
+          <div className="flex-shrink-0 w-20">
+            <div className="text-right mb-1">
+              <span className="text-xs font-bold text-cyan-400">
+                {goal.progress}%
+              </span>
+            </div>
+            <div className="w-full bg-zinc-800 rounded-full h-1.5">
+              <div
+                className={`h-1.5 rounded-full transition-all ${getProgressColor(
+                  goal.progress
+                )}`}
+                style={{ width: `${goal.progress}%` }}
+              ></div>
+            </div>
           </div>
-          <div className="w-full bg-zinc-800 rounded-full h-2">
-            <div
-              className={`h-2 rounded-full transition-all ${getProgressColor(
-                goal.progress
-              )}`}
-              style={{ width: `${goal.progress}%` }}
-            ></div>
-          </div>
-        </div>
 
-        {/* Target Date */}
-        {goal.target_date && (
-          <p className="text-sm text-zinc-400 mb-4">
-            Target: {new Date(goal.target_date).toLocaleDateString()}
-          </p>
-        )}
-
-        {/* Linked Projects */}
-        <div className="text-sm text-zinc-400 mb-4">
-          <span className="font-medium text-zinc-300">
-            {goal.linkedTasksCount || 0}
-          </span>{" "}
-          project{goal.linkedTasksCount !== 1 ? "s" : ""} supporting this goal
-        </div>
-
-        {/* Created By */}
-        <div className="text-xs text-zinc-500 mb-4">
-          Created by {goal.user?.name || goal.created_by || "Unknown"}
-        </div>
-
-        {/* Actions */}
-        <div className="flex gap-2 flex-wrap">
-          <Button
-            variant="flat"
-            size="sm"
-            className="bg-cyan-900/40 text-cyan-300 hover:bg-cyan-900/60"
-            onClick={() => openModal(goal)}
-          >
-            Edit
-          </Button>
-          {!goal.parent_goal_id && (
+          {/* Action buttons (compact) */}
+          <div className="flex gap-1 flex-shrink-0">
             <Button
-              variant="flat"
+              isIconOnly
               size="sm"
-              className="bg-purple-900/40 text-purple-300 hover:bg-purple-900/60"
-              onClick={() => openModal(undefined, goal)}
+              variant="light"
+              className="text-cyan-400 hover:text-cyan-300"
+              onClick={() => openModal(goal)}
+              title="Edit"
             >
-              <IconPlus size={16} />
-              Add Sub-goal
+              ✏️
             </Button>
-          )}
-          <Button
-            variant="flat"
-            size="sm"
-            className="bg-red-900/40 text-red-300 hover:bg-red-900/60"
-            onClick={() => handleDelete(goal.id)}
-          >
-            Delete
-          </Button>
+            {!goal.parent_goal_id && (
+              <Button
+                isIconOnly
+                size="sm"
+                variant="light"
+                className="text-purple-400 hover:text-purple-300"
+                onClick={() => openModal(undefined, goal)}
+                title="Add Sub-goal"
+              >
+                <IconPlus size={16} />
+              </Button>
+            )}
+            <Button
+              isIconOnly
+              size="sm"
+              variant="light"
+              className="text-red-400 hover:text-red-300"
+              onClick={() => handleDelete(goal.id)}
+              title="Delete"
+            >
+              🗑️
+            </Button>
+          </div>
         </div>
       </div>
 
       {/* Render children if expanded */}
       {goal.children && goal.children.length > 0 && expandedGoals.has(goal.id) && (
-        <div className="space-y-4 mt-4">
+        <div className="space-y-2 mt-2">
           {goal.children.map((child) => renderGoalCard(child, level + 1))}
         </div>
       )}
@@ -540,30 +544,164 @@ export default function StrategyPage() {
       </div>
 
       {/* View Toggle */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-2 mb-6 flex-wrap">
         <Button
-          isIconOnly
-          variant={viewMode === "tree" ? "solid" : "bordered"}
-          className={viewMode === "tree" ? "bg-blue-600 text-white" : "text-zinc-400"}
-          onClick={() => setViewMode("tree")}
-          title="Tree View"
+          variant={viewMode === "simplified-diagram" ? "solid" : "light"}
+          className={viewMode === "simplified-diagram" ? "bg-cyan-900/40 text-cyan-300" : "text-zinc-400 hover:text-white"}
+          onClick={() => {
+            setViewMode("simplified-diagram");
+            setSelectedGoal(null);
+          }}
+          size="sm"
         >
-          <IconLayoutList size={20} />
+          📊 Diagram
         </Button>
         <Button
-          isIconOnly
-          variant={viewMode === "diagram" ? "solid" : "bordered"}
-          className={viewMode === "diagram" ? "bg-blue-600 text-white" : "text-zinc-400"}
-          onClick={() => setViewMode("diagram")}
-          title="Diagram View"
+          variant={viewMode === "drill-down" ? "solid" : "light"}
+          className={viewMode === "drill-down" ? "bg-purple-900/40 text-purple-300" : "text-zinc-400 hover:text-white"}
+          onClick={() => setViewMode("drill-down")}
+          size="sm"
         >
-          <IconNetworkOff size={20} />
+          🎯 Drill-Down
+        </Button>
+        <Button
+          variant={viewMode === "list" ? "solid" : "light"}
+          className={viewMode === "list" ? "bg-blue-900/40 text-blue-300" : "text-zinc-400 hover:text-white"}
+          onClick={() => {
+            setViewMode("list");
+            setSelectedGoal(null);
+          }}
+          size="sm"
+        >
+          📋 List
+        </Button>
+        <Button
+          variant={viewMode === "timeline" ? "solid" : "light"}
+          className={viewMode === "timeline" ? "bg-orange-900/40 text-orange-300" : "text-zinc-400 hover:text-white"}
+          onClick={() => {
+            setViewMode("timeline");
+            setSelectedGoal(null);
+          }}
+          size="sm"
+        >
+          📅 Timeline
         </Button>
       </div>
 
-      {/* Goals View */}
-      {viewMode === "tree" ? (
-        /* Tree View */
+      {/* Goals View - Multiple Modes */}
+      {viewMode === "simplified-diagram" && (
+        <div className="space-y-6">
+          {filteredGoals.length === 0 ? (
+            <div className="text-center py-12 bg-zinc-900 rounded-lg border border-zinc-700">
+              <p className="text-zinc-400">No strategic goals found</p>
+            </div>
+          ) : (
+            <>
+              <p className="text-xs text-zinc-500">Click on any objective to drill down</p>
+              <GoalHierarchyDiagram goals={filteredGoals} onSelectGoal={(goal) => {
+                setSelectedGoal(goal);
+                setViewMode("drill-down");
+              }} />
+            </>
+          )}
+        </div>
+      )}
+
+      {viewMode === "drill-down" && (
+        <div className="space-y-6">
+          {selectedGoal ? (
+            <>
+              <Button
+                variant="light"
+                onClick={() => {
+                  setSelectedGoal(null);
+                  setViewMode("simplified-diagram");
+                }}
+                size="sm"
+                className="text-cyan-400 hover:text-cyan-300"
+              >
+                ← Back to Diagram
+              </Button>
+              <div className="bg-zinc-900 rounded-lg border border-zinc-700 p-6">
+                <div className="mb-6">
+                  <h2 className="text-3xl font-bold text-white mb-2">{selectedGoal.title}</h2>
+                  <div className="flex gap-2 flex-wrap">
+                    <Chip variant="flat" className={getStatusColor(selectedGoal.status)} size="sm">
+                      {selectedGoal.status.replace("_", " ")}
+                    </Chip>
+                    {selectedGoal.fiscal_year && (
+                      <Chip variant="flat" className="bg-cyan-900/40 text-cyan-300" size="sm">
+                        FY {selectedGoal.fiscal_year}
+                      </Chip>
+                    )}
+                  </div>
+                  {selectedGoal.description && (
+                    <p className="text-zinc-300 mt-4">{selectedGoal.description}</p>
+                  )}
+                </div>
+                
+                {/* Progress */}
+                <div className="mb-6">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-medium text-zinc-300">Progress</span>
+                    <span className="text-sm font-bold text-cyan-400">{selectedGoal.progress}%</span>
+                  </div>
+                  <div className="w-full bg-zinc-800 rounded-full h-2">
+                    <div
+                      className={`h-2 rounded-full transition-all ${getProgressColor(selectedGoal.progress)}`}
+                      style={{ width: `${selectedGoal.progress}%` }}
+                    ></div>
+                  </div>
+                </div>
+
+                {/* Sub-goals */}
+                {selectedGoal.children && selectedGoal.children.length > 0 && (
+                  <div className="mt-8 pt-6 border-t border-zinc-700">
+                    <h3 className="text-lg font-bold text-white mb-4">Sub-Goals ({selectedGoal.children.length})</h3>
+                    <div className="space-y-3">
+                      {selectedGoal.children.map((child) => (
+                        <div key={child.id} className="bg-zinc-800 rounded p-4">
+                          <div className="flex justify-between items-start mb-2">
+                            <h4 className="font-semibold text-white">{child.title}</h4>
+                            <Chip variant="flat" className={getStatusColor(child.status)} size="sm">
+                              {child.progress}%
+                            </Chip>
+                          </div>
+                          {child.description && (
+                            <p className="text-sm text-zinc-400 mb-2">{child.description}</p>
+                          )}
+                          <div className="w-full bg-zinc-700 rounded-full h-1">
+                            <div
+                              className={`h-1 rounded-full transition-all ${getProgressColor(child.progress)}`}
+                              style={{ width: `${child.progress}%` }}
+                            ></div>
+                          </div>
+                          {child.linkedTasksCount ? (
+                            <p className="text-xs text-cyan-300 mt-2">📊 {child.linkedTasksCount} project(s)</p>
+                          ) : null}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="text-zinc-400 mb-4">Select an objective from the diagram view to see details</p>
+              <Button
+                onClick={() => setViewMode("simplified-diagram")}
+                variant="light"
+                className="text-cyan-400 hover:text-cyan-300"
+              >
+                Go to Diagram →
+              </Button>
+            </>
+          )}
+        </div>
+      )}
+
+      {viewMode === "list" && (
         <div className="space-y-6">
           {filteredGoals.length === 0 ? (
             <div className="text-center py-12 bg-zinc-900 rounded-lg border border-zinc-700">
@@ -573,32 +711,78 @@ export default function StrategyPage() {
             buildGoalTree(filteredGoals).map((goal) => renderGoalCard(goal))
           )}
         </div>
-      ) : (
-        /* Diagram View */
+      )}
+
+      {viewMode === "timeline" && (
         <div className="space-y-6">
           {filteredGoals.length === 0 ? (
             <div className="text-center py-12 bg-zinc-900 rounded-lg border border-zinc-700">
               <p className="text-zinc-400">No strategic goals found</p>
             </div>
           ) : (
-            <GoalHierarchyDiagram goals={filteredGoals} />
+            <div className="space-y-4">
+              {/* Group goals by fiscal year */}
+              {Array.from(
+                new Set(filteredGoals.map((g) => g.fiscal_year || "No Year"))
+              )
+                .sort()
+                .map((year) => {
+                  const yearGoals = filteredGoals.filter(
+                    (g) => (g.fiscal_year || "No Year") === year
+                  );
+                  return (
+                    <div key={year} className="bg-zinc-900 rounded-lg border border-zinc-700 p-4">
+                      <h3 className="text-lg font-bold text-white mb-4">📅 {year}</h3>
+                      <div className="space-y-3">
+                        {yearGoals.map((goal) => (
+                          <div
+                            key={goal.id}
+                            className="bg-zinc-800 rounded p-3 border-l-4"
+                            style={{
+                              borderColor: goal.status === "active"
+                                ? "#06b6d4"
+                                : goal.status === "achieved"
+                                ? "#10b981"
+                                : goal.status === "on_hold"
+                                ? "#f97316"
+                                : "#ef4444",
+                            }}
+                          >
+                            <div className="flex justify-between items-start">
+                              <div className="flex-1">
+                                <h4 className="font-semibold text-white">{goal.title}</h4>
+                                {goal.description && (
+                                  <p className="text-sm text-zinc-400 mt-1">{goal.description}</p>
+                                )}
+                              </div>
+                              <div className="text-right">
+                                <span className="text-sm font-bold text-cyan-400">{goal.progress}%</span>
+                                {goal.target_date && (
+                                  <p className="text-xs text-zinc-500 mt-1">
+                                    {new Date(goal.target_date).toLocaleDateString()}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
           )}
         </div>
       )}
 
-      {/* Goals Tree - OLD LOCATION */}
-      <div className="space-y-6" style={{ display: "none" }}>
-        {filteredGoals.length === 0 ? (
-          <div className="text-center py-12 bg-zinc-900 rounded-lg border border-zinc-700">
-            <p className="text-zinc-400">No strategic goals found</p>
-          </div>
-        ) : (
-          buildGoalTree(filteredGoals).map((goal) => renderGoalCard(goal))
-        )}
-      </div>
-
       {/* Modal */}
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} size="lg">
+      <Modal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        size="lg"
+        isDismissable={false}
+        isKeyboardDismissDisabled={true}
+      >
         <ModalContent className="bg-zinc-900">
           <ModalHeader className="text-white text-xl font-bold">
             {editingGoal ? "Edit Strategic Goal" : "Add Strategic Goal"}
@@ -625,12 +809,17 @@ export default function StrategyPage() {
               className="bg-zinc-800"
             >
               {goals
-                .filter(g => !g.parent_goal_id) // Only show top-level goals as parents
-                .map((goal) => (
-                  <SelectItem key={goal.id} value={goal.id}>
-                    {goal.title}
-                  </SelectItem>
-                ))}
+                .filter(g => g.id !== editingGoal?.id) // Exclude self to prevent circular references
+                .map((goal) => {
+                  // Show goal with indent based on hierarchy level
+                  const level = countGoalLevel(goal, goals);
+                  const indent = "  ".repeat(level);
+                  return (
+                    <SelectItem key={goal.id} value={goal.id}>
+                      {indent}{goal.title}
+                    </SelectItem>
+                  );
+                })}
             </Select>
 
             <Textarea
