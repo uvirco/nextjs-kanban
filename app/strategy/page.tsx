@@ -12,6 +12,8 @@ import {
   IconChevronUp,
   IconChevronDown,
   IconSearch,
+  IconLayoutList,
+  IconNetworkOff,
 } from "@tabler/icons-react";
 import {
   Modal,
@@ -21,6 +23,7 @@ import {
   ModalFooter,
 } from "@nextui-org/modal";
 import { toast } from "sonner";
+import GoalHierarchyDiagram from "./components/GoalHierarchyDiagram";
 
 interface StrategicGoal {
   id: string;
@@ -52,6 +55,7 @@ export default function StrategyPage() {
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [expandedGoals, setExpandedGoals] = useState<Set<string>>(new Set());
   const [parentGoalId, setParentGoalId] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"tree" | "diagram">("tree");
 
   const [formData, setFormData] = useState({
     title: "",
@@ -535,8 +539,55 @@ export default function StrategyPage() {
         </div>
       </div>
 
-      {/* Goals Tree */}
-      <div className="space-y-6">
+      {/* View Toggle */}
+      <div className="flex gap-2 mb-6">
+        <Button
+          isIconOnly
+          variant={viewMode === "tree" ? "solid" : "bordered"}
+          className={viewMode === "tree" ? "bg-blue-600 text-white" : "text-zinc-400"}
+          onClick={() => setViewMode("tree")}
+          title="Tree View"
+        >
+          <IconLayoutList size={20} />
+        </Button>
+        <Button
+          isIconOnly
+          variant={viewMode === "diagram" ? "solid" : "bordered"}
+          className={viewMode === "diagram" ? "bg-blue-600 text-white" : "text-zinc-400"}
+          onClick={() => setViewMode("diagram")}
+          title="Diagram View"
+        >
+          <IconNetworkOff size={20} />
+        </Button>
+      </div>
+
+      {/* Goals View */}
+      {viewMode === "tree" ? (
+        /* Tree View */
+        <div className="space-y-6">
+          {filteredGoals.length === 0 ? (
+            <div className="text-center py-12 bg-zinc-900 rounded-lg border border-zinc-700">
+              <p className="text-zinc-400">No strategic goals found</p>
+            </div>
+          ) : (
+            buildGoalTree(filteredGoals).map((goal) => renderGoalCard(goal))
+          )}
+        </div>
+      ) : (
+        /* Diagram View */
+        <div className="space-y-6">
+          {filteredGoals.length === 0 ? (
+            <div className="text-center py-12 bg-zinc-900 rounded-lg border border-zinc-700">
+              <p className="text-zinc-400">No strategic goals found</p>
+            </div>
+          ) : (
+            <GoalHierarchyDiagram goals={filteredGoals} />
+          )}
+        </div>
+      )}
+
+      {/* Goals Tree - OLD LOCATION */}
+      <div className="space-y-6" style={{ display: "none" }}>
         {filteredGoals.length === 0 ? (
           <div className="text-center py-12 bg-zinc-900 rounded-lg border border-zinc-700">
             <p className="text-zinc-400">No strategic goals found</p>
