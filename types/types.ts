@@ -104,6 +104,7 @@ export interface Task {
   readinessScore: number;
   epicId: string | null;
   assignedUserId: string | null;
+  strategicGoalId: string | null;
 }
 
 export interface Activity {
@@ -396,6 +397,7 @@ export type TaskCreationData = {
   columnId: Column["id"];
   parentTaskId?: Task["parentTaskId"];
   assignedUserId?: string;
+  strategicGoalId?: string;
   // Advanced project fields
   priority?: Priority;
   dueDate?: string;

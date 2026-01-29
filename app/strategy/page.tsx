@@ -34,6 +34,7 @@ interface StrategicGoal {
   created_at: string;
   updated_at: string;
   user?: { id: string; name: string; email: string };
+  linkedTasksCount?: number;
 }
 
 export default function StrategyPage() {
@@ -80,10 +81,22 @@ export default function StrategyPage() {
         .select("id, name, email");
 
       const usersMap = new Map(usersData?.map((u) => [u.id, u]) || []);
-      const enrichedGoals = (goalsData || []).map((goal) => ({
-        ...goal,
-        user: goal.created_by ? usersMap.get(goal.created_by) : undefined,
-      }));
+
+      // Fetch linked tasks count for each goal
+      const enrichedGoals = await Promise.all(
+        (goalsData || []).map(async (goal) => {
+          const { count, error: countError } = await supabase
+            .from("Task")
+            .select("id", { count: "exact", head: true })
+            .eq("strategicGoalId", goal.id);
+
+          return {
+            ...goal,
+            user: goal.created_by ? usersMap.get(goal.created_by) : undefined,
+            linkedTasksCount: countError ? 0 : count || 0,
+          };
+        })
+      );
 
       setGoals(enrichedGoals);
     } catch (err) {
@@ -106,9 +119,28 @@ export default function StrategyPage() {
     }
 
     try {
+      // Get user ID from email
+      let userId = null;
+      if (session?.user?.email) {
+        const { data: userData } = await supabase
+          .from("User")
+          .select("id")
+          .eq("email", session.user.email)
+          .single();
+
+        if (userData) {
+          userId = userData.id;
+        }
+      }
+
       const goalData = {
-        ...formData,
-        created_by: session?.user?.email,
+        title: formData.title,
+        description: formData.description || null,
+        fiscal_year: formData.fiscal_year || null,
+        target_date: formData.target_date,
+        status: formData.status,
+        progress: formData.progress,
+        created_by: userId,
         updated_at: new Date().toISOString(),
       };
 
@@ -385,6 +417,14 @@ export default function StrategyPage() {
                   Target: {new Date(goal.target_date).toLocaleDateString()}
                 </p>
               )}
+
+              {/* Linked Projects */}
+              <div className="text-sm text-zinc-400 mb-4">
+                <span className="font-medium text-zinc-300">
+                  {goal.linkedTasksCount || 0}
+                </span>{" "}
+                project{goal.linkedTasksCount !== 1 ? "s" : ""} supporting this goal
+              </div>
 
               {/* Created By */}
               <div className="text-xs text-zinc-500 mb-4">

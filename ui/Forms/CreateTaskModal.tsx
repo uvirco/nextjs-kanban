@@ -1,9 +1,10 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { handleCreateTask } from "@/server-actions/TaskServerActions";
-import { TaskCreationData, Priority, RiskLevel } from "@/types/types";
+import { TaskCreationData, Priority, RiskLevel, StrategicGoal } from "@/types/types";
 import { IconPlus } from "@tabler/icons-react";
+import { supabase } from "@/lib/supabase";
 import { Input } from "@nextui-org/input";
 import { Button } from "@nextui-org/button";
 import { Select, SelectItem } from "@nextui-org/select";
@@ -42,6 +43,33 @@ export default function CreateTaskModal({
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [goals, setGoals] = useState<StrategicGoal[]>([]);
+  const [loadingGoals, setLoadingGoals] = useState(false);
+
+  // Fetch strategic goals on component mount
+  useEffect(() => {
+    const fetchGoals = async () => {
+      setLoadingGoals(true);
+      try {
+        const { data, error } = await supabase
+          .from("StrategicGoal")
+          .select("id, title, status")
+          .eq("status", "active")
+          .order("title");
+
+        if (error) throw error;
+        setGoals(data || []);
+      } catch (err) {
+        console.error("Error fetching goals:", err);
+      } finally {
+        setLoadingGoals(false);
+      }
+    };
+
+    if (isOpen) {
+      fetchGoals();
+    }
+  }, [isOpen]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -173,6 +201,32 @@ export default function CreateTaskModal({
               <h3 className="text-lg font-semibold text-foreground">
                 Project Details
               </h3>
+
+              <Select
+                label="Strategic Goal"
+                placeholder="Select a strategic goal (optional)"
+                selectedKeys={formData.strategicGoalId ? [formData.strategicGoalId] : []}
+                onSelectionChange={(keys) => {
+                  const selected = Array.from(keys)[0] as string | undefined;
+                  if (selected) {
+                    handleSelectChange("strategicGoalId", selected);
+                  } else {
+                    handleSelectChange("strategicGoalId", "");
+                  }
+                }}
+                isLoading={loadingGoals}
+                classNames={{
+                  trigger: "bg-background border-border text-foreground",
+                  listbox: "bg-background border-border",
+                  popoverContent: "bg-background",
+                }}
+              >
+                {goals.map((goal) => (
+                  <SelectItem key={goal.id} value={goal.id}>
+                    {goal.title}
+                  </SelectItem>
+                ))}
+              </Select>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Select
