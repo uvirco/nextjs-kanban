@@ -24,6 +24,7 @@ import {
 } from "@nextui-org/modal";
 import { toast } from "sonner";
 import GoalHierarchyDiagram from "./components/GoalHierarchyDiagram";
+import GoalMermaidDiagram from "./components/GoalMermaidDiagram";
 
 interface StrategicGoal {
   id: string;
@@ -597,11 +598,10 @@ export default function StrategyPage() {
             </div>
           ) : (
             <>
-              <p className="text-xs text-zinc-500">Click on any objective to drill down</p>
-              <GoalHierarchyDiagram goals={filteredGoals} onSelectGoal={(goal) => {
-                setSelectedGoal(goal);
-                setViewMode("drill-down");
-              }} />
+              <div className="bg-blue-900/20 border border-blue-700/30 rounded p-3 text-xs text-blue-300">
+                💡 Strategic goal hierarchy: 7 Objectives with 21 Sub-Goals
+              </div>
+              <GoalMermaidDiagram goals={filteredGoals} />
             </>
           )}
         </div>

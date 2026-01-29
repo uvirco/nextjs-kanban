@@ -34,16 +34,21 @@ const GoalNode = ({ data }: any) => {
     }
   };
 
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (data.onSelectGoal && data.goal) {
+      data.onSelectGoal(data.goal);
+    }
+  };
+
   return (
-    <div
-      onClick={() => {
-        if (data.onSelectGoal) {
-          data.onSelectGoal(data.goal);
-        }
-      }}
+    <button
+      onClick={handleClick}
+      onDoubleClick={(e) => e.stopPropagation()}
       className={`px-4 py-3 rounded-lg border-2 border-white shadow-lg cursor-pointer transition-colors ${getStatusColor(
         data.status
-      )} text-white font-semibold text-center max-w-xs`}
+      )} text-white font-semibold text-center max-w-xs w-full hover:scale-105 transform`}
+      style={{ outline: "none" }}
     >
       <div className="text-sm font-bold mb-1">{data.label}</div>
       <div className="text-xs opacity-90">Progress: {data.progress}%</div>
@@ -57,7 +62,7 @@ const GoalNode = ({ data }: any) => {
           {data.projectCount} project{data.projectCount !== 1 ? "s" : ""}
         </div>
       )}
-    </div>
+    </button>
   );
 };
 

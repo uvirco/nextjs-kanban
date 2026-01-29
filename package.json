@@ -42,6 +42,7 @@
     "jspdf": "^4.0.0",
     "lucide-react": "^0.555.0",
     "mailparser": "^3.9.1",
+    "mermaid": "^11.12.2",
     "next": "^16.0.7",
     "next-auth": "^5.0.0-beta.19",
     "next-themes": "^0.3.0",
