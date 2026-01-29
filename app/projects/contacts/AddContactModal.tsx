@@ -176,7 +176,17 @@ export default function AddContactModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="lg" scrollBehavior="inside">
+    <Modal 
+      isOpen={isOpen} 
+      onClose={onClose} 
+      size="lg" 
+      scrollBehavior="inside"
+      backdrop="opaque"
+      classNames={{
+        backdrop: "bg-black/50 backdrop-blur-md"
+      }}
+      isDismissable={false}
+    >
       <ModalContent className="bg-zinc-900">
         <ModalHeader className="text-white text-xl font-bold">
           {editingContact ? "Edit Contact" : "Add New Contact"}
@@ -236,7 +246,7 @@ export default function AddContactModal({
               <div>
                 <label className="block text-sm font-medium mb-2 text-white">Phone</label>
                 <Input
-                  placeholder="+1 (555) 000-0000"
+                  placeholder="011 - 555 6789"
                   value={formData.phone}
                   onChange={(e) => handleChange("phone", e.target.value)}
                   className="bg-zinc-800"

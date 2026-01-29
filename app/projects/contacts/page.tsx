@@ -242,12 +242,28 @@ export default function ContactsPage() {
       "Created By": counts.creators,
     };
 
-    const colorClasses = {
-      purple: "text-purple-300 bg-purple-900/40",
-      blue: "text-blue-300 bg-blue-900/40",
-      green: "text-green-300 bg-green-900/40",
-      orange: "text-orange-300 bg-orange-900/40",
-      cyan: "text-cyan-300 bg-cyan-900/40",
+    const getColorClass = (type: "header" | "button" | "selected") => {
+      if (type === "header") {
+        switch (color) {
+          case "purple": return "text-purple-300";
+          case "blue": return "text-blue-300";
+          case "green": return "text-green-300";
+          case "orange": return "text-orange-300";
+          case "cyan": return "text-cyan-300";
+          default: return "text-cyan-300";
+        }
+      }
+      if (type === "selected") {
+        switch (color) {
+          case "purple": return "bg-purple-900/40 text-purple-300";
+          case "blue": return "bg-blue-900/40 text-blue-300";
+          case "green": return "bg-green-900/40 text-green-300";
+          case "orange": return "bg-orange-900/40 text-orange-300";
+          case "cyan": return "bg-cyan-900/40 text-cyan-300";
+          default: return "bg-cyan-900/40 text-cyan-300";
+        }
+      }
+      return "";
     };
 
     return (
@@ -256,7 +272,7 @@ export default function ContactsPage() {
           onClick={() => setIsOpen(!isOpen)}
           className="flex items-center justify-between w-full mb-3"
         >
-          <h4 className={`font-semibold text-sm uppercase tracking-wide ${colorClasses[color as keyof typeof colorClasses]}`}>
+          <h4 className={`font-semibold text-sm uppercase tracking-wide ${getColorClass("header")}`}>
             {title}
           </h4>
           {isOpen ? (
@@ -274,14 +290,14 @@ export default function ContactsPage() {
                 onClick={() => onSelectionChange(selectedKey === option.key ? "" : option.key)}
                 className={`w-full text-left px-3 py-2 rounded transition-colors text-sm ${
                   selectedKey === option.key
-                    ? `${colorClasses[color as keyof typeof colorClasses]} border border-${color}-700/50`
+                    ? getColorClass("selected")
                     : "bg-zinc-800/50 text-zinc-300 hover:bg-zinc-800"
                 }`}
               >
                 <div className="flex justify-between items-center">
                   <span>{option.label}</span>
                   {countMap[title as keyof typeof countMap]?.[option.key] && (
-                    <span className={`text-xs font-bold ${colorClasses[color as keyof typeof colorClasses]}`}>
+                    <span className={`text-xs font-bold ${getColorClass("header")}`}>
                       {countMap[title as keyof typeof countMap][option.key]}
                     </span>
                   )}
