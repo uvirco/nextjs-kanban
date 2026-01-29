@@ -18,7 +18,7 @@ INSERT INTO public."StrategicGoal" (title, description, status, progress, fiscal
 VALUES (
   'Objective 2: New Product and Service Development',
   'Develop and launch innovative new products and services aligned with market opportunities and customer needs through collaborative partnerships.',
-  'active',
+  'achieved',
   0,
   '2026',
   '2026-12-31',
@@ -30,7 +30,7 @@ INSERT INTO public."StrategicGoal" (title, description, status, progress, fiscal
 VALUES (
   'Objective 3: Support and Enhance Existing Products and Services',
   'Maximize the performance, reliability, and lifecycle value of existing products and services through continuous improvement and strategic partnerships.',
-  'active',
+  'on_hold',
   0,
   '2026',
   '2026-12-31',
@@ -42,7 +42,7 @@ INSERT INTO public."StrategicGoal" (title, description, status, progress, fiscal
 VALUES (
   'Objective 4: Marketing, Sales, Business Development and Communications',
   'Strengthen brand presence, expand market reach, and build high-performing sales channels to drive sustainable growth across new and existing markets.',
-  'active',
+  'abandoned',
   0,
   '2026',
   '2026-12-31',
@@ -66,7 +66,7 @@ INSERT INTO public."StrategicGoal" (title, description, status, progress, fiscal
 VALUES (
   'Objective 6: Regulatory Compliance, Policy Management and Governance Excellence',
   'Ensure regulatory compliance, establish robust policies, and deliver governance excellence to support business integrity and stakeholder confidence.',
-  'active',
+  'achieved',
   0,
   '2026',
   '2026-12-31',
@@ -78,7 +78,7 @@ INSERT INTO public."StrategicGoal" (title, description, status, progress, fiscal
 VALUES (
   'Objective 7: Operations and Production Excellence',
   'Optimize production, procurement, and operations to maximize efficiency and reliability while maintaining the highest quality and service standards.',
-  'active',
+  'on_hold',
   0,
   '2026',
   '2026-12-31',
