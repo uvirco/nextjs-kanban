@@ -550,3 +550,21 @@ export interface ContactRelation {
   created_by?: string;
   contact?: Contact;
 }
+
+export interface StrategicGoal {
+  id: string;
+  title: string;
+  description?: string;
+  fiscal_year?: string;
+  target_date?: string | Date;
+  status: "active" | "achieved" | "on_hold" | "abandoned";
+  progress: number; // 0-100
+  created_by?: string;
+  created_at?: string | Date;
+  updated_at?: string | Date;
+  user?: {
+    id: string;
+    email: string;
+    name: string;
+  };
+}
