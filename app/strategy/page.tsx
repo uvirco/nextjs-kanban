@@ -33,8 +33,10 @@ interface StrategicGoal {
   created_by: string | null;
   created_at: string;
   updated_at: string;
+  parent_goal_id: string | null;
   user?: { id: string; name: string; email: string };
   linkedTasksCount?: number;
+  children?: StrategicGoal[];
 }
 
 export default function StrategyPage() {
@@ -48,6 +50,8 @@ export default function StrategyPage() {
   const [filterFiscalYear, setFilterFiscalYear] = useState("");
   const [sortColumn, setSortColumn] = useState("target_date");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [expandedGoals, setExpandedGoals] = useState<Set<string>>(new Set());
+  const [parentGoalId, setParentGoalId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -107,6 +111,34 @@ export default function StrategyPage() {
     }
   };
 
+  // Build tree structure from flat goals list
+  const buildGoalTree = (goalsData: StrategicGoal[]): StrategicGoal[] => {
+    const goalMap = new Map<string, StrategicGoal>();
+    
+    // Create map of all goals
+    goalsData.forEach((goal) => {
+      goalMap.set(goal.id, { ...goal, children: [] });
+    });
+
+    const rootGoals: StrategicGoal[] = [];
+
+    // Build parent-child relationships
+    goalsData.forEach((goal) => {
+      const goalInMap = goalMap.get(goal.id)!;
+      if (goal.parent_goal_id) {
+        const parent = goalMap.get(goal.parent_goal_id);
+        if (parent) {
+          if (!parent.children) parent.children = [];
+          parent.children.push(goalInMap);
+        }
+      } else {
+        rootGoals.push(goalInMap);
+      }
+    });
+
+    return rootGoals;
+  };
+
   const handleSave = async () => {
     const newErrors: Record<string, string> = {};
     if (!formData.title.trim()) newErrors.title = "Title is required";
@@ -141,6 +173,7 @@ export default function StrategyPage() {
         status: formData.status,
         progress: formData.progress,
         created_by: userId,
+        parent_goal_id: parentGoalId || null,
         updated_at: new Date().toISOString(),
       };
 
@@ -199,11 +232,14 @@ export default function StrategyPage() {
       progress: 0,
     });
     setErrors({});
+    setParentGoalId(null);
+    setEditingGoal(null);
   };
 
-  const openModal = (goal?: StrategicGoal) => {
+  const openModal = (goal?: StrategicGoal, parentGoal?: StrategicGoal) => {
     if (goal) {
       setEditingGoal(goal);
+      setParentGoalId(goal.parent_goal_id || null);
       setFormData({
         title: goal.title,
         description: goal.description || "",
@@ -214,6 +250,9 @@ export default function StrategyPage() {
       });
     } else {
       resetForm();
+      if (parentGoal) {
+        setParentGoalId(parentGoal.id);
+      }
     }
     setIsModalOpen(true);
   };
@@ -258,6 +297,155 @@ export default function StrategyPage() {
         return "bg-zinc-700 text-zinc-300";
     }
   };
+
+  const toggleExpanded = (goalId: string) => {
+    const newExpanded = new Set(expandedGoals);
+    if (newExpanded.has(goalId)) {
+      newExpanded.delete(goalId);
+    } else {
+      newExpanded.add(goalId);
+    }
+    setExpandedGoals(newExpanded);
+  };
+
+  const renderGoalCard = (goal: StrategicGoal, level: number = 0) => (
+    <div key={goal.id} className={`${level > 0 ? "ml-6 mt-4" : ""}`}>
+      <div className="bg-zinc-900 rounded-lg border border-zinc-700 p-6 hover:border-zinc-600 transition-colors">
+        {/* Header with expand button for goals with children */}
+        <div className="flex justify-between items-start mb-4">
+          <div className="flex-1 flex items-start gap-2">
+            {goal.children && goal.children.length > 0 && (
+              <button
+                onClick={() => toggleExpanded(goal.id)}
+                className="text-cyan-400 hover:text-cyan-300 mt-0.5 flex-shrink-0"
+              >
+                {expandedGoals.has(goal.id) ? (
+                  <IconChevronDown size={20} />
+                ) : (
+                  <IconChevronUp size={20} />
+                )}
+              </button>
+            )}
+            <div>
+              <h3 className="text-xl font-bold text-white mb-2">
+                {goal.title}
+              </h3>
+              <div className="flex gap-2 flex-wrap">
+                <Chip
+                  variant="flat"
+                  className={getStatusColor(goal.status)}
+                  size="sm"
+                >
+                  {goal.status.replace("_", " ")}
+                </Chip>
+                {goal.fiscal_year && (
+                  <Chip
+                    variant="flat"
+                    className="bg-cyan-900/40 text-cyan-300"
+                    size="sm"
+                  >
+                    {goal.fiscal_year}
+                  </Chip>
+                )}
+                {goal.children && goal.children.length > 0 && (
+                  <Chip
+                    variant="flat"
+                    className="bg-purple-900/40 text-purple-300"
+                    size="sm"
+                  >
+                    {goal.children.length} sub-goal{goal.children.length !== 1 ? "s" : ""}
+                  </Chip>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Description */}
+        {goal.description && (
+          <p className="text-sm text-zinc-300 mb-4">{goal.description}</p>
+        )}
+
+        {/* Progress Bar */}
+        <div className="mb-4">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-sm font-medium text-zinc-300">
+              Progress
+            </span>
+            <span className="text-sm font-bold text-cyan-400">
+              {goal.progress}%
+            </span>
+          </div>
+          <div className="w-full bg-zinc-800 rounded-full h-2">
+            <div
+              className={`h-2 rounded-full transition-all ${getProgressColor(
+                goal.progress
+              )}`}
+              style={{ width: `${goal.progress}%` }}
+            ></div>
+          </div>
+        </div>
+
+        {/* Target Date */}
+        {goal.target_date && (
+          <p className="text-sm text-zinc-400 mb-4">
+            Target: {new Date(goal.target_date).toLocaleDateString()}
+          </p>
+        )}
+
+        {/* Linked Projects */}
+        <div className="text-sm text-zinc-400 mb-4">
+          <span className="font-medium text-zinc-300">
+            {goal.linkedTasksCount || 0}
+          </span>{" "}
+          project{goal.linkedTasksCount !== 1 ? "s" : ""} supporting this goal
+        </div>
+
+        {/* Created By */}
+        <div className="text-xs text-zinc-500 mb-4">
+          Created by {goal.user?.name || goal.created_by || "Unknown"}
+        </div>
+
+        {/* Actions */}
+        <div className="flex gap-2 flex-wrap">
+          <Button
+            variant="flat"
+            size="sm"
+            className="bg-cyan-900/40 text-cyan-300 hover:bg-cyan-900/60"
+            onClick={() => openModal(goal)}
+          >
+            Edit
+          </Button>
+          {!goal.parent_goal_id && (
+            <Button
+              variant="flat"
+              size="sm"
+              className="bg-purple-900/40 text-purple-300 hover:bg-purple-900/60"
+              onClick={() => openModal(undefined, goal)}
+            >
+              <IconPlus size={16} />
+              Add Sub-goal
+            </Button>
+          )}
+          <Button
+            variant="flat"
+            size="sm"
+            className="bg-red-900/40 text-red-300 hover:bg-red-900/60"
+            onClick={() => handleDelete(goal.id)}
+          >
+            Delete
+          </Button>
+        </div>
+      </div>
+
+      {/* Render children if expanded */}
+      {goal.children && goal.children.length > 0 && expandedGoals.has(goal.id) && (
+        <div className="space-y-4 mt-4">
+          {goal.children.map((child) => renderGoalCard(child, level + 1))}
+        </div>
+      )}
+    </div>
+  );
 
   const getProgressColor = (progress: number) => {
     if (progress >= 75) return "bg-green-600";
@@ -347,111 +535,14 @@ export default function StrategyPage() {
         </div>
       </div>
 
-      {/* Goals Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Goals Tree */}
+      <div className="space-y-6">
         {filteredGoals.length === 0 ? (
-          <div className="col-span-2 text-center py-12 bg-zinc-900 rounded-lg border border-zinc-700">
+          <div className="text-center py-12 bg-zinc-900 rounded-lg border border-zinc-700">
             <p className="text-zinc-400">No strategic goals found</p>
           </div>
         ) : (
-          filteredGoals.map((goal) => (
-            <div
-              key={goal.id}
-              className="bg-zinc-900 rounded-lg border border-zinc-700 p-6 hover:border-zinc-600 transition-colors"
-            >
-              {/* Header */}
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex-1">
-                  <h3 className="text-xl font-bold text-white mb-2">
-                    {goal.title}
-                  </h3>
-                  <div className="flex gap-2 flex-wrap">
-                    <Chip
-                      variant="flat"
-                      className={getStatusColor(goal.status)}
-                      size="sm"
-                    >
-                      {goal.status.replace("_", " ")}
-                    </Chip>
-                    {goal.fiscal_year && (
-                      <Chip
-                        variant="flat"
-                        className="bg-cyan-900/40 text-cyan-300"
-                        size="sm"
-                      >
-                        {goal.fiscal_year}
-                      </Chip>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Description */}
-              {goal.description && (
-                <p className="text-sm text-zinc-300 mb-4">{goal.description}</p>
-              )}
-
-              {/* Progress Bar */}
-              <div className="mb-4">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium text-zinc-300">
-                    Progress
-                  </span>
-                  <span className="text-sm font-bold text-cyan-400">
-                    {goal.progress}%
-                  </span>
-                </div>
-                <div className="w-full bg-zinc-800 rounded-full h-2">
-                  <div
-                    className={`h-2 rounded-full transition-all ${getProgressColor(
-                      goal.progress
-                    )}`}
-                    style={{ width: `${goal.progress}%` }}
-                  ></div>
-                </div>
-              </div>
-
-              {/* Target Date */}
-              {goal.target_date && (
-                <p className="text-sm text-zinc-400 mb-4">
-                  Target: {new Date(goal.target_date).toLocaleDateString()}
-                </p>
-              )}
-
-              {/* Linked Projects */}
-              <div className="text-sm text-zinc-400 mb-4">
-                <span className="font-medium text-zinc-300">
-                  {goal.linkedTasksCount || 0}
-                </span>{" "}
-                project{goal.linkedTasksCount !== 1 ? "s" : ""} supporting this goal
-              </div>
-
-              {/* Created By */}
-              <div className="text-xs text-zinc-500 mb-4">
-                Created by {goal.user?.name || goal.created_by || "Unknown"}
-              </div>
-
-              {/* Actions */}
-              <div className="flex gap-2">
-                <Button
-                  variant="flat"
-                  size="sm"
-                  className="bg-cyan-900/40 text-cyan-300 hover:bg-cyan-900/60"
-                  onClick={() => openModal(goal)}
-                >
-                  Edit
-                </Button>
-                <Button
-                  variant="flat"
-                  size="sm"
-                  className="bg-red-900/40 text-red-300 hover:bg-red-900/60"
-                  onClick={() => handleDelete(goal.id)}
-                >
-                  Delete
-                </Button>
-              </div>
-            </div>
-          ))
+          buildGoalTree(filteredGoals).map((goal) => renderGoalCard(goal))
         )}
       </div>
 
@@ -471,6 +562,25 @@ export default function StrategyPage() {
               errorMessage={errors.title}
               className="bg-zinc-800"
             />
+
+            <Select
+              label="Parent Goal (Optional)"
+              placeholder="Select a parent goal for hierarchy"
+              selectedKeys={parentGoalId ? [parentGoalId] : []}
+              onSelectionChange={(keys) => {
+                const selected = Array.from(keys)[0] as string | undefined;
+                setParentGoalId(selected || null);
+              }}
+              className="bg-zinc-800"
+            >
+              {goals
+                .filter(g => !g.parent_goal_id) // Only show top-level goals as parents
+                .map((goal) => (
+                  <SelectItem key={goal.id} value={goal.id}>
+                    {goal.title}
+                  </SelectItem>
+                ))}
+            </Select>
 
             <Textarea
               label="Description"

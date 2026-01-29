@@ -569,4 +569,7 @@ export interface StrategicGoal {
     email: string;
     name: string;
   };
+  parent_goal_id?: string | null;
+  linkedTasksCount?: number;
+  children?: StrategicGoal[];
 }
