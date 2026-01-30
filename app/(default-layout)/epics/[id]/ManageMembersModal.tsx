@@ -3,9 +3,20 @@ import { useState, useEffect } from "react";
 import { IconX, IconPlus, IconTrash, IconUser } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 
@@ -71,8 +82,10 @@ export default function ManageMembersModal({
         if (usersResponse.ok) {
           const allUsers = await usersResponse.json();
           // Filter out users already in the epic
-          const currentUserIds = memberState.map(m => m.user.id);
-          const available = allUsers.filter((user: User) => !currentUserIds.includes(user.id));
+          const currentUserIds = memberState.map((m) => m.user.id);
+          const available = allUsers.filter(
+            (user: User) => !currentUserIds.includes(user.id),
+          );
           setAvailableUsers(available);
         }
       } catch (error) {
@@ -122,7 +135,7 @@ export default function ManageMembersModal({
       });
 
       if (response.ok) {
-        setMembers(memberState.filter(m => m.id !== memberId));
+        setMembers(memberState.filter((m) => m.id !== memberId));
         if (onMemberAdded) onMemberAdded();
       } else {
         console.error("Failed to remove member");
@@ -148,23 +161,35 @@ export default function ManageMembersModal({
       : roles.filter((role) => role.category === selectedRoleCategory);
 
   // Get unique role categories
-  const roleCategories = ["all", ...new Set(roles.map((role) => role.category))];
+  const roleCategories = [
+    "all",
+    ...new Set(roles.map((role) => role.category)),
+  ];
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl bg-zinc-900 border-zinc-700">
         <DialogHeader>
-          <DialogTitle className="text-white">Manage Epic Team Members</DialogTitle>
+          <DialogTitle className="text-white">
+            Manage Epic Team Members
+          </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
           {/* Add Member Section */}
           <div className="bg-zinc-800 rounded-lg p-4">
-            <h3 className="text-lg font-semibold text-white mb-4">Add Team Member</h3>
+            <h3 className="text-lg font-semibold text-white mb-4">
+              Add Team Member
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="user-select" className="text-white">Select User</Label>
-                <Select value={selectedUserId} onValueChange={setSelectedUserId}>
+                <Label htmlFor="user-select" className="text-white">
+                  Select User
+                </Label>
+                <Select
+                  value={selectedUserId}
+                  onValueChange={setSelectedUserId}
+                >
                   <SelectTrigger className="bg-zinc-700 border-zinc-600 text-white">
                     <SelectValue placeholder="Choose a user..." />
                   </SelectTrigger>
@@ -179,17 +204,25 @@ export default function ManageMembersModal({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="role-select" className="text-white">Role (Optional)</Label>
-                
+                <Label htmlFor="role-select" className="text-white">
+                  Role (Optional)
+                </Label>
+
                 {roles.length > 0 && roleCategories.length > 1 && (
-                  <Select value={selectedRoleCategory} onValueChange={setSelectedRoleCategory}>
+                  <Select
+                    value={selectedRoleCategory}
+                    onValueChange={setSelectedRoleCategory}
+                  >
                     <SelectTrigger className="bg-zinc-700 border-zinc-600 text-white text-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       {roleCategories.map((category) => (
                         <SelectItem key={category} value={category}>
-                          {category === "all" ? "All Categories" : category.charAt(0).toUpperCase() + category.slice(1)}
+                          {category === "all"
+                            ? "All Categories"
+                            : category.charAt(0).toUpperCase() +
+                              category.slice(1)}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -234,25 +267,36 @@ export default function ManageMembersModal({
 
           {/* Current Members Section */}
           <div className="bg-zinc-800 rounded-lg p-4">
-            <h3 className="text-lg font-semibold text-white mb-4">Current Team Members</h3>
+            <h3 className="text-lg font-semibold text-white mb-4">
+              Current Team Members
+            </h3>
             <div className="space-y-3">
               {memberState.length === 0 ? (
-                <p className="text-zinc-500 text-sm">No team members assigned</p>
+                <p className="text-zinc-500 text-sm">
+                  No team members assigned
+                </p>
               ) : (
                 memberState.map((member) => (
-                  <div key={member.id} className="flex items-center justify-between bg-zinc-700 rounded p-3">
+                  <div
+                    key={member.id}
+                    className="flex items-center justify-between bg-zinc-700 rounded p-3"
+                  >
                     <div className="flex items-center space-x-3">
                       <Avatar className="h-8 w-8">
                         <AvatarImage src={member.user.image || undefined} />
                         <AvatarFallback>
-                          {member.user.name?.[0] || member.user.email?.[0] || "?"}
+                          {member.user.name?.[0] ||
+                            member.user.email?.[0] ||
+                            "?"}
                         </AvatarFallback>
                       </Avatar>
                       <div>
                         <p className="text-sm font-medium text-white">
                           {member.user.name || member.user.email}
                         </p>
-                        <p className="text-xs text-zinc-400">{member.user.email}</p>
+                        <p className="text-xs text-zinc-400">
+                          {member.user.email}
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-3">
@@ -260,7 +304,9 @@ export default function ManageMembersModal({
                         {member.role}
                       </Badge>
                       <Button
-                        onClick={() => handleRemoveMember(member.id, member.user.id)}
+                        onClick={() =>
+                          handleRemoveMember(member.id, member.user.id)
+                        }
                         variant="outline"
                         size="sm"
                         className="text-red-400 border-red-600 hover:bg-red-900"

@@ -21,8 +21,12 @@ interface ActivityLogInput {
  */
 export async function logActivity(input: ActivityLogInput): Promise<void> {
   try {
-    console.log("logActivity called with:", { type: input.type, userId: input.userId, taskId: input.taskId });
-    
+    console.log("logActivity called with:", {
+      type: input.type,
+      userId: input.userId,
+      taskId: input.taskId,
+    });
+
     const { data, error } = await supabaseAdmin.from("Activity").insert({
       type: input.type,
       content: input.content,
@@ -64,12 +68,12 @@ export function formatActivityContent(params: {
   details?: string;
 }): string {
   const { action, userName, entityType, entityName, details } = params;
-  
+
   let message = `${userName} ${action} ${entityType} "${entityName}"`;
   if (details) {
     message += ` ${details}`;
   }
-  
+
   return message;
 }
 

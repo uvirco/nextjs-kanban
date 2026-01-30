@@ -107,7 +107,9 @@ export default function BudgetDetailLeft({
         </div>
 
         <div>
-          <label className="text-xs text-zinc-400 block mb-1">Fiscal Year</label>
+          <label className="text-xs text-zinc-400 block mb-1">
+            Fiscal Year
+          </label>
           <p className="text-white">{budget.fiscal_year}</p>
         </div>
 
@@ -137,14 +139,18 @@ export default function BudgetDetailLeft({
 
         {budget.department && (
           <div>
-            <label className="text-xs text-zinc-400 block mb-1">Department</label>
+            <label className="text-xs text-zinc-400 block mb-1">
+              Department
+            </label>
             <p className="text-purple-400 text-sm">{budget.department.name}</p>
           </div>
         )}
 
         {budget.parent_budget_id && (
           <div>
-            <label className="text-xs text-zinc-400 block mb-1">Parent Budget</label>
+            <label className="text-xs text-zinc-400 block mb-1">
+              Parent Budget
+            </label>
             <p className="text-zinc-400 text-sm">{budget.parent_budget_id}</p>
           </div>
         )}
@@ -171,7 +177,14 @@ export default function BudgetDetailLeft({
               <Select
                 selectedKeys={[formData.status]}
                 onSelectionChange={(keys) =>
-                  setFormData({ ...formData, status: Array.from(keys)[0] as "PLANNED" | "ORDERED" | "RECEIVED" | "PAID" })
+                  setFormData({
+                    ...formData,
+                    status: Array.from(keys)[0] as
+                      | "PLANNED"
+                      | "ORDERED"
+                      | "RECEIVED"
+                      | "PAID",
+                  })
                 }
               >
                 <SelectItem key="PLANNED">Planned</SelectItem>
@@ -228,7 +241,11 @@ export default function BudgetDetailLeft({
             </div>
 
             {canEdit && (
-              <Button size="sm" onClick={() => setIsEditing(true)} className="mt-4">
+              <Button
+                size="sm"
+                onClick={() => setIsEditing(true)}
+                className="mt-4"
+              >
                 Edit
               </Button>
             )}

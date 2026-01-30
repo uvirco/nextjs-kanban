@@ -46,7 +46,7 @@ const GoalNode = ({ data }: any) => {
       onClick={handleClick}
       onDoubleClick={(e) => e.stopPropagation()}
       className={`px-4 py-3 rounded-lg border-2 border-white shadow-lg cursor-pointer transition-colors ${getStatusColor(
-        data.status
+        data.status,
       )} text-white font-semibold text-center max-w-xs w-full hover:scale-105 transform`}
       style={{ outline: "none" }}
     >
@@ -83,7 +83,7 @@ export default function GoalHierarchyDiagram({
     // Calculate positions using hierarchical layout
     parentGoals.forEach((parentGoal, parentIndex) => {
       const childGoals = goals.filter(
-        (g) => g.parent_goal_id === parentGoal.id
+        (g) => g.parent_goal_id === parentGoal.id,
       );
       const xPos = parentIndex * 400;
       const yPos = 0;
@@ -154,7 +154,7 @@ export default function GoalHierarchyDiagram({
       initialNodes.map((node) => ({
         ...node,
         type: "default",
-      }))
+      })),
     );
     setEdges(initialEdges);
   }, [initialNodes, initialEdges, setNodes, setEdges]);
@@ -169,7 +169,12 @@ export default function GoalHierarchyDiagram({
         border: "1px solid #3f3f46",
       }}
     >
-      <ReactFlow nodes={nodes} edges={edges} onNodesChange={onNodesChange} onEdgesChange={onEdgesChange}>
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+      >
         <Background color="#52525b" gap={16} />
         <Controls />
       </ReactFlow>

@@ -109,7 +109,7 @@ export default function ContactsPage() {
         id,
         name: userMap[id]?.name || id,
         email: userMap[id]?.email || id,
-      }))
+      })),
     );
 
     setContacts(enrichedContacts);
@@ -141,7 +141,7 @@ export default function ContactsPage() {
         (c) =>
           c.name.toLowerCase().includes(term) ||
           c.email?.toLowerCase().includes(term) ||
-          c.phone?.toLowerCase().includes(term)
+          c.phone?.toLowerCase().includes(term),
       );
     }
 
@@ -213,9 +213,11 @@ export default function ContactsPage() {
 
   const SortIcon = ({ column }: { column: string }) => {
     if (sortColumn !== column) return null;
-    return sortDirection === "asc" ? 
-      <IconChevronUp size={14} className="inline ml-1" /> : 
-      <IconChevronDown size={14} className="inline ml-1" />;
+    return sortDirection === "asc" ? (
+      <IconChevronUp size={14} className="inline ml-1" />
+    ) : (
+      <IconChevronDown size={14} className="inline ml-1" />
+    );
   };
 
   const FilterSection = ({
@@ -245,22 +247,34 @@ export default function ContactsPage() {
     const getColorClass = (type: "header" | "button" | "selected") => {
       if (type === "header") {
         switch (color) {
-          case "purple": return "text-purple-300";
-          case "blue": return "text-blue-300";
-          case "green": return "text-green-300";
-          case "orange": return "text-orange-300";
-          case "cyan": return "text-cyan-300";
-          default: return "text-cyan-300";
+          case "purple":
+            return "text-purple-300";
+          case "blue":
+            return "text-blue-300";
+          case "green":
+            return "text-green-300";
+          case "orange":
+            return "text-orange-300";
+          case "cyan":
+            return "text-cyan-300";
+          default:
+            return "text-cyan-300";
         }
       }
       if (type === "selected") {
         switch (color) {
-          case "purple": return "bg-purple-900/40 text-purple-300";
-          case "blue": return "bg-blue-900/40 text-blue-300";
-          case "green": return "bg-green-900/40 text-green-300";
-          case "orange": return "bg-orange-900/40 text-orange-300";
-          case "cyan": return "bg-cyan-900/40 text-cyan-300";
-          default: return "bg-cyan-900/40 text-cyan-300";
+          case "purple":
+            return "bg-purple-900/40 text-purple-300";
+          case "blue":
+            return "bg-blue-900/40 text-blue-300";
+          case "green":
+            return "bg-green-900/40 text-green-300";
+          case "orange":
+            return "bg-orange-900/40 text-orange-300";
+          case "cyan":
+            return "bg-cyan-900/40 text-cyan-300";
+          default:
+            return "bg-cyan-900/40 text-cyan-300";
         }
       }
       return "";
@@ -272,7 +286,9 @@ export default function ContactsPage() {
           onClick={() => setIsOpen(!isOpen)}
           className="flex items-center justify-between w-full mb-3"
         >
-          <h4 className={`font-semibold text-sm uppercase tracking-wide ${getColorClass("header")}`}>
+          <h4
+            className={`font-semibold text-sm uppercase tracking-wide ${getColorClass("header")}`}
+          >
             {title}
           </h4>
           {isOpen ? (
@@ -287,7 +303,11 @@ export default function ContactsPage() {
             {options.map((option) => (
               <button
                 key={option.key}
-                onClick={() => onSelectionChange(selectedKey === option.key ? "" : option.key)}
+                onClick={() =>
+                  onSelectionChange(
+                    selectedKey === option.key ? "" : option.key,
+                  )
+                }
                 className={`w-full text-left px-3 py-2 rounded transition-colors text-sm ${
                   selectedKey === option.key
                     ? getColorClass("selected")
@@ -297,7 +317,9 @@ export default function ContactsPage() {
                 <div className="flex justify-between items-center">
                   <span>{option.label}</span>
                   {countMap[title as keyof typeof countMap]?.[option.key] && (
-                    <span className={`text-xs font-bold ${getColorClass("header")}`}>
+                    <span
+                      className={`text-xs font-bold ${getColorClass("header")}`}
+                    >
                       {countMap[title as keyof typeof countMap][option.key]}
                     </span>
                   )}
@@ -312,26 +334,44 @@ export default function ContactsPage() {
 
   const getFilterCounts = () => {
     return {
-      types: contacts.reduce((acc: any, c) => ({
-        ...acc,
-        [c.contact_type]: (acc[c.contact_type] || 0) + 1,
-      }), {}),
-      companies: contacts.reduce((acc: any, c) => ({
-        ...acc,
-        [c.company || "unspecified"]: (acc[c.company || "unspecified"] || 0) + 1,
-      }), {}),
-      cities: contacts.reduce((acc: any, c) => ({
-        ...acc,
-        [c.city || "unspecified"]: (acc[c.city || "unspecified"] || 0) + 1,
-      }), {}),
-      countries: contacts.reduce((acc: any, c) => ({
-        ...acc,
-        [c.country || "unspecified"]: (acc[c.country || "unspecified"] || 0) + 1,
-      }), {}),
-      creators: contacts.reduce((acc: any, c) => ({
-        ...acc,
-        [c.created_by || "unspecified"]: (acc[c.created_by || "unspecified"] || 0) + 1,
-      }), {}),
+      types: contacts.reduce(
+        (acc: any, c) => ({
+          ...acc,
+          [c.contact_type]: (acc[c.contact_type] || 0) + 1,
+        }),
+        {},
+      ),
+      companies: contacts.reduce(
+        (acc: any, c) => ({
+          ...acc,
+          [c.company || "unspecified"]:
+            (acc[c.company || "unspecified"] || 0) + 1,
+        }),
+        {},
+      ),
+      cities: contacts.reduce(
+        (acc: any, c) => ({
+          ...acc,
+          [c.city || "unspecified"]: (acc[c.city || "unspecified"] || 0) + 1,
+        }),
+        {},
+      ),
+      countries: contacts.reduce(
+        (acc: any, c) => ({
+          ...acc,
+          [c.country || "unspecified"]:
+            (acc[c.country || "unspecified"] || 0) + 1,
+        }),
+        {},
+      ),
+      creators: contacts.reduce(
+        (acc: any, c) => ({
+          ...acc,
+          [c.created_by || "unspecified"]:
+            (acc[c.created_by || "unspecified"] || 0) + 1,
+        }),
+        {},
+      ),
     };
   };
 
@@ -376,7 +416,9 @@ export default function ContactsPage() {
                 placeholder="Search contacts..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                startContent={<IconSearch size={18} className="text-zinc-400" />}
+                startContent={
+                  <IconSearch size={18} className="text-zinc-400" />
+                }
                 classNames={{
                   input: "text-white bg-zinc-800 placeholder-zinc-500",
                   inputWrapper: "bg-zinc-800 border-zinc-700",
@@ -385,9 +427,15 @@ export default function ContactsPage() {
             </div>
 
             {/* Active Filters */}
-            {(filterType || filterCompany || filterCity || filterCountry || filterCreatedBy) && (
+            {(filterType ||
+              filterCompany ||
+              filterCity ||
+              filterCountry ||
+              filterCreatedBy) && (
               <div className="mb-6">
-                <p className="text-xs font-semibold text-zinc-400 uppercase mb-3">Active Filters</p>
+                <p className="text-xs font-semibold text-zinc-400 uppercase mb-3">
+                  Active Filters
+                </p>
                 <div className="flex flex-wrap gap-2">
                   {filterType && (
                     <Chip
@@ -431,7 +479,8 @@ export default function ContactsPage() {
                       variant="flat"
                       className="bg-cyan-900/40 text-cyan-300"
                     >
-                      {allUsers.find((u) => u.id === filterCreatedBy)?.name || filterCreatedBy}
+                      {allUsers.find((u) => u.id === filterCreatedBy)?.name ||
+                        filterCreatedBy}
                     </Chip>
                   )}
                 </div>
@@ -493,8 +542,13 @@ export default function ContactsPage() {
         <div className="flex-1">
           {/* Results Counter */}
           <div className="text-sm text-zinc-300 mb-4 font-medium">
-            Showing <span className="text-cyan-400 font-bold">{filteredContacts.length}</span> of{" "}
-            <span className="text-cyan-400 font-bold">{contacts.length}</span> contacts
+            Showing{" "}
+            <span className="text-cyan-400 font-bold">
+              {filteredContacts.length}
+            </span>{" "}
+            of{" "}
+            <span className="text-cyan-400 font-bold">{contacts.length}</span>{" "}
+            contacts
           </div>
 
           {/* Table */}
@@ -544,41 +598,65 @@ export default function ContactsPage() {
                   >
                     Country <SortIcon column="country" />
                   </th>
-                  <th className="px-4 py-3 text-left text-white font-semibold">Created By</th>
-                  <th className="px-4 py-3 text-right text-white font-semibold">Actions</th>
+                  <th className="px-4 py-3 text-left text-white font-semibold">
+                    Created By
+                  </th>
+                  <th className="px-4 py-3 text-right text-white font-semibold">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {filteredContacts.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="px-4 py-8 text-center text-zinc-400">
+                    <td
+                      colSpan={9}
+                      className="px-4 py-8 text-center text-zinc-400"
+                    >
                       No contacts found
                     </td>
                   </tr>
                 ) : (
                   filteredContacts.map((contact) => (
-                    <tr key={contact.id} className="border-t border-zinc-700 hover:bg-zinc-800/80 transition-colors">
-                      <td className="px-4 py-3 text-white font-medium">{contact.name}</td>
+                    <tr
+                      key={contact.id}
+                      className="border-t border-zinc-700 hover:bg-zinc-800/80 transition-colors"
+                    >
+                      <td className="px-4 py-3 text-white font-medium">
+                        {contact.name}
+                      </td>
                       <td className="px-4 py-3 text-sm text-cyan-300">
                         {contact.email || "-"}
                       </td>
                       <td className="px-4 py-3 text-sm text-cyan-300">
                         {contact.phone || "-"}
                       </td>
-                      <td className="px-4 py-3 text-sm text-white">{contact.company || "-"}</td>
+                      <td className="px-4 py-3 text-sm text-white">
+                        {contact.company || "-"}
+                      </td>
                       <td className="px-4 py-3">
-                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                          contact.contact_type === 'supplier' ? 'bg-purple-900/40 text-purple-300' :
-                          contact.contact_type === 'contractor' ? 'bg-orange-900/40 text-orange-300' :
-                          contact.contact_type === 'team_member' ? 'bg-green-900/40 text-green-300' :
-                          contact.contact_type === 'client' ? 'bg-blue-900/40 text-blue-300' :
-                          'bg-zinc-700 text-zinc-300'
-                        }`}>
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                            contact.contact_type === "supplier"
+                              ? "bg-purple-900/40 text-purple-300"
+                              : contact.contact_type === "contractor"
+                                ? "bg-orange-900/40 text-orange-300"
+                                : contact.contact_type === "team_member"
+                                  ? "bg-green-900/40 text-green-300"
+                                  : contact.contact_type === "client"
+                                    ? "bg-blue-900/40 text-blue-300"
+                                    : "bg-zinc-700 text-zinc-300"
+                          }`}
+                        >
                           {contact.contact_type}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-sm text-white">{contact.city || "-"}</td>
-                      <td className="px-4 py-3 text-sm text-white">{contact.country || "-"}</td>
+                      <td className="px-4 py-3 text-sm text-white">
+                        {contact.city || "-"}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-white">
+                        {contact.country || "-"}
+                      </td>
                       <td className="px-4 py-3 text-sm text-zinc-300">
                         {contact.user?.name || contact.created_by || "-"}
                       </td>

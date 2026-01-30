@@ -154,13 +154,17 @@ export default function StrategyPage() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-16">
-          <h1 className="text-5xl font-bold text-white mb-2">Business Strategy</h1>
+          <h1 className="text-5xl font-bold text-white mb-2">
+            Business Strategy
+          </h1>
           <p className="text-zinc-400 text-lg">Strategic objectives & goals</p>
         </div>
 
         {/* Bubble Cards Section */}
         <div className="mb-16">
-          <h2 className="text-2xl font-bold text-white mb-8">Strategic Objectives</h2>
+          <h2 className="text-2xl font-bold text-white mb-8">
+            Strategic Objectives
+          </h2>
           <div className="flex flex-wrap gap-6 justify-start">
             {topLevelGoals.map((goal) => (
               <button
@@ -183,10 +187,13 @@ export default function StrategyPage() {
                     {goal.title}
                   </p>
                 </div>
-                
+
                 {/* Progress Ring */}
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 120 120">
+                  <svg
+                    className="w-32 h-32 transform -rotate-90"
+                    viewBox="0 0 120 120"
+                  >
                     {/* Background circle */}
                     <circle
                       cx="60"
@@ -225,8 +232,12 @@ export default function StrategyPage() {
             <div className="bg-zinc-800 border border-zinc-700 rounded p-2 w-full">
               <div className="flex items-center gap-4 flex-wrap">
                 <div className="flex items-center gap-1.5">
-                  <div className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${getObjectiveColor(selectedGoal.id)} flex-shrink-0`}></div>
-                  <h2 className="text-sm font-bold text-white">{selectedGoal.title}</h2>
+                  <div
+                    className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${getObjectiveColor(selectedGoal.id)} flex-shrink-0`}
+                  ></div>
+                  <h2 className="text-sm font-bold text-white">
+                    {selectedGoal.title}
+                  </h2>
                 </div>
 
                 <Chip
@@ -238,19 +249,25 @@ export default function StrategyPage() {
                 </Chip>
 
                 {selectedGoal.description && (
-                  <p className="text-zinc-400 text-xs flex-1">{selectedGoal.description}</p>
+                  <p className="text-zinc-400 text-xs flex-1">
+                    {selectedGoal.description}
+                  </p>
                 )}
 
                 {/* Progress Bar */}
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  <span className="text-xs text-zinc-500 whitespace-nowrap">Progress</span>
+                  <span className="text-xs text-zinc-500 whitespace-nowrap">
+                    Progress
+                  </span>
                   <div className="w-20 bg-zinc-700 rounded-full h-1.5 overflow-hidden">
                     <div
                       className={`h-1.5 rounded-full transition-all ${getProgressColor(selectedGoal.progress)}`}
                       style={{ width: `${selectedGoal.progress}%` }}
                     ></div>
                   </div>
-                  <span className="text-xs font-bold text-cyan-400 whitespace-nowrap">{selectedGoal.progress}%</span>
+                  <span className="text-xs font-bold text-cyan-400 whitespace-nowrap">
+                    {selectedGoal.progress}%
+                  </span>
                 </div>
               </div>
             </div>
@@ -258,7 +275,9 @@ export default function StrategyPage() {
             {/* Sub-Goals Bubbles */}
             {selectedGoal.children && selectedGoal.children.length > 0 && (
               <div>
-                <h3 className="text-2xl font-bold text-white mb-8">Sub-Goals</h3>
+                <h3 className="text-2xl font-bold text-white mb-8">
+                  Sub-Goals
+                </h3>
                 <div className="flex flex-wrap gap-8">
                   {selectedGoal.children.map((subGoal) => (
                     <div

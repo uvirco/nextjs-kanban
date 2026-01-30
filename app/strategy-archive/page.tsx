@@ -56,7 +56,9 @@ export default function StrategyArchivePage() {
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [expandedGoals, setExpandedGoals] = useState<Set<string>>(new Set());
   const [parentGoalId, setParentGoalId] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<"simplified-diagram" | "drill-down" | "list" | "timeline">("simplified-diagram");
+  const [viewMode, setViewMode] = useState<
+    "simplified-diagram" | "drill-down" | "list" | "timeline"
+  >("simplified-diagram");
   const [selectedGoal, setSelectedGoal] = useState<StrategicGoal | null>(null);
 
   const [formData, setFormData] = useState({
@@ -105,7 +107,7 @@ export default function StrategyArchivePage() {
             user: goal.created_by ? usersMap.get(goal.created_by) : undefined,
             linkedTasksCount: countError ? 0 : count || 0,
           };
-        })
+        }),
       );
 
       setGoals(enrichedGoals);
@@ -120,7 +122,7 @@ export default function StrategyArchivePage() {
   // Build tree structure from flat goals list
   const buildGoalTree = (goalsData: StrategicGoal[]): StrategicGoal[] => {
     const goalMap = new Map<string, StrategicGoal>();
-    
+
     // Create map of all goals
     goalsData.forEach((goal) => {
       goalMap.set(goal.id, { ...goal, children: [] });
@@ -146,24 +148,28 @@ export default function StrategyArchivePage() {
   };
 
   // Count goal level (depth) in hierarchy for indentation
-  const countGoalLevel = (goal: StrategicGoal, allGoals: StrategicGoal[]): number => {
+  const countGoalLevel = (
+    goal: StrategicGoal,
+    allGoals: StrategicGoal[],
+  ): number => {
     let level = 0;
     let current = goal;
-    
+
     while (current.parent_goal_id) {
-      const parent = allGoals.find(g => g.id === current.parent_goal_id);
+      const parent = allGoals.find((g) => g.id === current.parent_goal_id);
       if (!parent) break;
       level++;
       current = parent;
     }
-    
+
     return level;
   };
 
   const handleSave = async () => {
     const newErrors: Record<string, string> = {};
     if (!formData.title.trim()) newErrors.title = "Title is required";
-    if (!formData.target_date) newErrors.target_date = "Target date is required";
+    if (!formData.target_date)
+      newErrors.target_date = "Target date is required";
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -280,7 +286,11 @@ export default function StrategyArchivePage() {
 
   const filteredGoals = goals
     .filter((g) => {
-      if (searchTerm && !g.title.toLowerCase().includes(searchTerm.toLowerCase())) return false;
+      if (
+        searchTerm &&
+        !g.title.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+        return false;
       if (filterStatus && g.status !== filterStatus) return false;
       if (filterFiscalYear && g.fiscal_year !== filterFiscalYear) return false;
       return true;
@@ -302,7 +312,9 @@ export default function StrategyArchivePage() {
       return 0;
     });
 
-  const allFiscalYears = [...new Set(goals.map((g) => g.fiscal_year).filter(Boolean))];
+  const allFiscalYears = [
+    ...new Set(goals.map((g) => g.fiscal_year).filter(Boolean)),
+  ];
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -332,11 +344,11 @@ export default function StrategyArchivePage() {
   const renderGoalCard = (goal: StrategicGoal, level: number = 0) => {
     // Width based on level: parents 1/4, children 1/8
     const widthClass = level === 0 ? "w-1/4" : "w-1/8";
-    const marginLeft = level > 0 ? (level * 12.5) : 0; // 12.5% per level
-    
+    const marginLeft = level > 0 ? level * 12.5 : 0; // 12.5% per level
+
     return (
-      <div 
-        key={goal.id} 
+      <div
+        key={goal.id}
         className={`${widthClass}`}
         style={{ marginLeft: `${marginLeft}%` }}
       >
@@ -359,12 +371,12 @@ export default function StrategyArchivePage() {
                 ) : (
                   <div className="w-3 flex-shrink-0" />
                 )}
-                
+
                 <h3 className="text-xs font-bold text-white break-words flex-1">
                   {goal.title}
                 </h3>
               </div>
-              
+
               <Chip
                 variant="flat"
                 className={getStatusColor(goal.status)}
@@ -391,7 +403,7 @@ export default function StrategyArchivePage() {
               <div className="w-full bg-zinc-800 rounded-full h-1">
                 <div
                   className={`h-1 rounded-full transition-all ${getProgressColor(
-                    goal.progress
+                    goal.progress,
                   )}`}
                   style={{ width: `${goal.progress}%` }}
                 ></div>
@@ -437,11 +449,13 @@ export default function StrategyArchivePage() {
         </div>
 
         {/* Render children if expanded */}
-        {goal.children && goal.children.length > 0 && expandedGoals.has(goal.id) && (
-          <div className="space-y-0.5 mt-0.5">
-            {goal.children.map((child) => renderGoalCard(child, level + 1))}
-          </div>
-        )}
+        {goal.children &&
+          goal.children.length > 0 &&
+          expandedGoals.has(goal.id) && (
+            <div className="space-y-0.5 mt-0.5">
+              {goal.children.map((child) => renderGoalCard(child, level + 1))}
+            </div>
+          )}
       </div>
     );
   };
@@ -464,7 +478,9 @@ export default function StrategyArchivePage() {
   return (
     <div className="p-8 min-h-screen bg-zinc-950">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-4xl font-bold text-white">Strategic Goals Archive</h1>
+        <h1 className="text-4xl font-bold text-white">
+          Strategic Goals Archive
+        </h1>
         <Button
           color="primary"
           onClick={() => openModal()}
@@ -538,7 +554,11 @@ export default function StrategyArchivePage() {
       <div className="flex gap-2 mb-6 flex-wrap">
         <Button
           variant={viewMode === "simplified-diagram" ? "solid" : "light"}
-          className={viewMode === "simplified-diagram" ? "bg-cyan-900/40 text-cyan-300" : "text-zinc-400 hover:text-white"}
+          className={
+            viewMode === "simplified-diagram"
+              ? "bg-cyan-900/40 text-cyan-300"
+              : "text-zinc-400 hover:text-white"
+          }
           onClick={() => {
             setViewMode("simplified-diagram");
             setSelectedGoal(null);
@@ -549,7 +569,11 @@ export default function StrategyArchivePage() {
         </Button>
         <Button
           variant={viewMode === "drill-down" ? "solid" : "light"}
-          className={viewMode === "drill-down" ? "bg-purple-900/40 text-purple-300" : "text-zinc-400 hover:text-white"}
+          className={
+            viewMode === "drill-down"
+              ? "bg-purple-900/40 text-purple-300"
+              : "text-zinc-400 hover:text-white"
+          }
           onClick={() => setViewMode("drill-down")}
           size="sm"
         >
@@ -557,7 +581,11 @@ export default function StrategyArchivePage() {
         </Button>
         <Button
           variant={viewMode === "list" ? "solid" : "light"}
-          className={viewMode === "list" ? "bg-blue-900/40 text-blue-300" : "text-zinc-400 hover:text-white"}
+          className={
+            viewMode === "list"
+              ? "bg-blue-900/40 text-blue-300"
+              : "text-zinc-400 hover:text-white"
+          }
           onClick={() => {
             setViewMode("list");
             setSelectedGoal(null);
@@ -568,7 +596,11 @@ export default function StrategyArchivePage() {
         </Button>
         <Button
           variant={viewMode === "timeline" ? "solid" : "light"}
-          className={viewMode === "timeline" ? "bg-orange-900/40 text-orange-300" : "text-zinc-400 hover:text-white"}
+          className={
+            viewMode === "timeline"
+              ? "bg-orange-900/40 text-orange-300"
+              : "text-zinc-400 hover:text-white"
+          }
           onClick={() => {
             setViewMode("timeline");
             setSelectedGoal(null);
@@ -614,27 +646,43 @@ export default function StrategyArchivePage() {
               </Button>
               <div className="bg-zinc-900 rounded-lg border border-zinc-700 p-6">
                 <div className="mb-6">
-                  <h2 className="text-3xl font-bold text-white mb-2">{selectedGoal.title}</h2>
+                  <h2 className="text-3xl font-bold text-white mb-2">
+                    {selectedGoal.title}
+                  </h2>
                   <div className="flex gap-2 flex-wrap">
-                    <Chip variant="flat" className={getStatusColor(selectedGoal.status)} size="sm">
+                    <Chip
+                      variant="flat"
+                      className={getStatusColor(selectedGoal.status)}
+                      size="sm"
+                    >
                       {selectedGoal.status.replace("_", " ")}
                     </Chip>
                     {selectedGoal.fiscal_year && (
-                      <Chip variant="flat" className="bg-cyan-900/40 text-cyan-300" size="sm">
+                      <Chip
+                        variant="flat"
+                        className="bg-cyan-900/40 text-cyan-300"
+                        size="sm"
+                      >
                         FY {selectedGoal.fiscal_year}
                       </Chip>
                     )}
                   </div>
                   {selectedGoal.description && (
-                    <p className="text-zinc-300 mt-4">{selectedGoal.description}</p>
+                    <p className="text-zinc-300 mt-4">
+                      {selectedGoal.description}
+                    </p>
                   )}
                 </div>
-                
+
                 {/* Progress */}
                 <div className="mb-6">
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium text-zinc-300">Progress</span>
-                    <span className="text-sm font-bold text-cyan-400">{selectedGoal.progress}%</span>
+                    <span className="text-sm font-medium text-zinc-300">
+                      Progress
+                    </span>
+                    <span className="text-sm font-bold text-cyan-400">
+                      {selectedGoal.progress}%
+                    </span>
                   </div>
                   <div className="w-full bg-zinc-800 rounded-full h-2">
                     <div
@@ -647,18 +695,28 @@ export default function StrategyArchivePage() {
                 {/* Sub-goals */}
                 {selectedGoal.children && selectedGoal.children.length > 0 && (
                   <div className="mt-8 pt-6 border-t border-zinc-700">
-                    <h3 className="text-lg font-bold text-white mb-4">Sub-Goals ({selectedGoal.children.length})</h3>
+                    <h3 className="text-lg font-bold text-white mb-4">
+                      Sub-Goals ({selectedGoal.children.length})
+                    </h3>
                     <div className="space-y-3">
                       {selectedGoal.children.map((child) => (
                         <div key={child.id} className="bg-zinc-800 rounded p-4">
                           <div className="flex justify-between items-start mb-2">
-                            <h4 className="font-semibold text-white">{child.title}</h4>
-                            <Chip variant="flat" className={getStatusColor(child.status)} size="sm">
+                            <h4 className="font-semibold text-white">
+                              {child.title}
+                            </h4>
+                            <Chip
+                              variant="flat"
+                              className={getStatusColor(child.status)}
+                              size="sm"
+                            >
                               {child.progress}%
                             </Chip>
                           </div>
                           {child.description && (
-                            <p className="text-sm text-zinc-400 mb-2">{child.description}</p>
+                            <p className="text-sm text-zinc-400 mb-2">
+                              {child.description}
+                            </p>
                           )}
                           <div className="w-full bg-zinc-700 rounded-full h-1">
                             <div
@@ -667,7 +725,9 @@ export default function StrategyArchivePage() {
                             ></div>
                           </div>
                           {child.linkedTasksCount ? (
-                            <p className="text-xs text-cyan-300 mt-2">📊 {child.linkedTasksCount} project(s)</p>
+                            <p className="text-xs text-cyan-300 mt-2">
+                              📊 {child.linkedTasksCount} project(s)
+                            </p>
                           ) : null}
                         </div>
                       ))}
@@ -678,7 +738,9 @@ export default function StrategyArchivePage() {
             </>
           ) : (
             <>
-              <p className="text-zinc-400 mb-4">Select an objective from the diagram view to see details</p>
+              <p className="text-zinc-400 mb-4">
+                Select an objective from the diagram view to see details
+              </p>
               <Button
                 onClick={() => setViewMode("simplified-diagram")}
                 variant="light"
@@ -713,43 +775,57 @@ export default function StrategyArchivePage() {
             <div className="space-y-4">
               {/* Group goals by fiscal year */}
               {Array.from(
-                new Set(filteredGoals.map((g) => g.fiscal_year || "No Year"))
+                new Set(filteredGoals.map((g) => g.fiscal_year || "No Year")),
               )
                 .sort()
                 .map((year) => {
                   const yearGoals = filteredGoals.filter(
-                    (g) => (g.fiscal_year || "No Year") === year
+                    (g) => (g.fiscal_year || "No Year") === year,
                   );
                   return (
-                    <div key={year} className="bg-zinc-900 rounded-lg border border-zinc-700 p-4">
-                      <h3 className="text-lg font-bold text-white mb-4">📅 {year}</h3>
+                    <div
+                      key={year}
+                      className="bg-zinc-900 rounded-lg border border-zinc-700 p-4"
+                    >
+                      <h3 className="text-lg font-bold text-white mb-4">
+                        📅 {year}
+                      </h3>
                       <div className="space-y-3">
                         {yearGoals.map((goal) => (
                           <div
                             key={goal.id}
                             className="bg-zinc-800 rounded p-3 border-l-4"
                             style={{
-                              borderColor: goal.status === "active"
-                                ? "#06b6d4"
-                                : goal.status === "achieved"
-                                ? "#10b981"
-                                : goal.status === "on_hold"
-                                ? "#f97316"
-                                : "#ef4444",
+                              borderColor:
+                                goal.status === "active"
+                                  ? "#06b6d4"
+                                  : goal.status === "achieved"
+                                    ? "#10b981"
+                                    : goal.status === "on_hold"
+                                      ? "#f97316"
+                                      : "#ef4444",
                             }}
                           >
                             <div className="flex justify-between items-start">
                               <div className="flex-1">
-                                <h4 className="font-semibold text-white">{goal.title}</h4>
+                                <h4 className="font-semibold text-white">
+                                  {goal.title}
+                                </h4>
                                 {goal.description && (
-                                  <p className="text-sm text-zinc-400 mt-1">{goal.description}</p>
+                                  <p className="text-sm text-zinc-400 mt-1">
+                                    {goal.description}
+                                  </p>
                                 )}
                               </div>
                               <div className="text-right">
-                                <span className="text-sm font-bold text-cyan-400">{goal.progress}%</span>
+                                <span className="text-sm font-bold text-cyan-400">
+                                  {goal.progress}%
+                                </span>
                                 {goal.target_date && (
                                   <p className="text-xs text-zinc-500 mt-1">
-                                    {new Date(goal.target_date).toLocaleDateString()}
+                                    {new Date(
+                                      goal.target_date,
+                                    ).toLocaleDateString()}
                                   </p>
                                 )}
                               </div>
@@ -766,9 +842,9 @@ export default function StrategyArchivePage() {
       )}
 
       {/* Modal */}
-      <Modal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
         size="lg"
         isDismissable={false}
         isKeyboardDismissDisabled={true}
@@ -782,7 +858,9 @@ export default function StrategyArchivePage() {
               label="Title *"
               placeholder="Enter goal title"
               value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, title: e.target.value })
+              }
               isInvalid={!!errors.title}
               errorMessage={errors.title}
               className="bg-zinc-800"
@@ -799,14 +877,15 @@ export default function StrategyArchivePage() {
               className="bg-zinc-800"
             >
               {goals
-                .filter(g => g.id !== editingGoal?.id) // Exclude self to prevent circular references
+                .filter((g) => g.id !== editingGoal?.id) // Exclude self to prevent circular references
                 .map((goal) => {
                   // Show goal with indent based on hierarchy level
                   const level = countGoalLevel(goal, goals);
                   const indent = "  ".repeat(level);
                   return (
                     <SelectItem key={goal.id} value={goal.id}>
-                      {indent}{goal.title}
+                      {indent}
+                      {goal.title}
                     </SelectItem>
                   );
                 })}

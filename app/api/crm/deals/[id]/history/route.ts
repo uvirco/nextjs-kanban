@@ -4,7 +4,7 @@ import { auth } from "@/auth";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const session = await auth();
@@ -26,14 +26,17 @@ export async function GET(
         notes,
         changedByUserId,
         changedByUser:changedByUserId(id, name, email)
-      `
+      `,
       )
       .eq("dealId", parseInt(id))
       .order("changedAt", { ascending: false });
 
     if (error) {
       // If table doesn't exist, return empty array instead of error
-      if (error.code === "PGRST205" || error.message?.includes("Could not find the table")) {
+      if (
+        error.code === "PGRST205" ||
+        error.message?.includes("Could not find the table")
+      ) {
         return NextResponse.json({ history: [] });
       }
       console.error("Error fetching deal stage history:", error);
@@ -45,7 +48,7 @@ export async function GET(
     console.error("Error in deal stage history API:", error);
     return NextResponse.json(
       { error: "Failed to fetch stage history" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

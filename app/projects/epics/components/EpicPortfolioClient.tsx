@@ -128,28 +128,28 @@ export default function EpicPortfolioClient({
     "priority" | "timeline" | "matrix" | "table" | "board" | "burndown" | "grid"
   >(getInitialState("view", DEFAULT_SAVED_STATE.view));
   const [filter, setFilter] = useState<"all" | "active" | "backlog">(
-    getInitialState("filter", DEFAULT_SAVED_STATE.filter)
+    getInitialState("filter", DEFAULT_SAVED_STATE.filter),
   );
   const [departmentFilter, setDepartmentFilter] = useState<string>(
-    getInitialState("departmentFilter", DEFAULT_SAVED_STATE.departmentFilter)
+    getInitialState("departmentFilter", DEFAULT_SAVED_STATE.departmentFilter),
   );
   const [riskFilter, setRiskFilter] = useState<string>(
-    getInitialState("riskFilter", DEFAULT_SAVED_STATE.riskFilter)
+    getInitialState("riskFilter", DEFAULT_SAVED_STATE.riskFilter),
   );
   const [businessValueFilter, setBusinessValueFilter] = useState<string>(
     getInitialState(
       "businessValueFilter",
-      DEFAULT_SAVED_STATE.businessValueFilter
-    )
+      DEFAULT_SAVED_STATE.businessValueFilter,
+    ),
   );
   const [dueDateFilter, setDueDateFilter] = useState<string>(
-    getInitialState("dueDateFilter", DEFAULT_SAVED_STATE.dueDateFilter)
+    getInitialState("dueDateFilter", DEFAULT_SAVED_STATE.dueDateFilter),
   );
   const [showColumnSettings, setShowColumnSettings] = useState<boolean>(
     getInitialState(
       "showColumnSettings",
-      DEFAULT_SAVED_STATE.showColumnSettings
-    )
+      DEFAULT_SAVED_STATE.showColumnSettings,
+    ),
   );
   const [columnVisibility, setColumnVisibility] = useState<
     Record<string, boolean>
@@ -167,7 +167,7 @@ export default function EpicPortfolioClient({
     | "totalTasks"
   >(getInitialState("sortField", DEFAULT_SAVED_STATE.sortField));
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">(
-    getInitialState("sortDirection", DEFAULT_SAVED_STATE.sortDirection)
+    getInitialState("sortDirection", DEFAULT_SAVED_STATE.sortDirection),
   );
 
   // Save state to localStorage whenever it changes
@@ -234,7 +234,7 @@ export default function EpicPortfolioClient({
 
   // Get unique departments for filter dropdown
   const departments = Array.from(
-    new Set(epics.map((epic) => epic.department?.name).filter(Boolean))
+    new Set(epics.map((epic) => epic.department?.name).filter(Boolean)),
   ).sort();
 
   const filteredEpics = epics.filter((epic) => {
@@ -284,7 +284,7 @@ export default function EpicPortfolioClient({
           break;
         case "this-month":
           const monthFromNow = new Date(
-            now.getTime() + 30 * 24 * 60 * 60 * 1000
+            now.getTime() + 30 * 24 * 60 * 60 * 1000,
           );
           if (dueDate > monthFromNow || dueDate < now) return false;
           break;
@@ -292,12 +292,12 @@ export default function EpicPortfolioClient({
           const nextMonth = new Date(
             now.getFullYear(),
             now.getMonth() + 1,
-            now.getDate()
+            now.getDate(),
           );
           const monthAfter = new Date(
             now.getFullYear(),
             now.getMonth() + 2,
-            now.getDate()
+            now.getDate(),
           );
           if (dueDate < nextMonth || dueDate >= monthAfter) return false;
           break;
@@ -328,7 +328,12 @@ export default function EpicPortfolioClient({
             Print
           </button>
           <button
-            onClick={() => exportTableToPDF("portfolio-table", `epics-${new Date().toISOString().split('T')[0]}.pdf`)}
+            onClick={() =>
+              exportTableToPDF(
+                "portfolio-table",
+                `epics-${new Date().toISOString().split("T")[0]}.pdf`,
+              )
+            }
             className="flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-700 rounded-lg transition-colors"
             title="Export to PDF"
           >

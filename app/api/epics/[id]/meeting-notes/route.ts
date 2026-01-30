@@ -6,7 +6,7 @@ import { ActivityType } from "@/types/types";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const session = await auth();
@@ -25,7 +25,7 @@ export async function GET(
         epic:Task!epic_id(id, title),
         action_items:meeting_action_items(*),
         createdBy:User!created_by(name, email)
-      `
+      `,
       )
       .eq("epic_id", epicId)
       .order("meeting_date", { ascending: false });
@@ -34,7 +34,7 @@ export async function GET(
       console.error("Error fetching meeting notes:", error);
       return NextResponse.json(
         { error: "Failed to fetch meeting notes" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -61,7 +61,7 @@ export async function GET(
 
       const allAssigneeIds = meetingNotes
         .flatMap((note: any) =>
-          (note.action_items || []).map((ai: any) => ai.assignee_text)
+          (note.action_items || []).map((ai: any) => ai.assignee_text),
         )
         .filter((id: string) => id);
 
@@ -72,7 +72,7 @@ export async function GET(
           .in("id", allAssigneeIds);
 
         const assigneeMap = new Map(
-          assignees?.map((u: any) => [u.id, u]) || []
+          assignees?.map((u: any) => [u.id, u]) || [],
         );
 
         meetingNotes.forEach((note: any) => {
@@ -88,14 +88,14 @@ export async function GET(
     console.error("Failed to fetch meeting notes:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const session = await auth();
@@ -127,7 +127,7 @@ export async function POST(
       .insert({
         title,
         meeting_type: meetingType || meeting_type || "other",
-        meeting_date: (meetingDate || meeting_date) || new Date().toISOString(),
+        meeting_date: meetingDate || meeting_date || new Date().toISOString(),
         attendees_text: attendees || [],
         agenda,
         notes,
@@ -150,7 +150,7 @@ export async function POST(
       console.error("Error creating meeting note:", error);
       return NextResponse.json(
         { error: "Failed to create meeting note" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -189,7 +189,7 @@ export async function POST(
         epic:Task!epic_id(id, title),
         action_items:meeting_action_items(*),
         createdBy:User(name, email)
-      `
+      `,
       )
       .eq("id", meetingNote.id)
       .single();
@@ -207,7 +207,9 @@ export async function POST(
     });
 
     await logActivity({
-      type: (type === "quick" ? "QUICK_NOTE_ADDED" : "MEETING_NOTE_ADDED") as ActivityType,
+      type: (type === "quick"
+        ? "QUICK_NOTE_ADDED"
+        : "MEETING_NOTE_ADDED") as ActivityType,
       content: notes || title || "", // Use the actual note content instead of a formatted description
       userId: session.user.id,
       taskId: epicId,
@@ -242,7 +244,7 @@ export async function POST(
           .in("id", assigneeIds);
 
         const assigneeMap = new Map(
-          assignees?.map((u: any) => [u.id, u]) || []
+          assignees?.map((u: any) => [u.id, u]) || [],
         );
 
         completeMeetingNote.action_items.forEach((item: any) => {
@@ -256,7 +258,7 @@ export async function POST(
     console.error("Failed to create meeting note:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

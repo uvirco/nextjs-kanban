@@ -54,9 +54,12 @@ export default function BudgetFilesTab({
               className="bg-zinc-800/50 rounded p-3 border border-zinc-700 flex items-center justify-between"
             >
               <div className="flex-1">
-                <p className="font-semibold text-white text-sm">{file.filename}</p>
+                <p className="font-semibold text-white text-sm">
+                  {file.filename}
+                </p>
                 <p className="text-xs text-zinc-400">
-                  {formatFileSize(file.size || 0)} • {formatDate(file.createdAt)}
+                  {formatFileSize(file.size || 0)} •{" "}
+                  {formatDate(file.createdAt)}
                 </p>
                 <p className="text-xs text-zinc-500">
                   by {file.user?.name || file.user?.email || "Unknown"}

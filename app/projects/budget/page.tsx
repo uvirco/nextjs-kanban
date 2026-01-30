@@ -24,11 +24,11 @@ export default function BudgetPage() {
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<BudgetEntry | null>(null);
   const [allUsers, setAllUsers] = useState<any[]>([]);
-  
+
   // Sorting state
   const [sortColumn, setSortColumn] = useState<string>("date");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
-  
+
   // Filtering state
   const [filterType, setFilterType] = useState<string>("");
   const [filterFrequency, setFilterFrequency] = useState<string>("");
@@ -38,7 +38,7 @@ export default function BudgetPage() {
   const [filterDepartment, setFilterDepartment] = useState<string>("");
   const [filterProject, setFilterProject] = useState<string>("");
   const [filterUser, setFilterUser] = useState<string>("");
-  
+
   // Expanded rows state
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
@@ -54,7 +54,7 @@ export default function BudgetPage() {
     const { data, error } = await supabase
       .from("budget_entries")
       .select(
-        "*, epic:Task!epic_id(id, title), department:Department!department_id(id, name)"
+        "*, epic:Task!epic_id(id, title), department:Department!department_id(id, name)",
       )
       .order("date", { ascending: false });
 
@@ -64,7 +64,12 @@ export default function BudgetPage() {
       return;
     }
 
-    console.log("Budget entries fetched:", data?.slice(0, 2).map((e: any) => ({ id: e.id, created_by: e.created_by })));
+    console.log(
+      "Budget entries fetched:",
+      data
+        ?.slice(0, 2)
+        .map((e: any) => ({ id: e.id, created_by: e.created_by })),
+    );
 
     // Collect unique user IDs and fetch user details
     const userIds = new Set<string>();
@@ -96,14 +101,14 @@ export default function BudgetPage() {
       }
       return {
         ...entry,
-        user: entry.created_by ? userMap[entry.created_by] : null
+        user: entry.created_by ? userMap[entry.created_by] : null,
       };
     });
 
-    const uniqueUsers = Array.from(usersSet).map(id => ({
+    const uniqueUsers = Array.from(usersSet).map((id) => ({
       id,
       name: userMap[id]?.name || id,
-      email: userMap[id]?.email || id
+      email: userMap[id]?.email || id,
     }));
     setAllUsers(uniqueUsers);
 
@@ -142,7 +147,8 @@ export default function BudgetPage() {
   const formatDate = (dateValue: string | Date | null | undefined) => {
     if (!dateValue) return "-";
     try {
-      const date = typeof dateValue === "string" ? new Date(dateValue) : dateValue;
+      const date =
+        typeof dateValue === "string" ? new Date(dateValue) : dateValue;
       if (isNaN(date.getTime())) return "-";
       return date.toLocaleDateString();
     } catch {
@@ -170,7 +176,8 @@ export default function BudgetPage() {
   const calculateAge = (createdAt: string | Date | null | undefined) => {
     if (!createdAt) return 0;
     try {
-      const created = typeof createdAt === "string" ? new Date(createdAt) : createdAt;
+      const created =
+        typeof createdAt === "string" ? new Date(createdAt) : createdAt;
       if (isNaN(created.getTime())) return 0;
       const today = new Date();
       const diffTime = Math.abs(today.getTime() - created.getTime());
@@ -181,10 +188,7 @@ export default function BudgetPage() {
     }
   };
 
-  const calculateAnnualTotal = (
-    amount: number,
-    frequency: string
-  ): number => {
+  const calculateAnnualTotal = (amount: number, frequency: string): number => {
     const frequencyMultipliers: Record<string, number> = {
       "One-time": 1,
       Weekly: 52,
@@ -284,8 +288,13 @@ export default function BudgetPage() {
   };
 
   const SortIcon = ({ column }: { column: string }) => {
-    if (sortColumn !== column) return <span className="text-xs text-zinc-600">⇅</span>;
-    return sortDirection === "asc" ? <span className="text-xs">▲</span> : <span className="text-xs">▼</span>;
+    if (sortColumn !== column)
+      return <span className="text-xs text-zinc-600">⇅</span>;
+    return sortDirection === "asc" ? (
+      <span className="text-xs">▲</span>
+    ) : (
+      <span className="text-xs">▼</span>
+    );
   };
 
   if (loading) {
@@ -324,7 +333,9 @@ export default function BudgetPage() {
             </select>
           </div>
           <div>
-            <label className="text-xs text-zinc-400 block mb-1">Frequency</label>
+            <label className="text-xs text-zinc-400 block mb-1">
+              Frequency
+            </label>
             <select
               value={filterFrequency}
               onChange={(e) => setFilterFrequency(e.target.value)}
@@ -338,18 +349,23 @@ export default function BudgetPage() {
             </select>
           </div>
           <div>
-            <label className="text-xs text-zinc-400 block mb-1">Fiscal Year</label>
+            <label className="text-xs text-zinc-400 block mb-1">
+              Fiscal Year
+            </label>
             <select
               value={filterFiscalYear}
               onChange={(e) => setFilterFiscalYear(e.target.value)}
               className="w-full px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-sm text-zinc-300"
             >
               <option value="">All Fiscal Years</option>
-              {[...new Set(budgetEntries.map((e) => e.fiscal_year))].sort().reverse().map((year) => (
-                <option key={year} value={year}>
-                  {year}
-                </option>
-              ))}
+              {[...new Set(budgetEntries.map((e) => e.fiscal_year))]
+                .sort()
+                .reverse()
+                .map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
             </select>
           </div>
           <div>
@@ -360,11 +376,13 @@ export default function BudgetPage() {
               className="w-full px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-sm text-zinc-300"
             >
               <option value="">All Categories</option>
-              {[...new Set(budgetEntries.map((e) => e.category))].sort().map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
+              {[...new Set(budgetEntries.map((e) => e.category))]
+                .sort()
+                .map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
             </select>
           </div>
           <div>
@@ -409,7 +427,7 @@ export default function BudgetPage() {
                 .map((e) => e.epic)
                 .filter(
                   (epic, idx, arr) =>
-                    epic && arr.findIndex((ep) => ep?.id === epic.id) === idx
+                    epic && arr.findIndex((ep) => ep?.id === epic.id) === idx,
                 )
                 .sort((a, b) => (a?.title || "").localeCompare(b?.title || ""))
                 .map((epic) => (
@@ -420,7 +438,9 @@ export default function BudgetPage() {
             </select>
           </div>
           <div>
-            <label className="text-xs text-zinc-400 block mb-1">Department</label>
+            <label className="text-xs text-zinc-400 block mb-1">
+              Department
+            </label>
             <select
               value={filterDepartment}
               onChange={(e) => setFilterDepartment(e.target.value)}
@@ -432,7 +452,7 @@ export default function BudgetPage() {
                 .map((e) => e.department)
                 .filter(
                   (dept, idx, arr) =>
-                    dept && arr.findIndex((d) => d?.id === dept.id) === idx
+                    dept && arr.findIndex((d) => d?.id === dept.id) === idx,
                 )
                 .sort((a, b) => (a?.name || "").localeCompare(b?.name || ""))
                 .map((dept) => (
@@ -443,7 +463,14 @@ export default function BudgetPage() {
             </select>
           </div>
         </div>
-        {(filterType || filterFrequency || filterFiscalYear || filterCategory || filterStatus || filterProject || filterDepartment || filterUser) && (
+        {(filterType ||
+          filterFrequency ||
+          filterFiscalYear ||
+          filterCategory ||
+          filterStatus ||
+          filterProject ||
+          filterDepartment ||
+          filterUser) && (
           <button
             onClick={() => {
               setFilterType("");
@@ -467,29 +494,53 @@ export default function BudgetPage() {
           <thead className="bg-zinc-800">
             <tr>
               <th className="px-4 py-3 text-left w-8"></th>
-              <th className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700" onClick={() => handleSort("date")}>
+              <th
+                className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700"
+                onClick={() => handleSort("date")}
+              >
                 Date <SortIcon column="date" />
               </th>
-              <th className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700" onClick={() => handleSort("status")}>
+              <th
+                className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700"
+                onClick={() => handleSort("status")}
+              >
                 Status <SortIcon column="status" />
               </th>
-              <th className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700" onClick={() => handleSort("fiscal_year")}>
+              <th
+                className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700"
+                onClick={() => handleSort("fiscal_year")}
+              >
                 Fiscal Year <SortIcon column="fiscal_year" />
               </th>
-              <th className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700" onClick={() => handleSort("epic")}>
+              <th
+                className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700"
+                onClick={() => handleSort("epic")}
+              >
                 Linked To <SortIcon column="epic" />
               </th>
-              <th className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700" onClick={() => handleSort("entry_type")}>
+              <th
+                className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700"
+                onClick={() => handleSort("entry_type")}
+              >
                 Type <SortIcon column="entry_type" />
               </th>
-              <th className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700" onClick={() => handleSort("category")}>
+              <th
+                className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700"
+                onClick={() => handleSort("category")}
+              >
                 Category <SortIcon column="category" />
               </th>
               <th className="px-4 py-3 text-left">Description</th>
-              <th className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700" onClick={() => handleSort("created_by")}>
+              <th
+                className="px-4 py-3 text-left cursor-pointer hover:bg-zinc-700"
+                onClick={() => handleSort("created_by")}
+              >
                 Created By <SortIcon column="created_by" />
               </th>
-              <th className="px-4 py-3 text-right cursor-pointer hover:bg-zinc-700" onClick={() => handleSort("amount")}>
+              <th
+                className="px-4 py-3 text-right cursor-pointer hover:bg-zinc-700"
+                onClick={() => handleSort("amount")}
+              >
                 Amount <SortIcon column="amount" />
               </th>
               <th className="px-4 py-3 text-left">Actions</th>
@@ -501,20 +552,28 @@ export default function BudgetPage() {
                 <tr className="border-t border-zinc-800">
                   <td className="px-4 py-3 text-center">
                     {entry.children && entry.children.length > 0 && (
-                      <button onClick={() => toggleRowExpanded(entry.id)} className="text-blue-400 hover:text-blue-300">
+                      <button
+                        onClick={() => toggleRowExpanded(entry.id)}
+                        className="text-blue-400 hover:text-blue-300"
+                      >
                         {expandedRows.has(entry.id) ? "▼" : "▶"}
                       </button>
                     )}
                   </td>
                   <td className="px-4 py-3">{formatDate(entry.date)}</td>
                   <td className="px-4 py-3">
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${
-                      entry.status === 'PLANNED' ? 'bg-yellow-900 text-yellow-200' :
-                      entry.status === 'ORDERED' ? 'bg-blue-900 text-blue-200' :
-                      entry.status === 'RECEIVED' ? 'bg-green-900 text-green-200' :
-                      'bg-purple-900 text-purple-200'
-                    }`}>
-                      {entry.status || 'PLANNED'}
+                    <span
+                      className={`px-2 py-1 rounded text-xs font-medium ${
+                        entry.status === "PLANNED"
+                          ? "bg-yellow-900 text-yellow-200"
+                          : entry.status === "ORDERED"
+                            ? "bg-blue-900 text-blue-200"
+                            : entry.status === "RECEIVED"
+                              ? "bg-green-900 text-green-200"
+                              : "bg-purple-900 text-purple-200"
+                      }`}
+                    >
+                      {entry.status || "PLANNED"}
                     </span>
                   </td>
                   <td className="px-4 py-3">
@@ -524,24 +583,32 @@ export default function BudgetPage() {
                   </td>
                   <td className="px-4 py-3">
                     {entry.epic ? (
-                      <span className="text-blue-400 text-xs">{entry.epic.title}</span>
+                      <span className="text-blue-400 text-xs">
+                        {entry.epic.title}
+                      </span>
                     ) : entry.department ? (
-                      <span className="text-purple-400 text-xs">{entry.department.name}</span>
+                      <span className="text-purple-400 text-xs">
+                        {entry.department.name}
+                      </span>
                     ) : (
                       <span className="text-zinc-500 text-xs">-</span>
                     )}
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`px-2 py-1 rounded text-xs ${
-                      entry.entry_type === "Budget"
-                        ? "bg-blue-900 text-blue-200"
-                        : "bg-red-900 text-red-200"
-                    }`}>
+                    <span
+                      className={`px-2 py-1 rounded text-xs ${
+                        entry.entry_type === "Budget"
+                          ? "bg-blue-900 text-blue-200"
+                          : "bg-red-900 text-red-200"
+                      }`}
+                    >
                       {entry.entry_type}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-sm">{entry.category}</td>
-                  <td className="px-4 py-3 text-sm">{entry.description || "-"}</td>
+                  <td className="px-4 py-3 text-sm">
+                    {entry.description || "-"}
+                  </td>
                   <td className="px-4 py-3 text-sm text-zinc-400">
                     {entry.user?.name || entry.user?.email || "-"}
                   </td>
@@ -550,16 +617,18 @@ export default function BudgetPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-2">
-                      <Button 
-                        variant="flat" 
-                        size="sm" 
-                        onClick={() => router.push(`/projects/budget/${entry.id}`)}
+                      <Button
+                        variant="flat"
+                        size="sm"
+                        onClick={() =>
+                          router.push(`/projects/budget/${entry.id}`)
+                        }
                       >
                         View
                       </Button>
-                      <Button 
-                        variant="solid" 
-                        size="sm" 
+                      <Button
+                        variant="solid"
+                        size="sm"
                         color="primary"
                         onClick={() => {
                           setEditingEntry(entry);
@@ -571,61 +640,83 @@ export default function BudgetPage() {
                     </div>
                   </td>
                 </tr>
-                
+
                 {/* Show children if expanded */}
-                {expandedRows.has(entry.id) && entry.children && entry.children.length > 0 && (
-                  <>
-                    {entry.children.map((child) => (
-                      <tr key={child.id} className="border-t border-zinc-700 bg-zinc-800/30">
-                        <td className="px-4 py-3"></td>
-                        <td className="px-4 py-3 pl-8 text-sm">├ {formatDate(child.date)}</td>
-                        <td className="px-4 py-3">
-                          <span className={`px-2 py-1 rounded text-xs font-medium ${
-                            child.status === 'PLANNED' ? 'bg-yellow-900 text-yellow-200' :
-                            child.status === 'ORDERED' ? 'bg-blue-900 text-blue-200' :
-                            child.status === 'RECEIVED' ? 'bg-green-900 text-green-200' :
-                            'bg-purple-900 text-purple-200'
-                          }`}>
-                            {child.status || 'PLANNED'}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-sm text-zinc-500">{child.fiscal_year}</td>
-                        <td className="px-4 py-3 text-sm text-zinc-500">-</td>
-                        <td className="px-4 py-3 text-sm">{child.entry_type}</td>
-                        <td className="px-4 py-3 text-sm">{child.category}</td>
-                        <td className="px-4 py-3 text-sm text-zinc-400">{child.description || "-"}</td>
-                        <td className="px-4 py-3 text-sm text-zinc-400">
-                          {child.user?.name || child.user?.email || "-"}
-                        </td>
-                        <td className="px-4 py-3 text-right font-mono text-sm">
-                          {formatCurrency(child.amount, child.currency)}
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="flex gap-2">
-                            <Button 
-                              variant="flat" 
-                              size="sm" 
-                              onClick={() => router.push(`/projects/budget/${child.id}`)}
+                {expandedRows.has(entry.id) &&
+                  entry.children &&
+                  entry.children.length > 0 && (
+                    <>
+                      {entry.children.map((child) => (
+                        <tr
+                          key={child.id}
+                          className="border-t border-zinc-700 bg-zinc-800/30"
+                        >
+                          <td className="px-4 py-3"></td>
+                          <td className="px-4 py-3 pl-8 text-sm">
+                            ├ {formatDate(child.date)}
+                          </td>
+                          <td className="px-4 py-3">
+                            <span
+                              className={`px-2 py-1 rounded text-xs font-medium ${
+                                child.status === "PLANNED"
+                                  ? "bg-yellow-900 text-yellow-200"
+                                  : child.status === "ORDERED"
+                                    ? "bg-blue-900 text-blue-200"
+                                    : child.status === "RECEIVED"
+                                      ? "bg-green-900 text-green-200"
+                                      : "bg-purple-900 text-purple-200"
+                              }`}
                             >
-                              View
-                            </Button>
-                            <Button 
-                              variant="solid" 
-                              size="sm" 
-                              color="primary"
-                              onClick={() => {
-                                setEditingEntry(child);
-                                setIsModalOpen(true);
-                              }}
-                            >
-                              Edit
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </>
-                )}
+                              {child.status || "PLANNED"}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-sm text-zinc-500">
+                            {child.fiscal_year}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-zinc-500">-</td>
+                          <td className="px-4 py-3 text-sm">
+                            {child.entry_type}
+                          </td>
+                          <td className="px-4 py-3 text-sm">
+                            {child.category}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-zinc-400">
+                            {child.description || "-"}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-zinc-400">
+                            {child.user?.name || child.user?.email || "-"}
+                          </td>
+                          <td className="px-4 py-3 text-right font-mono text-sm">
+                            {formatCurrency(child.amount, child.currency)}
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex gap-2">
+                              <Button
+                                variant="flat"
+                                size="sm"
+                                onClick={() =>
+                                  router.push(`/projects/budget/${child.id}`)
+                                }
+                              >
+                                View
+                              </Button>
+                              <Button
+                                variant="solid"
+                                size="sm"
+                                color="primary"
+                                onClick={() => {
+                                  setEditingEntry(child);
+                                  setIsModalOpen(true);
+                                }}
+                              >
+                                Edit
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </>
+                  )}
               </React.Fragment>
             ))}
             {budgetEntries.length > 0 && (
@@ -636,13 +727,13 @@ export default function BudgetPage() {
                 <td className="px-4 py-3 text-right font-mono">
                   {formatCurrency(
                     calculateTotalAmounts().totalAmount,
-                    budgetEntries[0]?.currency || "USD"
+                    budgetEntries[0]?.currency || "USD",
                   )}
                 </td>
                 <td className="px-4 py-3 text-right font-mono text-green-400">
                   {formatCurrency(
                     calculateTotalAmounts().totalAnnual,
-                    budgetEntries[0]?.currency || "USD"
+                    budgetEntries[0]?.currency || "USD",
                   )}
                 </td>
                 <td colSpan={5}></td>
@@ -654,7 +745,9 @@ export default function BudgetPage() {
                   colSpan={14}
                   className="px-4 py-8 text-center text-zinc-500"
                 >
-                  {budgetEntries.length === 0 ? "No budget entries found. Add your first entry!" : "No entries match the selected filters."}
+                  {budgetEntries.length === 0
+                    ? "No budget entries found. Add your first entry!"
+                    : "No entries match the selected filters."}
                 </td>
               </tr>
             )}
@@ -667,7 +760,7 @@ export default function BudgetPage() {
         onClose={() => {
           setIsModalOpen(false);
           setEditingEntry(null);
-        }} 
+        }}
         onSuccess={() => {
           setIsModalOpen(false);
           setEditingEntry(null);

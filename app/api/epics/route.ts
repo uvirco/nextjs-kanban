@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
         createdAt,
         updatedAt,
         departmentId
-      `
+      `,
       )
       .eq("taskType", "EPIC");
 
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
     console.error("Failed to fetch epics:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
     if (!title) {
       return NextResponse.json(
         { error: "Missing required field: title" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
         {
           error: `Epics board not found. Please ensure the database migration has been run. Error: ${boardError?.message || "Unknown"}`,
         },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
         {
           error: `Epics board Backlog column not found. Error: ${columnError?.message || "Unknown"}`,
         },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
       console.error("Error creating epic:", epicError);
       return NextResponse.json(
         { error: "Failed to create epic" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -169,7 +169,7 @@ export async function POST(request: NextRequest) {
     console.error("API error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -69,7 +69,14 @@ export default function ActivityFeedSection({
   useEffect(() => {
     fetchActivities();
     fetchDepartments();
-  }, [dateRange, filterType, filterEntity, filterTimeRange, filterDepartment, filterProject]);
+  }, [
+    dateRange,
+    filterType,
+    filterEntity,
+    filterTimeRange,
+    filterDepartment,
+    filterProject,
+  ]);
 
   useEffect(() => {
     fetchProjects(filterDepartment);

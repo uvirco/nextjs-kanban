@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
         .from("Task")
         .select("id")
         .eq("parentTaskId", epicId);
-      
+
       const subTaskIds = subtasks?.map((t: any) => t.id) || [];
       // Include both the epic itself and all its subtasks
       taskIds = [epicId, ...subTaskIds];
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
         task:Task!Activity_taskId_fkey(id, title, taskType),
         board:Board!Activity_boardId_fkey(id, title),
         targetUser:User!Activity_targetUserId_fkey(id, name, email)
-      `
+      `,
       )
       .order("createdAt", { ascending: false });
 
@@ -100,7 +100,7 @@ export async function GET(request: NextRequest) {
       console.error("Error fetching activities:", error);
       return NextResponse.json(
         { error: "Failed to fetch activities" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -114,7 +114,7 @@ export async function GET(request: NextRequest) {
     console.error("Failed to fetch activities:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

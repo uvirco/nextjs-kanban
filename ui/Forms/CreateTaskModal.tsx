@@ -2,7 +2,12 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { handleCreateTask } from "@/server-actions/TaskServerActions";
-import { TaskCreationData, Priority, RiskLevel, StrategicGoal } from "@/types/types";
+import {
+  TaskCreationData,
+  Priority,
+  RiskLevel,
+  StrategicGoal,
+} from "@/types/types";
 import { IconPlus } from "@tabler/icons-react";
 import { supabase } from "@/lib/supabase";
 import { Input } from "@nextui-org/input";
@@ -77,7 +82,7 @@ export default function CreateTaskModal({
 
   const handleSelectChange = (
     name: string,
-    value: string | Priority | RiskLevel
+    value: string | Priority | RiskLevel,
   ) => {
     if (value === "") {
       setFormData({ ...formData, [name]: undefined });
@@ -205,7 +210,9 @@ export default function CreateTaskModal({
               <Select
                 label="Strategic Goal"
                 placeholder="Select a strategic goal (optional)"
-                selectedKeys={formData.strategicGoalId ? [formData.strategicGoalId] : []}
+                selectedKeys={
+                  formData.strategicGoalId ? [formData.strategicGoalId] : []
+                }
                 onSelectionChange={(keys) => {
                   const selected = Array.from(keys)[0] as string | undefined;
                   if (selected) {

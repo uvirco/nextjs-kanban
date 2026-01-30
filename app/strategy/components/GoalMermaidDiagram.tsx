@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { StrategicGoal } from '@/types/types';
-import { Select, SelectItem } from '@nextui-org/select';
-import { Chip } from '@nextui-org/chip';
+import { useEffect, useState } from "react";
+import { StrategicGoal } from "@/types/types";
+import { Select, SelectItem } from "@nextui-org/select";
+import { Chip } from "@nextui-org/chip";
 
 interface GoalMermaidDiagramProps {
   goals: StrategicGoal[];
 }
 
 export default function GoalMermaidDiagram({ goals }: GoalMermaidDiagramProps) {
-  const [selectedGoalId, setSelectedGoalId] = useState<string>('');
+  const [selectedGoalId, setSelectedGoalId] = useState<string>("");
 
   // Get top-level objectives for selection
   const topLevelGoals = goals.filter((g) => !g.parent_goal_id);
@@ -29,35 +29,35 @@ export default function GoalMermaidDiagram({ goals }: GoalMermaidDiagramProps) {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'achieved':
-        return 'bg-green-900/30 border-green-700';
-      case 'on_hold':
-        return 'bg-orange-900/30 border-orange-700';
-      case 'abandoned':
-        return 'bg-red-900/30 border-red-700';
+      case "achieved":
+        return "bg-green-900/30 border-green-700";
+      case "on_hold":
+        return "bg-orange-900/30 border-orange-700";
+      case "abandoned":
+        return "bg-red-900/30 border-red-700";
       default:
-        return 'bg-blue-900/30 border-blue-700';
+        return "bg-blue-900/30 border-blue-700";
     }
   };
 
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
-      case 'achieved':
-        return 'bg-green-600 text-white';
-      case 'on_hold':
-        return 'bg-orange-600 text-white';
-      case 'abandoned':
-        return 'bg-red-600 text-white';
+      case "achieved":
+        return "bg-green-600 text-white";
+      case "on_hold":
+        return "bg-orange-600 text-white";
+      case "abandoned":
+        return "bg-red-600 text-white";
       default:
-        return 'bg-blue-600 text-white';
+        return "bg-blue-600 text-white";
     }
   };
 
   const getProgressColor = (progress: number) => {
-    if (progress >= 75) return 'bg-green-600';
-    if (progress >= 50) return 'bg-blue-600';
-    if (progress >= 25) return 'bg-yellow-600';
-    return 'bg-red-600';
+    if (progress >= 75) return "bg-green-600";
+    if (progress >= 50) return "bg-blue-600";
+    if (progress >= 25) return "bg-yellow-600";
+    return "bg-red-600";
   };
 
   return (
@@ -85,7 +85,7 @@ export default function GoalMermaidDiagram({ goals }: GoalMermaidDiagramProps) {
         </div>
         {childGoals.length > 0 && (
           <div className="text-sm text-zinc-400 pb-2">
-            {childGoals.length} sub-goal{childGoals.length !== 1 ? 's' : ''}
+            {childGoals.length} sub-goal{childGoals.length !== 1 ? "s" : ""}
           </div>
         )}
       </div>
@@ -93,26 +93,36 @@ export default function GoalMermaidDiagram({ goals }: GoalMermaidDiagramProps) {
       {/* Objective Card */}
       {selectedGoal && (
         <div className="space-y-4">
-          <div className={`${getStatusColor(selectedGoal.status)} border-2 rounded-lg p-8`}>
+          <div
+            className={`${getStatusColor(selectedGoal.status)} border-2 rounded-lg p-8`}
+          >
             <div className="flex justify-between items-start mb-4">
-              <h2 className="text-3xl font-bold text-white flex-1">{selectedGoal.title}</h2>
+              <h2 className="text-3xl font-bold text-white flex-1">
+                {selectedGoal.title}
+              </h2>
               <Chip
                 variant="flat"
                 className={`${getStatusBadgeColor(selectedGoal.status)} text-lg px-4 py-2`}
               >
-                {selectedGoal.status.replace('_', ' ')}
+                {selectedGoal.status.replace("_", " ")}
               </Chip>
             </div>
 
             {selectedGoal.description && (
-              <p className="text-zinc-300 text-lg mb-6">{selectedGoal.description}</p>
+              <p className="text-zinc-300 text-lg mb-6">
+                {selectedGoal.description}
+              </p>
             )}
 
             {/* Progress Bar */}
             <div className="mb-6">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-lg font-semibold text-zinc-300">Progress</span>
-                <span className="text-2xl font-bold text-cyan-400">{selectedGoal.progress}%</span>
+                <span className="text-lg font-semibold text-zinc-300">
+                  Progress
+                </span>
+                <span className="text-2xl font-bold text-cyan-400">
+                  {selectedGoal.progress}%
+                </span>
               </div>
               <div className="w-full bg-zinc-800 rounded-full h-4 overflow-hidden">
                 <div
@@ -127,7 +137,9 @@ export default function GoalMermaidDiagram({ goals }: GoalMermaidDiagramProps) {
               {selectedGoal.fiscal_year && (
                 <div>
                   <p className="text-zinc-500">Fiscal Year</p>
-                  <p className="text-white text-lg font-semibold">{selectedGoal.fiscal_year}</p>
+                  <p className="text-white text-lg font-semibold">
+                    {selectedGoal.fiscal_year}
+                  </p>
                 </div>
               )}
               {selectedGoal.target_date && (
@@ -141,7 +153,9 @@ export default function GoalMermaidDiagram({ goals }: GoalMermaidDiagramProps) {
               {selectedGoal.linkedTasksCount ? (
                 <div>
                   <p className="text-zinc-500">Linked Projects</p>
-                  <p className="text-white text-lg font-semibold">{selectedGoal.linkedTasksCount}</p>
+                  <p className="text-white text-lg font-semibold">
+                    {selectedGoal.linkedTasksCount}
+                  </p>
                 </div>
               ) : null}
             </div>
@@ -158,25 +172,31 @@ export default function GoalMermaidDiagram({ goals }: GoalMermaidDiagramProps) {
                     className={`${getStatusColor(goal.status)} border-2 rounded-lg p-6`}
                   >
                     <div className="flex justify-between items-start mb-3">
-                      <h4 className="text-xl font-bold text-white flex-1">{goal.title}</h4>
+                      <h4 className="text-xl font-bold text-white flex-1">
+                        {goal.title}
+                      </h4>
                       <Chip
                         variant="flat"
                         className={getStatusBadgeColor(goal.status)}
                         size="sm"
                       >
-                        {goal.status.replace('_', ' ')}
+                        {goal.status.replace("_", " ")}
                       </Chip>
                     </div>
 
                     {goal.description && (
-                      <p className="text-zinc-300 text-sm mb-4">{goal.description}</p>
+                      <p className="text-zinc-300 text-sm mb-4">
+                        {goal.description}
+                      </p>
                     )}
 
                     {/* Progress */}
                     <div className="mb-4">
                       <div className="flex justify-between items-center mb-2">
                         <span className="text-sm text-zinc-400">Progress</span>
-                        <span className="text-lg font-bold text-cyan-400">{goal.progress}%</span>
+                        <span className="text-lg font-bold text-cyan-400">
+                          {goal.progress}%
+                        </span>
                       </div>
                       <div className="w-full bg-zinc-800 rounded-full h-2">
                         <div
@@ -190,7 +210,10 @@ export default function GoalMermaidDiagram({ goals }: GoalMermaidDiagramProps) {
                     <div className="space-y-2 text-xs text-zinc-400">
                       {goal.fiscal_year && <p>FY: {goal.fiscal_year}</p>}
                       {goal.target_date && (
-                        <p>Target: {new Date(goal.target_date).toLocaleDateString()}</p>
+                        <p>
+                          Target:{" "}
+                          {new Date(goal.target_date).toLocaleDateString()}
+                        </p>
                       )}
                       {goal.linkedTasksCount ? (
                         <p>📊 {goal.linkedTasksCount} project(s)</p>

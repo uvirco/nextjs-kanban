@@ -83,7 +83,9 @@ export default function EditMeetingNoteForm({
     meetingDate: meetingNote?.meeting_date
       ? (() => {
           try {
-            return new Date(meetingNote.meeting_date).toISOString().split("T")[0];
+            return new Date(meetingNote.meeting_date)
+              .toISOString()
+              .split("T")[0];
           } catch {
             return new Date().toISOString().split("T")[0];
           }
@@ -101,7 +103,9 @@ export default function EditMeetingNoteForm({
       assignee: item.assignee_text || "",
       status: item.status,
       priority: item.priority,
-      due_date: item.due_date ? new Date(item.due_date).toISOString().split("T")[0] : "",
+      due_date: item.due_date
+        ? new Date(item.due_date).toISOString().split("T")[0]
+        : "",
     })) as Array<{
       id?: string;
       description: string;
@@ -173,11 +177,14 @@ export default function EditMeetingNoteForm({
         const updatedMeetingNote = await response.json();
         onSuccess(updatedMeetingNote);
       } else {
-        alert(`Failed to ${isUpdate ? 'update' : 'create'} meeting note`);
+        alert(`Failed to ${isUpdate ? "update" : "create"} meeting note`);
       }
     } catch (error) {
-      console.error(`Failed to ${meetingNote?.id ? 'update' : 'create'} meeting note:`, error);
-      alert(`Failed to ${meetingNote?.id ? 'update' : 'create'} meeting note`);
+      console.error(
+        `Failed to ${meetingNote?.id ? "update" : "create"} meeting note:`,
+        error,
+      );
+      alert(`Failed to ${meetingNote?.id ? "update" : "create"} meeting note`);
     } finally {
       setLoading(false);
     }
@@ -199,12 +206,12 @@ export default function EditMeetingNoteForm({
   const handleActionItemChange = (
     index: number,
     field: string,
-    value: string
+    value: string,
   ) => {
     setFormData((prev) => ({
       ...prev,
       actionItems: prev.actionItems.map((item, i) =>
-        i === index ? { ...item, [field]: value } : item
+        i === index ? { ...item, [field]: value } : item,
       ),
     }));
   };
@@ -386,7 +393,7 @@ export default function EditMeetingNoteForm({
                           handleActionItemChange(
                             index,
                             "description",
-                            e.target.value
+                            e.target.value,
                           )
                         }
                         className="w-full px-2 py-1 bg-zinc-900 border border-zinc-700 rounded text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500 text-sm"
@@ -403,7 +410,7 @@ export default function EditMeetingNoteForm({
                           handleActionItemChange(
                             index,
                             "assignee",
-                            e.target.value
+                            e.target.value,
                           )
                         }
                         className="w-full px-2 py-1 bg-zinc-900 border border-zinc-700 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
@@ -426,7 +433,7 @@ export default function EditMeetingNoteForm({
                           handleActionItemChange(
                             index,
                             "status",
-                            e.target.value
+                            e.target.value,
                           )
                         }
                         className="w-full px-2 py-1 bg-zinc-900 border border-zinc-700 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
@@ -447,7 +454,7 @@ export default function EditMeetingNoteForm({
                           handleActionItemChange(
                             index,
                             "priority",
-                            e.target.value
+                            e.target.value,
                           )
                         }
                         className="w-full px-2 py-1 bg-zinc-900 border border-zinc-700 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
@@ -471,7 +478,7 @@ export default function EditMeetingNoteForm({
                           handleActionItemChange(
                             index,
                             "due_date",
-                            e.target.value
+                            e.target.value,
                           )
                         }
                         className="px-2 py-1 bg-zinc-900 border border-zinc-700 rounded text-white focus:outline-none focus:border-blue-500 text-sm"

@@ -3,7 +3,7 @@ import jsPDF from "jspdf";
 
 export async function exportTableToPDF(
   elementId: string,
-  filename: string = "export.pdf"
+  filename: string = "export.pdf",
 ) {
   try {
     const element = document.getElementById(elementId);
@@ -32,8 +32,13 @@ export async function exportTableToPDF(
 
     // Add image to PDF, handling multiple pages
     while (heightLeft >= 0) {
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, 
-        (canvas.height * imgWidth) / canvas.width
+      pdf.addImage(
+        imgData,
+        "PNG",
+        0,
+        position,
+        imgWidth,
+        (canvas.height * imgWidth) / canvas.width,
       );
       heightLeft -= pageHeight;
       position -= pageHeight;

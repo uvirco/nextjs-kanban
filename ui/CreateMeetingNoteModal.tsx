@@ -75,7 +75,7 @@ export default function CreateMeetingNoteModal({
       const response = await fetch("/api/epics");
       console.log(
         "CreateMeetingNoteModal: Epics response status:",
-        response.status
+        response.status,
       );
       if (response.ok) {
         const data = await response.json();
@@ -85,7 +85,7 @@ export default function CreateMeetingNoteModal({
         const errorData = await response.json();
         console.error(
           "CreateMeetingNoteModal: Failed to fetch epics:",
-          errorData
+          errorData,
         );
       }
     } catch (error) {
@@ -132,7 +132,7 @@ export default function CreateMeetingNoteModal({
             attendees: formData.attendees,
             meetingDate: new Date(formData.meetingDate).toISOString(),
           }),
-        }
+        },
       );
 
       if (response.ok) {
@@ -166,12 +166,12 @@ export default function CreateMeetingNoteModal({
   const handleActionItemChange = (
     index: number,
     field: string,
-    value: string
+    value: string,
   ) => {
     setFormData((prev) => ({
       ...prev,
       actionItems: prev.actionItems.map((item, i) =>
-        i === index ? { ...item, [field]: value } : item
+        i === index ? { ...item, [field]: value } : item,
       ),
     }));
   };
@@ -378,7 +378,7 @@ export default function CreateMeetingNoteModal({
                           handleActionItemChange(
                             index,
                             "description",
-                            e.target.value
+                            e.target.value,
                           )
                         }
                         className="w-full px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500 text-sm"
@@ -395,7 +395,7 @@ export default function CreateMeetingNoteModal({
                           handleActionItemChange(
                             index,
                             "assignee",
-                            e.target.value
+                            e.target.value,
                           )
                         }
                         className="w-full px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
@@ -418,7 +418,7 @@ export default function CreateMeetingNoteModal({
                           handleActionItemChange(
                             index,
                             "status",
-                            e.target.value
+                            e.target.value,
                           )
                         }
                         className="w-full px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
@@ -440,7 +440,7 @@ export default function CreateMeetingNoteModal({
                           handleActionItemChange(
                             index,
                             "due_date",
-                            e.target.value
+                            e.target.value,
                           )
                         }
                         className="w-full px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-white focus:outline-none focus:border-blue-500 text-sm"

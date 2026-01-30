@@ -554,7 +554,7 @@ function EpicDetailPageClient({
                     searchTerm={quickNotesSearch}
                     onSave={(updatedEpic) => {
                       // Refresh activity tab when note is saved
-                      setActivityRefreshKey(prev => prev + 1);
+                      setActivityRefreshKey((prev) => prev + 1);
                     }}
                   />
                 </TabsContent>
@@ -571,8 +571,14 @@ function EpicDetailPageClient({
                   </div>
                 </TabsContent>
 
-                <TabsContent value="activity" key={`activity-${activityRefreshKey}`}>
-                  <EpicActivityTab epicId={epic.id} key={`activity-tab-${activityRefreshKey}`} />
+                <TabsContent
+                  value="activity"
+                  key={`activity-${activityRefreshKey}`}
+                >
+                  <EpicActivityTab
+                    epicId={epic.id}
+                    key={`activity-tab-${activityRefreshKey}`}
+                  />
                 </TabsContent>
 
                 <TabsContent value="team" className="space-y-6">

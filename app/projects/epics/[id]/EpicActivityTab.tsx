@@ -109,7 +109,9 @@ export default function EpicActivityTab({ epicId }: { epicId: string }) {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [expandedActivities, setExpandedActivities] = useState<Set<string>>(new Set());
+  const [expandedActivities, setExpandedActivities] = useState<Set<string>>(
+    new Set(),
+  );
 
   useEffect(() => {
     fetchActivities();
@@ -264,7 +266,9 @@ export default function EpicActivityTab({ epicId }: { epicId: string }) {
 
   return (
     <div className="space-y-3">
-      <style jsx global>{quillReadOnlyStyles}</style>
+      <style jsx global>
+        {quillReadOnlyStyles}
+      </style>
       {/* Refresh button */}
       <div className="flex justify-end mb-4">
         <button
@@ -298,11 +302,17 @@ export default function EpicActivityTab({ epicId }: { epicId: string }) {
               {/* Activity content if available */}
               {activity.content && (
                 <div className="mt-2">
-                  {activity.type === "QUICK_NOTE_ADDED" || activity.type === "MEETING_NOTE_ADDED" ? (
+                  {activity.type === "QUICK_NOTE_ADDED" ||
+                  activity.type === "MEETING_NOTE_ADDED" ? (
                     <div className="bg-zinc-800/50 rounded p-3 border border-zinc-700">
                       {!expandedActivities.has(activity.id) && (
                         <>
-                          <div className="text-xs text-zinc-300 ql-editor ql-disabled line-clamp-3" dangerouslySetInnerHTML={{ __html: activity.content }} />
+                          <div
+                            className="text-xs text-zinc-300 ql-editor ql-disabled line-clamp-3"
+                            dangerouslySetInnerHTML={{
+                              __html: activity.content,
+                            }}
+                          />
                           <button
                             onClick={() => toggleExpanded(activity.id)}
                             className="mt-2 text-xs text-blue-400 hover:text-blue-300 font-medium"
@@ -313,7 +323,12 @@ export default function EpicActivityTab({ epicId }: { epicId: string }) {
                       )}
                       {expandedActivities.has(activity.id) && (
                         <>
-                          <div className="text-xs text-zinc-300 ql-editor ql-disabled max-h-96 overflow-y-auto" dangerouslySetInnerHTML={{ __html: activity.content }} />
+                          <div
+                            className="text-xs text-zinc-300 ql-editor ql-disabled max-h-96 overflow-y-auto"
+                            dangerouslySetInnerHTML={{
+                              __html: activity.content,
+                            }}
+                          />
                           <button
                             onClick={() => toggleExpanded(activity.id)}
                             className="mt-2 text-xs text-blue-400 hover:text-blue-300 font-medium"
@@ -327,7 +342,9 @@ export default function EpicActivityTab({ epicId }: { epicId: string }) {
                     <div className="mt-2 text-xs text-zinc-400">
                       {activity.content.length > 300 ? (
                         <>
-                          {decodeHtmlEntities(activity.content.substring(0, 300))}
+                          {decodeHtmlEntities(
+                            activity.content.substring(0, 300),
+                          )}
                           ...
                         </>
                       ) : (

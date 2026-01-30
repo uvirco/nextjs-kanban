@@ -86,7 +86,9 @@ export default function BudgetDetailRight({
           <div className="p-4 space-y-4">
             <div>
               <h3 className="font-semibold text-white mb-2">Description</h3>
-              <p className="text-zinc-300">{budget.description || "No description"}</p>
+              <p className="text-zinc-300">
+                {budget.description || "No description"}
+              </p>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -107,7 +109,11 @@ export default function BudgetDetailRight({
         </Tab>
 
         <Tab key="notes" title="Notes">
-          <BudgetNotesTab budget={budget} notes={notes} onNoteAdded={fetchNotes} />
+          <BudgetNotesTab
+            budget={budget}
+            notes={notes}
+            onNoteAdded={fetchNotes}
+          />
         </Tab>
 
         <Tab key="comments" title="Comments">
@@ -119,7 +125,11 @@ export default function BudgetDetailRight({
         </Tab>
 
         <Tab key="files" title="Files">
-          <BudgetFilesTab budget={budget} files={files} onFileAdded={fetchFiles} />
+          <BudgetFilesTab
+            budget={budget}
+            files={files}
+            onFileAdded={fetchFiles}
+          />
         </Tab>
 
         <Tab key="activity" title="Activity">

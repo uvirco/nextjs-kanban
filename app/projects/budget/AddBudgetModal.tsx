@@ -118,7 +118,7 @@ export default function AddBudgetModal({
       fetchDepartments();
       fetchParentBudgets();
       fetchExistingCategories();
-      
+
       // Populate form if editing an entry
       if (editingEntry) {
         setFormData({
@@ -339,7 +339,10 @@ export default function AddBudgetModal({
         console.log("Using NextAuth session user ID:", userId);
       } else if (status === "authenticated" && session?.user?.email) {
         // Fallback: look up user by email in custom User table
-        console.log("Session loaded but no user.id, looking up by email:", session.user.email);
+        console.log(
+          "Session loaded but no user.id, looking up by email:",
+          session.user.email,
+        );
         userId = await getUserIdByEmail(session.user.email);
         if (userId) {
           console.log("Found user ID by email:", userId);
@@ -369,7 +372,7 @@ export default function AddBudgetModal({
     try {
       let result;
       console.log("Saving budget entry:", entryData);
-      
+
       if (editingEntry) {
         // Update existing entry (don't change created_by or parent_budget_id on update)
         const { parent_budget_id, created_by, ...updateData } = entryData;
@@ -390,13 +393,13 @@ export default function AddBudgetModal({
         toast.error(
           editingEntry
             ? "Failed to update budget entry"
-            : "Failed to add budget entry"
+            : "Failed to add budget entry",
         );
       } else {
         toast.success(
           editingEntry
             ? "Budget entry updated successfully"
-            : "Budget entry added successfully"
+            : "Budget entry added successfully",
         );
         onSuccess();
         setCustomCategory("");
@@ -532,9 +535,14 @@ export default function AddBudgetModal({
               </label>
               <div onClick={(e) => e.stopPropagation()}>
                 <Select
-                  selectedKeys={formData.parentBudgetId ? [formData.parentBudgetId] : []}
+                  selectedKeys={
+                    formData.parentBudgetId ? [formData.parentBudgetId] : []
+                  }
                   onSelectionChange={(keys) =>
-                    handleChange("parentBudgetId", Array.from(keys)[0] as string)
+                    handleChange(
+                      "parentBudgetId",
+                      Array.from(keys)[0] as string,
+                    )
                   }
                   placeholder="Select parent budget (for sub-items)"
                   aria-label="Parent Budget"
@@ -647,9 +655,7 @@ export default function AddBudgetModal({
                 <Input
                   type="month"
                   value={formData.purchaseDate}
-                  onChange={(e) =>
-                    handleChange("purchaseDate", e.target.value)
-                  }
+                  onChange={(e) => handleChange("purchaseDate", e.target.value)}
                 />
               </div>
             )}
@@ -772,8 +778,8 @@ export default function AddBudgetModal({
                 ? "Updating..."
                 : "Adding..."
               : editingEntry
-              ? "Update Entry"
-              : "Add Entry"}
+                ? "Update Entry"
+                : "Add Entry"}
           </Button>
         </ModalFooter>
       </ModalContent>

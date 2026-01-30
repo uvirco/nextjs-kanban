@@ -1,7 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { IconUserPlus, IconUserMinus, IconMail, IconUser } from "@tabler/icons-react";
+import {
+  IconUserPlus,
+  IconUserMinus,
+  IconMail,
+  IconUser,
+} from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import ManageMembersModal from "./ManageMembersModal";
 
@@ -91,7 +96,8 @@ export default function TeamTab({
                     />
                   ) : (
                     <div className="w-10 h-10 rounded-full bg-zinc-700 flex items-center justify-center text-sm font-medium text-zinc-300">
-                      {((member.user.name ?? member.user.email) || "?")[0].toUpperCase()}
+                      {((member.user.name ?? member.user.email) ||
+                        "?")[0].toUpperCase()}
                     </div>
                   )}
                   <div>
@@ -112,7 +118,9 @@ export default function TeamTab({
         ) : (
           <div className="text-center py-8 text-zinc-500">
             <p>No team members yet</p>
-            <p className="text-sm mt-2">Add people to collaborate on this project</p>
+            <p className="text-sm mt-2">
+              Add people to collaborate on this project
+            </p>
           </div>
         )}
       </div>
@@ -123,7 +131,9 @@ export default function TeamTab({
           <div className="flex items-center gap-2 mb-4">
             <IconMail size={20} className="text-zinc-400" />
             <h3 className="text-lg font-semibold text-white">Stakeholders</h3>
-            <span className="text-sm text-zinc-500">({stakeholders.length})</span>
+            <span className="text-sm text-zinc-500">
+              ({stakeholders.length})
+            </span>
           </div>
 
           <div className="space-y-3">
@@ -141,14 +151,17 @@ export default function TeamTab({
                     />
                   ) : (
                     <div className="w-10 h-10 rounded-full bg-zinc-700 flex items-center justify-center text-sm font-medium text-zinc-300">
-                      {((stakeholder.user.name ?? stakeholder.user.email) || "?")[0].toUpperCase()}
+                      {((stakeholder.user.name ?? stakeholder.user.email) ||
+                        "?")[0].toUpperCase()}
                     </div>
                   )}
                   <div>
                     <p className="text-white font-medium">
                       {stakeholder.user.name || stakeholder.user.email}
                     </p>
-                    <p className="text-sm text-zinc-400">{stakeholder.user.email}</p>
+                    <p className="text-sm text-zinc-400">
+                      {stakeholder.user.email}
+                    </p>
                   </div>
                 </div>
                 <span className="px-2 py-1 text-xs font-medium bg-amber-900/30 text-amber-300 rounded">

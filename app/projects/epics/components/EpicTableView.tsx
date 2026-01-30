@@ -351,7 +351,7 @@ export default function EpicTableView({
                               </div>
                               <span
                                 className={`text-sm font-medium ${getReadinessColor(
-                                  epic.readinessScore || 0
+                                  epic.readinessScore || 0,
                                 )}`}
                               >
                                 {epic.readinessScore || 0}%
@@ -365,7 +365,7 @@ export default function EpicTableView({
                             {epic.priority ? (
                               <span
                                 className={`px-2 py-1 text-xs font-medium rounded ${getPriorityColor(
-                                  epic.priority
+                                  epic.priority,
                                 )}`}
                               >
                                 {epic.priority}
@@ -405,7 +405,7 @@ export default function EpicTableView({
                             {epic.riskLevel ? (
                               <span
                                 className={`px-2 py-1 text-xs font-medium rounded ${getRiskColor(
-                                  epic.riskLevel
+                                  epic.riskLevel,
                                 )}`}
                               >
                                 {epic.riskLevel}

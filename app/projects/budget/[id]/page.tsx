@@ -58,7 +58,7 @@ export default function BudgetDetailPage() {
     const { data, error } = await supabase
       .from("budget_entries")
       .select(
-        "*, epic:Task!epic_id(id, title), department:Department!department_id(id, name)"
+        "*, epic:Task!epic_id(id, title), department:Department!department_id(id, name)",
       )
       .eq("id", budgetId)
       .single();
@@ -80,7 +80,10 @@ export default function BudgetDetailPage() {
           data.user = {
             id: user.id,
             email: user.email || "",
-            name: user.user_metadata?.name || user.email?.split("@")[0] || "Unknown",
+            name:
+              user.user_metadata?.name ||
+              user.email?.split("@")[0] ||
+              "Unknown",
           };
         }
       }
@@ -113,10 +116,7 @@ export default function BudgetDetailPage() {
   return (
     <div className="p-6 h-full">
       <div className="mb-4">
-        <Button
-          variant="light"
-          onClick={() => router.push("/projects/budget")}
-        >
+        <Button variant="light" onClick={() => router.push("/projects/budget")}>
           ← Back to Budget
         </Button>
       </div>
@@ -124,7 +124,11 @@ export default function BudgetDetailPage() {
       <div className="grid grid-cols-3 gap-6 h-[calc(100vh-150px)]">
         {/* Left Panel - Budget Details */}
         <div className="col-span-1">
-          <BudgetDetailLeft budget={budget} canEdit={canEdit} onUpdate={fetchBudgetDetails} />
+          <BudgetDetailLeft
+            budget={budget}
+            canEdit={canEdit}
+            onUpdate={fetchBudgetDetails}
+          />
         </div>
 
         {/* Right Panel - Tabs */}

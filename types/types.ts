@@ -492,7 +492,13 @@ export interface BudgetEntry {
 
 export interface Comment {
   id: string;
-  parent_type: "task" | "epic" | "budget_entry" | "project" | "chat" | "conversation";
+  parent_type:
+    | "task"
+    | "epic"
+    | "budget_entry"
+    | "project"
+    | "chat"
+    | "conversation";
   parent_id: string;
   user_id: string;
   content: string;
@@ -516,9 +522,19 @@ export interface Conversation {
 }
 
 // Contact Types
-export type ContactType = 'supplier' | 'contractor' | 'team_member' | 'client' | 'other';
-export type RelationType = 'supplier' | 'approver' | 'team_member' | 'stakeholder' | 'contractor';
-export type ParentType = 'project' | 'budget_entry' | 'task';
+export type ContactType =
+  | "supplier"
+  | "contractor"
+  | "team_member"
+  | "client"
+  | "other";
+export type RelationType =
+  | "supplier"
+  | "approver"
+  | "team_member"
+  | "stakeholder"
+  | "contractor";
+export type ParentType = "project" | "budget_entry" | "task";
 
 export interface Contact {
   id: string;

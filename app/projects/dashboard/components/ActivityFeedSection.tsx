@@ -122,12 +122,21 @@ export default function ActivityFeedSection({
     { id: string; name: string }[]
   >([]);
   const [projects, setProjects] = useState<{ id: string; title: string }[]>([]);
-  const [expandedActivities, setExpandedActivities] = useState<Set<string>>(new Set());
+  const [expandedActivities, setExpandedActivities] = useState<Set<string>>(
+    new Set(),
+  );
 
   useEffect(() => {
     fetchActivities();
     fetchDepartments();
-  }, [dateRange, filterType, filterEntity, filterTimeRange, filterDepartment, filterProject]);
+  }, [
+    dateRange,
+    filterType,
+    filterEntity,
+    filterTimeRange,
+    filterDepartment,
+    filterProject,
+  ]);
 
   useEffect(() => {
     fetchProjects(filterDepartment);
@@ -372,7 +381,9 @@ export default function ActivityFeedSection({
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-      <style jsx global>{quillReadOnlyStyles}</style>
+      <style jsx global>
+        {quillReadOnlyStyles}
+      </style>
       {/* Left Sidebar - Compact Filters */}
       <div className="lg:col-span-1">
         <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-3 sticky top-8 space-y-3">
@@ -617,7 +628,9 @@ export default function ActivityFeedSection({
                                       }}
                                     />
                                     <button
-                                      onClick={() => toggleExpanded(activity.id)}
+                                      onClick={() =>
+                                        toggleExpanded(activity.id)
+                                      }
                                       className="mt-1 text-xs text-blue-400 hover:text-blue-300"
                                     >
                                       ▼ Read More
@@ -633,7 +646,9 @@ export default function ActivityFeedSection({
                                       }}
                                     />
                                     <button
-                                      onClick={() => toggleExpanded(activity.id)}
+                                      onClick={() =>
+                                        toggleExpanded(activity.id)
+                                      }
                                       className="mt-2 text-xs text-blue-400 hover:text-blue-300"
                                     >
                                       ▲ Show Less
