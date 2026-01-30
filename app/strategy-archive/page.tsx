@@ -92,11 +92,11 @@ export default function StrategyArchivePage() {
         .from("User")
         .select("id, name, email");
 
-      const usersMap = new Map(usersData?.map((u) => [u.id, u]) || []);
+      const usersMap = new Map(usersData?.map((u: any) => [u.id, u]) || []);
 
       // Fetch linked tasks count for each goal
       const enrichedGoals = await Promise.all(
-        (goalsData || []).map(async (goal) => {
+        (goalsData || []).map(async (goal: any) => {
           const { count, error: countError } = await supabase
             .from("Task")
             .select("id", { count: "exact", head: true })
@@ -272,7 +272,7 @@ export default function StrategyArchivePage() {
         description: goal.description || "",
         fiscal_year: goal.fiscal_year || new Date().getFullYear().toString(),
         target_date: goal.target_date || "",
-        status: goal.status,
+        status: goal.status as any,
         progress: goal.progress,
       });
     } else {
@@ -623,7 +623,7 @@ export default function StrategyArchivePage() {
               <div className="bg-blue-900/20 border border-blue-700/30 rounded p-3 text-xs text-blue-300">
                 💡 Strategic goal hierarchy: 7 Objectives with 21 Sub-Goals
               </div>
-              <GoalMermaidDiagram goals={filteredGoals} />
+              <GoalMermaidDiagram goals={filteredGoals as any} />
             </>
           )}
         </div>

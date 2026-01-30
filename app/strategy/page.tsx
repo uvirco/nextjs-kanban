@@ -46,12 +46,12 @@ export default function StrategyPage() {
       if (goalsData) {
         // Build goal tree
         const goalMap = new Map<string, StrategicGoal>();
-        goalsData.forEach((goal) => {
+        goalsData.forEach((goal: StrategicGoal) => {
           goalMap.set(goal.id, { ...goal, children: [] });
         });
 
         const topLevel: StrategicGoal[] = [];
-        goalsData.forEach((goal) => {
+        goalsData.forEach((goal: StrategicGoal) => {
           const goalInMap = goalMap.get(goal.id)!;
           if (goal.parent_goal_id) {
             const parent = goalMap.get(goal.parent_goal_id);
