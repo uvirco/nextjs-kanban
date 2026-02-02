@@ -120,7 +120,8 @@ export default function GoalsTreePage() {
         padding: [4, 8],
         fontSize: 11,
       },
-      children: goal.children?.map((child) => buildTreeData(child, color)) || [],
+      children:
+        goal.children?.map((child) => buildTreeData(child, color)) || [],
     };
   };
 
@@ -171,7 +172,9 @@ export default function GoalsTreePage() {
             // Extract just the objective/goal number and name
             const match = title.match(/(?:Objective|Goal) [\d.]+: (.+)/);
             if (match) {
-              return match[1].substring(0, 15) + (match[1].length > 15 ? "..." : "");
+              return (
+                match[1].substring(0, 15) + (match[1].length > 15 ? "..." : "")
+              );
             }
             return title.substring(0, 18) + (title.length > 18 ? "..." : "");
           },
@@ -215,10 +218,17 @@ export default function GoalsTreePage() {
     <div className="w-full h-screen bg-zinc-950 flex flex-col">
       <div className="p-6 border-b border-zinc-800 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Strategic Goals Hierarchy</h1>
-          <p className="text-zinc-400">Interactive tree view of objectives and sub-goals</p>
+          <h1 className="text-3xl font-bold text-white mb-2">
+            Strategic Goals Hierarchy
+          </h1>
+          <p className="text-zinc-400">
+            Interactive tree view of objectives and sub-goals
+          </p>
         </div>
-        <a href="/strategy2" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium transition-colors">
+        <a
+          href="/strategy2"
+          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium transition-colors"
+        >
           Strategy View
         </a>
       </div>

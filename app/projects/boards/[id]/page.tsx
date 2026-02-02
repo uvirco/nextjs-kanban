@@ -129,7 +129,7 @@ export default async function BoardPage({
     // Filter out EPIC tasks from board display
     columnsWithTasks.forEach((column: any) => {
       column.tasks = column.tasks.filter(
-        (task: any) => task.taskType !== "EPIC"
+        (task: any) => task.taskType !== "EPIC",
       );
     });
 
@@ -137,7 +137,7 @@ export default async function BoardPage({
     if (labelFilter.length > 0) {
       columnsWithTasks.forEach((column: any) => {
         column.tasks = column.tasks.filter((task: any) =>
-          task.labels?.some((label: any) => labelFilter.includes(label.id))
+          task.labels?.some((label: any) => labelFilter.includes(label.id)),
         );
       });
     }
@@ -154,13 +154,28 @@ export default async function BoardPage({
     }
 
     // Apply department filter if needed
+    // Include tasks with matching departmentId OR no department assigned (unassigned tasks)
     if (selectedDepartmentId) {
       columnsWithTasks.forEach((column: any) => {
-        column.tasks = column.tasks.filter(
-          (task: any) => task.departmentId === selectedDepartmentId
-        );
+        column.tasks = column.tasks.filter((task: any) => {
+          return (
+            task.departmentId === selectedDepartmentId ||
+            task.departmentId === null ||
+            task.departmentId === undefined
+          );
+        });
       });
     }
+
+    // Debug: Log task counts
+    const tasksBeforeFilters = (tasksData || []).length;
+    const tasksAfterEpicFilter = columnsWithTasks.reduce(
+      (sum: number, col: any) => sum + (col.tasks?.length || 0),
+      0,
+    );
+    console.log(
+      `[Board ${id}] Tasks: ${tasksBeforeFilters} total, ${tasksAfterEpicFilter} after filters, dept=${selectedDepartmentId || "none"}`,
+    );
 
     // Fetch all epic tasks (taskType = 'EPIC') for the filter dropdown
     let epicQuery = supabaseAdmin
@@ -206,7 +221,7 @@ export default async function BoardPage({
         `
       *,
       user:User (*)
-    `
+    `,
       )
       .eq("boardId", id);
 
@@ -215,7 +230,7 @@ export default async function BoardPage({
       boardMembers.find((member: any) => member.role === "owner")?.user ?? null;
     const isOwner = owner?.id === userId;
     const members = boardMembers.filter(
-      (member: any) => member.role === "member"
+      (member: any) => member.role === "member",
     );
 
     const board: BoardWithColumns = {

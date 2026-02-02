@@ -27,7 +27,9 @@ export default function Strategy2Page() {
   const [goals, setGoals] = useState<StrategicGoal[]>([]);
   const [topLevelGoals, setTopLevelGoals] = useState<StrategicGoal[]>([]);
   const [selectedGoal, setSelectedGoal] = useState<StrategicGoal | null>(null);
-  const [selectedSubGoal, setSelectedSubGoal] = useState<StrategicGoal | null>(null);
+  const [selectedSubGoal, setSelectedSubGoal] = useState<StrategicGoal | null>(
+    null,
+  );
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -177,7 +179,10 @@ export default function Strategy2Page() {
           <h1 className="text-2xl font-bold text-white">Business Strategy</h1>
           <p className="text-zinc-400 text-xs">Strategic objectives & goals</p>
         </div>
-        <a href="/goals-tree" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium transition-colors">
+        <a
+          href="/goals-tree"
+          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium transition-colors"
+        >
           Tree View
         </a>
       </div>
@@ -254,7 +259,10 @@ export default function Strategy2Page() {
           {selectedGoal?.children && selectedGoal.children.length > 0 && (
             <div className="flex flex-col gap-8 items-center flex-shrink-0 pt-4">
               {selectedGoal.children.map((subGoal, index) => (
-                <div key={subGoal.id} className="flex flex-col items-center gap-2 group">
+                <div
+                  key={subGoal.id}
+                  className="flex flex-col items-center gap-2 group"
+                >
                   <button
                     onClick={() => setSelectedSubGoal(subGoal)}
                     className={`
@@ -263,7 +271,7 @@ export default function Strategy2Page() {
                     border-2 shadow-lg hover:shadow-2xl
                     transition-all duration-300 hover:scale-110
                     group flex-shrink-0
-                    ${selectedSubGoal?.id === subGoal.id ? 'ring-2 ring-white scale-110' : ''}
+                    ${selectedSubGoal?.id === subGoal.id ? "ring-2 ring-white scale-110" : ""}
                   `}
                   >
                     <div className="text-white z-10 text-xs font-bold">
@@ -271,7 +279,8 @@ export default function Strategy2Page() {
                     </div>
                   </button>
                   <div className="text-white text-xs font-semibold text-center break-words w-24 leading-tight">
-                    {subGoal.title.split(': ').slice(1).join(': ') || subGoal.title}
+                    {subGoal.title.split(": ").slice(1).join(": ") ||
+                      subGoal.title}
                   </div>
                 </div>
               ))}
@@ -283,7 +292,9 @@ export default function Strategy2Page() {
         <div className="flex-1 p-4 overflow-y-auto flex flex-col">
           {/* Objective Header */}
           {selectedGoal && (
-            <div className={`bg-gradient-to-r ${getObjectiveColor(selectedGoal.id)} rounded-lg p-4 mb-4 border-2 shadow-lg`}>
+            <div
+              className={`bg-gradient-to-r ${getObjectiveColor(selectedGoal.id)} rounded-lg p-4 mb-4 border-2 shadow-lg`}
+            >
               <div className="flex items-center justify-between gap-4 flex-wrap">
                 <div className="flex-1 min-w-0">
                   <h1 className="text-3xl font-bold text-white mb-2 break-words">
@@ -304,7 +315,9 @@ export default function Strategy2Page() {
                     {selectedGoal.status.replace("_", " ").toUpperCase()}
                   </Chip>
                   <div className="text-white text-center">
-                    <div className="text-4xl font-bold">{selectedGoal.progress}%</div>
+                    <div className="text-4xl font-bold">
+                      {selectedGoal.progress}%
+                    </div>
                     <div className="text-xs text-zinc-100">Complete</div>
                   </div>
                 </div>
@@ -315,14 +328,17 @@ export default function Strategy2Page() {
           <div className="max-w-6xl mx-auto w-full flex-1">
             {/* Sub-Goals Display */}
             {selectedGoal && selectedSubGoal && (
-              <div className={`bg-gradient-to-r ${getObjectiveColor(selectedGoal.id)} rounded-lg p-6 border-2 shadow-lg`}>
+              <div
+                className={`bg-gradient-to-r ${getObjectiveColor(selectedGoal.id)} rounded-lg p-6 border-2 shadow-lg`}
+              >
                 <div className="flex items-start gap-4">
                   <div className="flex-shrink-0 bg-white bg-opacity-20 rounded-lg w-12 h-12 flex items-center justify-center font-bold text-white text-lg">
                     {getGoalNumber(selectedSubGoal.title)}
                   </div>
                   <div className="flex-1 min-w-0">
                     <h2 className="text-xl font-bold text-white mb-2 break-words">
-                      {selectedSubGoal.title.split(': ').slice(1).join(': ') || selectedSubGoal.title}
+                      {selectedSubGoal.title.split(": ").slice(1).join(": ") ||
+                        selectedSubGoal.title}
                     </h2>
                     {selectedSubGoal.description && (
                       <p className="text-zinc-100 text-sm">
@@ -346,7 +362,9 @@ export default function Strategy2Page() {
 
             {selectedGoal && !selectedSubGoal && (
               <div className="text-center text-zinc-400 py-2">
-                <p className="text-sm">Select a sub-goal from the sidebar to view details</p>
+                <p className="text-sm">
+                  Select a sub-goal from the sidebar to view details
+                </p>
               </div>
             )}
           </div>

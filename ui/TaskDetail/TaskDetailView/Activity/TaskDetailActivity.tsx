@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import {
   IconChevronRight,
 } from "@tabler/icons-react";
 import TaskDetailActivityItem from "./TaskDetailActivityItem";
-import { handleCreateActivity } from "@/server-actions/ActivityServerActions";
+import { handleCreateActivity, handleFetchActivities } from "@/server-actions/ActivityServerActions";
 import TaskDetailItemHeading from "../ui/TaskDetailItemHeading";
 import TaskDetailItemContent from "../ui/TaskDetailItemContent";
 import { ActivityWithRelations } from "@/types/types";
@@ -28,15 +28,32 @@ interface TaskDetailActivityProps {
 export default function TaskDetailActivity({
   taskId,
   boardId,
-  activities,
+  activities: initialActivities,
   columnTitle,
   userName,
   userImage,
 }: TaskDetailActivityProps) {
+  const [activities, setActivities] = useState<ActivityWithRelations[]>(initialActivities);
   const [showForm, setShowForm] = useState(false);
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Refetch activities when component mounts or taskId changes
+  useEffect(() => {
+    const fetchActivities = async () => {
+      try {
+        const result = await handleFetchActivities(taskId);
+        if (result.success && result.activities) {
+          setActivities(result.activities as any);
+        }
+      } catch (err) {
+        console.error("Failed to fetch activities:", err);
+      }
+    };
+
+    fetchActivities();
+  }, [taskId]);
 
   const handleToggleForm = () => {
     setShowForm(!showForm);
@@ -54,14 +71,31 @@ export default function TaskDetailActivity({
 
     try {
       const response = await handleCreateActivity(taskId, boardId, content);
+      console.log("[Comment Submit] Response:", response);
+      
       if (response.success) {
         toast.success(response.message);
         handleToggleForm();
+        
+        // Refetch activities after successful submission
+        try {
+          console.log("[Comment Submit] Fetching activities for taskId:", taskId);
+          const result = await handleFetchActivities(taskId);
+          console.log("[Comment Submit] Fetch result:", result);
+          
+          if (result.success && result.activities) {
+            console.log("[Comment Submit] Setting activities:", result.activities);
+            setActivities(result.activities as any);
+          }
+        } catch (err) {
+          console.error("Failed to refetch activities:", err);
+        }
       } else {
         toast.error(response.message);
         setError(response.message);
       }
     } catch (error) {
+      console.error("[Comment Submit] Exception:", error);
       toast.error("An error occurred while submitting the form");
       setError("An error occurred while submitting the form");
     } finally {

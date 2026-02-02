@@ -50,13 +50,18 @@ export async function handleCreateActivity(
     });
 
     if (error) {
+      console.error("[Activity Create Error]", error);
       return { success: false, message: MESSAGES.ACTIVITY.CREATE_FAILURE };
     }
 
-    revalidatePath(`/task/${taskId}`);
+    // Revalidate multiple paths to ensure page updates
+    revalidatePath(`/projects/tasks/${taskId}`);
+    revalidatePath(`/projects/tasks`);
+    revalidatePath("/");
 
     return { success: true, message: MESSAGES.ACTIVITY.CREATE_SUCCESS };
   } catch (e) {
+    console.error("[Activity Create Exception]", e);
     return { success: false, message: MESSAGES.ACTIVITY.CREATE_FAILURE };
   }
 }
@@ -101,5 +106,30 @@ export async function handleDeleteActivity(data: {
     return { success: true, message: MESSAGES.ACTIVITY.DELETE_SUCCESS };
   } catch (e) {
     return { success: false, message: MESSAGES.ACTIVITY.DELETE_FAILURE };
+  }
+}
+
+// Fetch Activities
+export async function handleFetchActivities(taskId: string) {
+  try {
+    console.log("[handleFetchActivities] Fetching for taskId:", taskId);
+    const { data: activities, error } = await supabaseAdmin
+      .from("Activity")
+      .select("*, user:User!userId(*)")
+      .eq("taskId", taskId)
+      .order("createdAt", { ascending: false });
+
+    console.log("[handleFetchActivities] Error:", error);
+    console.log("[handleFetchActivities] Activities:", activities);
+
+    if (error) {
+      console.error("[Activity Fetch Error]", error);
+      return { success: false, activities: [], message: error.message || MESSAGES.ACTIVITY.CREATE_FAILURE };
+    }
+
+    return { success: true, activities: activities || [], message: "" };
+  } catch (e) {
+    console.error("[Activity Fetch Exception]", e);
+    return { success: false, activities: [], message: (e as any).message || MESSAGES.ACTIVITY.CREATE_FAILURE };
   }
 }
